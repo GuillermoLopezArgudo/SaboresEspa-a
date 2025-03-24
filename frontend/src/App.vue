@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="submit()">Enviar</button>
+    <button @click="submit()">Moniato</button>
   </div>
 </template>
 
