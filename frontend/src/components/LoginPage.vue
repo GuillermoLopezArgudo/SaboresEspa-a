@@ -17,6 +17,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from "vue-router";
+import axios from 'axios';
 
 const router = useRouter();
 
@@ -24,9 +25,23 @@ const email = ref('');
 const password = ref('');
 
 function OnSubmit() {
-  console.log("Email:" + email.value)
-  console.log("Password:" + password.value)
-  router.push({ name: "home" });
+  
+  const payload = {
+    email:email.value,
+    password:password.value,
+  }
+  axios.post('http://localhost:5000/login', payload)
+    .then(response => {
+      localStorage.setItem("userToken", response.data.usertoken);
+      localStorage.setItem("iduser", response.data.iduser);
+      router.push({ name: "home" });
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  
+
+
 }
 
 
