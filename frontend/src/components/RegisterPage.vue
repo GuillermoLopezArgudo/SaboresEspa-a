@@ -9,6 +9,10 @@
         <input type="password" id="password" v-model="password" class="form-control" required />
         <label for="confirmPassword" class="form-label">Confirm Password</label>
         <input type="password" id="confirmPassword" v-model="confirmPassword" class="form-control" required />
+        <select name="type" placeholder="Select" v-model="type">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
         <input type="submit" value="Enviar" />
       </fieldset>
       <router-link to="/login">¿Iniciar Sesión?</router-link>
@@ -23,6 +27,7 @@ import { useRouter } from "vue-router";
 
 const email = ref('');
 const password = ref('');
+const type = ref('');
 const confirmPassword = ref('');
 const router = useRouter();
 
@@ -30,6 +35,7 @@ function OnSubmit() {
   console.log("Email:" + email.value)
   console.log("Password:" + password.value)
   console.log("Password:" + confirmPassword.value)
+  console.log("Type:" + type.value)
   router.push({ name: "home" });
 }
 
