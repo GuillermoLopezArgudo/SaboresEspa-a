@@ -11,6 +11,10 @@
                 <input type="file" id="imageRecipe" @change="handleImageChange" class="form-control" required> 
             </div>
             <div>
+                <label for="videoRecipe" class="form-label">Video de la receta (Opcional)</label>
+                <input type="file" id="videoRecipe" @change="handleVideoChange" class="form-control"> 
+            </div>
+            <div>
                 <label for="descriptionRecipe" class="form-label">Descripción de la receta</label>
                 <textarea id="descriptionRecipe" rows="20" cols="20" v-model="description" class="form-control" required></textarea>
             </div>
@@ -19,6 +23,14 @@
                 <input v-model="recipebook.ingredients[index]" placeholder="Ingrediente" class="form-control" required>
                 <input v-model="recipebook.quantities[index]" placeholder="Cantidad" class="form-control" required>
             </div>
+                <div class="form-check">
+                    <input type="radio" id="option" name="option" value="yes" checked v-model="option" required class="form-check-input">
+                    <label for="option" class="form-check-label">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" id="option" name="option" value="no" v-model="option" required class="form-check-input">
+                    <label for="optio" class="form-check-label">No</label>
+                </div>
             <div>
                 <label for="more" class="form-label">Añadir más</label>
                 <input type="button" id="more" value="+" @click.prevent="moreIngredients" class="form-control" required>
@@ -33,11 +45,14 @@ import { ref, reactive } from 'vue';
 
 const title = ref('');
 const img = ref('');
+const video = ref('');
 const description = ref('');
 const recipebook = reactive({
     ingredients: [],
     quantities: []
 });
+const valoracion = ref('');
+const option = ref('')
 
 var datos  = [];
 var objeto = {};
@@ -45,6 +60,12 @@ var objeto = {};
 function handleImageChange(event) {
     const file = event.target.files[0];
     img.value = file;
+}
+
+function handleVideoChange(event) {
+    const file = event.target.files[0];
+    console.log(file)
+    video.value = file;
 }
 
 function moreIngredients() {
@@ -58,13 +79,16 @@ function submitRecipe() {
     //console.log('Description:', description.value);
     //console.log('Ingredients:', recipebook.ingredients);
     //console.log('Quantities:', recipebook.quantities);
-
+console.log(video.value.name)
     datos.push({
         "titulo":title.value,
         "imagen":img.value.name,
+        "video":video.value.name,
         "descipcion":description.value,
         "ingredientes":recipebook.ingredients,
-        "cantidades":recipebook.quantities
+        "cantidades":recipebook.quantities,
+        "valoracion":valoracion.value,
+        "opcion":option.value
     })
     objeto.datos = datos;
     console.log(JSON.stringify(objeto));
