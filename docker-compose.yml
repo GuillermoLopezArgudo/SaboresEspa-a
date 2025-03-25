@@ -25,12 +25,12 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "8080:80"
+      - "8080:8080"
     depends_on:
       - db
     environment:
       - VUE_APP_API_URL=http://flask:5000 
-
+    command: npm run serve
   # Servicio de base de datos MySQL
   db:
     image: mysql:8.0
