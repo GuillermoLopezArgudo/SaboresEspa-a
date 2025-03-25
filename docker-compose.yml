@@ -1,20 +1,57 @@
+version: '3.7'
+
 services:
+  # Tu servicio de Flask (Backend)
   flask:
     build:
-      context: . 
-      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - .:/app
     ports:
       - "5000:5000"
     environment:
       - FLASK_ENV=development
-    volumes:
-      - .:/app
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DB=mydatabase
+    depends_on:
+      - db  
 
+  # Tu servicio de Vue.js (Frontend)
   vue:
     build:
       context: ./frontend
-      dockerfile: Dockerfile 
     ports:
       - "8080:80"
     depends_on:
-      - flask 
+      - db 
+
+  # Servicio de base de datos MySQL
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: mydatabase
+      #MYSQL_USER: root
+      #MYSQL_PASSWORD: 1234
+    volumes:
+      - mysql-data:/var/lib/mysql  
+    ports:
+      - "3306:3306"  
+
+  # Servicio phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234 
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      MYSQL_HOST: db  
+    ports:
+      - "8081:80"  
+    depends_on:
+      - db  
+volumes:
+  mysql-data:
