@@ -64,6 +64,25 @@ def login():
             iduser = cur.fetchone()
             return jsonify(usertoken=token, iduser=iduser)
 
+@app.route('/create', methods=['POST'])
+def create():
+    data = request.get_json()
+    titulo = data.get("titulo")
+    imagen = data.get("imagen")
+    video = ""
+    descripcion=data.get("descripcion")
+    ingredientes=data.get("ingredientes")
+    cantidades = data.get("cantidades")
+    idUser = data.get("idUser")
+    comentarios = ""
+
+    cur = mysql.connection.cursor()
+    query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video, valoraciones) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (titulo,descripcion,imagen,ingredientes,cantidades,idUser,comentarios,video,0))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify(message=imagen)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

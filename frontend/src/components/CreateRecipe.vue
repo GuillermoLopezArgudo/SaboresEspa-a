@@ -43,7 +43,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import axios from 'axios';
-console.log("a")
+
 const title = ref('');
 const img = ref('');
 const video = ref('');
@@ -52,11 +52,7 @@ const recipebook = reactive({
     ingredients: [],
     quantities: []
 });
-const valoracion = ref('');
 const option = ref('')
-
-var datos  = [];
-var objeto = {};
 
 function handleImageChange(event) {
     const file = event.target.files[0];
@@ -75,11 +71,20 @@ function moreIngredients() {
 }
 
 function submitRecipe() {
-    
-    axios.post('http://localhost:5000/')
+    const receta ={
+        titulo:title.value,
+        imagen:img.value.name,
+        video:video.value.name,
+        descipcion:description.value,
+        ingredientes:recipebook.ingredients,
+        cantidades:recipebook.quantities,
+        idUser:localStorage.getItem("iduser"),
+        opcion:option.value
+    }
+
+    axios.post('http://localhost:5000/create',receta)
         .then(response => {
-            const tabla = response.data.tables;
-            console.log("Mensaje desde flask: " + tabla)
+            console.log(response.data.message)
         })
         .catch(error => {
             console.log(error)
@@ -90,18 +95,7 @@ function submitRecipe() {
     //console.log('Description:', description.value);
     //console.log('Ingredients:', recipebook.ingredients);
     //console.log('Quantities:', recipebook.quantities);
-    datos.push({
-        "titulo":title.value,
-        "imagen":img.value.name,
-        "video":video.value.name,
-        "descipcion":description.value,
-        "ingredientes":recipebook.ingredients,
-        "cantidades":recipebook.quantities,
-        "valoracion":valoracion.value,
-        "opcion":option.value
-    })
-    objeto.datos = datos;
-    console.log(JSON.stringify(objeto));
+
 }
 </script>
 
