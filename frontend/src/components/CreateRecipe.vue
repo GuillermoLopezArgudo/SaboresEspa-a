@@ -43,7 +43,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import axios from 'axios';
-console.log("basdasd")
+console.log("a")
 const title = ref('');
 const img = ref('');
 const video = ref('');

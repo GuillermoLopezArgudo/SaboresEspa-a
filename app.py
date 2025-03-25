@@ -1,41 +1,69 @@
 from flask import Flask, jsonify, request
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_cors import CORS
 from flask_mysqldb import MySQL
+import hashlib
 
 app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
 app.config.from_object('config.Config')
-
-
+app.config['JWT_SECRET_KEY'] = 'supersecretkey'
+jwt = JWTManager(app)
 mysql = MySQL(app)
 
 @app.route('/', methods=['POST'])
 def inicio():
     
-    try:
-        # Intentamos hacer una consulta simple para verificar la conexión
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT DATABASE();")
-        current_db = cur.fetchone()
-        print(f"Conectado a la base de datos: {current_db}")
-        
-        # Luego buscamos las tablas
-        cur.execute("SHOW TABLES;")
-        tables = cur.fetchall()
-        cur.close()
-        
-        # Si no se han encontrado tablas, es un indicio de que no se ha creado ninguna tabla
-        table_names = [table[0] for table in tables]
-        print(f"Tablas encontradas: {table_names}")
-        return jsonify(tables=table_names)
-    except Exception as e:
-        print(f"Error al conectar a la base de datos: {e}")
-        return jsonify(error=str(e)), 500
-    # data = request.get_json()
-    # respuesta = data.get('enviar')
+    return jsonify(error=str(e)), 500
 
-    #return jsonify(message="Hola desde Flask!")
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
+    type = data.get("type")
+    token = create_access_token(identity=email)
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute('SELECT email FROM Users WHERE email = %s', (email,))
+        existing_user = cur.fetchone()
+        if not existing_user:
+            query = "INSERT INTO Users (nombre, email, password, idFav, type, token) VALUES (%s, %s, %s, %s, %s, %s)"
+            cur.execute(query, (name, email, hashlib.sha256(password.encode('utf-8')).hexdigest(), '0', type, token))
+            cur.execute('SELECT id FROM Users WHERE email = %s', (email,))
+            iduser = cur.fetchone()
+            mysql.connection.commit()
+            return jsonify(usertoken=token,iduser=iduser)
+        else:
+            return jsonify(message="El email ya está registrado") 
+    except Exception as e:
+        return jsonify(message="Error interno en el servidor")
+    finally:
+        cur.close()
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+    
+
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE email = %s', (email,))
+    token = cur.fetchone()
+    cur.execute('SELECT email FROM Users WHERE email = %s', (email,))
+    existing_email = cur.fetchone()
+    if existing_email:
+        cur.execute('SELECT password FROM Users WHERE password = %s', (hashlib.sha256(password.encode('utf-8')).hexdigest(),))
+        existing_password = cur.fetchone()
+        if existing_password:
+            cur.execute('SELECT id FROM Users WHERE email = %s', (email,))
+            iduser = cur.fetchone()
+            return jsonify(usertoken=token, iduser=iduser)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
