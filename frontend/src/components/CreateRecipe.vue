@@ -43,6 +43,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import axios from 'axios';
+import { useRouter } from "vue-router";
 
 const title = ref('');
 const img = ref('');
@@ -52,6 +53,7 @@ const recipebook = reactive({
     ingredients: [],
     quantities: []
 });
+const router = useRouter();
 const option = ref('')
 
 function handleImageChange(event) {
@@ -71,20 +73,26 @@ function moreIngredients() {
 }
 
 function submitRecipe() {
+
     const receta ={
         titulo:title.value,
         imagen:img.value.name,
         video:video.value.name,
-        descipcion:description.value,
+        descripcion:description.value,
         ingredientes:recipebook.ingredients,
         cantidades:recipebook.quantities,
         idUser:localStorage.getItem("iduser"),
-        opcion:option.value
+        opcion:option.value,
+        userToken:localStorage.getItem("userToken")
     }
 
     axios.post('http://localhost:5000/create',receta)
         .then(response => {
-            console.log(response.data.message)
+            if(response.data.isLoggin){
+                console.log(response.data.message)
+            }else{
+                router.push({ name: "register" });
+            }         
         })
         .catch(error => {
             console.log(error)

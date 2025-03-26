@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 import hashlib
+import json
 
 app = Flask(__name__)
 
@@ -14,8 +15,7 @@ mysql = MySQL(app)
 
 @app.route('/', methods=['POST'])
 def inicio():
-    
-    return jsonify(error=str(e)), 500
+    return jsonify(message=""), 500
 
 
 @app.route('/register', methods=['POST'])
@@ -26,8 +26,9 @@ def register():
     password = data.get("password")
     type = data.get("type")
     token = create_access_token(identity=email)
+    cur = mysql.connection.cursor()
     try:
-        cur = mysql.connection.cursor()
+        
         cur.execute('SELECT email FROM Users WHERE email = %s', (email,))
         existing_user = cur.fetchone()
         if not existing_user:
@@ -38,9 +39,9 @@ def register():
             mysql.connection.commit()
             return jsonify(usertoken=token,iduser=iduser)
         else:
-            return jsonify(message="El email ya está registrado") 
+            return jsonify(message="El email ya está registrado"), 400
     except Exception as e:
-        return jsonify(message="Error interno en el servidor")
+        return jsonify(message="Error interno en el servidor", error=str(e)), 500
     finally:
         cur.close()
 
@@ -66,22 +67,33 @@ def login():
 
 @app.route('/create', methods=['POST'])
 def create():
+
     data = request.get_json()
     titulo = data.get("titulo")
     imagen = data.get("imagen")
     video = ""
     descripcion=data.get("descripcion")
     ingredientes=data.get("ingredientes")
+    ingredientes_json = json.dumps(ingredientes)
     cantidades = data.get("cantidades")
+    cantidades_json = json.dumps(cantidades)
     idUser = data.get("idUser")
     comentarios = ""
+    token = data.get("userToken")
 
     cur = mysql.connection.cursor()
-    query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video, valoraciones) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    cur.execute(query, (titulo,descripcion,imagen,ingredientes,cantidades,idUser,comentarios,video,0))
-    mysql.connection.commit()
-    cur.close()
-    return jsonify(message=imagen)
+
+    cur.execute('SELECT token FROM Users WHERE token = %s', (token,))
+    token = cur.fetchone()
+    
+    if token:
+        query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video, valoraciones) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cur.execute(query, (titulo,descripcion,imagen,ingredientes_json,cantidades_json,idUser,comentarios,video,0))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify(message="Receta registrada",isLoggin=True)
+    return jsonify(menssage="Error no registrado",isLoggin=False)
+    
 
 
 if __name__ == '__main__':
