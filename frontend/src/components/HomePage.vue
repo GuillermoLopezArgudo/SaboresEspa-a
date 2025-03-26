@@ -3,7 +3,7 @@
     <nav class="navbar bg-body-tertiary">
         <div class="container">
             <router-link to="/create" class="navbar-brand">Crear</router-link>
-            <router-link to="/register" class="navbar-brand">Recetas</router-link>
+            <router-link to="/recipes" class="navbar-brand">Recetas</router-link>
             <router-link to="/register" class="navbar-brand">Ajustes</router-link>
         </div>
     </nav>

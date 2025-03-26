@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_mysqldb import MySQL
 import hashlib
 import json
+import base64
 
 app = Flask(__name__)
 
@@ -51,10 +52,8 @@ def login():
     email = data.get("email")
     password = data.get("password")
     
-
     cur = mysql.connection.cursor()
-    cur.execute('SELECT token FROM Users WHERE email = %s', (email,))
-    token = cur.fetchone()
+    token = create_access_token(identity=email)
     cur.execute('SELECT email FROM Users WHERE email = %s', (email,))
     existing_email = cur.fetchone()
     if existing_email:
@@ -63,23 +62,27 @@ def login():
         if existing_password:
             cur.execute('SELECT id FROM Users WHERE email = %s', (email,))
             iduser = cur.fetchone()
+            cur.execute('UPDATE Users SET token = %s WHERE email = %s', (token, email))
+            mysql.connection.commit()
             return jsonify(usertoken=token, iduser=iduser)
 
 @app.route('/create', methods=['POST'])
 def create():
 
-    data = request.get_json()
-    titulo = data.get("titulo")
-    imagen = data.get("imagen")
-    video = ""
-    descripcion=data.get("descripcion")
-    ingredientes=data.get("ingredientes")
-    ingredientes_json = json.dumps(ingredientes)
-    cantidades = data.get("cantidades")
-    cantidades_json = json.dumps(cantidades)
-    idUser = data.get("idUser")
+    titulo = request.form.get("titulo")
+    descripcion = request.form.get("descripcion")
+    imagen = request.files.get('imagen')
+    img_bin = imagen.read()
+    video = request.files.get('video')
+    if video:
+        video_bin = video.read()
+    else:
+        video_bin = None
+    ingredientes_json = request.form.get("ingredientes") 
+    cantidades_json = request.form.get("cantidades")
+    idUser = request.form.get("idUser")
     comentarios = ""
-    token = data.get("userToken")
+    token = request.form.get("userToken")
 
     cur = mysql.connection.cursor()
 
@@ -87,14 +90,102 @@ def create():
     token = cur.fetchone()
     
     if token:
+        imagen = request.files.get('imagen')
         query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video, valoraciones) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cur.execute(query, (titulo,descripcion,imagen,ingredientes_json,cantidades_json,idUser,comentarios,video,0))
+        cur.execute(query, (titulo,descripcion,img_bin,ingredientes_json,cantidades_json,idUser,comentarios,video_bin,0))
         mysql.connection.commit()
         cur.close()
         return jsonify(message="Receta registrada",isLoggin=True)
     return jsonify(menssage="Error no registrado",isLoggin=False)
     
+@app.route('/viewRecipes' , methods=["POST"])
+def viewAll():
+    data = request.get_json()
+    token = data.get("userToken")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (token,))
+    token = cur.fetchone()
+    cur.execute('SELECT id FROM Users WHERE token = %s', (token,))
+    iduser = cur.fetchone()
+    if token:
+        cur.execute('SELECT * FROM Receta WHERE iduser = %s', (iduser,))
+        recipes = cur.fetchall()
+        recipe_list = []
+        for recipe in recipes:
+            ingredients = recipe[4]
+            quantities = recipe[5]
+            ingredients_list = ingredients.split(",")
+            quantities_list = quantities.split(",")
+            img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
+            if recipe[8]:
+                video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
+            else:
+                video_base64 = None
+            recipe_dict = {
+                'id': recipe[0],
+                'titulo': recipe[1],
+                'descripcion': recipe[2],
+                'img': img_base64,
+                'ingredientes':ingredients_list,
+                'cantidades': quantities_list,
+                'idUser': recipe[6],
+                'comentarios': recipe[7],
+                'video': video_base64,
+                'valoraciones': recipe[9]
+            }
+            recipe_list.append(recipe_dict)
+        cur.close()
+        return jsonify(message=recipe_list)
 
+@app.route('/viewRecipe', methods=["POST"])
+def viewOne():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    tokenUser = data.get("userToken")
+    cur = mysql.connection.cursor()
+
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        cur.execute("SELECT * FROM Receta WHERE id = %s", (idrecipe,))
+        recipe = cur.fetchone()
+
+        img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
+        if recipe[8]:
+            video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
+        else:
+            video_base64 = None
+
+        ingredients_list = recipe[4].split(",") 
+        quantities_list = recipe[5].split(",") 
+
+        recipe_dict = {
+            'id': recipe[0],
+            'titulo': recipe[1],
+            'descripcion': recipe[2],
+            'img': img_base64,
+            'ingredientes': ingredients_list,
+            'cantidades': quantities_list,
+            'idUser': recipe[6],
+            'comentarios': recipe[7],
+            'video': video_base64,
+            'valoraciones': recipe[9]
+        }
+
+        return jsonify(message=recipe_dict)
+
+@app.route('/deleteRecipe', methods=["POST"])
+def deleteOne():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    tokenUser = data.get("userToken")
+    cur = mysql.connection.cursor()
+
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        cur.execute("DELETE * FROM Receta WHERE id = %s", (idrecipe,))
+        return jsonify(message="Receta Eliminada")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
