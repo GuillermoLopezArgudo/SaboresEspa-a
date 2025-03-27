@@ -1,33 +1,54 @@
 <template>
-  <div>
-    <form @submit.prevent="OnSubmit">
-      <h1>Registrarse</h1>
-      <fieldset>
-        <label for="name" class="form-label">Nombre:</label>
-        <input id="nombre" class="form-control" v-model="name" required>
-        <label for="email" class="form-label">Correo:</label>
-        <input type="email" id="email" v-model="email" class="form-control" required />
-        <label for="password" class="form-label">Password</label>
-        <input pattern=".{8,}" type="password" id="password" v-model="password" class="form-control" required />
-        <label for="confirmPassword" class="form-label">Confirm Password</label>
-        <input pattern=".{8,}" type="password" id="confirmPassword" v-model="confirmPassword" class="form-control"
-          required />
-        <select name="type" placeholder="Select" v-model="type">
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-        <input type="submit" value="Enviar" />
-      </fieldset>
-      <router-link to="/login">¿Iniciar Sesión?</router-link>
-    </form>
-    <div v-if="error">
-      <p class="alert alert-danger">{{ error }}</p>
+  <div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card p-4 shadow-lg" style="width: 400px;">
+      <h1 class="text-center mb-4">Registrarse</h1>
+      <form @submit.prevent="OnSubmit">
+        <div class="mb-3">
+          <label for="name" class="form-label">Nombre:</label>
+          <input id="name" class="form-control" v-model="name" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo:</label>
+          <input type="email" id="email" class="form-control" v-model="email" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Contraseña:</label>
+          <input type="password" id="password" class="form-control" v-model="password" required pattern=".{8,}" />
+          <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres.</small>
+        </div>
+
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label">Confirmar Contraseña:</label>
+          <input type="password" id="confirmPassword" class="form-control" v-model="confirmPassword" required pattern=".{8,}" />
+        </div>
+
+        <div class="mb-3">
+          <label for="type" class="form-label">Tipo de usuario:</label>
+          <select id="type" class="form-select" v-model="type" required>
+            <option value="user">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+
+        <div class="d-grid gap-2">
+          <input type="submit" value="Registrar" class="btn btn-primary" />
+        </div>
+      </form>
+
+      <div class="text-center mt-3">
+        <router-link to="/login">¿Ya tienes cuenta? Iniciar sesión</router-link>
+      </div>
+
+      <div v-if="error" class="alert alert-danger mt-3">
+        {{ error }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-
 import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
@@ -35,10 +56,10 @@ import axios from 'axios';
 const name = ref('');
 const email = ref('');
 const password = ref('');
-const type = ref('');
 const confirmPassword = ref('');
-const router = useRouter();
+const type = ref('user');
 const error = ref('');
+const router = useRouter();
 
 function OnSubmit() {
   if (password.value === confirmPassword.value) {
@@ -46,29 +67,29 @@ function OnSubmit() {
       name: name.value,
       email: email.value,
       password: password.value,
-      type: type.value
+      type: type.value,
     };
+
     axios.post('http://localhost:5000/register', payload)
-    
       .then(response => {
-        if (response.data.usertoken) {  
+        if (response.data.usertoken) {
           localStorage.setItem("userToken", response.data.usertoken);
           localStorage.setItem("iduser", response.data.iduser);
           router.push({ name: "home" });
         } else {
           error.value = response.data.message;
-          name.value='';
-          email.value='';
-          password.value='';
-          confirmPassword.value='';
-          type.value='';
+          name.value = '';
+          email.value = '';
+          password.value = '';
+          confirmPassword.value = '';
+          type.value = 'user';
         }
         setTimeout(() => {
           error.value = '';
         }, 3000);
       })
-      .catch(error => {
-        error.value = error.response?.data?.message || "Hubo un problema con el servidor. Intenta más tarde.";
+      .catch(err => {
+        error.value = err.response?.data?.message || "Hubo un problema con el servidor. Intenta más tarde.";
         setTimeout(() => {
           error.value = '';
         }, 3000);
@@ -76,11 +97,78 @@ function OnSubmit() {
   } else {
     error.value = "LAS CONTRASEÑAS NO SON IGUALES";
     setTimeout(() => {
-      error.value = "";
-    }, 3000)
+      error.value = '';
+    }, 3000);
   }
 }
-
 </script>
 
-<style></style>
+<style scoped>
+/* General background and layout */
+body {
+  background-color: #f8f9fa;
+}
+
+/* Card styling */
+.card {
+  border-radius: 8px;
+}
+
+/* Text centering and spacing for the form */
+form {
+  padding: 2rem;
+}
+
+h1 {
+  color: #007bff;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Input and label styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+  border-radius: 5px;
+}
+
+/* Form label styling */
+.form-label {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Button styling */
+input[type="submit"] {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+  padding: 10px;
+  font-size: 1.1rem;
+  border-radius: 5px;
+}
+
+input[type="submit"]:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Link styling */
+router-link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+router-link:hover {
+  text-decoration: underline;
+}
+
+/* Error message styling */
+.alert {
+  font-weight: bold;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+</style>

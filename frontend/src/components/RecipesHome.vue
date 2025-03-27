@@ -3,8 +3,8 @@
         <img :src="'data:image/jpeg;base64,' + item.img" class="card-img-top" alt="recipe image" v-if="item.img" />
         <div class="card-body">
             <h5 class="card-title">{{ item.titulo }}</h5>
-            <p class="card-text">{{ item.descripcion }}</p>
-            <button @click="OnClickRecipe">Ver Receta</button>
+            <p class="card-text text-truncate" :title="item.descripcion">{{ item.descripcion }}</p>
+            <button @click="OnClickRecipe" class="btn btn-primary w-100">Ver Receta</button>
         </div>
     </div>
 </template>
@@ -18,11 +18,11 @@ const props = defineProps({
         type: Object,   
         required: true
     }
-})
+});
 const router = useRouter();
 
 function OnClickRecipe(){
-    router.push({ name: "recipe",query: { id: props.item.id} });
+    router.push({ name: "recipe", query: { id: props.item.id } });
 }
 </script>
 
@@ -31,5 +31,30 @@ function OnClickRecipe(){
     margin: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+button {
+    border-radius: 5px;
+    font-size: 1rem;
 }
 </style>

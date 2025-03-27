@@ -26,6 +26,7 @@ def register():
     email = data.get("email")
     password = data.get("password")
     type = data.get("type")
+    favs = data.get("favs")
     token = create_access_token(identity=email)
     cur = mysql.connection.cursor()
     try:
@@ -34,7 +35,7 @@ def register():
         existing_user = cur.fetchone()
         if not existing_user:
             query = "INSERT INTO Users (nombre, email, password, idFav, type, token) VALUES (%s, %s, %s, %s, %s, %s)"
-            cur.execute(query, (name, email, hashlib.sha256(password.encode('utf-8')).hexdigest(), '0', type, token))
+            cur.execute(query, (name, email, hashlib.sha256(password.encode('utf-8')).hexdigest(), favs, type, token))
             cur.execute('SELECT id FROM Users WHERE email = %s', (email,))
             iduser = cur.fetchone()
             mysql.connection.commit()
@@ -63,8 +64,10 @@ def login():
             cur.execute('SELECT id FROM Users WHERE email = %s', (email,))
             iduser = cur.fetchone()
             cur.execute('UPDATE Users SET token = %s WHERE email = %s', (token, email))
+            cur.execute('SELECT idFav FROM Users Where id = %s', (iduser))
+            idFavs = cur.fetchone()
             mysql.connection.commit()
-            return jsonify(usertoken=token, iduser=iduser)
+            return jsonify(usertoken=token, iduser=iduser, idFavs=idFavs)
 
 @app.route('/create', methods=['POST'])
 def create():
@@ -81,7 +84,7 @@ def create():
     ingredientes_json = request.form.get("ingredientes") 
     cantidades_json = request.form.get("cantidades")
     idUser = request.form.get("idUser")
-    comentarios = ""
+    comentarios = request.form.get("opcion")
     token = request.form.get("userToken")
 
     cur = mysql.connection.cursor()
@@ -95,11 +98,11 @@ def create():
         cur.execute(query, (titulo,descripcion,img_bin,ingredientes_json,cantidades_json,idUser,comentarios,video_bin,0))
         mysql.connection.commit()
         cur.close()
-        return jsonify(message="Receta registrada",isLoggin=True)
-    return jsonify(menssage="Error no registrado",isLoggin=False)
+        return jsonify(message="Receta registrada")
+    return jsonify(menssage="Error no registrado",)
     
 @app.route('/viewRecipes' , methods=["POST"])
-def viewAll():
+def viewAllHome():
     data = request.get_json()
     token = data.get("userToken")
     cur = mysql.connection.cursor()
@@ -138,41 +141,36 @@ def viewAll():
         return jsonify(message=recipe_list)
 
 @app.route('/viewRecipe', methods=["POST"])
-def viewOne():
+def viewOneHome():
     data = request.get_json()
     idrecipe = data.get("idrecipe")
-    tokenUser = data.get("userToken")
     cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Receta WHERE id = %s", (idrecipe,))
+    recipe = cur.fetchone()
 
-    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
-    tokenUser = cur.fetchone()
-    if tokenUser:
-        cur.execute("SELECT * FROM Receta WHERE id = %s", (idrecipe,))
-        recipe = cur.fetchone()
+    img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
+    if recipe[8]:
+        video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
+    else:
+        video_base64 = None
 
-        img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
-        if recipe[8]:
-            video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
-        else:
-            video_base64 = None
+    ingredients_list = recipe[4].split(",") 
+    quantities_list = recipe[5].split(",") 
 
-        ingredients_list = recipe[4].split(",") 
-        quantities_list = recipe[5].split(",") 
+    recipe_dict = {
+        'id': recipe[0],
+        'titulo': recipe[1],
+        'descripcion': recipe[2],
+        'img': img_base64,
+        'ingredientes': ingredients_list,
+        'cantidades': quantities_list,
+        'idUser': recipe[6],
+        'comentarios': recipe[7],
+        'video': video_base64,
+        'valoraciones': recipe[9]
+    }
 
-        recipe_dict = {
-            'id': recipe[0],
-            'titulo': recipe[1],
-            'descripcion': recipe[2],
-            'img': img_base64,
-            'ingredientes': ingredients_list,
-            'cantidades': quantities_list,
-            'idUser': recipe[6],
-            'comentarios': recipe[7],
-            'video': video_base64,
-            'valoraciones': recipe[9]
-        }
-
-        return jsonify(message=recipe_dict)
+    return jsonify(message=recipe_dict)
 
 @app.route('/deleteRecipe', methods=["POST"])
 def deleteOne():
@@ -184,8 +182,230 @@ def deleteOne():
     cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
     tokenUser = cur.fetchone()
     if tokenUser:
-        cur.execute("DELETE * FROM Receta WHERE id = %s", (idrecipe,))
+        cur.execute("DELETE FROM Receta WHERE id = %s", (idrecipe,))
+        mysql.connection.commit()
         return jsonify(message="Receta Eliminada")
+    
+@app.route("/editeRecipe", methods=["POST"])
+def editeOne():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    tokenUser = data.get("userToken")
+    cur = mysql.connection.cursor()
+
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        return jsonify(message="Entro")
+
+@app.route("/viewAll", methods=["POST"])
+def viewAllIndex():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM Receta')
+    recipes = cur.fetchall()
+    recipe_list = []
+    for recipe in recipes:
+        ingredients = recipe[4]
+        quantities = recipe[5]
+        ingredients_list = ingredients.split(",")
+        quantities_list = quantities.split(",")
+        img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
+        if recipe[8]:
+            video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
+        else:
+            video_base64 = None
+        recipe_dict = {
+            'id': recipe[0],
+            'titulo': recipe[1],
+            'descripcion': recipe[2],
+            'img': img_base64,
+            'ingredientes':ingredients_list,
+            'cantidades': quantities_list,
+            'idUser': recipe[6],
+            'comentarios': recipe[7],
+            'video': video_base64,
+            'valoraciones': recipe[9]
+        }
+        recipe_list.append(recipe_dict)
+    cur.close()
+    return jsonify(message=recipe_list)
+
+@app.route("/createComment", methods=["POST"])
+def createComment():
+    data = request.get_json()
+    comment = data.get("comment")
+    idrecipe = data.get("idrecipe")
+    iduser = data.get("iduser")
+    userToken = data.get("userToken")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (userToken,))
+    token = cur.fetchone()
+    if token:
+        query = "INSERT INTO Comentarios (texto,  idreceta, iduser) VALUES (%s, %s, %s)"
+        cur.execute(query, (comment,idrecipe,iduser))
+        mysql.connection.commit()
+        comment_id = cur.lastrowid
+        cur.execute('SELECT nombre FROM Users WHERE id = %s', (iduser,))
+        user = cur.fetchone()
+        query_update = "UPDATE Receta SET comentarios = JSON_ARRAY_APPEND(comentarios, '$', %s) WHERE id = %s"
+        cur.execute(query_update, (comment_id, idrecipe))  
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"message": "Comentario Subido","idcomment": comment_id,"username": user[0] })
+
+@app.route("/viewComment", methods=["POST"])
+def viewComments():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    userToken = data.get("userToken")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (userToken,))
+    token = cur.fetchone()
+    if token:
+        cur.execute('SELECT * FROM Comentarios WHERE idreceta = %s', (idrecipe,))
+        comments = cur.fetchall()
+        comments_with_names = []
+
+        for comment in comments:
+            iduser = comment[3]
+            cur.execute('SELECT nombre FROM Users WHERE id = %s', (iduser,))
+            user = cur.fetchone()
+            comment_data = {
+                'idcomment': comment[0],
+                'comment': comment[1],
+                'idrecipe': comment[2],
+                'iduser': comment[3],
+                'username': user[0]
+            }
+
+            comments_with_names.append(comment_data)
+
+        return jsonify(message=comments_with_names)
+
+@app.route("/deleteComment", methods=["POST"])
+def deleteComments():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    tokenUser = data.get("userToken")
+    idcomment=data.get("idcomment")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        cur.execute("SELECT comentarios FROM Receta WHERE id = %s", (idrecipe,))
+        recipe = cur.fetchone()
+        comentarios_json = recipe[0]
+        comentarios = json.loads(comentarios_json)
+
+        comentarios = [comentario for comentario in comentarios if comentario != idcomment]
+        updated_comentarios_json = json.dumps(comentarios)
+        cur.execute("UPDATE Receta SET comentarios = %s WHERE id = %s", (updated_comentarios_json, idrecipe))
+        mysql.connection.commit()
+        cur.execute("DELETE FROM Comentarios WHERE id = %s", (idcomment,))
+        mysql.connection.commit()
+        return jsonify(message="Comentario Eliminado")
+
+@app.route("/updateFavs", methods=['POST'])
+def updateFavs():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    iduser = data.get("iduser")
+    tokenUser = data.get("userToken")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        cur.execute("SELECT idFav FROM Users WHERE id = %s", (iduser,))
+        favs = cur.fetchone()
+        if favs:
+            favs_json = favs[0]
+            favs = json.loads(favs_json)
+        else:
+            favs = []
+        if idrecipe not in favs:
+            favs.append(idrecipe)
+        updated_favs_json = json.dumps(favs)
+        cur.execute("UPDATE Users SET idFav = %s WHERE id = %s", (updated_favs_json, iduser))
+        mysql.connection.commit()
+        
+        return jsonify(message="Fav Añadido",idFavs=updated_favs_json)
+
+@app.route('/deleteFavs', methods=['POST'])
+def deleteFavs():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    iduser = data.get("iduser")
+    tokenUser = data.get("userToken")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        cur.execute("SELECT idFav FROM Users WHERE id = %s", (iduser,))
+        favs = cur.fetchone()  
+        if favs:
+            favs_json = favs[0]
+            favs = json.loads(favs_json)
+        else:
+            favs = []
+        favs = [fav for fav in favs if fav != idrecipe]
+        updated_favs_json = json.dumps(favs)
+        cur.execute("UPDATE Users SET idFav = %s WHERE id = %s", (updated_favs_json, iduser))
+        mysql.connection.commit()
+        
+        return jsonify(message="Fav Eliminado",idFavs=updated_favs_json)
+
+@app.route('/viewFavs', methods=["POST"])
+def viewFavs():
+    data = request.get_json()
+    idFavs = data.get("idFavs")
+    
+    if not idFavs:
+        return jsonify(message="No hay favoritos"), 400
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Receta WHERE id IN (%s)" % ','.join(['%s'] * len(idFavs)), tuple(idFavs))
+    recetas = cur.fetchall()
+    recetas_json = []
+    
+    for receta in recetas:
+        imagen_base64 = base64.b64encode(receta[3]).decode('utf-8')
+        recetas_json.append({
+            'id':receta[0],
+            'titulo': receta[1],  
+            'descripcion': receta[2],
+            'imagen': imagen_base64
+        })
+    return jsonify(message=recetas_json)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+"""
+CREATE TABLE Users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    idFav VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    token VARCHAR(459) NOT NULL
+);
+CREATE TABLE Receta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    img BLOB NOT NULL,
+    ingredientes VARCHAR(255) NOT NULL,
+    cantidades VARCHAR(255) NOT NULL,
+    iduser INT NOT NULL,
+    comentarios VARCHAR(255) DEFAULT NULL,
+    video LONGBLOB DEFAULT NULL,
+    valoraciones VARCHAR(255) NOT NULL
+);
+CREATE TABLE Comentarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    texto VARCHAR(255) NOT NULL,
+    idreceta INT NOT NULL,
+    iduser INT NOT NULL
+);
+
+"""
