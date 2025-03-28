@@ -21,6 +21,7 @@ const props = defineProps({
 });
 const router = useRouter();
 
+//Funcion que navega a la receta pulsada segun id
 function OnClickRecipe(){
     router.push({ name: "recipe", query: { id: props.item.id } });
 }

@@ -12,17 +12,16 @@
                 </div>
             </div>
         </nav>
-
         <div v-if="elementos.recetas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
             <div v-for="(item, index) in elementos.recetas" :key="index" class="col mb-4">
                 <button @click="toggleFavorite(item.id)" :class="['heart-button', { 'active': isFavorite(item.id) }]"
                     class="btn btn-outline-danger mb-3">
-                    <i class="fa" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
+                    <i class="fa" :class="isFavorite(item.id) ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
                 </button>
                 <Recipe :item="item"></Recipe>
+                <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
             </div>
         </div>
-
         <div v-else class="text-center">
             <p>No se encontraron recetas.</p>
         </div>
@@ -31,8 +30,10 @@
 
 <script setup>
 import axios from 'axios';
-import { ref,reactive,onMounted } from 'vue';
+import { reactive } from 'vue';
 import Recipe from './RecipesHome.vue';
+import StarRating from './StarRating.vue';
+import 'font-awesome/css/font-awesome.min.css';
 
 const elementos = reactive({
     recetas: []
@@ -40,9 +41,12 @@ const elementos = reactive({
 const userToken = localStorage.getItem('userToken');
 const favoritos = reactive({});
 const iduser = localStorage.getItem('iduser');
+const ratings = reactive({});
+const favs = localStorage.getItem('idFavs')
 
+//Llama al back por la referencia /viewAll el cual muestra todas las recetas
 axios
-    .post('http://localhost:5000/viewAll')
+    .post('http://localhost:5000/viewAll', { iduser })
     .then(response => {
         if (response.data.message && response.data.message.length > 0) {
             elementos.recetas = response.data.message.map(item => {
@@ -52,49 +56,94 @@ axios
                     cantidades: JSON.parse(item.cantidades)
                 };
             });
+            if (userToken) {
+                elementos.recetas.forEach(idrecipe => {
+                    JSON.parse(favs).forEach(element => {
+                        if (idrecipe.id == element) {
+                            toggleFavorite(idrecipe.id)
+                        }
+                    });
+                });
+            }
+
+            if (userToken) {
+                response.data.stars.forEach(element => {
+                    console.log(element)
+                });
+            }
         }
     })
     .catch(error => {
         console.error("Error en la solicitud:", error);
     });
 
+//Cambia el icono de Favoritos a "encedido" o "apagado" si esta encendido llama al back por la referencia /updateFavs
+//Si esta apagado llama al back por la referencia /deleteFavs
 const toggleFavorite = (id) => {
-    const payload = {
-    idrecipe: id,
-    userToken: userToken,
-    comment: "",
-    iduser: iduser,
-    idcomment: 0
-};
-    if (favoritos[id]) {
-        favoritos[id] = false;
-        axios
-            .post('http://localhost:5000/deleteFavs', payload)
-            .then(response => {
-                console.log(response.data.message)
-                localStorage.setItem('idFavs',response.data.idFavs)
-            })
-            .catch(error => {
-                console.error("Error en la solicitud:", error);
-            });
+    if (userToken) {
+
+
+        const payload = {
+            idrecipe: id,
+            userToken: userToken,
+            comment: "",
+            iduser: iduser,
+            idcomment: 0
+        };
+        if (favoritos[id]) {
+            favoritos[id] = false;
+            axios
+                .post('http://localhost:5000/deleteFavs', payload)
+                .then(response => {
+                    console.log(response.data.message)
+                    localStorage.setItem('idFavs', response.data.idFavs)
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                });
+        } else {
+            favoritos[id] = true;
+            axios
+                .post('http://localhost:5000/updateFavs', payload)
+                .then(response => {
+                    console.log(response.data.message)
+                    localStorage.setItem('idFavs', response.data.idFavs)
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                });
+        }
     } else {
-        favoritos[id] = true;
-        axios
-            .post('http://localhost:5000/updateFavs', payload)
-            .then(response => {
-                console.log(response.data.message)
-                localStorage.setItem('idFavs',response.data.idFavs)
-            })
-            .catch(error => {
-                console.error("Error en la solicitud:", error);
-            });
+
     }
-
-
 };
 
+//Comprueba por id cual se pulsa para y activa el Favoritos
 const isFavorite = (id) => {
     return favoritos[id] || false;
+};
+
+//Funcion que "suma estrellas " cuando se pulsa en la estrella y llama al back por la referencia /updateRating 
+const ratingChanged = (recipeId) => {
+    if (userToken) {
+        return (newRating) => {
+            ratings[recipeId] = newRating;
+            const payload = {
+                idrecipe: recipeId,
+                rating: newRating,
+                userToken: userToken,
+                iduser: iduser
+            };
+            axios
+                .post('http://localhost:5000/updateRating', payload)
+                .then(response => {
+                    console.log(response.data.message);
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                });
+        };
+    }
 };
 </script>
 

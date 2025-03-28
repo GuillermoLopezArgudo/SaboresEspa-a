@@ -7,17 +7,14 @@
           <label for="email" class="form-label">Correo:</label>
           <input type="email" id="email" v-model="email" class="form-control" required />
         </div>
-
         <div class="mb-3">
           <label for="password" class="form-label">Contraseña:</label>
           <input type="password" id="password" v-model="password" class="form-control" required />
         </div>
-
         <div class="d-grid gap-2">
           <input type="submit" value="Iniciar Sesión" class="btn btn-primary" />
         </div>
       </form>
-
       <div class="text-center mt-3">
         <router-link to="/register">¿No tienes cuenta? Regístrate aquí</router-link>
       </div>
@@ -34,6 +31,7 @@ const router = useRouter();
 const email = ref('');
 const password = ref('');
 
+//Cuando se pulsa en enviar llamamos al back por la referencia /login y le pasamos los valores del objeto de payload y restorna el token, iduser los idFavs y los almacena en el localstorage
 function OnSubmit() {
   const payload = {
     email: email.value,

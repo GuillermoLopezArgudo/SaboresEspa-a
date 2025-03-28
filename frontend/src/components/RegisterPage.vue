@@ -7,23 +7,19 @@
           <label for="name" class="form-label">Nombre:</label>
           <input id="name" class="form-control" v-model="name" required />
         </div>
-
         <div class="mb-3">
           <label for="email" class="form-label">Correo:</label>
           <input type="email" id="email" class="form-control" v-model="email" required />
         </div>
-
         <div class="mb-3">
           <label for="password" class="form-label">Contraseña:</label>
           <input type="password" id="password" class="form-control" v-model="password" required pattern=".{8,}" />
           <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres.</small>
         </div>
-
         <div class="mb-3">
           <label for="confirmPassword" class="form-label">Confirmar Contraseña:</label>
           <input type="password" id="confirmPassword" class="form-control" v-model="confirmPassword" required pattern=".{8,}" />
         </div>
-
         <div class="mb-3">
           <label for="type" class="form-label">Tipo de usuario:</label>
           <select id="type" class="form-select" v-model="type" required>
@@ -31,16 +27,13 @@
             <option value="admin">Administrador</option>
           </select>
         </div>
-
         <div class="d-grid gap-2">
           <input type="submit" value="Registrar" class="btn btn-primary" />
         </div>
       </form>
-
       <div class="text-center mt-3">
         <router-link to="/login">¿Ya tienes cuenta? Iniciar sesión</router-link>
       </div>
-
       <div v-if="error" class="alert alert-danger mt-3">
         {{ error }}
       </div>
@@ -49,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
 
@@ -59,8 +52,10 @@ const password = ref('');
 const confirmPassword = ref('');
 const type = ref('user');
 const error = ref('');
+const favs = reactive([]);
 const router = useRouter();
 
+//Funcion que cuando se pulsa en enviar llama al back por la referenica /register
 function OnSubmit() {
   if (password.value === confirmPassword.value) {
     const payload = {
@@ -68,10 +63,11 @@ function OnSubmit() {
       email: email.value,
       password: password.value,
       type: type.value,
+      favs: favs.value
     };
-
     axios.post('http://localhost:5000/register', payload)
       .then(response => {
+        
         if (response.data.usertoken) {
           localStorage.setItem("userToken", response.data.usertoken);
           localStorage.setItem("iduser", response.data.iduser);
@@ -104,17 +100,14 @@ function OnSubmit() {
 </script>
 
 <style scoped>
-/* General background and layout */
 body {
   background-color: #f8f9fa;
 }
 
-/* Card styling */
 .card {
   border-radius: 8px;
 }
 
-/* Text centering and spacing for the form */
 form {
   padding: 2rem;
 }
@@ -125,7 +118,6 @@ h1 {
   font-weight: bold;
 }
 
-/* Input and label styling */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -133,13 +125,11 @@ select {
   border-radius: 5px;
 }
 
-/* Form label styling */
 .form-label {
   font-weight: bold;
   color: #333;
 }
 
-/* Button styling */
 input[type="submit"] {
   background-color: #007bff;
   border-color: #007bff;
@@ -154,7 +144,6 @@ input[type="submit"]:hover {
   border-color: #0056b3;
 }
 
-/* Link styling */
 router-link {
   color: #007bff;
   text-decoration: none;
@@ -164,7 +153,6 @@ router-link:hover {
   text-decoration: underline;
 }
 
-/* Error message styling */
 .alert {
   font-weight: bold;
   color: #dc3545;

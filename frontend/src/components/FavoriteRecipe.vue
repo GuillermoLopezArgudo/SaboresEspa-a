@@ -1,7 +1,6 @@
 <template>
   <div class="container mt-5">
     <h1 class="text-center mb-5">Recetario: Recetas Favoritas</h1>
-    
     <div v-if="recetas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       <div v-for="(item, index) in recetas" :key="item.id" class="col">
         <div class="card shadow-sm border-light">
@@ -10,13 +9,12 @@
             <h5 class="card-title text-center text-primary">{{ item.titulo }}</h5>
             <p class="card-text text-muted">{{ item.descripcion }}</p>
             <div class="d-flex justify-content-between align-items-center">
-                <router-link :to="'/recipe?id=' + item.id" class="btn btn-primary">Ver receta</router-link>
+              <router-link :to="'/recipe?id=' + item.id" class="btn btn-primary">Ver receta</router-link>
             </div>
           </div>
         </div>
       </div>
     </div>
-  
     <div v-else class="text-center mt-5">
       <div class="alert alert-warning" role="alert">
         No tienes recetas favoritas. ¡Agrega algunas y vuelve!
@@ -35,6 +33,7 @@ const idFavs = JSON.parse(localStorage.getItem('idFavs')) || [];
 
 const recetas = ref([]);
 
+//Cuando se crea el componente compruebe si en el localstorage hay favoritos si hay muestra los favoritos llamando al back por referencia /viewFavs
 onMounted(() => {
   if (idFavs.length > 0) {
     const payload = {

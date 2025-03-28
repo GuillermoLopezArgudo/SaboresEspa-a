@@ -1,44 +1,35 @@
 <template>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Receta</h1>
-
         <div v-if="userToken">
             <router-link to="/home" class="btn btn-secondary mb-3">Atrás</router-link>
         </div>
         <div v-else>
             <router-link to="/" class="btn btn-secondary mb-3">Atrás</router-link>
         </div>
-
         <div v-if="receta">
             <h2 class="text-primary">{{ receta.titulo }}</h2>
-
             <button @click="toggleFavorite" :class="['heart-button', { 'active': isFavorite }]"
                 class="btn btn-outline-danger mb-3">
                 <i class="fa" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
             </button>
-
             <p class="lead">{{ receta.descripcion }}</p>
-
             <div v-if="receta.img" class="mb-4">
                 <img :src="'data:image/jpeg;base64,' + receta.img" alt="Imagen de la receta"
                     class="img-fluid rounded shadow" />
             </div>
-
             <h3 class="text-secondary">Ingredientes:</h3>
             <ul class="list-group list-group-flush mb-4">
                 <li v-for="(ingrediente, idx) in receta.ingredientes" :key="idx" class="list-group-item">
                     {{ ingrediente }} - {{ receta.cantidades[idx] || 'Cantidad no disponible' }}
                 </li>
             </ul>
-
             <div v-if="receta.video" class="my-4">
                 <video controls :src="'data:video/mp4;base64,' + receta.video" class="w-100 rounded shadow"></video>
             </div>
-
             <div v-if="receta.valoraciones" class="my-3">
                 <p><strong>Valoración:</strong> {{ receta.valoraciones }} estrellas</p>
             </div>
-
             <div v-if="receta.comentarios != null" class="my-4">
                 <h4>Comentarios:</h4>
                 <ul class="list-group">
@@ -83,9 +74,19 @@ const receta = ref(null);
 const comment = ref("");
 const userToken = localStorage.getItem('userToken');
 const iduser = localStorage.getItem('iduser');
+const favs = localStorage.getItem('idFavs')
 const comments = ref([]);
 const isFavorite = ref(false);
+const payload = {
+    idrecipe: parseInt(recipeId),
+    userToken: userToken,
+    comment: "",
+    iduser: iduser,
+    idcomment: 0
+};
 
+//Cambia el icono de Favoritos a "encedido" o "apagado" si esta encendido llama al back por la referencia /updateFavs
+//Si esta apagado llama al back por la referencia /deleteFavs
 const toggleFavorite = () => {
     isFavorite.value = !isFavorite.value;
     if (isFavorite.value) {
@@ -93,35 +94,29 @@ const toggleFavorite = () => {
             .post('http://localhost:5000/updateFavs', payload)
             .then(response => {
                 console.log(response.data.message)
-                localStorage.setItem('idFavs',response.data.idFavs)
+                localStorage.setItem('idFavs', response.data.idFavs)
             })
             .catch(error => {
                 console.error("Error en la solicitud:", error);
             });
-    }else{
+    } else {
         axios
             .post('http://localhost:5000/deleteFavs', payload)
             .then(response => {
                 console.log(response.data.message)
-                localStorage.setItem('idFavs',response.data.idFavs)
-                
+                localStorage.setItem('idFavs', response.data.idFavs)
+
             })
             .catch(error => {
                 console.error("Error en la solicitud:", error);
             });
     }
-    
+
 
 };
 
-const payload = {
-    idrecipe: recipeId,
-    userToken: userToken,
-    comment: "",
-    iduser: iduser,
-    idcomment: 0
-};
-
+//Cuando cargar el componente llama a back por la referencia /viewRecipe el cual muestra las recetas
+//Tambien llama al back por la referencia /viewComment el cual trae todos los comentarios de la receta
 onMounted(() => {
     axios
         .post('http://localhost:5000/viewRecipe', payload)
@@ -156,8 +151,19 @@ onMounted(() => {
         .catch(error => {
             console.error("Error en la solicitud:", error);
         });
+
+    if (userToken) {
+        JSON.parse(favs).forEach(element => {
+            if (element == recipeId) {
+                toggleFavorite()
+            }
+        })
+    }
+    ;
+
 });
 
+//Funcion que llama al back por la referencia /deleteRecipe el cual elimina la receta y navega al home
 function deleteRecipe() {
     axios
         .post('http://localhost:5000/deleteRecipe', payload)
@@ -170,6 +176,7 @@ function deleteRecipe() {
         });
 }
 
+//Funcion INACABADA
 function editeRecipe() {
     axios
         .post('http://localhost:5000/editeRecipe', payload)
@@ -181,6 +188,7 @@ function editeRecipe() {
         });
 }
 
+//Funcion que crea un comentario la cual llama al back por la referencia /createComment
 function createComment() {
     payload.comment = comment.value;
     if (userToken) {
@@ -204,6 +212,7 @@ function createComment() {
     }
 }
 
+//Funcion que elimina un comentario de una receta llamando la back por la referencia /deleteComment
 function deleteComment(idcomment) {
     payload.idcomment = idcomment;
     axios

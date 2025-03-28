@@ -26,7 +26,7 @@ def register():
     email = data.get("email")
     password = data.get("password")
     type = data.get("type")
-    favs = data.get("favs")
+    favs = data.get("favs",[])
     token = create_access_token(identity=email)
     cur = mysql.connection.cursor()
     try:
@@ -34,8 +34,9 @@ def register():
         cur.execute('SELECT email FROM Users WHERE email = %s', (email,))
         existing_user = cur.fetchone()
         if not existing_user:
+            favs_json = json.dumps(favs)
             query = "INSERT INTO Users (nombre, email, password, idFav, type, token) VALUES (%s, %s, %s, %s, %s, %s)"
-            cur.execute(query, (name, email, hashlib.sha256(password.encode('utf-8')).hexdigest(), favs, type, token))
+            cur.execute(query, (name, email, hashlib.sha256(password.encode('utf-8')).hexdigest(), favs_json, type, token))
             cur.execute('SELECT id FROM Users WHERE email = %s', (email,))
             iduser = cur.fetchone()
             mysql.connection.commit()
@@ -85,6 +86,7 @@ def create():
     cantidades_json = request.form.get("cantidades")
     idUser = request.form.get("idUser")
     comentarios = request.form.get("opcion")
+    valoracion = request.form.get("valoracion")
     token = request.form.get("userToken")
 
     cur = mysql.connection.cursor()
@@ -94,8 +96,8 @@ def create():
     
     if token:
         imagen = request.files.get('imagen')
-        query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video, valoraciones) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cur.execute(query, (titulo,descripcion,img_bin,ingredientes_json,cantidades_json,idUser,comentarios,video_bin,0))
+        query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
+        cur.execute(query, (titulo,descripcion,img_bin,ingredientes_json,cantidades_json,idUser,comentarios,video_bin))
         mysql.connection.commit()
         cur.close()
         return jsonify(message="Receta registrada")
@@ -134,7 +136,6 @@ def viewAllHome():
                 'idUser': recipe[6],
                 'comentarios': recipe[7],
                 'video': video_base64,
-                'valoraciones': recipe[9]
             }
             recipe_list.append(recipe_dict)
         cur.close()
@@ -167,7 +168,6 @@ def viewOneHome():
         'idUser': recipe[6],
         'comentarios': recipe[7],
         'video': video_base64,
-        'valoraciones': recipe[9]
     }
 
     return jsonify(message=recipe_dict)
@@ -189,7 +189,6 @@ def deleteOne():
 @app.route("/editeRecipe", methods=["POST"])
 def editeOne():
     data = request.get_json()
-    idrecipe = data.get("idrecipe")
     tokenUser = data.get("userToken")
     cur = mysql.connection.cursor()
 
@@ -200,6 +199,8 @@ def editeOne():
 
 @app.route("/viewAll", methods=["POST"])
 def viewAllIndex():
+    data = request.get_json()
+    idUser = data.get("iduser")
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM Receta')
     recipes = cur.fetchall()
@@ -224,11 +225,12 @@ def viewAllIndex():
             'idUser': recipe[6],
             'comentarios': recipe[7],
             'video': video_base64,
-            'valoraciones': recipe[9]
         }
         recipe_list.append(recipe_dict)
+    cur.execute("SELECT idrecipe,valoracion FROM Valoracion WHERE iduser = %s",(idUser,))
+    stars = cur.fetchall()
     cur.close()
-    return jsonify(message=recipe_list)
+    return jsonify(message=recipe_list,stars=stars)
 
 @app.route("/createComment", methods=["POST"])
 def createComment():
@@ -261,26 +263,26 @@ def viewComments():
     cur = mysql.connection.cursor()
     cur.execute('SELECT token FROM Users WHERE token = %s', (userToken,))
     token = cur.fetchone()
-    if token:
-        cur.execute('SELECT * FROM Comentarios WHERE idreceta = %s', (idrecipe,))
-        comments = cur.fetchall()
-        comments_with_names = []
+    
+    cur.execute('SELECT * FROM Comentarios WHERE idreceta = %s', (idrecipe,))
+    comments = cur.fetchall()
+    comments_with_names = []
 
-        for comment in comments:
-            iduser = comment[3]
-            cur.execute('SELECT nombre FROM Users WHERE id = %s', (iduser,))
-            user = cur.fetchone()
-            comment_data = {
-                'idcomment': comment[0],
-                'comment': comment[1],
-                'idrecipe': comment[2],
-                'iduser': comment[3],
-                'username': user[0]
-            }
+    for comment in comments:
+        iduser = comment[3]
+        cur.execute('SELECT nombre FROM Users WHERE id = %s', (iduser,))
+        user = cur.fetchone()
+        comment_data = {
+            'idcomment': comment[0],
+            'comment': comment[1],
+            'idrecipe': comment[2],
+            'iduser': comment[3],
+            'username': user[0]
+        }
 
-            comments_with_names.append(comment_data)
+        comments_with_names.append(comment_data)
 
-        return jsonify(message=comments_with_names)
+    return jsonify(message=comments_with_names)
 
 @app.route("/deleteComment", methods=["POST"])
 def deleteComments():
@@ -376,6 +378,35 @@ def viewFavs():
         })
     return jsonify(message=recetas_json)
 
+@app.route('/updateRating', methods=["POST"])
+def updateReting():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    rating = data.get("rating")
+    iduser = data.get("iduser")
+    tokenUser = data.get("userToken")
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+    if tokenUser:
+        cur.execute("SELECT * FROM Valoracion WHERE iduser = %s AND idrecipe = %s", (iduser,idrecipe,))
+        exist = cur.fetchone()
+        if exist:
+            query_update = "UPDATE Valoracion SET valoracion = %s WHERE iduser = %s AND idrecipe = %s"
+            cur.execute(query_update, (rating, iduser, idrecipe))  
+            mysql.connection.commit()
+            cur.close()
+            return jsonify(message="CAMBIADO")
+        else:
+            query = "INSERT INTO Valoracion (idrecipe, iduser, valoracion) VALUES (%s, %s, %s)"
+            cur.execute(query, (idrecipe,iduser,rating)) 
+            mysql.connection.commit()
+            cur.close()
+            return jsonify(message="NUEVO")
+
+
+        
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
@@ -398,14 +429,20 @@ CREATE TABLE Receta (
     cantidades VARCHAR(255) NOT NULL,
     iduser INT NOT NULL,
     comentarios VARCHAR(255) DEFAULT NULL,
-    video LONGBLOB DEFAULT NULL,
-    valoraciones VARCHAR(255) NOT NULL
+    video LONGBLOB DEFAULT NULL
 );
 CREATE TABLE Comentarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     texto VARCHAR(255) NOT NULL,
     idreceta INT NOT NULL,
     iduser INT NOT NULL
+);
+
+CREATE TABLE Valoracion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idrecipe INT NOT NULL,
+    iduser INT NOT NULL,
+    valoracion INT NOT NULL
 );
 
 """

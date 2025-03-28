@@ -1,18 +1,12 @@
 <template>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Recetas de Hoy</h1>
-        
-        <!-- Enlace de regreso a la página anterior -->
         <router-link to="/home" class="btn btn-secondary mb-4">Atras</router-link>
-
-        <!-- Verifica si hay recetas disponibles -->
         <div v-if="elementos.recetas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
             <div v-for="(item, index) in elementos.recetas" :key="index" class="col mb-4">
                 <Recipe :item="item"></Recipe>
             </div>
         </div>
-
-        <!-- Mensaje si no hay recetas -->
         <div v-else class="text-center">
             <p>No se encontraron recetas.</p>
         </div>
@@ -25,20 +19,17 @@ import axios from 'axios';
 import Recipe from './RecipesHome.vue';
 import { useRouter } from 'vue-router';
 
-// Recuperar el token de usuario del localStorage
 const userToken = ref(localStorage.getItem("userToken"));
 const router = useRouter();
-
-// Definir un estado reactivo para las recetas
 const elementos = reactive({
     recetas: []
 });
 
-// Redirigir al usuario si no está logueado
+//Comprueba si el token esta guardado en el localstorage si no lo esta llama al back por la referencia /viewRecipes y muestra todas las recetas propias
 if (userToken.value == null) {
     router.push({ name: "login" });
 } else {
-    // Hacer la petición a la API para obtener las recetas del usuario
+
     axios.post('http://localhost:5000/viewRecipes', { userToken: userToken.value })
         .then(response => {
             if (response.data.message && response.data.message.length > 0) {

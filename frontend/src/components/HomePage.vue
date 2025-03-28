@@ -1,16 +1,12 @@
 <template>
     <div>
       <h1 class="text-center mt-4">Bienvenido a tu Recetario</h1>
-  
-      <!-- Barra de navegación -->
       <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
         <div class="container">
           <router-link to="/" class="navbar-brand fs-4 text-primary">Recetario</router-link>
-          
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-          </button>
-          
+          </button>   
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
               <li class="nav-item">
@@ -32,8 +28,6 @@
           </div>
         </div>
       </nav>
-  
-      <!-- Contenido de las recetas -->
       <div class="container">
         <FavoriteRecipe></FavoriteRecipe>
       </div>
@@ -47,23 +41,24 @@
   
   const userToken = ref(localStorage.getItem("userToken"));
   const router = useRouter();
+
+  //Si no hay token en el localstorage envia al login
   if(userToken.value == null){
       router.push({ name: "login"});
   }
   
+  //Cierra la sesion eliminando lo almacenado en el localstorage
   function closeSession(){
       localStorage.clear()
   }
   </script>
   
   <style scoped>
-  /* Estilos generales */
   body {
     background-color: #f8f9fa;
     font-family: 'Arial', sans-serif;
   }
-  
-  /* Títulos */
+
   h1 {
     font-size: 2.5rem;
     color: #007bff;
@@ -72,7 +67,6 @@
     margin-bottom: 30px;
   }
   
-  /* Navbar */
   .navbar {
     background-color: #ffffff;
   }
@@ -100,7 +94,6 @@
     background-color: #007bff;
   }
   
-  /* Favoritos */
   .favorite-recipes {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -139,7 +132,6 @@
     background-color: #0056b3;
   }
   
-  /* Estilo para los botones de acción */
   button {
     background-color: #007bff;
     border: none;
@@ -153,7 +145,6 @@
     background-color: #0056b3;
   }
   
-  /* Estilos responsivos */
   @media (max-width: 768px) {
     .favorite-recipes {
       grid-template-columns: repeat(2, 1fr);

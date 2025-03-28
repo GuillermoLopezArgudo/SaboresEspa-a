@@ -22,17 +22,20 @@
 
             <div class="mb-3">
                 <label for="descriptionRecipe" class="form-label">Descripción de la receta</label>
-                <textarea id="descriptionRecipe" rows="5" v-model="description" class="form-control" required></textarea>
+                <textarea id="descriptionRecipe" rows="5" v-model="description" class="form-control"
+                    required></textarea>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">¿Deseas comentarios en tu receta?</label>
                 <div class="form-check">
-                    <input type="radio" id="optionYes" name="option" value="yes" checked v-model="option" class="form-check-input">
+                    <input type="radio" id="optionYes" name="option" value="yes" checked v-model="option"
+                        class="form-check-input">
                     <label for="optionYes" class="form-check-label">Sí</label>
                 </div>
                 <div class="form-check">
-                    <input type="radio" id="optionNo" name="option" value="no" v-model="option" class="form-check-input">
+                    <input type="radio" id="optionNo" name="option" value="no" v-model="option"
+                        class="form-check-input">
                     <label for="optionNo" class="form-check-label">No</label>
                 </div>
             </div>
@@ -40,13 +43,15 @@
             <div class="mb-3">
                 <label for="ingredientsRecipe" class="form-label">Ingredientes + Cantidades</label>
                 <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="d-flex mb-2">
-                    <input v-model="recipebook.ingredients[index]" placeholder="Ingrediente" class="form-control me-2" />
+                    <input v-model="recipebook.ingredients[index]" placeholder="Ingrediente"
+                        class="form-control me-2" />
                     <input v-model="recipebook.quantities[index]" placeholder="Cantidad" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3">
-                <button type="button" @click.prevent="moreIngredients" class="btn btn-link p-0">Añadir más ingredientes</button>
+                <button type="button" @click.prevent="moreIngredients" class="btn btn-link p-0">Añadir más
+                    ingredientes</button>
             </div>
 
             <div class="d-grid">
@@ -74,25 +79,31 @@ const option = ref('yes');
 const comentarios = ref([]);
 const userToken = ref(localStorage.getItem("userToken"));
 
+//Si no existe el token en el localstorage lo vuelve a la pagina de login
 if (userToken.value == null) {
     router.push({ name: "login" });
 }
 
+//Mete la imagen dentro de lo obtenido de la seleccion de la img
 function handleImageChange(event) {
     const file = event.target.files[0];
     img.value = file;
 }
 
+//Mete el video dentro de lo obtenido de la seleccion de el video
 function handleVideoChange(event) {
     const file = event.target.files[0];
     video.value = file;
 }
 
+//Mete los ingredientes y las cantidades de los arrays
 function moreIngredients() {
     recipebook.ingredients.push('');
     recipebook.quantities.push('');
 }
 
+//Cuando pulsa en enviar crea un objeto formData en el cual se mete todos los valores obtenidos en el formulario
+//Llamamos al back por referencia /create, con el argumento de formData si la respuesta es correcta nos devolvera un mensaje y nevegamos el home
 function submitRecipe() {
     const formData = new FormData();
     formData.append('titulo', title.value);
@@ -130,11 +141,15 @@ h1 {
     color: #007bff;
 }
 
-input[type="text"], input[type="file"], textarea, select {
+input[type="text"],
+input[type="file"],
+textarea,
+select {
     border-radius: 5px;
 }
 
-input[type="submit"], button {
+input[type="submit"],
+button {
     border-radius: 5px;
 }
 
