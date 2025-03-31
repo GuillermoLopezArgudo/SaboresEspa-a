@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
@@ -28,7 +28,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits();
+
 
 // Función para cambiar la calificación
 const setRating = (star) => {
