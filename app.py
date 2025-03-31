@@ -207,20 +207,26 @@ def editeOne():
 
     imagen = request.files.get('imagen')
     img_url = None
-    if imagen and allowed_file(imagen.filename):
-        filename = secure_filename(imagen.filename)
-        img_url = os.path.join(app.config['UPLOAD_FOLDER_IMAGES'], filename)
-        imagen.save(img_url)
+    if imagen != None:
+        if imagen and allowed_file(imagen.filename):
+            filename = secure_filename(imagen.filename)
+            img_url = os.path.join(app.config['UPLOAD_FOLDER_IMAGES'], filename)
+            imagen.save(img_url)
+    else:
+        img_url = data.get('imagen')
     video = request.files.get('video')
     video_url = None
-    if video and allowed_file(video.filename):
-        filename = secure_filename(video.filename)
-        video_url = os.path.join(app.config['UPLOAD_FOLDER_VIDEOS'], filename)
-        video.save(video_url)
-
+    if video != None:
+        if video and allowed_file(video.filename):
+            filename = secure_filename(video.filename)
+            video_url = os.path.join(app.config['UPLOAD_FOLDER_VIDEOS'], filename)
+            video.save(video_url)
+    else:
+        video_url = data.get('video')
+    
     ingredients_json = json.dumps(ingredients)
     quantities_json = json.dumps(quantities)
-    
+
     if user_token:
         cur = mysql.connection.cursor()
         cur.execute("SELECT comentarios FROM Receta WHERE id = %s", (recipe_id,))
