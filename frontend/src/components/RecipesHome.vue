@@ -1,6 +1,6 @@
 <template>
     <div class="card" style="width: 18rem;">
-        <img :src="'data:image/jpeg;base64,' + item.img" class="card-img-top" alt="recipe image" v-if="item.img" />
+        <img :src="`http://localhost:5000/${item.img}`" class="card-img-top" alt="recipe image" v-if="item.img" />
         <div class="card-body">
             <h5 class="card-title">{{ item.titulo }}</h5>
             <p class="card-text text-truncate" :title="item.descripcion">{{ item.descripcion }}</p>

@@ -34,6 +34,7 @@ import { reactive } from 'vue';
 import Recipe from './RecipesHome.vue';
 import StarRating from './StarRating.vue';
 import 'font-awesome/css/font-awesome.min.css';
+import { useRouter } from 'vue-router';
 
 const elementos = reactive({
     recetas: []
@@ -41,8 +42,10 @@ const elementos = reactive({
 const userToken = localStorage.getItem('userToken');
 const favoritos = reactive({});
 const iduser = localStorage.getItem('iduser');
-const ratings = reactive({});
+const ratings = reactive(JSON.parse(localStorage.getItem('ratings')) || {});
 const favs = localStorage.getItem('idFavs')
+const router = useRouter();
+
 
 //Llama al back por la referencia /viewAll el cual muestra todas las recetas
 axios
@@ -56,7 +59,7 @@ axios
                     cantidades: JSON.parse(item.cantidades)
                 };
             });
-            if (userToken) {
+            if (favs) {
                 elementos.recetas.forEach(idrecipe => {
                     JSON.parse(favs).forEach(element => {
                         if (idrecipe.id == element) {
@@ -64,13 +67,12 @@ axios
                         }
                     });
                 });
+                response.data.stars.forEach(element => {
+                    ratings[element[0]] = element[1]; 
+                });
+                localStorage.setItem('ratings', JSON.stringify(ratings));
             }
 
-            if (userToken) {
-                response.data.stars.forEach(element => {
-                    console.log(element)
-                });
-            }
         }
     })
     .catch(error => {
@@ -81,7 +83,6 @@ axios
 //Si esta apagado llama al back por la referencia /deleteFavs
 const toggleFavorite = (id) => {
     if (userToken) {
-
 
         const payload = {
             idrecipe: id,
@@ -114,7 +115,7 @@ const toggleFavorite = (id) => {
                 });
         }
     } else {
-
+        router.push({ name: "login" });
     }
 };
 
@@ -134,6 +135,8 @@ const ratingChanged = (recipeId) => {
                 userToken: userToken,
                 iduser: iduser
             };
+
+            localStorage.setItem('ratings', JSON.stringify(ratings));
             axios
                 .post('http://localhost:5000/updateRating', payload)
                 .then(response => {

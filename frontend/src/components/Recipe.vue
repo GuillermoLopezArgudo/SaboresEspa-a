@@ -15,7 +15,7 @@
             </button>
             <p class="lead">{{ receta.descripcion }}</p>
             <div v-if="receta.img" class="mb-4">
-                <img :src="'data:image/jpeg;base64,' + receta.img" alt="Imagen de la receta"
+                <img :src="`http://localhost:5000/${receta.img}`" alt="Imagen de la receta"
                     class="img-fluid rounded shadow" />
             </div>
             <h3 class="text-secondary">Ingredientes:</h3>
@@ -25,7 +25,7 @@
                 </li>
             </ul>
             <div v-if="receta.video" class="my-4">
-                <video controls :src="'data:video/mp4;base64,' + receta.video" class="w-100 rounded shadow"></video>
+                <video controls :src="'http://localhost:5000/' + receta.video" class="w-100 rounded shadow"></video>
             </div>
             <div v-if="receta.valoraciones" class="my-3">
                 <p><strong>Valoración:</strong> {{ receta.valoraciones }} estrellas</p>
@@ -34,18 +34,24 @@
                 <h4>Comentarios:</h4>
                 <ul class="list-group">
                     <li v-for="comentario in comments" :key="comentario.idcomment" class="list-group-item">
-                        <strong>Comentario:</strong> {{ comentario.comment }} <br>
-                        <small>Usuario: {{ comentario.username }}</small>
-                        <div v-if="iduser == comentario.iduser">
-                            <button class="btn btn-sm btn-warning me-2">Editar</button>
-                            <button @click="deleteComment(comentario.idcomment)"
-                                class="btn btn-sm btn-danger">Eliminar</button>
+                        <strong>Comentario:</strong>
+                        <div v-if="editingCommentId === comentario.idcomment">
+                            <input type="text" v-model="editedComment" class="form-control mb-2" />
+                            <button @click="updateComment(comentario.idcomment)" class="btn btn-sm btn-success me-2">Actualizar</button>
+                            <button @click="cancelEdit" class="btn btn-sm btn-secondary">Cancelar</button>
+                        </div>
+                        <div v-else>
+                            {{ comentario.comment }} <br>
+                            <small>Usuario: {{ comentario.username }}</small>
+                            <div v-if="iduser == comentario.iduser">
+                                <button @click="startEditComment(comentario)" class="btn btn-sm btn-warning me-2">Editar</button>
+                                <button @click="deleteComment(comentario.idcomment)" class="btn btn-sm btn-danger">Eliminar</button>
+                            </div>
                         </div>
                     </li>
                 </ul>
                 <div class="mt-3">
-                    <input type="text" placeholder="Escribe tu comentario..." v-model="comment"
-                        class="form-control mb-2" />
+                    <input type="text" placeholder="Escribe tu comentario..." v-model="comment" class="form-control mb-2" :value="comment"/>
                     <button @click.prevent="createComment" class="btn btn-primary w-100">Enviar Comentario</button>
                 </div>
             </div>
@@ -59,6 +65,7 @@
         <p v-else class="text-center text-muted">Cargando receta...</p>
     </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -77,6 +84,8 @@ const iduser = localStorage.getItem('iduser');
 const favs = localStorage.getItem('idFavs')
 const comments = ref([]);
 const isFavorite = ref(false);
+const editingCommentId = ref(null);
+const editedComment = ref("");
 const payload = {
     idrecipe: parseInt(recipeId),
     userToken: userToken,
@@ -111,8 +120,6 @@ const toggleFavorite = () => {
                 console.error("Error en la solicitud:", error);
             });
     }
-
-
 };
 
 //Cuando cargar el componente llama a back por la referencia /viewRecipe el cual muestra las recetas
@@ -158,8 +165,9 @@ onMounted(() => {
                 toggleFavorite()
             }
         })
+    }else{
+        router.push({ name: "login" });
     }
-    ;
 
 });
 
@@ -178,14 +186,7 @@ function deleteRecipe() {
 
 //Funcion INACABADA
 function editeRecipe() {
-    axios
-        .post('http://localhost:5000/editeRecipe', payload)
-        .then(response => {
-            console.log(response.data.message);
-        })
-        .catch(error => {
-            console.error("Error en la solicitud:", error);
-        });
+    router.push({ name: "edite", query: { id: recipeId } });
 }
 
 //Funcion que crea un comentario la cual llama al back por la referencia /createComment
@@ -225,7 +226,37 @@ function deleteComment(idcomment) {
             console.error("Error en la solicitud:", error);
         });
 }
+
+function updateComment(idcomment) {
+    payload.idcomment = idcomment;
+    payload.comment = editedComment.value;
+
+    axios
+        .post('http://localhost:5000/editeComment', payload)
+        .then(response => {
+            const updatedComment = comments.value.find(comment => comment.idcomment === idcomment);
+            if (updatedComment) {
+                updatedComment.comment = editedComment.value;
+            }
+            console.log(response.data.message)
+            cancelEdit();
+        })
+        .catch(error => {
+            console.error("Error en la solicitud:", error);
+        });
+}
+
+function startEditComment(comentario) {
+    editingCommentId.value = comentario.idcomment;
+    editedComment.value = comentario.comment;
+}
+
+function cancelEdit() {
+    editingCommentId.value = null;
+    editedComment.value = "";
+}
 </script>
+
 
 <style scoped>
 h1,

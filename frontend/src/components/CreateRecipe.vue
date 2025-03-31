@@ -25,21 +25,6 @@
                 <textarea id="descriptionRecipe" rows="5" v-model="description" class="form-control"
                     required></textarea>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">¿Deseas comentarios en tu receta?</label>
-                <div class="form-check">
-                    <input type="radio" id="optionYes" name="option" value="yes" checked v-model="option"
-                        class="form-check-input">
-                    <label for="optionYes" class="form-check-label">Sí</label>
-                </div>
-                <div class="form-check">
-                    <input type="radio" id="optionNo" name="option" value="no" v-model="option"
-                        class="form-check-input">
-                    <label for="optionNo" class="form-check-label">No</label>
-                </div>
-            </div>
-
             <div class="mb-3">
                 <label for="ingredientsRecipe" class="form-label">Ingredientes + Cantidades</label>
                 <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="d-flex mb-2">
@@ -75,7 +60,6 @@ const recipebook = reactive({
     quantities: []
 });
 const router = useRouter();
-const option = ref('yes');
 const comentarios = ref([]);
 const userToken = ref(localStorage.getItem("userToken"));
 
@@ -116,6 +100,7 @@ function submitRecipe() {
     formData.append('opcion', JSON.stringify(comentarios.value));
     formData.append('userToken', localStorage.getItem("userToken"));
 
+    
     axios.post('http://localhost:5000/create', formData)
         .then(response => {
             console.log(response.data.message);

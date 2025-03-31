@@ -1,12 +1,21 @@
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 import hashlib
 import json
 import base64
+import os
 
 app = Flask(__name__)
+
+app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
+app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
 app.config.from_object('config.Config')
@@ -76,32 +85,35 @@ def create():
     titulo = request.form.get("titulo")
     descripcion = request.form.get("descripcion")
     imagen = request.files.get('imagen')
-    img_bin = imagen.read()
+    img_url = None
+    if imagen and allowed_file(imagen.filename):
+        filename = secure_filename(imagen.filename)
+        img_url = os.path.join(app.config['UPLOAD_FOLDER_IMAGES'], filename)
+        imagen.save(img_url)
     video = request.files.get('video')
-    if video:
-        video_bin = video.read()
-    else:
-        video_bin = None
+    video_url = None
+    if video and allowed_file(video.filename):
+        filename = secure_filename(video.filename)
+        video_url = os.path.join(app.config['UPLOAD_FOLDER_VIDEOS'], filename)
+        video.save(video_url)
     ingredientes_json = request.form.get("ingredientes") 
     cantidades_json = request.form.get("cantidades")
     idUser = request.form.get("idUser")
     comentarios = request.form.get("opcion")
-    valoracion = request.form.get("valoracion")
     token = request.form.get("userToken")
 
     cur = mysql.connection.cursor()
 
     cur.execute('SELECT token FROM Users WHERE token = %s', (token,))
     token = cur.fetchone()
-    
     if token:
         imagen = request.files.get('imagen')
         query = "INSERT INTO Receta (titulo,  descripcion, img, ingredientes, cantidades, idUser, comentarios, video) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
-        cur.execute(query, (titulo,descripcion,img_bin,ingredientes_json,cantidades_json,idUser,comentarios,video_bin))
+        cur.execute(query, (titulo,descripcion,img_url,ingredientes_json,cantidades_json,idUser,comentarios,video_url))
         mysql.connection.commit()
         cur.close()
         return jsonify(message="Receta registrada")
-    return jsonify(menssage="Error no registrado",)
+    return jsonify(menssage="Error no registrado")
     
 @app.route('/viewRecipes' , methods=["POST"])
 def viewAllHome():
@@ -121,21 +133,19 @@ def viewAllHome():
             quantities = recipe[5]
             ingredients_list = ingredients.split(",")
             quantities_list = quantities.split(",")
-            img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
-            if recipe[8]:
-                video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
-            else:
-                video_base64 = None
+            img_url = recipe[3]
+            video_url = recipe[8] if recipe[8] else None
+
             recipe_dict = {
                 'id': recipe[0],
                 'titulo': recipe[1],
                 'descripcion': recipe[2],
-                'img': img_base64,
+                'img': img_url,
                 'ingredientes':ingredients_list,
                 'cantidades': quantities_list,
                 'idUser': recipe[6],
                 'comentarios': recipe[7],
-                'video': video_base64,
+                'video': video_url,
             }
             recipe_list.append(recipe_dict)
         cur.close()
@@ -149,25 +159,22 @@ def viewOneHome():
     cur.execute("SELECT * FROM Receta WHERE id = %s", (idrecipe,))
     recipe = cur.fetchone()
 
-    img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
-    if recipe[8]:
-        video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
-    else:
-        video_base64 = None
+    img_url = recipe[3]
+    video_url = recipe[8] if recipe[8] else None
 
     ingredients_list = recipe[4].split(",") 
     quantities_list = recipe[5].split(",") 
-
+    
     recipe_dict = {
         'id': recipe[0],
         'titulo': recipe[1],
         'descripcion': recipe[2],
-        'img': img_base64,
+        'img': img_url,
         'ingredientes': ingredients_list,
         'cantidades': quantities_list,
         'idUser': recipe[6],
         'comentarios': recipe[7],
-        'video': video_base64,
+        'video': video_url,
     }
 
     return jsonify(message=recipe_dict)
@@ -188,14 +195,53 @@ def deleteOne():
     
 @app.route("/editeRecipe", methods=["POST"])
 def editeOne():
-    data = request.get_json()
-    tokenUser = data.get("userToken")
-    cur = mysql.connection.cursor()
 
-    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
-    tokenUser = cur.fetchone()
-    if tokenUser:
-        return jsonify(message="Entro")
+    data = request.form
+    recipe_id = data.get('idrecipe')
+    title = data.get('titulo')
+    description = data.get('descripcion')
+    ingredients = json.loads(data.get('ingredientes'))
+    quantities = json.loads(data.get('cantidades'))
+    user_token = data.get('userToken') 
+
+
+    imagen = request.files.get('imagen')
+    img_url = None
+    if imagen and allowed_file(imagen.filename):
+        filename = secure_filename(imagen.filename)
+        img_url = os.path.join(app.config['UPLOAD_FOLDER_IMAGES'], filename)
+        imagen.save(img_url)
+    video = request.files.get('video')
+    video_url = None
+    if video and allowed_file(video.filename):
+        filename = secure_filename(video.filename)
+        video_url = os.path.join(app.config['UPLOAD_FOLDER_VIDEOS'], filename)
+        video.save(video_url)
+
+    ingredients_json = json.dumps(ingredients)
+    quantities_json = json.dumps(quantities)
+    
+    if user_token:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT comentarios FROM Receta WHERE id = %s", (recipe_id,))
+        comments = cur.fetchone()
+        cur.execute("""
+            UPDATE Receta 
+            SET 
+                titulo = %s, 
+                descripcion = %s, 
+                ingredientes = %s, 
+                cantidades = %s, 
+                comentarios = %s, 
+                video = %s,
+                img = %s
+            WHERE id = %s;
+        """, (title, description, ingredients_json, quantities_json, comments, video_url, img_url, recipe_id))
+
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify(message="Receta actualizada correctamente")
 
 @app.route("/viewAll", methods=["POST"])
 def viewAllIndex():
@@ -210,21 +256,18 @@ def viewAllIndex():
         quantities = recipe[5]
         ingredients_list = ingredients.split(",")
         quantities_list = quantities.split(",")
-        img_base64 = base64.b64encode(recipe[3]).decode('utf-8')
-        if recipe[8]:
-            video_base64 = base64.b64encode(recipe[8]).decode('utf-8')
-        else:
-            video_base64 = None
+        img_url = recipe[3]
+        video_url = recipe[8] if recipe[8] else None
         recipe_dict = {
             'id': recipe[0],
             'titulo': recipe[1],
             'descripcion': recipe[2],
-            'img': img_base64,
+            'img': img_url,
             'ingredientes':ingredients_list,
             'cantidades': quantities_list,
             'idUser': recipe[6],
             'comentarios': recipe[7],
-            'video': video_base64,
+            'video': video_url,
         }
         recipe_list.append(recipe_dict)
     cur.execute("SELECT idrecipe,valoracion FROM Valoracion WHERE iduser = %s",(idUser,))
@@ -307,6 +350,40 @@ def deleteComments():
         mysql.connection.commit()
         return jsonify(message="Comentario Eliminado")
 
+@app.route("/editeComment", methods=["POST"])
+def editeComment():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    tokenUser = data.get("userToken")
+    idcomment = data.get("idcomment")
+    iduser = data.get("iduser")
+    new_comment = data.get("comment")
+
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT token FROM Users WHERE token = %s', (tokenUser,))
+    tokenUser = cur.fetchone()
+
+    if tokenUser:
+        cur.execute("SELECT * FROM Comentarios WHERE id = %s AND iduser = %s", (idcomment, iduser))
+        comment = cur.fetchone()
+
+        if comment:
+            cur.execute("UPDATE Comentarios SET texto = %s WHERE id = %s", (new_comment, idcomment))
+            mysql.connection.commit()
+
+            cur.execute("SELECT comentarios FROM Receta WHERE id = %s", (idrecipe,))
+            recipe = cur.fetchone()
+            comentarios_json = recipe[0]
+            comentarios = json.loads(comentarios_json)
+
+            updated_comentarios_json = json.dumps(comentarios)
+            cur.execute("UPDATE Receta SET comentarios = %s WHERE id = %s", (updated_comentarios_json, idrecipe))
+            mysql.connection.commit()
+
+            return jsonify(message="Comentario actualizado exitosamente")
+
+    return jsonify(message="No autorizado o comentario no encontrado"), 403
+
 @app.route("/updateFavs", methods=['POST'])
 def updateFavs():
     data = request.get_json()
@@ -369,12 +446,12 @@ def viewFavs():
     recetas_json = []
     
     for receta in recetas:
-        imagen_base64 = base64.b64encode(receta[3]).decode('utf-8')
+        img_url = receta[3]
         recetas_json.append({
             'id':receta[0],
             'titulo': receta[1],  
             'descripcion': receta[2],
-            'imagen': imagen_base64
+            'imagen': img_url
         })
     return jsonify(message=recetas_json)
 
@@ -396,16 +473,13 @@ def updateReting():
             cur.execute(query_update, (rating, iduser, idrecipe))  
             mysql.connection.commit()
             cur.close()
-            return jsonify(message="CAMBIADO")
+            return jsonify(message="Valoracion añadida")
         else:
             query = "INSERT INTO Valoracion (idrecipe, iduser, valoracion) VALUES (%s, %s, %s)"
             cur.execute(query, (idrecipe,iduser,rating)) 
             mysql.connection.commit()
             cur.close()
-            return jsonify(message="NUEVO")
-
-
-        
+            return jsonify(message="Valoracion actualizada")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
@@ -424,12 +498,12 @@ CREATE TABLE Receta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
-    img BLOB NOT NULL,
+    img VARCHAR(255) NOT NULL,
     ingredientes VARCHAR(255) NOT NULL,
     cantidades VARCHAR(255) NOT NULL,
     iduser INT NOT NULL,
     comentarios VARCHAR(255) DEFAULT NULL,
-    video LONGBLOB DEFAULT NULL
+    video VARCHAR(255) DEFAULT NULL
 );
 CREATE TABLE Comentarios (
     id INT AUTO_INCREMENT PRIMARY KEY,

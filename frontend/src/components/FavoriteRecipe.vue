@@ -4,7 +4,7 @@
     <div v-if="recetas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       <div v-for="(item, index) in recetas" :key="item.id" class="col">
         <div class="card shadow-sm border-light">
-          <img :src="'data:image/jpeg;base64,' + item.imagen" class="card-img-top" alt="Imagen de receta">
+          <img :src="`http://localhost:5000/${item.imagen}`" class="card-img-top" alt="Imagen de receta">
           <div class="card-body">
             <h5 class="card-title text-center text-primary">{{ item.titulo }}</h5>
             <p class="card-text text-muted">{{ item.descripcion }}</p>
