@@ -67,9 +67,6 @@ const recipebook = reactive({
 onMounted(() => {
     axios.post('http://localhost:5000/viewRecipe', { idrecipe: recipeId })
         .then(response => {
-            //console.log(response.data.message.cantidades[0])
-
-
             if (response.data.message) {
                 const recipe = response.data.message;
                 title.value = recipe.title;
@@ -77,7 +74,6 @@ onMounted(() => {
                 video.value = recipe.video ? `${recipe.video}` : '';
                 img.value = recipe.image ? `${recipe.image}` : ''
             }
-            console.log(response.data.message)
             if (response.data.message.quatities[0] == "[]") {
                 recipebook.ingredients = "";
                 recipebook.quantities = "";

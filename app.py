@@ -487,6 +487,10 @@ def updateReting():
             cur.close()
             return jsonify(message="Valoracion actualizada")
 
+@app.route('/viewProfile', methods=["POST"])
+def viewProfiles():
+    return jsonify(message="hola")
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 

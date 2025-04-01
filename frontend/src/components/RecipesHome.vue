@@ -20,7 +20,6 @@ const props = defineProps({
     }
 });
 
-console.log(props.item)
 const router = useRouter();
 
 //Funcion que navega a la receta pulsada segun id

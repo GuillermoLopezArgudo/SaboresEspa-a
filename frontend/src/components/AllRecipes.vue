@@ -51,7 +51,6 @@ const router = useRouter();
 axios
     .post('http://localhost:5000/viewAll', { iduser })
     .then(response => {
-        console.log(response.data.message)
         if (response.data.message && response.data.message.length > 0) {
             elementos.recetas = response.data.message.map(item => {
                 return {

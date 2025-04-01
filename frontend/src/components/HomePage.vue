@@ -19,7 +19,7 @@
                 <router-link to="/" class="nav-link">Todas las recetas</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/register" class="nav-link">Ajustes</router-link>
+                <router-link to="/profile" class="nav-link">Ajustes</router-link>
               </li>
               <li class="nav-item">
                 <router-link @click="closeSession" to="/login" class="nav-link">Cerrar sesión</router-link>
