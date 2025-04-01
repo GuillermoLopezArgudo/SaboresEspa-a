@@ -45,6 +45,7 @@ onMounted(() => {
     axios
       .post('http://localhost:5000/viewFavs', payload)
       .then(response => {
+        
         recetas.value = response.data.message;
       })
       .catch(error => {

@@ -72,17 +72,18 @@ onMounted(() => {
 
             if (response.data.message) {
                 const recipe = response.data.message;
-                title.value = recipe.titulo;
-                description.value = recipe.descripcion;
+                title.value = recipe.title;
+                description.value = recipe.description;
                 video.value = recipe.video ? `${recipe.video}` : '';
-                img.value = recipe.img ? `${recipe.img}` : ''
+                img.value = recipe.image ? `${recipe.image}` : ''
             }
-            if (response.data.message.cantidades[0] == "[]") {
+            console.log(response.data.message)
+            if (response.data.message.quatities[0] == "[]") {
                 recipebook.ingredients = "";
                 recipebook.quantities = "";
             }else{
-                let parsedArrayIngredientes= JSON.parse(response.data.message.ingredientes)
-                let parsedArrayQuantities= JSON.parse(response.data.message.cantidades)
+                let parsedArrayIngredientes= JSON.parse(response.data.message.ingredients)
+                let parsedArrayQuantities= JSON.parse(response.data.message.quatities)
                 parsedArrayIngredientes.forEach(element => {
                     recipebook.ingredients.push(element)
                 });

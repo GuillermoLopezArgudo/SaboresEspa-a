@@ -13,7 +13,7 @@
                 <router-link to="/create" class="nav-link">Crear receta</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/recipes" class="nav-link">Mis recetas</router-link>
+                <router-link to="/recipes_personal" class="nav-link">Mis recetas</router-link>
               </li>
               <li class="nav-item">
                 <router-link to="/" class="nav-link">Todas las recetas</router-link>

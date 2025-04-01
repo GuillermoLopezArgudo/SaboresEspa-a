@@ -1,9 +1,9 @@
 <template>
     <div class="card" style="width: 18rem;">
-        <img :src="`http://localhost:5000/${item.img}`" class="card-img-top" alt="recipe image" v-if="item.img" />
+        <img :src="`http://localhost:5000/${item.image}`" class="card-img-top" alt="recipe image" v-if="item.image" />
         <div class="card-body">
-            <h5 class="card-title">{{ item.titulo }}</h5>
-            <p class="card-text text-truncate" :title="item.descripcion">{{ item.descripcion }}</p>
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text text-truncate" :title="item.description">{{ item.description }}</p>
             <button @click="OnClickRecipe" class="btn btn-primary w-100">Ver Receta</button>
         </div>
     </div>
@@ -19,6 +19,8 @@ const props = defineProps({
         required: true
     }
 });
+
+console.log(props.item)
 const router = useRouter();
 
 //Funcion que navega a la receta pulsada segun id

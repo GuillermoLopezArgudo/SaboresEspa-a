@@ -8,14 +8,14 @@
             <router-link to="/" class="btn btn-secondary mb-3">Atrás</router-link>
         </div>
         <div v-if="receta">
-            <h2 class="text-primary">{{ receta.titulo }}</h2>
+            <h2 class="text-primary">{{ receta.title }}</h2>
             <button @click="toggleFavorite" :class="['heart-button', { 'active': isFavorite }]"
                 class="btn btn-outline-danger mb-3">
                 <i class="fa" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
             </button>
             <p class="lead">{{ receta.descripcion }}</p>
-            <div v-if="receta.img" class="mb-4">
-                <img :src="`http://localhost:5000/${receta.img}`" alt="Imagen de la receta"
+            <div v-if="receta.image" class="mb-4">
+                <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta"
                     class="img-fluid rounded shadow" />
             </div>
             <h3 class="text-secondary">Ingredientes:</h3>
@@ -27,10 +27,10 @@
             <div v-if="receta.video" class="my-4">
                 <video controls :src="'http://localhost:5000/' + receta.video" class="w-100 rounded shadow"></video>
             </div>
-            <div v-if="receta.valoraciones" class="my-3">
+            <div v-if="receta.assessment" class="my-3">
                 <p><strong>Valoración:</strong> {{ receta.valoraciones }} estrellas</p>
             </div>
-            <div v-if="receta.comentarios != null" class="my-4">
+            <div v-if="receta.comments != null" class="my-4">
                 <h4>Comentarios:</h4>
                 <ul class="list-group">
                     <li v-for="comentario in comments" :key="comentario.idcomment" class="list-group-item">
@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <div v-if="iduser == receta.idUser" class="mt-4">
+            <div v-if="iduser == receta.id_user" class="mt-4">
                 <button @click="deleteRecipe" class="btn btn-danger w-100 mb-2">Eliminar Receta</button>
                 <button @click="editeRecipe" class="btn btn-warning w-100">Editar Receta</button>
             </div>
@@ -131,8 +131,8 @@ onMounted(() => {
             if (response.data.message) {
                 receta.value = {
                     ...response.data.message,
-                    ingredientes: response.data.message.ingredientes.map(item => item.replace(/[\[\]"]/g, '')),
-                    cantidades: response.data.message.cantidades.map(item => item.replace(/[\[\]"]/g, ''))
+                    ingredientes: response.data.message.ingredients.map(item => item.replace(/[\[\]"]/g, '')),
+                    cantidades: response.data.message.quatities.map(item => item.replace(/[\[\]"]/g, ''))
                 };
             } else {
                 console.error("Receta no encontrada o error en la respuesta");
@@ -146,13 +146,12 @@ onMounted(() => {
         .post('http://localhost:5000/viewComment', payload)
         .then(response => {
             const commentsArray = response.data.message.map(item => ({
-                idcomment: item.idcomment,
+                idcomment: item.id_comment,
                 comment: item.comment,
-                idrecipe: item.idrecipe,
-                iduser: item.iduser,
+                idrecipe: item.id_recipe,
+                iduser: item.id_user,
                 username: item.username
             }));
-
             comments.value = commentsArray;
         })
         .catch(error => {
@@ -234,17 +233,24 @@ function updateComment(idcomment) {
     axios
         .post('http://localhost:5000/editeComment', payload)
         .then(response => {
-            const updatedComment = comments.value.find(comment => comment.idcomment === idcomment);
-            if (updatedComment) {
-                updatedComment.comment = editedComment.value;
-            }
-            console.log(response.data.message)
+            const updatedComments = comments.value.map(comment => {
+                if (comment.idcomment === idcomment) {
+                    return {
+                        ...comment,
+                        comment: editedComment.value,
+                    };
+                }
+                return comment;
+            });
+            comments.value = updatedComments;
+            console.log(response.data.message);
             cancelEdit();
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
         });
 }
+
 
 function startEditComment(comentario) {
     editingCommentId.value = comentario.idcomment;

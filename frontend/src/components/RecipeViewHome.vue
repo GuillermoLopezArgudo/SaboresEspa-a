@@ -36,8 +36,8 @@ if (userToken.value == null) {
                 elementos.recetas = response.data.message.map(item => {
                     return {
                         ...item,
-                        ingredientes: JSON.parse(item.ingredientes),
-                        cantidades: JSON.parse(item.cantidades)
+                        ingredients: JSON.parse(item.ingredients),
+                        quatities: JSON.parse(item.quatities)
                     };
                 });
             } else {
