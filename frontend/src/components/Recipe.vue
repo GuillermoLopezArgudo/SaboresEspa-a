@@ -1,71 +1,66 @@
 <template>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Receta</h1>
+    <div class="container mx-auto mt-5 px-4">
+        <h1 class="text-center mb-4 text-3xl font-bold">Receta</h1>
         <div v-if="userToken">
-            <router-link to="/home" class="btn btn-secondary mb-3">Atrás</router-link>
+            <router-link to="/home" class="btn btn-secondary mb-3 px-4 py-2 border border-gray-300 rounded-md">Atrás</router-link>
         </div>
         <div v-else>
-            <router-link to="/" class="btn btn-secondary mb-3">Atrás</router-link>
+            <router-link to="/" class="btn btn-secondary mb-3 px-4 py-2 border border-gray-300 rounded-md">Atrás</router-link>
         </div>
         <div v-if="receta">
-            <h2 class="text-primary">{{ receta.title }}</h2>
-            <button @click="toggleFavorite" :class="['heart-button', { 'active': isFavorite }]"
-                class="btn btn-outline-danger mb-3">
+            <h2 class="text-primary text-2xl font-semibold">{{ receta.title }}</h2>
+            <button @click="toggleFavorite" :class="['heart-button', { 'active': isFavorite }]" class="btn btn-outline-danger mb-3 px-4 py-2 border border-red-500 rounded-md">
                 <i class="fa" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
             </button>
-            <p class="lead">{{ receta.descripcion }}</p>
+            <p class="lead text-lg">{{ receta.descripcion }}</p>
             <div v-if="receta.image" class="mb-4">
-                <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta"
-                    class="img-fluid rounded shadow" />
+                <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta" class="w-full rounded-lg shadow-lg" />
             </div>
-            <h3 class="text-secondary">Ingredientes:</h3>
-            <ul class="list-group list-group-flush mb-4">
-                <li v-for="(ingrediente, idx) in receta.ingredientes" :key="idx" class="list-group-item">
+            <h3 class="text-secondary text-xl font-semibold">Ingredientes:</h3>
+            <ul class="list-none mb-4">
+                <li v-for="(ingrediente, idx) in receta.ingredientes" :key="idx" class="mb-2">
                     {{ ingrediente }} - {{ receta.cantidades[idx] || 'Cantidad no disponible' }}
                 </li>
             </ul>
             <div v-if="receta.video" class="my-4">
-                <video controls :src="'http://localhost:5000/' + receta.video" class="w-100 rounded shadow"></video>
+                <video controls :src="'http://localhost:5000/' + receta.video" class="w-full rounded-lg shadow-lg"></video>
             </div>
             <div v-if="receta.assessment" class="my-3">
                 <p><strong>Valoración:</strong> {{ receta.valoraciones }} estrellas</p>
             </div>
             <div v-if="receta.comments != null" class="my-4">
-                <h4>Comentarios:</h4>
-                <ul class="list-group">
-                    <li v-for="comentario in comments" :key="comentario.idcomment" class="list-group-item">
+                <h4 class="text-xl font-semibold">Comentarios:</h4>
+                <ul class="list-none">
+                    <li v-for="comentario in comments" :key="comentario.idcomment" class="mb-4">
                         <strong>Comentario:</strong>
-                        <div v-if="editingCommentId === comentario.idcomment">
-                            <input type="text" v-model="editedComment" class="form-control mb-2" />
-                            <button @click="updateComment(comentario.idcomment)" class="btn btn-sm btn-success me-2">Actualizar</button>
-                            <button @click="cancelEdit" class="btn btn-sm btn-secondary">Cancelar</button>
+                        <div v-if="editingCommentId === comentario.idcomment" class="mb-2">
+                            <input type="text" v-model="editedComment" class="form-control mb-2 p-2 border border-gray-300 rounded-md" />
+                            <button @click="updateComment(comentario.idcomment)" class="btn btn-sm bg-green-500 text-white px-4 py-2 rounded-md mr-2">Actualizar</button>
+                            <button @click="cancelEdit" class="btn btn-sm bg-gray-500 text-white px-4 py-2 rounded-md">Cancelar</button>
                         </div>
                         <div v-else>
                             {{ comentario.comment }} <br>
                             <small>Usuario: {{ comentario.username }}</small>
                             <div v-if="iduser == comentario.iduser">
-                                <button @click="startEditComment(comentario)" class="btn btn-sm btn-warning me-2">Editar</button>
-                                <button @click="deleteComment(comentario.idcomment)" class="btn btn-sm btn-danger">Eliminar</button>
+                                <button @click="startEditComment(comentario)" class="btn btn-sm bg-yellow-500 text-white px-4 py-2 rounded-md mr-2">Editar</button>
+                                <button @click="deleteComment(comentario.idcomment)" class="btn btn-sm bg-red-500 text-white px-4 py-2 rounded-md">Eliminar</button>
                             </div>
                         </div>
                     </li>
                 </ul>
                 <div class="mt-3">
-                    <input type="text" placeholder="Escribe tu comentario..." v-model="comment" class="form-control mb-2" :value="comment"/>
-                    <button @click.prevent="createComment" class="btn btn-primary w-100">Enviar Comentario</button>
+                    <input type="text" placeholder="Escribe tu comentario..." v-model="comment" class="form-control mb-2 p-2 border border-gray-300 rounded-md" :value="comment"/>
+                    <button @click.prevent="createComment" class="btn btn-primary w-full py-2 rounded-md">Enviar Comentario</button>
                 </div>
             </div>
-
             <div v-if="iduser == receta.id_user" class="mt-4">
-                <button @click="deleteRecipe" class="btn btn-danger w-100 mb-2">Eliminar Receta</button>
-                <button @click="editeRecipe" class="btn btn-warning w-100">Editar Receta</button>
+                <button @click="deleteRecipe" class="btn bg-red-600 text-white w-full py-2 rounded-md mb-2">Eliminar Receta</button>
+                <button @click="editeRecipe" class="btn bg-yellow-500 text-white w-full py-2 rounded-md">Editar Receta</button>
             </div>
         </div>
-
         <p v-else class="text-center text-muted">Cargando receta...</p>
     </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -94,8 +89,6 @@ const payload = {
     idcomment: 0
 };
 
-//Cambia el icono de Favoritos a "encedido" o "apagado" si esta encendido llama al back por la referencia /updateFavs
-//Si esta apagado llama al back por la referencia /deleteFavs
 const toggleFavorite = () => {
     isFavorite.value = !isFavorite.value;
     if (isFavorite.value) {
@@ -114,7 +107,6 @@ const toggleFavorite = () => {
             .then(response => {
                 console.log(response.data.message)
                 localStorage.setItem('idFavs', response.data.idFavs)
-
             })
             .catch(error => {
                 console.error("Error en la solicitud:", error);
@@ -122,8 +114,6 @@ const toggleFavorite = () => {
     }
 };
 
-//Cuando cargar el componente llama a back por la referencia /viewRecipe el cual muestra las recetas
-//Tambien llama al back por la referencia /viewComment el cual trae todos los comentarios de la receta
 onMounted(() => {
     axios
         .post('http://localhost:5000/viewRecipe', payload)
@@ -164,13 +154,11 @@ onMounted(() => {
                 toggleFavorite()
             }
         })
-    }else{
+    } else {
         router.push({ name: "login" });
     }
-
 });
 
-//Funcion que llama al back por la referencia /deleteRecipe el cual elimina la receta y navega al home
 function deleteRecipe() {
     axios
         .post('http://localhost:5000/deleteRecipe', payload)
@@ -183,12 +171,10 @@ function deleteRecipe() {
         });
 }
 
-//Funcion INACABADA
 function editeRecipe() {
     router.push({ name: "edite", query: { id: recipeId } });
 }
 
-//Funcion que crea un comentario la cual llama al back por la referencia /createComment
 function createComment() {
     payload.comment = comment.value;
     if (userToken) {
@@ -212,7 +198,6 @@ function createComment() {
     }
 }
 
-//Funcion que elimina un comentario de una receta llamando la back por la referencia /deleteComment
 function deleteComment(idcomment) {
     payload.idcomment = idcomment;
     axios
@@ -251,7 +236,6 @@ function updateComment(idcomment) {
         });
 }
 
-
 function startEditComment(comentario) {
     editingCommentId.value = comentario.idcomment;
     editedComment.value = comentario.comment;
@@ -262,7 +246,6 @@ function cancelEdit() {
     editedComment.value = "";
 }
 </script>
-
 
 <style scoped>
 h1,

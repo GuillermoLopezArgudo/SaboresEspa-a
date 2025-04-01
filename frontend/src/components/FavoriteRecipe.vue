@@ -1,22 +1,20 @@
 <template>
-  <div class="container mt-5">
-    <h1 class="text-center mb-5">Recetario: Recetas Favoritas</h1>
-    <div v-if="recetas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      <div v-for="(item, index) in recetas" :key="item.id" class="col">
-        <div class="card shadow-sm border-light">
-          <img :src="`http://localhost:5000/${item.imagen}`" class="card-img-top" alt="Imagen de receta">
-          <div class="card-body">
-            <h5 class="card-title text-center text-primary">{{ item.titulo }}</h5>
-            <p class="card-text text-muted">{{ item.descripcion }}</p>
-            <div class="d-flex justify-content-between align-items-center">
-              <router-link :to="'/recipe?id=' + item.id" class="btn btn-primary">Ver receta</router-link>
-            </div>
+  <div class="container mx-auto mt-5 px-4">
+    <h1 class="text-center text-3xl font-semibold mb-5">Recetario: Recetas Favoritas</h1>
+    <div v-if="recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="(item, index) in recetas" :key="item.id" class="card border border-light rounded-lg shadow-sm overflow-hidden">
+        <img :src="`http://localhost:5000/${item.imagen}`" class="w-full h-48 object-cover" alt="Imagen de receta">
+        <div class="card-body p-4">
+          <h5 class="card-title text-center text-primary text-xl font-bold">{{ item.titulo }}</h5>
+          <p class="card-text text-gray-600 text-sm">{{ item.descripcion }}</p>
+          <div class="flex justify-between items-center mt-4">
+            <router-link :to="'/recipe?id=' + item.id" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">Ver receta</router-link>
           </div>
         </div>
       </div>
     </div>
     <div v-else class="text-center mt-5">
-      <div class="alert alert-warning" role="alert">
+      <div class="alert alert-warning bg-yellow-100 text-yellow-800 p-4 rounded-lg font-medium">
         No tienes recetas favoritas. ¡Agrega algunas y vuelve!
       </div>
     </div>
@@ -33,7 +31,7 @@ const idFavs = JSON.parse(localStorage.getItem('idFavs')) || [];
 
 const recetas = ref([]);
 
-//Cuando se crea el componente compruebe si en el localstorage hay favoritos si hay muestra los favoritos llamando al back por referencia /viewFavs
+//Cuando se crea el componente, si hay favoritos en localstorage, llama al backend para obtenerlos
 onMounted(() => {
   if (idFavs.length > 0) {
     const payload = {
@@ -45,7 +43,6 @@ onMounted(() => {
     axios
       .post('http://localhost:5000/viewFavs', payload)
       .then(response => {
-        
         recetas.value = response.data.message;
       })
       .catch(error => {
@@ -56,52 +53,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.container {
-  max-width: 1200px;
-  margin-top: 50px;
-}
-
-.card {
-  border-radius: 15px;
-  transition: transform 0.2s ease-in-out;
-}
-
-.card:hover {
-  transform: scale(1.05);
-}
-
-.card-img-top {
-  height: 200px;
-  object-fit: cover;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-}
-
-.card-title {
-  font-weight: bold;
-}
-
-.card-text {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.btn {
-  transition: background-color 0.3s;
-}
-
-.btn:hover {
-  background-color: #0056b3;
-}
-
-.alert {
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-@media (max-width: 768px) {
-  .container {
-    margin-top: 30px;
-  }
-}
 </style>

@@ -1,22 +1,22 @@
 <template>
-  <div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card p-4 shadow-lg" style="width: 400px;">
-      <h1 class="text-center mb-4">Iniciar Sesión</h1>
+  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="p-6 shadow-lg rounded-lg w-[400px] bg-white">
+      <h1 class="text-center text-blue-600 text-2xl font-bold mb-4">Iniciar Sesión</h1>
       <form @submit.prevent="OnSubmit">
-        <div class="mb-3">
-          <label for="email" class="form-label">Correo:</label>
-          <input type="email" id="email" v-model="email" class="form-control" required />
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 font-semibold">Correo:</label>
+          <input type="email" id="email" v-model="email" class="w-full p-2 border border-gray-300 rounded-md" required />
         </div>
-        <div class="mb-3">
-          <label for="password" class="form-label">Contraseña:</label>
-          <input type="password" id="password" v-model="password" class="form-control" required />
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700 font-semibold">Contraseña:</label>
+          <input type="password" id="password" v-model="password" class="w-full p-2 border border-gray-300 rounded-md" required />
         </div>
-        <div class="d-grid gap-2">
-          <input type="submit" value="Iniciar Sesión" class="btn btn-primary" />
+        <div class="mb-4">
+          <input type="submit" value="Iniciar Sesión" class="w-full py-2 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 transition" />
         </div>
       </form>
       <div class="text-center mt-3">
-        <router-link to="/register">¿No tienes cuenta? Regístrate aquí</router-link>
+        <router-link to="/register" class="text-blue-600 hover:underline">¿No tienes cuenta? Regístrate aquí</router-link>
       </div>
     </div>
   </div>
@@ -31,7 +31,8 @@ const router = useRouter();
 const email = ref('');
 const password = ref('');
 
-//Cuando se pulsa en enviar llamamos al back por la referencia /login y le pasamos los valores del objeto de payload y restorna el token, iduser los idFavs y los almacena en el localstorage
+// Cuando se pulsa en enviar, llamamos al back por la referencia /login y le pasamos los valores del objeto de payload
+// y retorna el token, iduser, idFavs y los almacena en el localStorage
 function OnSubmit() {
   const payload = {
     email: email.value,
@@ -53,64 +54,8 @@ function OnSubmit() {
 </script>
 
 <style scoped>
-/* General background and layout */
+
 body {
   background-color: #f8f9fa;
-}
-
-/* Card styling */
-.card {
-  border-radius: 8px;
-}
-
-.card p {
-  font-size: 1.2rem;
-}
-
-/* Text centering and spacing for the form */
-form {
-  padding: 2rem;
-}
-
-h1 {
-  color: #007bff;
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-/* Input and label styling */
-input[type='email'],
-input[type='password'] {
-  border-radius: 5px;
-}
-
-.form-label {
-  font-weight: bold;
-  color: #333;
-}
-
-/* Button styling */
-input[type='submit'] {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: white;
-  padding: 10px;
-  font-size: 1.1rem;
-  border-radius: 5px;
-}
-
-input[type='submit']:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-/* Link styling */
-router-link {
-  color: #007bff;
-  text-decoration: none;
-}
-
-router-link:hover {
-  text-decoration: underline;
 }
 </style>

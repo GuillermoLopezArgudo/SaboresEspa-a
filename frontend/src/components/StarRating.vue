@@ -1,12 +1,12 @@
 <template>
-  <div class="star-rating">
+  <div class="star-rating flex">
     <i
       v-for="star in 5"
       :key="star"
       class="fa"
       :class="{
-        'fa-star': star <= rating,
-        'fa-star-o': star > rating
+        'fa-star text-yellow-400': star <= rating,
+        'fa-star-o text-gray-400': star > rating
       }"
       @click="setRating(star)"
     ></i>
@@ -28,8 +28,6 @@ const props = defineProps({
   }
 });
 
-
-
 // Función para cambiar la calificación
 const setRating = (star) => {
   // Actualiza la calificación solo si el usuario está autenticado
@@ -46,12 +44,4 @@ const setRating = (star) => {
 </script>
 
 <style scoped>
-.star-rating {
-  font-size: 1.5rem;
-  color: #ffd700; /* Color dorado para las estrellas */
-}
-.star-rating .fa {
-  cursor: pointer;
-  margin-right: 5px;
-}
 </style>

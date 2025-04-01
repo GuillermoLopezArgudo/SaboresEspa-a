@@ -1,164 +1,100 @@
 <template>
-    <div>
-      <h1 class="text-center mt-4">Bienvenido a tu Recetario</h1>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
-        <div class="container">
-          <router-link to="/" class="navbar-brand fs-4 text-primary">Recetario</router-link>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>   
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-              <li class="nav-item">
-                <router-link to="/create" class="nav-link">Crear receta</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/recipes_personal" class="nav-link">Mis recetas</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/" class="nav-link">Todas las recetas</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/profile" class="nav-link">Ajustes</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link @click="closeSession" to="/login" class="nav-link">Cerrar sesión</router-link>
-              </li>
-            </ul>
-          </div>
+  <div>
+    <h1 class="text-center mt-4 text-blue-600 text-3xl font-bold mb-8">Bienvenido a tu Recetario</h1>
+    <nav class="bg-white shadow-sm mb-4">
+      <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+        <router-link to="/" class="text-2xl text-blue-600 font-semibold">Recetario</router-link>
+        <button class="lg:hidden px-3 py-2 border border-blue-600 rounded-md" type="button" @click="toggleNavbar">
+          <span class="text-blue-600">☰</span>
+        </button>
+        <div v-show="!navbarOpen" class="lg:flex lg:ml-auto space-x-6">
+          <router-link to="/create" class="text-gray-600 text-lg hover:text-blue-600">Crear receta</router-link>
+          <router-link to="/recipes_personal" class="text-gray-600 text-lg hover:text-blue-600">Mis recetas</router-link>
+          <router-link to="/" class="text-gray-600 text-lg hover:text-blue-600">Todas las recetas</router-link>
+          <router-link to="/profile" class="text-gray-600 text-lg hover:text-blue-600">Ajustes</router-link>
+          <router-link @click="closeSession" to="/login" class="text-gray-600 text-lg hover:text-blue-600">Cerrar sesión</router-link>
         </div>
-      </nav>
-      <div class="container">
-        <FavoriteRecipe></FavoriteRecipe>
       </div>
+    </nav>
+    <div class="container mx-auto px-4">
+      <FavoriteRecipe></FavoriteRecipe>
     </div>
-  </template>
-  
-  <script setup>
-  import FavoriteRecipe from './FavoriteRecipe.vue';
-  import { ref } from 'vue';
-  import { useRouter } from 'vue-router';
-  
-  const userToken = ref(localStorage.getItem("userToken"));
-  const router = useRouter();
+  </div>
+</template>
 
-  //Si no hay token en el localstorage envia al login
-  if(userToken.value == null){
-      router.push({ name: "login"});
+<script setup>
+import FavoriteRecipe from './FavoriteRecipe.vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const userToken = ref(localStorage.getItem("userToken"));
+const router = useRouter();
+const navbarOpen = ref(false);
+
+// Si no hay token en el localstorage envía al login
+if (userToken.value == null) {
+  router.push({ name: "login" });
+}
+
+// Cierra la sesión eliminando lo almacenado en el localStorage
+function closeSession() {
+  localStorage.clear();
+}
+
+// Función para manejar el toggle del navbar en pantallas pequeñas
+function toggleNavbar() {
+  navbarOpen.value = !navbarOpen.value;
+}
+</script>
+
+<style scoped>
+body {
+  background-color: #f8f9fa;
+  font-family: 'Arial', sans-serif;
+}
+
+.favorite-recipes {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10;
+}
+
+.favorite-recipes .recipe-card {
+  @apply bg-white border border-gray-300 rounded-lg shadow-md p-4;
+}
+
+.favorite-recipes .recipe-card img {
+  @apply w-full rounded-lg;
+}
+
+.favorite-recipes .recipe-card h5 {
+  @apply text-xl text-gray-800 font-semibold;
+}
+
+.favorite-recipes .recipe-card .btn {
+  @apply bg-blue-600 text-white border-none mt-4 w-full py-2 rounded-lg hover:bg-blue-700;
+}
+
+button {
+  @apply bg-blue-600 text-white py-2 px-4 text-lg rounded-lg border-none hover:bg-blue-700;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .favorite-recipes {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  //Cierra la sesion eliminando lo almacenado en el localstorage
-  function closeSession(){
-      localStorage.clear()
-  }
-  </script>
-  
-  <style scoped>
-  body {
-    background-color: #f8f9fa;
-    font-family: 'Arial', sans-serif;
+}
+
+@media (max-width: 480px) {
+  .favorite-recipes {
+    grid-template-columns: 1fr;
   }
 
   h1 {
-    font-size: 2.5rem;
-    color: #007bff;
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 30px;
+    font-size: 2rem;
   }
-  
-  .navbar {
-    background-color: #ffffff;
-  }
-  
-  .navbar-brand {
-    font-size: 1.5rem;
-    color: #007bff;
-  }
-  
-  .navbar-nav .nav-link {
-    color: #6c757d;
-    font-size: 1.1rem;
-    margin-right: 15px;
-  }
-  
-  .navbar-nav .nav-link:hover {
-    color: #007bff;
-  }
-  
-  .navbar-toggler {
-    border-color: #007bff;
-  }
-  
-  .navbar-toggler-icon {
-    background-color: #007bff;
-  }
-  
-  .favorite-recipes {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 40px;
-  }
-  
-  .favorite-recipes .recipe-card {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-  }
-  
-  .favorite-recipes .recipe-card img {
-    width: 100%;
-    border-radius: 8px;
-  }
-  
-  .favorite-recipes .recipe-card h5 {
-    font-size: 1.25rem;
-    color: #333;
-  }
-  
-  .favorite-recipes .recipe-card .btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    margin-top: 10px;
-    width: 100%;
-    border-radius: 5px;
-  }
-  
-  .favorite-recipes .recipe-card .btn:hover {
-    background-color: #0056b3;
-  }
-  
-  button {
-    background-color: #007bff;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  @media (max-width: 768px) {
-    .favorite-recipes {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .favorite-recipes {
-      grid-template-columns: 1fr;
-    }
-  
-    h1 {
-      font-size: 2rem;
-    }
-  }
-  </style>
-  
+}
+</style>

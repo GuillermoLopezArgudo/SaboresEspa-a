@@ -1,10 +1,12 @@
 <template>
-    <div class="card" style="width: 18rem;">
-        <img :src="`http://localhost:5000/${item.image}`" class="card-img-top" alt="recipe image" v-if="item.image" />
-        <div class="card-body">
-            <h5 class="card-title">{{ item.title }}</h5>
-            <p class="card-text text-truncate" :title="item.description">{{ item.description }}</p>
-            <button @click="OnClickRecipe" class="btn btn-primary w-100">Ver Receta</button>
+    <div class="max-w-xs mx-auto my-4 p-4 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:translate-y-2">
+        <img :src="`http://localhost:5000/${item.image}`" class="w-full h-48 object-cover rounded-t-lg" alt="recipe image" v-if="item.image" />
+        <div class="p-4">
+            <h5 class="text-lg font-semibold">{{ item.title }}</h5>
+            <p class="text-sm text-gray-600 truncate" :title="item.description">{{ item.description }}</p>
+            <button @click="OnClickRecipe" class="mt-4 w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Ver Receta
+            </button>
         </div>
     </div>
 </template>
@@ -29,34 +31,4 @@ function OnClickRecipe(){
 </script>
 
 <style scoped>
-.card {
-    margin: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.card-text {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.card-body {
-    padding: 1rem;
-}
-
-button {
-    border-radius: 5px;
-    font-size: 1rem;
-}
 </style>

@@ -1,40 +1,40 @@
 <template>
-  <div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card p-4 shadow-lg" style="width: 400px;">
-      <h1 class="text-center mb-4">Registrarse</h1>
+  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="p-6 shadow-lg rounded-lg w-[400px] bg-white">
+      <h1 class="text-center text-blue-600 text-2xl font-bold mb-4">Registrarse</h1>
       <form @submit.prevent="OnSubmit">
-        <div class="mb-3">
-          <label for="name" class="form-label">Nombre:</label>
-          <input id="name" class="form-control" v-model="name" required />
+        <div class="mb-4">
+          <label for="name" class="block text-gray-700 font-semibold">Nombre:</label>
+          <input id="name" class="w-full p-2 border border-gray-300 rounded-md" v-model="name"  />
         </div>
-        <div class="mb-3">
-          <label for="email" class="form-label">Correo:</label>
-          <input type="email" id="email" class="form-control" v-model="email" required />
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 font-semibold">Correo:</label>
+          <input type="email" id="email" class="w-full p-2 border border-gray-300 rounded-md" v-model="email"  />
         </div>
-        <div class="mb-3">
-          <label for="password" class="form-label">Contraseña:</label>
-          <input type="password" id="password" class="form-control" v-model="password" required pattern=".{8,}" />
-          <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres.</small>
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700 font-semibold">Contraseña:</label>
+          <input type="password" id="password" class="w-full p-2 border border-gray-300 rounded-md" v-model="password"  pattern=".{8,}" />
+          <small class="text-sm text-gray-500">La contraseña debe tener al menos 8 caracteres.</small>
         </div>
-        <div class="mb-3">
-          <label for="confirmPassword" class="form-label">Confirmar Contraseña:</label>
-          <input type="password" id="confirmPassword" class="form-control" v-model="confirmPassword" required pattern=".{8,}" />
+        <div class="mb-4">
+          <label for="confirmPassword" class="block text-gray-700 font-semibold">Confirmar Contraseña:</label>
+          <input type="password" id="confirmPassword" class="w-full p-2 border border-gray-300 rounded-md" v-model="confirmPassword"  pattern=".{8,}" />
         </div>
-        <div class="mb-3">
-          <label for="type" class="form-label">Tipo de usuario:</label>
-          <select id="type" class="form-select" v-model="type" required>
+        <div class="mb-4">
+          <label for="type" class="block text-gray-700 font-semibold">Tipo de usuario:</label>
+          <select id="type" class="w-full p-2 border border-gray-300 rounded-md" v-model="type" >
             <option value="user">Usuario</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
-        <div class="d-grid gap-2">
-          <input type="submit" value="Registrar" class="btn btn-primary" />
+        <div class="mb-4">
+          <input type="submit" value="Registrar" class="w-full py-2 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 transition" />
         </div>
       </form>
       <div class="text-center mt-3">
-        <router-link to="/login">¿Ya tienes cuenta? Iniciar sesión</router-link>
+        <router-link to="/login" class="text-blue-600 hover:underline">¿Ya tienes cuenta? Iniciar sesión</router-link>
       </div>
-      <div v-if="error" class="alert alert-danger mt-3">
+      <div v-if="error" class="mt-3 p-4 bg-red-100 text-red-600 border border-red-300 rounded-md">
         {{ error }}
       </div>
     </div>
@@ -52,10 +52,9 @@ const password = ref('');
 const confirmPassword = ref('');
 const type = ref('user');
 const error = ref('');
-const favs = reactive([]);
 const router = useRouter();
 
-//Funcion que cuando se pulsa en enviar llama al back por la referenica /register
+// Función que cuando se pulsa en enviar llama al back por la referencia /register
 function OnSubmit() {
   if (password.value === confirmPassword.value) {
     const payload = {
@@ -63,11 +62,10 @@ function OnSubmit() {
       email: email.value,
       password: password.value,
       type: type.value,
-      favs: favs.value
     };
     axios.post('http://localhost:5000/register', payload)
       .then(response => {
-        
+          console.log(response.data.message)
         if (response.data.usertoken) {
           localStorage.setItem("userToken", response.data.usertoken);
           localStorage.setItem("iduser", response.data.iduser);
@@ -98,65 +96,3 @@ function OnSubmit() {
   }
 }
 </script>
-
-<style scoped>
-body {
-  background-color: #f8f9fa;
-}
-
-.card {
-  border-radius: 8px;
-}
-
-form {
-  padding: 2rem;
-}
-
-h1 {
-  color: #007bff;
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-select {
-  border-radius: 5px;
-}
-
-.form-label {
-  font-weight: bold;
-  color: #333;
-}
-
-input[type="submit"] {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: white;
-  padding: 10px;
-  font-size: 1.1rem;
-  border-radius: 5px;
-}
-
-input[type="submit"]:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-router-link {
-  color: #007bff;
-  text-decoration: none;
-}
-
-router-link:hover {
-  text-decoration: underline;
-}
-
-.alert {
-  font-weight: bold;
-  color: #dc3545;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-}
-</style>
