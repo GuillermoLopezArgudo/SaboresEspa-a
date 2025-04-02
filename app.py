@@ -201,7 +201,24 @@ def editeComment():
 
 @app.route('/viewFavs', methods=['POST'])
 def viewFavs():
-    return jsonify(message="a")
+    data = request.get_json()
+    iduser = data.get("iduser")
+    favorites=UserFavorite.select(UserFavorite.id_recipe).where(UserFavorite.id_user == iduser).execute()
+    favorites_list = [favorite.id_recipe_id for favorite in favorites]
+    recipes = Recipe.select().where(Recipe.id.in_(favorites_list))
+    recipes_list = [{"id":recipe.id,"title": recipe.recipe_title, "image":recipe.recipe_image, "description":recipe.recipe_description} for recipe in recipes]
+    return jsonify(message=recipes_list)
+
+@app.route('/changeImage',methods=['POST'])
+def changeImage():
+    data = request.get_json()
+    iduser = data.get("iduser")
+    image = data.get("image")
+    image_url = None
+    if image:  
+        image_url = save_base64_file(image['base64'], image['name'], app.config['UPLOAD_FOLDER_IMAGES'])
+    Users.update(user_image=image_url).where(Users.id == iduser).execute()
+    return jsonify(message="Image Cambiada")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
