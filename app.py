@@ -147,9 +147,61 @@ def updateRating():
 def viewRecipe():
     data = request.get_json()
     idrecipe = data.get("idrecipe")
+    iduser = data.get("iduser")
     recipes = Recipe.select().where(Recipe.id == idrecipe)
-    recipe_list = [{"title": recipe.id_recipe_id} for recipe in recipes]
-    return jsonify(message=idrecipe)
+    recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description, "video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
+    ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
+    ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
+    if iduser:
+        favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
+        favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list,favorites_list=favorites_list)
+    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list)
+
+@app.route('/viewComment', methods=['POST'])
+def viewComment(): 
+    data = request.get_json()
+    idrecipe = data.get("idrecipe") 
+    comments = RecipeComment.select().where(RecipeComment.id_recipe_id ==idrecipe)
+    comment_list = [{"id":comment.id,"comment":comment.comment_text,"iduser":comment.id_user_id} for comment in comments]
+    return jsonify(comment_list=comment_list)
+    
+@app.route('/createComment', methods=['POST'])
+def createComment():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    iduser=data.get("iduser")
+    comment=data.get("comment")
+    user = Users.select(Users.user_name).where(Users.id == iduser).execute()
+    commentRecipe = RecipeComment(comment_text= comment,id_recipe_id= idrecipe, id_user_id= iduser,created_at = date.today(), modified_at = date.today())
+    commentRecipe.save() 
+    return jsonify(message ="Comment Update",username=user[0].user_name)
+
+@app.route('/deleteRecipe', methods=['POST'])
+def deleteRecipe():
+    data = request.get_json()
+    idrecipe = data.get('idrecipe')
+    RecipeIngredient.delete().where(RecipeIngredient.id_recipe == idrecipe).execute()
+    RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
+    UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
+    RecipeReview.delete().where(RecipeReview.id_recipe == idrecipe).execute()
+    Recipe.delete().where(Recipe.id == idrecipe).execute()
+    return jsonify(message="Recipe comment")
+
+@app.route('/deleteComment', methods=['POST'])
+def deleteComment():
+    data = request.get_json()
+    idcomment = data.get('idcomment')
+    RecipeComment.delete().where(RecipeComment.id == idcomment).execute()
+    return jsonify(message="Recipe deleted")
+
+@app.route('/editeComment', methods=['POST'])
+def editeComment():
+    data = request.get_json()
+    comment = data.get('comment')
+    idcomment = data.get('idcomment')
+    RecipeComment.update(comment_text=comment).where(RecipeComment.id == idcomment).execute()
+    return jsonify(message="Change Comment")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
