@@ -30,6 +30,8 @@ services:
       - db
     environment:
       - VUE_APP_API_URL=http://flask:5000 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     command: npm run serve
   # Servicio de base de datos MySQL
   db:

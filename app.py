@@ -38,7 +38,6 @@ def register():
     password = data.get("password")
     token = create_access_token(identity=email)
     type = data.get("type")
-    
     if Users.select().where(Users.user_email == email).exists():
         return jsonify(message="ERROR")
     user = Users(user_name = name,user_email = email, user_password = hashlib.sha256(password.encode('utf-8')).hexdigest(), user_type = type,user_token = token, user_image= "/static/images/NonPerfil.webp", created_at = date.today(), modified_at = date.today())
@@ -81,11 +80,8 @@ def createRecipe():
         user = Users.select(Users.id).where((Users.user_token == token)).get()
         recipe = Recipe(recipe_title = title,recipe_image = image_url,recipe_description = description, recipe_video = video_url, id_user_id = user.id, created_at = date.today(), modified_at = date.today())
         recipe.save() 
-        for i in range(len(ingredients)):
-            
+        for i in range(len(ingredients)):        
             quantity = quantities[i] if i < len(quantities) else ''
-            
-            #return jsonify(message=ingredients[0])
             recipe_ingredient = RecipeIngredient(id_recipe_id = recipe.id, id_user_id = user.id,ingredients_text=ingredients[i],quantity_unit=quantity, created_at = date.today(), modified_at = date.today())
             recipe_ingredient.save()
         
@@ -202,6 +198,10 @@ def editeComment():
     idcomment = data.get('idcomment')
     RecipeComment.update(comment_text=comment).where(RecipeComment.id == idcomment).execute()
     return jsonify(message="Change Comment")
+
+@app.route('/viewFavs', methods=['POST'])
+def viewFavs():
+    return jsonify(message="a")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
