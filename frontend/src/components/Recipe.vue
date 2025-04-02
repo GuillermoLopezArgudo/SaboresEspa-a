@@ -118,21 +118,13 @@ onMounted(() => {
     axios
         .post('http://localhost:5000/viewRecipe', payload)
         .then(response => {
-            if (response.data.message) {
-                receta.value = {
-                    ...response.data.message,
-                    ingredientes: response.data.message.ingredients.map(item => item.replace(/[\[\]"]/g, '')),
-                    cantidades: response.data.message.quatities.map(item => item.replace(/[\[\]"]/g, ''))
-                };
-            } else {
-                console.error("Receta no encontrada o error en la respuesta");
-            }
+            console.log(response.data.message)
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
         });
 
-    axios
+    /*axios
         .post('http://localhost:5000/viewComment', payload)
         .then(response => {
             const commentsArray = response.data.message.map(item => ({
@@ -156,7 +148,7 @@ onMounted(() => {
         })
     } else {
         router.push({ name: "login" });
-    }
+    }*/
 });
 
 function deleteRecipe() {

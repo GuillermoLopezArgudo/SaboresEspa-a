@@ -3,7 +3,7 @@ import LoginPage from '../components/LoginPage.vue';
 import RegisterPage from '../components/RegisterPage.vue';
 import HomePage from '../components/HomePage.vue';
 import CreateRecipe from '@/components/CreateRecipe.vue';
-import PersonalRecipe from '@/components/RecipeViewHome.vue';
+import PersonalRecipe from '@/components/PersonalRecipes.vue';
 import Recipe from '@/components/Recipe.vue';
 import AllRecipes from '@/components/AllRecipes.vue';
 import EditeRecipe from '@/components/EditeRecipe.vue';

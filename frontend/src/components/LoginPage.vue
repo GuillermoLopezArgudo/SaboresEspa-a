@@ -5,18 +5,25 @@
       <form @submit.prevent="OnSubmit">
         <div class="mb-4">
           <label for="email" class="block text-gray-700 font-semibold">Correo:</label>
-          <input type="email" id="email" v-model="email" class="w-full p-2 border border-gray-300 rounded-md" required />
+          <input type="email" id="email" v-model="email" class="w-full p-2 border border-gray-300 rounded-md"
+            required />
         </div>
         <div class="mb-4">
           <label for="password" class="block text-gray-700 font-semibold">Contraseña:</label>
-          <input type="password" id="password" v-model="password" class="w-full p-2 border border-gray-300 rounded-md" required />
+          <input type="password" id="password" v-model="password" class="w-full p-2 border border-gray-300 rounded-md"
+            required />
         </div>
         <div class="mb-4">
-          <input type="submit" value="Iniciar Sesión" class="w-full py-2 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 transition" />
+          <input type="submit" value="Iniciar Sesión"
+            class="w-full py-2 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 transition" />
         </div>
       </form>
       <div class="text-center mt-3">
-        <router-link to="/register" class="text-blue-600 hover:underline">¿No tienes cuenta? Regístrate aquí</router-link>
+        <router-link to="/register" class="text-blue-600 hover:underline">¿No tienes cuenta? Regístrate
+          aquí</router-link>
+      </div>
+      <div v-if="error" class="mt-3 p-4 bg-red-100 text-red-600 border border-red-300 rounded-md">
+        {{ error }}
       </div>
     </div>
   </div>
@@ -30,6 +37,7 @@ import axios from 'axios';
 const router = useRouter();
 const email = ref('');
 const password = ref('');
+const error = ref('')
 
 // Cuando se pulsa en enviar, llamamos al back por la referencia /login y le pasamos los valores del objeto de payload
 // y retorna el token, iduser, idFavs y los almacena en el localStorage
@@ -42,10 +50,17 @@ function OnSubmit() {
   axios
     .post('http://localhost:5000/login', payload)
     .then((response) => {
-      localStorage.setItem('userToken', response.data.usertoken);
-      localStorage.setItem('iduser', response.data.iduser);
-      localStorage.setItem('idFavs', response.data.idFavs);
-      router.push({ name: 'home' });
+      if (response.data.userToken) {
+        localStorage.setItem('userToken', response.data.userToken);
+        localStorage.setItem('iduser', response.data.iduser);
+        router.push({ name: 'home' });
+      } else {
+        error.value = response.data.message;
+        setTimeout(() => {
+          error.value = '';
+        },3000);
+
+      }
     })
     .catch((error) => {
       console.error(error);
@@ -54,7 +69,6 @@ function OnSubmit() {
 </script>
 
 <style scoped>
-
 body {
   background-color: #f8f9fa;
 }

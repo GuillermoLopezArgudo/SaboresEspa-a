@@ -13,7 +13,7 @@
             </div>
         </nav>
         <div v-if="elementos.recetas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-            <div v-for="(item, index) in elementos.recetas" :key="index" class="col mb-4">
+            <div v-for="(item, index) in elementos.recetas[0]" :key="index" class="col mb-4">
                 <button @click="toggleFavorite(item.id)" :class="['heart-button', { 'active': isFavorite(item.id) }]"
                     class="btn btn-outline-danger mb-3">
                     <i class="fa" :class="isFavorite(item.id) ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
@@ -30,7 +30,7 @@
 
 <script setup>
 import axios from 'axios';
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
 import Recipe from './RecipesHome.vue';
 import StarRating from './StarRating.vue';
 import 'font-awesome/css/font-awesome.min.css';
@@ -42,8 +42,7 @@ const elementos = reactive({
 const userToken = localStorage.getItem('userToken');
 const favoritos = reactive({});
 const iduser = localStorage.getItem('iduser');
-const ratings = reactive(JSON.parse(localStorage.getItem('ratings')) || {});
-const favs = localStorage.getItem('idFavs')
+const ratings = reactive({});
 const router = useRouter();
 
 
@@ -51,27 +50,14 @@ const router = useRouter();
 axios
     .post('http://localhost:5000/viewAll', { iduser })
     .then(response => {
-        if (response.data.message && response.data.message.length > 0) {
-            elementos.recetas = response.data.message.map(item => {
-                return {
-                    ...item,
-                    ingredientes: JSON.parse(item.ingredients),
-                    cantidades: JSON.parse(item.quatities)
-                };
+        elementos.recetas.push(response.data.recipes_list)
+        if (iduser) {
+            response.data.favorites_list.forEach(id => {
+                favoritos[id.id_recipe] = true
             });
-            if (favs) {
-                elementos.recetas.forEach(idrecipe => {
-                    JSON.parse(favs).forEach(element => {
-                        if (idrecipe.id == element) {
-                            toggleFavorite(idrecipe.id)
-                        }
-                    });
-                });
-                response.data.stars.forEach(element => {
-                    ratings[element[0]] = element[1]; 
-                });
-                localStorage.setItem('ratings', JSON.stringify(ratings));
-            }
+            response.data.reviews_list.forEach(id => {
+                ratings[id.id_recipe] = id.review;
+            });
 
         }
     })
@@ -97,7 +83,6 @@ const toggleFavorite = (id) => {
                 .post('http://localhost:5000/deleteFavs', payload)
                 .then(response => {
                     console.log(response.data.message)
-                    localStorage.setItem('idFavs', response.data.idFavs)
                 })
                 .catch(error => {
                     console.error("Error en la solicitud:", error);
@@ -108,7 +93,6 @@ const toggleFavorite = (id) => {
                 .post('http://localhost:5000/updateFavs', payload)
                 .then(response => {
                     console.log(response.data.message)
-                    localStorage.setItem('idFavs', response.data.idFavs)
                 })
                 .catch(error => {
                     console.error("Error en la solicitud:", error);

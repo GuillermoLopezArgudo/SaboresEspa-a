@@ -21,7 +21,7 @@ class Users(BaseModel):
     user_email = CharField(max_length=255, unique=True)
     user_password = CharField(max_length=255)
     user_type = CharField(max_length=50)
-    user_token = CharField(max_length=255)
+    user_token = CharField(max_length=512)
     user_image = CharField(max_length=255)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
@@ -32,6 +32,7 @@ class Users(BaseModel):
 # Modelo para la tabla 'recipe'
 class Recipe(BaseModel):
     recipe_title = CharField(max_length=255)
+    recipe_image = CharField(max_length=255)
     recipe_description = TextField()
     recipe_video = CharField(max_length=255, null=True)
     id_user = ForeignKeyField(Users, backref='recipes')
@@ -78,7 +79,6 @@ class RecipeIngredient(BaseModel):
     id_recipe = ForeignKeyField(Recipe, backref='ingredients')
     id_user = ForeignKeyField(Users, backref='ingredients')
     ingredients_text = TextField(null=True)
-    quantities_num = IntegerField(null=True)
     quantity_unit = CharField(max_length=50, null=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)

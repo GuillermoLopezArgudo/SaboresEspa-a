@@ -65,9 +65,8 @@ function OnSubmit() {
     };
     axios.post('http://localhost:5000/register', payload)
       .then(response => {
-          console.log(response.data.message)
-        if (response.data.usertoken) {
-          localStorage.setItem("userToken", response.data.usertoken);
+        if (response.data.userToken) {
+          localStorage.setItem("userToken", response.data.userToken);
           localStorage.setItem("iduser", response.data.iduser);
           router.push({ name: "home" });
         } else {
