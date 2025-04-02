@@ -4,10 +4,10 @@ import RegisterPage from '../components/RegisterPage.vue';
 import HomePage from '../components/HomePage.vue';
 import CreateRecipe from '@/components/CreateRecipe.vue';
 import PersonalRecipe from '@/components/PersonalRecipes.vue';
-import Recipe from '@/components/Recipe.vue';
+import Recipe from '@/components/RecipeView.vue';
 import AllRecipes from '@/components/AllRecipes.vue';
 import EditeRecipe from '@/components/EditeRecipe.vue';
-import Profile from '@/components/Profile.vue';
+import Profile from '@/components/ProfileUser.vue';
 
 const routes = [
   { path: '/', component: AllRecipes, name:"/"},

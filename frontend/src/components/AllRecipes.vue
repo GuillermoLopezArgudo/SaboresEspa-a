@@ -30,7 +30,7 @@
 
 <script setup>
 import axios from 'axios';
-import { ref, reactive } from 'vue';
+import { reactive } from 'vue';
 import Recipe from './RecipesHome.vue';
 import StarRating from './StarRating.vue';
 import 'font-awesome/css/font-awesome.min.css';

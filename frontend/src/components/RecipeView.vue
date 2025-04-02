@@ -60,7 +60,7 @@
                 </ul>
                 <div class="mt-3">
                     <input type="text" placeholder="Escribe tu comentario..." v-model="comment"
-                        class="form-control mb-2 p-2 border border-gray-300 rounded-md" :value="comment" />
+                        class="form-control mb-2 p-2 border border-gray-300 rounded-md"  />
                     <button @click.prevent="createComment" class="btn btn-primary w-full py-2 rounded-md">Enviar
                         Comentario</button>
                 </div>

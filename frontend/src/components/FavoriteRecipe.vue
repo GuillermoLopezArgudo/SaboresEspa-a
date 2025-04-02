@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto mt-5 px-4">
-    <h1 class="text-center text-3xl font-semibold mb-5">Recetario: Recetas Favoritas</h1>
+    <!--<h1 class="text-center text-3xl font-semibold mb-5">Recetario: Recetas Favoritas</h1>
     <div v-if="recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="(item, index) in recetas" :key="item.id" class="card border border-light rounded-lg shadow-sm overflow-hidden">
         <img :src="`http://localhost:5000/${item.imagen}`" class="w-full h-48 object-cover" alt="Imagen de receta">
@@ -17,12 +17,12 @@
       <div class="alert alert-warning bg-yellow-100 text-yellow-800 p-4 rounded-lg font-medium">
         No tienes recetas favoritas. ¡Agrega algunas y vuelve!
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+/*import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const userToken = localStorage.getItem('userToken');
@@ -49,7 +49,7 @@ onMounted(() => {
         console.error("Error en la solicitud:", error);
       });
   }
-});
+});*/
 </script>
 
 <style scoped>
