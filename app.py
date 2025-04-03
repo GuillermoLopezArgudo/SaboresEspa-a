@@ -159,7 +159,15 @@ def viewComment():
     data = request.get_json()
     idrecipe = data.get("idrecipe") 
     comments = RecipeComment.select().where(RecipeComment.id_recipe_id ==idrecipe)
-    comment_list = [{"id":comment.id,"comment":comment.comment_text,"iduser":comment.id_user_id} for comment in comments]
+    comment_list = []
+    for comment in comments:
+        user = Users.get(Users.id == comment.id_user_id)
+        comment_list.append({
+            "id": comment.id,
+            "comment": comment.comment_text,
+            "iduser": comment.id_user_id,
+            "username": user.user_name
+        })
     return jsonify(comment_list=comment_list)
     
 @app.route('/createComment', methods=['POST'])
