@@ -1,33 +1,117 @@
 <template>
-  <div class="bg-gray-100 min-h-screen">
-    <!-- Header -->
-    <h1 class="text-center mt-6 text-4xl font-bold text-orange-600 mb-8">Bienvenido a tu Recetario</h1>
+  <div class="min-h-screen bg-amber-50">
+    <!-- Header con imagen de fondo -->
+    <div class="bg-amber-900 py-8 px-4 sm:px-6 lg:px-8 relative">
+      <div class="absolute inset-0 bg-black opacity-20"></div>
+      <div class="relative max-w-7xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-white font-serif mb-2">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-orange-300">Bienvenido a tu Recetario</span>
+        </h1>
+        <p class="text-xl text-amber-100">Descubre, crea y comparte tus recetas favoritas</p>
+      </div>
+    </div>
     
-    <!-- Navbar -->
-    <nav class="bg-white shadow-lg mb-6">
-      <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <router-link to="/" class="text-3xl font-extrabold text-orange-600">Recetario</router-link>
-        
-        <!-- Mobile Navbar Toggle -->
-        <button class="lg:hidden px-4 py-2 border-2 border-orange-600 rounded-lg" @click="toggleNavbar">
-          <span class="text-orange-600">☰</span>
-        </button>
-
-        <!-- Links for large screens -->
-        <div v-show="!navbarOpen" class="lg:flex lg:ml-auto space-x-8">
-          <router-link to="/create" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Crear receta</router-link>
-          <router-link to="/recipes_personal" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Mis recetas</router-link>
-          <router-link to="/" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Todas las recetas</router-link>
-          <router-link to="/profile" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Ajustes</router-link>
-          <router-link @click="closeSession" to="/login" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Cerrar sesión</router-link>
+    <!-- Navbar mejorado -->
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <!-- Logo -->
+          <router-link to="/" class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Recetario</span>
+          </router-link>
+          
+          <!-- Mobile menu button -->
+          <div class="flex lg:hidden">
+            <button @click="toggleNavbar" class="inline-flex items-center justify-center p-2 rounded-md text-amber-600 hover:text-amber-800 focus:outline-none">
+              <span class="sr-only">Open main menu</span>
+              <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Desktop Navigation -->
+          <div class="hidden lg:flex lg:items-center lg:space-x-8">
+            <router-link to="/create" class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Crear receta
+            </router-link>
+            <router-link to="/recipes_personal" class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Mis recetas
+            </router-link>
+            <router-link to="/" class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Todas las recetas
+            </router-link>
+            <router-link to="/profile" class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Ajustes
+            </router-link>
+            <router-link @click="closeSession" to="/login" class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar sesión
+            </router-link>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile Navigation -->
+      <div v-show="navbarOpen" class="lg:hidden bg-white shadow-lg">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <router-link to="/create" class="block px-3 py-2 rounded-md text-base font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-50 transition duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Crear receta
+          </router-link>
+          <router-link to="/recipes_personal" class="block px-3 py-2 rounded-md text-base font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-50 transition duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            Mis recetas
+          </router-link>
+          <router-link to="/" class="block px-3 py-2 rounded-md text-base font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-50 transition duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Todas las recetas
+          </router-link>
+          <router-link to="/profile" class="block px-3 py-2 rounded-md text-base font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-50 transition duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Ajustes
+          </router-link>
+          <router-link @click="closeSession" to="/login" class="block px-3 py-2 rounded-md text-base font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-50 transition duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Cerrar sesión
+          </router-link>
         </div>
       </div>
     </nav>
 
     <!-- Main content -->
-    <div class="container mx-auto px-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <FavoriteRecipe />
-    </div>
+    </main>
   </div>
 </template>
 
@@ -57,54 +141,30 @@ function toggleNavbar() {
 </script>
 
 <style scoped>
-/* Estilos para el body */
-body {
-  font-family: 'Roboto', sans-serif;
+/* Transición suave para el menú móvil */
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+  transition: all 0.3s ease;
 }
 
-/* Estilo de la receta favorita */
-.favorite-recipes {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8;
+.mobile-menu-enter-from,
+.mobile-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
-.favorite-recipes .recipe-card {
-  @apply bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300;
+/* Efecto para los enlaces activos */
+.router-link-exact-active {
+  @apply text-amber-900 font-semibold;
 }
 
-.favorite-recipes .recipe-card img {
-  @apply w-full h-48 object-cover rounded-t-lg;
+/* Animación para el logo */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
-.favorite-recipes .recipe-card h5 {
-  @apply text-xl font-semibold text-gray-800 mt-4 px-4;
-}
-
-.favorite-recipes .recipe-card p {
-  @apply text-gray-600 mt-2 px-4 pb-4;
-}
-
-.favorite-recipes .recipe-card .btn {
-  @apply bg-orange-600 text-white border-none mt-4 w-full py-2 rounded-lg hover:bg-orange-700 transition duration-300;
-}
-
-button {
-  @apply bg-orange-600 text-white py-2 px-6 text-lg rounded-lg border-none hover:bg-orange-700 transition duration-300;
-}
-
-/* Media Queries */
-@media (max-width: 768px) {
-  .favorite-recipes {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .favorite-recipes {
-    grid-template-columns: 1fr;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-  }
+.logo:hover {
+  animation: pulse 1s infinite;
 }
 </style>

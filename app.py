@@ -409,6 +409,29 @@ def changeImage():
 
     return jsonify(message="Image data not valid")
 
+@app.route('/changeName',methods=['POST'])
+def changeName():
+    data = request.get_json()
+    name = data.get("name")
+    iduser = data.get("iduser")
+    userToken = data.get("userToken")
+    if Users.select().where((Users.user_token == userToken)).exists():
+        Users.update(user_name=name).where(Users.id == iduser).execute()
+        return jsonify(message=name)
+    
+@app.route('/changeEmail',methods=['POST'])
+def changeEmail():
+    data = request.get_json()
+    email = data.get("email")
+    iduser = data.get("iduser")
+    userToken = data.get("userToken")
+    if Users.select().where((Users.user_token == userToken)).exists():
+        Users.update(user_email=email).where(Users.id == iduser).execute()
+        token = create_access_token(identity=email)
+        user = Users.select(Users.id).where((Users.user_email == email)).get() 
+        Users.update(user_token=token).where(Users.id == user.id).execute()
+        return jsonify(message=email,userToken=token)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 

@@ -1,66 +1,175 @@
 <template>
-  <div class="container mx-auto mt-4 px-4">
-    <h1 class="text-center mb-4 text-blue-600 text-3xl font-bold">Editar Receta</h1>
-    <router-link to="/home"
-      class="inline-block px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600 mb-3">Atrás</router-link>
+  <div class="min-h-screen bg-amber-50 py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Encabezado -->
+    <div class="max-w-4xl mx-auto text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
+        Editar Receta
+      </h1>
+      <p class="text-lg text-amber-700">Actualiza los detalles de tu creación culinaria</p>
+    </div>
 
-    <form @submit.prevent="submitEditeRecipe" class="shadow-lg p-6 rounded-lg bg-white">
-      <!-- Nombre de la receta -->
-      <div class="mb-4">
-        <label for="titleRecipe" class="block text-lg font-semibold">Nombre de la receta</label>
-        <input type="text" id="titleRecipe" v-model="title"
-          class="mt-2 p-2 w-full rounded border border-gray-300 focus:ring-blue-500" required />
-      </div>
+    <!-- Botón de regreso -->
+    <div class="max-w-4xl mx-auto mb-6">
+      <router-link to="/home" class="inline-flex items-center px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition duration-300 shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Volver al inicio
+      </router-link>
+    </div>
 
-      <!-- Imagen de la receta -->
-      <div class="mb-4">
-        <label for="imageRecipe" class="block text-lg font-semibold">Imagen de la receta</label>
-        <input type="file" id="imageRecipe" @change="handleImageChange"
-          class="mt-2 p-2 w-full rounded border border-gray-300 focus:ring-blue-500" />
-      </div>
+    <!-- Formulario -->
+    <form @submit.prevent="submitEditeRecipe" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
+      <!-- Información básica -->
+      <div class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
+        <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Información Básica
+        </h2>
 
-      <!-- Video de la receta -->
-      <div class="mb-4">
-        <label for="videoRecipe" class="block text-lg font-semibold">Video de la receta (Opcional)</label>
-        <input type="file" id="videoRecipe" @change="handleVideoChange"
-          class="mt-2 p-2 w-full rounded border border-gray-300 focus:ring-blue-500" />
-      </div>
+        <!-- Título -->
+        <div class="mb-5">
+          <label for="titleRecipe" class="block text-base font-medium text-amber-700 mb-1">Nombre de la receta*</label>
+          <input type="text" id="titleRecipe" v-model="title" required
+                 class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                 placeholder="Ej: Lasagna tradicional">
+        </div>
 
-      <!-- Descripción -->
-      <div class="mb-4">
-        <label for="descriptionRecipe" class="block text-lg font-semibold">Descripción de la receta</label>
-        <textarea id="descriptionRecipe" rows="5" v-model="description"
-          class="mt-2 p-2 w-full rounded border border-gray-300 focus:ring-blue-500" required></textarea>
+        <!-- Imagen y video -->
+        <div class="grid md:grid-cols-2 gap-5">
+          <!-- Imagen -->
+          <div>
+            <label for="imageRecipe" class="block text-base font-medium text-amber-700 mb-1">Imagen principal</label>
+            <div class="relative border-2 border-dashed border-amber-300 rounded-lg p-4 text-center hover:border-amber-400 transition duration-300 bg-amber-50">
+              <input type="file" id="imageRecipe" @change="handleImageChange"
+                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="mt-1 text-sm text-amber-600">
+                {{ image && typeof image === 'object' ? image.name : 'Haz clic para cambiar la imagen' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Video -->
+          <div>
+            <label for="videoRecipe" class="block text-base font-medium text-amber-700 mb-1">Video (Opcional)</label>
+            <div class="relative border-2 border-dashed border-amber-300 rounded-lg p-4 text-center hover:border-amber-400 transition duration-300 bg-amber-50">
+              <input type="file" id="videoRecipe" @change="handleVideoChange"
+                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <p class="mt-1 text-sm text-amber-600">
+                {{ video && typeof video === 'object' ? video.name : 'Subir o cambiar video' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="mt-5">
+          <label for="descriptionRecipe" class="block text-base font-medium text-amber-700 mb-1">Descripción*</label>
+          <textarea id="descriptionRecipe" rows="4" v-model="description" required
+                    class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                    placeholder="Describe tu receta..."></textarea>
+        </div>
       </div>
 
       <!-- Ingredientes -->
-      <div class="mb-4">
-        <label class="block text-lg font-semibold">Ingredientes + Cantidades</label>
-        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="flex mb-2">
-          <input v-model="recipebook.ingredients[index]" placeholder="Ingrediente"
-            class="p-2 w-1/2 rounded border border-gray-300 focus:ring-blue-500 mr-2" />
-          <input v-model="recipebook.quantities[index]" placeholder="Cantidad"
-            class="p-2 w-1/2 rounded border border-gray-300 focus:ring-blue-500" />
+      <div class="p-6 sm:p-8 border-b border-amber-100">
+        <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Ingredientes
+        </h2>
+
+        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label :for="'ingredient'+index" class="block text-sm font-medium text-amber-700 mb-1">Ingrediente {{ index + 1 }}</label>
+            <input :id="'ingredient'+index" v-model="recipebook.ingredients[index]" required
+                   class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                   placeholder="Nombre del ingrediente">
+          </div>
+          <div>
+            <label :for="'quantity'+index" class="block text-sm font-medium text-amber-700 mb-1">Cantidad</label>
+            <input :id="'quantity'+index" v-model="recipebook.quantities[index]" required
+                   class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                   placeholder="Cantidad necesaria">
+          </div>
         </div>
+
+        <button type="button" @click="addIngredient"
+                class="mt-3 flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Añadir ingrediente
+        </button>
       </div>
 
       <!-- Pasos de preparación -->
-      <div class="mb-4">
-        <label class="block text-lg font-semibold">Pasos de preparación</label>
-        <div v-for="(step, index) in recipebook.steps" :key="index" class="flex mb-2">
-          <input v-model="recipebook.steps[index].title" placeholder="Titulo"
-            class="p-2 w-1/2 rounded border border-gray-300 focus:ring-blue-500 mr-2">
-          <input v-model="recipebook.steps[index].description" placeholder="Descripcion"
-            class="p-2 w-1/2 rounded border border-gray-300 focus:ring-blue-500" />
-          <input type="file" @change="handleStepImageChange($event, index)"
-            class="p-2 w-full rounded border border-gray-300 focus:ring-blue-500" />
+      <div class="p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          Pasos de Preparación
+        </h2>
+
+        <div v-for="(step, index) in recipebook.steps" :key="index" class="mb-5 p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h3 class="text-base font-semibold text-amber-700 mb-2">Paso {{ index + 1 }}</h3>
+          
+          <div class="mb-3">
+            <label :for="'stepTitle'+index" class="block text-sm font-medium text-amber-700 mb-1">Título del paso</label>
+            <input :id="'stepTitle'+index" v-model="step.title" required
+                   class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                   placeholder="Título breve">
+          </div>
+          
+          <div class="mb-3">
+            <label :for="'stepDesc'+index" class="block text-sm font-medium text-amber-700 mb-1">Descripción</label>
+            <textarea :id="'stepDesc'+index" v-model="step.description" rows="2" required
+                      class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                      placeholder="Describe este paso..."></textarea>
+          </div>
+          
+          <div>
+            <label :for="'stepImage'+index" class="block text-sm font-medium text-amber-700 mb-1">Imagen (Opcional)</label>
+            <div class="relative">
+              <input type="file" :id="'stepImage'+index" @change="handleStepImageChange($event, index)"
+                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+              <div class="flex items-center justify-between px-3 py-1.5 bg-white rounded-lg border border-amber-300 shadow-sm">
+                <span class="text-xs text-amber-600 truncate">
+                  {{ step.image ? (typeof step.image === 'object' ? step.image.name : 'Imagen existente') : 'Seleccionar imagen...' }}
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <button type="button" @click="addStep"
+                class="flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Añadir paso
+        </button>
       </div>
 
-      <!-- Botón para enviar -->
-      <div class="d-grid mt-6">
-        <input type="submit" value="Actualizar Receta"
-          class="w-full py-3 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-500" />
+      <!-- Botón de enviar -->
+      <div class="px-6 sm:px-8 pb-6 sm:pb-8">
+        <button type="submit"
+                class="w-full py-3 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-semibold rounded-lg shadow-md transition duration-300 transform hover:scale-[1.01]">
+          Guardar Cambios
+        </button>
       </div>
     </form>
   </div>
@@ -86,23 +195,33 @@ const recipebook = reactive({
   steps: []
 });
 
+// Función para añadir ingrediente
+const addIngredient = () => {
+  recipebook.ingredients.push('');
+  recipebook.quantities.push('');
+};
+
+// Función para añadir paso
+const addStep = () => {
+  recipebook.steps.push({ title: '', description: '', image: null });
+};
+
 onMounted(() => {
   axios.post('http://localhost:5000/viewRecipe', { idrecipe: recipeId })
     .then(response => {
-      title.value = response.data.recipe_list[0].title
-      description.value = response.data.recipe_list[0].description
-      image.value = response.data.recipe_list[0].image
-      video.value = response.data.recipe_list[0].video
+      title.value = response.data.recipe_list[0].title;
+      description.value = response.data.recipe_list[0].description;
+      image.value = response.data.recipe_list[0].image;
+      video.value = response.data.recipe_list[0].video;
 
       response.data.ingredient_list.forEach(element => {
-        recipebook.ingredients.push(element.ingredients)
-        recipebook.quantities.push(element.quantity)
+        recipebook.ingredients.push(element.ingredients);
+        recipebook.quantities.push(element.quantity);
       });
 
       response.data.step_list.forEach(element => {
-        recipebook.steps.push(element)
+        recipebook.steps.push(element);
       });
-
     })
     .catch(error => {
       console.error("Error en la solicitud:", error);
@@ -181,26 +300,21 @@ function submitEditeRecipe() {
 </script>
 
 <style scoped>
-.container {
-  max-width: 900px;
+/* Animación para las secciones del formulario */
+.form-section {
+  transition: all 0.3s ease;
 }
 
-form {
-  background-color: #f9f9f9;
-  border-radius: 8px;
+.form-section:hover {
+  background-color: rgba(254, 243, 199, 0.3);
 }
 
-button {
-  color: #007bff;
-  text-decoration: underline;
+/* Efecto para los botones de añadir */
+.add-button {
+  transition: all 0.2s ease;
 }
 
-button:hover {
-  cursor: pointer;
-  color: #0056b3;
-}
-
-.d-grid {
-  margin-top: 20px;
+.add-button:hover {
+  transform: translateY(-1px);
 }
 </style>
