@@ -1,23 +1,32 @@
 <template>
-  <div>
-    <h1 class="text-center mt-4 text-blue-600 text-3xl font-bold mb-8">Bienvenido a tu Recetario</h1>
-    <nav class="bg-white shadow-sm mb-4">
-      <div class="container mx-auto px-4 py-2 flex justify-between items-center">
-        <router-link to="/" class="text-2xl text-blue-600 font-semibold">Recetario</router-link>
-        <button class="lg:hidden px-3 py-2 border border-blue-600 rounded-md" type="button" @click="toggleNavbar">
-          <span class="text-blue-600">☰</span>
+  <div class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <h1 class="text-center mt-6 text-4xl font-bold text-orange-600 mb-8">Bienvenido a tu Recetario</h1>
+    
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg mb-6">
+      <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <router-link to="/" class="text-3xl font-extrabold text-orange-600">Recetario</router-link>
+        
+        <!-- Mobile Navbar Toggle -->
+        <button class="lg:hidden px-4 py-2 border-2 border-orange-600 rounded-lg" @click="toggleNavbar">
+          <span class="text-orange-600">☰</span>
         </button>
-        <div v-show="!navbarOpen" class="lg:flex lg:ml-auto space-x-6">
-          <router-link to="/create" class="text-gray-600 text-lg hover:text-blue-600">Crear receta</router-link>
-          <router-link to="/recipes_personal" class="text-gray-600 text-lg hover:text-blue-600">Mis recetas</router-link>
-          <router-link to="/" class="text-gray-600 text-lg hover:text-blue-600">Todas las recetas</router-link>
-          <router-link to="/profile" class="text-gray-600 text-lg hover:text-blue-600">Ajustes</router-link>
-          <router-link @click="closeSession" to="/login" class="text-gray-600 text-lg hover:text-blue-600">Cerrar sesión</router-link>
+
+        <!-- Links for large screens -->
+        <div v-show="!navbarOpen" class="lg:flex lg:ml-auto space-x-8">
+          <router-link to="/create" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Crear receta</router-link>
+          <router-link to="/recipes_personal" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Mis recetas</router-link>
+          <router-link to="/" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Todas las recetas</router-link>
+          <router-link to="/profile" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Ajustes</router-link>
+          <router-link @click="closeSession" to="/login" class="text-lg font-medium text-gray-700 hover:text-orange-600 transition duration-300">Cerrar sesión</router-link>
         </div>
       </div>
     </nav>
-    <div class="container mx-auto px-4">
-      <FavoriteRecipe></FavoriteRecipe>
+
+    <!-- Main content -->
+    <div class="container mx-auto px-6">
+      <FavoriteRecipe />
     </div>
   </div>
 </template>
@@ -31,12 +40,12 @@ const userToken = ref(localStorage.getItem("userToken"));
 const router = useRouter();
 const navbarOpen = ref(false);
 
-// Si no hay token en el localstorage envía al login
+// Redirigir al login si no hay token
 if (userToken.value == null) {
   router.push({ name: "login" });
 }
 
-// Cierra la sesión eliminando lo almacenado en el localStorage
+// Función para cerrar sesión
 function closeSession() {
   localStorage.clear();
 }
@@ -48,37 +57,38 @@ function toggleNavbar() {
 </script>
 
 <style scoped>
+/* Estilos para el body */
 body {
-  background-color: #f8f9fa;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
+/* Estilo de la receta favorita */
 .favorite-recipes {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8;
 }
 
 .favorite-recipes .recipe-card {
-  @apply bg-white border border-gray-300 rounded-lg shadow-md p-4;
+  @apply bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300;
 }
 
 .favorite-recipes .recipe-card img {
-  @apply w-full rounded-lg;
+  @apply w-full h-48 object-cover rounded-t-lg;
 }
 
 .favorite-recipes .recipe-card h5 {
-  @apply text-xl text-gray-800 font-semibold;
+  @apply text-xl font-semibold text-gray-800 mt-4 px-4;
+}
+
+.favorite-recipes .recipe-card p {
+  @apply text-gray-600 mt-2 px-4 pb-4;
 }
 
 .favorite-recipes .recipe-card .btn {
-  @apply bg-blue-600 text-white border-none mt-4 w-full py-2 rounded-lg hover:bg-blue-700;
+  @apply bg-orange-600 text-white border-none mt-4 w-full py-2 rounded-lg hover:bg-orange-700 transition duration-300;
 }
 
 button {
-  @apply bg-blue-600 text-white py-2 px-4 text-lg rounded-lg border-none hover:bg-blue-700;
-}
-
-button:hover {
-  background-color: #0056b3;
+  @apply bg-orange-600 text-white py-2 px-6 text-lg rounded-lg border-none hover:bg-orange-700 transition duration-300;
 }
 
 /* Media Queries */
@@ -94,7 +104,7 @@ button:hover {
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 }
 </style>

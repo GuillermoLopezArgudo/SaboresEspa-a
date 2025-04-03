@@ -89,7 +89,7 @@ class RecipeIngredient(BaseModel):
 # Modelo para la tabla 'steps_image'
 class StepImage(BaseModel):
     id_user = ForeignKeyField(Users, backref='step_images')
-    image = CharField(max_length=255)
+    step_image = CharField(max_length=255)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
 
@@ -100,6 +100,7 @@ class StepImage(BaseModel):
 class RecipeStep(BaseModel):
     id_recipe = ForeignKeyField(Recipe, backref='steps')    
     id_user = ForeignKeyField(Users, backref='steps')
+    step_title = CharField(max_length=255)
     step_description = TextField()
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)

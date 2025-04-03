@@ -3,18 +3,25 @@
     <div class="w-full sm:w-96">
       <div class="bg-white shadow-lg rounded-xl p-6">
         <div class="text-center mb-4">
-          <img :src="`http://localhost:5000/${image}`" alt="Imagen de perfil"
-            class="w-36 h-36 rounded-full mx-auto object-cover" />
+          <img :src="imageUrl" alt="Imagen de perfil" class="w-36 h-36 rounded-full mx-auto object-cover" />
           <label for="imageRecipe" class="block text-lg mt-4 text-gray-700">Imagen del perfil</label>
           <input type="file" id="imageRecipe" @change="handleImageChange"
             class="mt-2 p-2 border border-gray-300 rounded-md w-full" />
         </div>
         <div class="mt-4">
-          <h5 class="text-lg font-semibold text-gray-800">Nombre:</h5>
-          <p class="text-gray-600">{{ name }}</p>
-          <button class="mt-2 text-blue-500 hover:text-blue-700 font-medium" @click="changeName">
-            Cambiar Nombre
-          </button>
+          <div v-if="!bollChangeName">
+            <input type="text" id="changeName"  v-model="name">
+            <button class="mt-2 text-blue-500 hover:text-blue-700 font-medium" @click="changeName">
+              Enviar
+            </button>
+          </div>
+          <div v-else>
+            <h5 class="text-lg font-semibold text-gray-800">Nombre:</h5>
+            <p class="text-gray-600">{{ name }}</p>
+            <button class="mt-2 text-blue-500 hover:text-blue-700 font-medium" @click="handleNameChange">
+              Cambiar Nombre
+            </button>
+          </div>
         </div>
         <div class="mt-4">
           <h5 class="text-lg font-semibold text-gray-800">Email:</h5>
@@ -35,39 +42,37 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-const image = ref("static/images/NonPerfil.webp");
-const name = ref("")
-const email = ref("")
-const payload = {
+const image = ref("");
+const imageUrl = ref("");
+const name = ref("");
+const email = ref("");
+const payload = ref({
   userToken: localStorage.getItem("userToken"),
-  iduser: localStorage.getItem("iduser")
-};
+  iduser: localStorage.getItem("iduser"),
+});
+const bollChangeName = ref(true)
 
 function handleImageChange(event) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onloadend = () => {
-      image.value = {
-        name: file.name,
-        base64: reader.result
+      image.value = reader.result;
+      imageUrl.value = reader.result;
+
+      const imageData = {
+        base64: image.value.split(',')[1],
+        name: file.name 
       };
+      changeImage(imageData);
     };
     reader.readAsDataURL(file);
   }
-
-  /*axios
-    .post('http://localhost:5000/changeImage', { image: image.value })
-    .then(response => {
-      console.log(response.data.message)
-    })
-    .catch(error => {
-      console.log(error);
-    });*/
 }
 
-function changeName() {
-  alert('Función para cambiar el nombre');
+
+function  handleNameChange() {
+  bollChangeName.value = false
 }
 
 function changeEmail() {
@@ -77,15 +82,34 @@ function changeEmail() {
 function changePassword() {
   alert('Función para cambiar el password');
 }
+function changeImage(imageData) {
+  axios
+    .post('http://localhost:5000/changeImage', {
+      image: imageData,
+      iduser: payload.value.iduser,
+      userToken: payload.value.userToken
+    })
+    .then(response => {
+      console.log(response.data);
+      imageUrl.value = `http://localhost:5000/${response.data.newImage}`;
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
 
+
+function changeName() {
+
+}
 
 onMounted(() => {
   axios
-    .post('http://localhost:5000/viewProfile', payload)
+    .post('http://localhost:5000/viewProfile', payload.value)
     .then(response => {
-
-      name.value = response.data.message[0]
-      email.value = response.data.message[1]
+      name.value = response.data.message[0].name;
+      email.value = response.data.message[0].email;
+      imageUrl.value = `http://localhost:5000/${response.data.message[0].image}`; 
     })
     .catch(error => {
       console.log(error);

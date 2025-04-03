@@ -2,37 +2,63 @@
     <div class="container mx-auto mt-5 px-4">
         <h1 class="text-center mb-4 text-3xl font-bold">Receta</h1>
         <div v-if="userToken">
-            <router-link to="/home"
+            <router-link to="/"
                 class="btn btn-secondary mb-3 px-4 py-2 border border-gray-300 rounded-md">Atrás</router-link>
         </div>
         <div v-else>
             <router-link to="/"
                 class="btn btn-secondary mb-3 px-4 py-2 border border-gray-300 rounded-md">Atrás</router-link>
         </div>
+
         <div v-if="receta">
             <h2 class="text-primary text-2xl font-semibold">{{ receta.title }}</h2>
             <button @click="toggleFavorite" :class="['heart-button', { 'active': isFavorite }]"
                 class="btn btn-outline-danger mb-3 px-4 py-2 border border-red-500 rounded-md">
                 <i class="fa" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i> Favoritos
             </button>
-            <p class="lead text-lg">{{ receta.descripcion }}</p>
+            <p class="lead text-lg">{{ receta.description }}</p>
+
+            <!-- Imagen de la receta -->
             <div v-if="receta.image" class="mb-4">
                 <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta"
                     class="w-full rounded-lg shadow-lg" />
             </div>
+
+            <!-- Ingredientes -->
             <h3 class="text-secondary text-xl font-semibold">Ingredientes:</h3>
             <ul class="list-none mb-4">
-                <li v-for="(ingrediente, idx) in ingredients.value" :key="idx" class="mb-2">
+                <li v-for="(ingrediente, idx) in ingredients" :key="idx" class="mb-2">
                     {{ ingrediente }} - {{ quantity[idx] || 'Cantidad no disponible' }}
                 </li>
             </ul>
+
+            <!-- Video de la receta -->
             <div v-if="receta.video" class="my-4">
                 <video controls :src="'http://localhost:5000/' + receta.video"
                     class="w-full rounded-lg shadow-lg"></video>
             </div>
+
+            <!-- Pasos de la receta -->
+            <div v-if="steps.length > 0" class="mt-4">
+                <h3 class="text-secondary text-xl font-semibold">Pasos:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div v-for="(step, idx) in steps" :key="idx" class="mb-4">
+                        <h4 class="font-semibold">{{ step.title }}</h4>
+                        <p>{{ step.description }}</p>
+                        <div v-if="step.image">
+                            <img :src="`http://localhost:5000/${step.image}`" alt="Imagen del paso"
+                                class="w-full rounded-lg shadow-lg" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Valoración de la receta -->
             <div v-if="receta.assessment" class="my-3">
                 <p><strong>Valoración:</strong> {{ receta.valoraciones }} estrellas</p>
             </div>
+
+            <!-- Comentarios -->
             <div v-if="comment != null" class="my-4">
                 <h4 class="text-xl font-semibold">Comentarios:</h4>
                 <ul class="list-none">
@@ -65,6 +91,8 @@
                         Comentario</button>
                 </div>
             </div>
+
+            <!-- Botones de eliminar o editar la receta -->
             <div v-if="iduser == receta.id_user" class="mt-4">
                 <button @click="deleteRecipe" class="btn bg-red-600 text-white w-full py-2 rounded-md mb-2">Eliminar
                     Receta</button>
@@ -72,6 +100,7 @@
                     Receta</button>
             </div>
         </div>
+
         <p v-else class="text-center text-muted">Cargando receta...</p>
     </div>
 </template>
@@ -92,6 +121,7 @@ const userToken = localStorage.getItem('userToken');
 const iduser = localStorage.getItem('iduser');
 const ingredients = ref([]);
 const quantity = ref([]);
+const steps = ref([]);
 const comments = ref([]);
 const isFavorite = ref(false);
 const editingCommentId = ref(null);
@@ -152,6 +182,7 @@ onMounted(() => {
                 ingredients.value.push(element.ingredients);
                 quantity.value.push(element.quantity)
             });
+            steps.value = response.data.step_list;
             fetchRecipe();
             if (iduser) {
                 response.data.favorites_list.forEach(id => {
