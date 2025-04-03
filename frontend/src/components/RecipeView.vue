@@ -22,7 +22,7 @@
             </div>
             <h3 class="text-secondary text-xl font-semibold">Ingredientes:</h3>
             <ul class="list-none mb-4">
-                <li v-for="(ingrediente, idx) in ingredients" :key="idx" class="mb-2">
+                <li v-for="(ingrediente, idx) in ingredients.value" :key="idx" class="mb-2">
                     {{ ingrediente }} - {{ quantity[idx] || 'Cantidad no disponible' }}
                 </li>
             </ul>
@@ -60,7 +60,7 @@
                 </ul>
                 <div class="mt-3">
                     <input type="text" placeholder="Escribe tu comentario..." v-model="comment"
-                        class="form-control mb-2 p-2 border border-gray-300 rounded-md"  />
+                        class="form-control mb-2 p-2 border border-gray-300 rounded-md" />
                     <button @click.prevent="createComment" class="btn btn-primary w-full py-2 rounded-md">Enviar
                         Comentario</button>
                 </div>
@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
@@ -90,9 +90,9 @@ const receta = ref(null);
 const comment = ref("");
 const userToken = localStorage.getItem('userToken');
 const iduser = localStorage.getItem('iduser');
-const ingredients = reactive([]);
-const quantity = reactive([]);
-const comments = reactive([]);
+const ingredients = ref([]);
+const quantity = ref([]);
+const comments = ref([]);
 const isFavorite = ref(false);
 const editingCommentId = ref(null);
 const editedComment = ref("");
@@ -131,16 +131,28 @@ const toggleFavorite = () => {
     }
 };
 
+function fetchRecipe() {
+
+    axios
+        .post('http://localhost:5000/viewComment', payload)
+        .then(response => {
+            comments.value = response.data.comment_list;
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
+}
+
+
 onMounted(() => {
-    
+
     axios
         .post('http://localhost:5000/viewRecipe', payload)
         .then(response => {
             receta.value = response.data.recipe_list[0]
             response.data.ingredient_list.forEach(element => {
-                ingredients.push(element.ingredients);
-                quantity.push(element.quantity)
+                ingredients.value.push(element.ingredients);
+                quantity.value.push(element.quantity)
             });
+            fetchRecipe();
             if (iduser) {
                 response.data.favorites_list.forEach(id => {
                     if (id.id_recipe === parseInt(recipeId)) {
@@ -148,15 +160,6 @@ onMounted(() => {
                     }
                 });
             }
-        })
-        .catch(error => {
-            console.error("Error en la solicitud:", error);
-        });
-
-    axios
-        .post('http://localhost:5000/viewComment', payload)
-        .then(response => {
-            comments.splice(0, comments.length, ...response.data.comment_list);
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -182,58 +185,39 @@ function editeRecipe() {
 function createComment() {
     payload.comment = comment.value;
     if (userToken) {
-        axios
-            .post('http://localhost:5000/createComment', payload)
-            .then(response => {
-                const newComment = {
-                    idcomment: response.data.idcomment,
-                    comment: comment.value,
-                    username: response.data.username,
-                    iduser: iduser
-                };
-                comments.splice(0, comments.length, ...comments, newComment);
+        axios.post('http://localhost:5000/createComment', payload)
+            .then(() => {
+                fetchRecipe();
                 comment.value = "";
             })
-            .catch(error => {
-                console.error("Error en la solicitud:", error);
-            });
+            .catch(error => console.error("Error en la solicitud:", error));
     } else {
         router.push({ name: "login" });
     }
 }
 
+
 function deleteComment(idcomment) {
     payload.idcomment = idcomment;
-    axios
-        .post('http://localhost:5000/deleteComment', payload)
-        .then(response => {
-            console.log(response.data.message);
-            console.log(comments)
-            comments.splice(0, comments.length, ...comments.filter(comment => comment.idcomment !== idcomment));
-            console.log(comments)
+    axios.post('http://localhost:5000/deleteComment', payload)
+        .then(() => {
+            fetchRecipe();
         })
-        .catch(error => {
-            console.error("Error en la solicitud:", error);
-        });
+        .catch(error => console.error("Error en la solicitud:", error));
 }
+
 
 function updateComment(idcomment) {
     payload.idcomment = idcomment;
     payload.comment = editedComment.value;
-
-    axios
-        .post('http://localhost:5000/editeComment', payload)
-        .then(response => {
-            const updatedComment = comments.find(comment => comment.idcomment === idcomment);
-            console.log(response.data.message);
-            updatedComment.comment = editedComment.value;
-            comments.splice(0, comments.length, ...comments);  // Force update the reactive array
+    axios.post('http://localhost:5000/editeComment', payload)
+        .then(() => {
+            fetchRecipe();
             cancelEdit();
         })
-        .catch(error => {
-            console.error("Error en la solicitud:", error);
-        });
+        .catch(error => console.error("Error en la solicitud:", error));
 }
+
 
 function startEditComment(comment) {
     editingCommentId.value = comment.id;
