@@ -9,7 +9,7 @@
           <input type="file" id="imageRecipe" @change="handleImageChange"
             class="mt-2 p-2 border border-gray-300 rounded-md w-full" />
         </div>
-        <div class="mt-4">
+        <!--<div class="mt-4">
           <h5 class="text-lg font-semibold text-gray-800">Nombre:</h5>
           <p class="text-gray-600">{{ name }}</p>
           <button class="mt-2 text-blue-500 hover:text-blue-700 font-medium" @click="changeName">
@@ -22,7 +22,7 @@
           <button class="mt-2 text-blue-500 hover:text-blue-700 font-medium" @click="changeEmail">
             Cambiar Email
           </button>
-        </div>
+        </div>-->
         <button class="mt-2 text-blue-500 hover:text-blue-700 font-medium" @click="changePassword">
           Cambiar Password
         </button>
@@ -45,6 +45,7 @@ const payload = {
 
 function handleImageChange(event) {
   const file = event.target.files[0];
+  console.log(event.target.files[0])
   if (file) {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -80,7 +81,17 @@ function changePassword() {
 
 
 onMounted(() => {
+
   axios
+    .post('http://localhost:500/showProfileImage', payload)
+    .then(response => {
+      console.log(response.data.image)
+    })
+    .catch(error => {
+      console.log(error)
+    })
+
+ /*axios
     .post('http://localhost:5000/viewProfile', payload)
     .then(response => {
 
@@ -89,7 +100,7 @@ onMounted(() => {
     })
     .catch(error => {
       console.log(error);
-    });
+    });*/
 });
 </script>
 

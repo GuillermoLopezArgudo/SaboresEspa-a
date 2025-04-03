@@ -159,7 +159,15 @@ def viewComment():
     data = request.get_json()
     idrecipe = data.get("idrecipe") 
     comments = RecipeComment.select().where(RecipeComment.id_recipe_id ==idrecipe)
-    comment_list = [{"id":comment.id,"comment":comment.comment_text,"iduser":comment.id_user_id} for comment in comments]
+    comment_list = []
+    for comment in comments:
+        user = Users.get(Users.id == comment.id_user_id)
+        comment_list.append({
+            "id": comment.id,
+            "comment": comment.comment_text,
+            "iduser": comment.id_user_id,
+            "username": user.user_name
+        })
     return jsonify(comment_list=comment_list)
     
 @app.route('/createComment', methods=['POST'])
@@ -211,6 +219,28 @@ def viewFavs():
 
 @app.route('/changeImage',methods=['POST'])
 def changeImage():
+    data = request.get_json()
+    iduser = data.get("iduser")
+    image = data.get("image")
+    image_url = None
+    if image:  
+        image_url = save_base64_file(image['base64'], image['name'], app.config['UPLOAD_FOLDER_IMAGES'])
+    Users.update(user_image=image_url).where(Users.id == iduser).execute()
+    return jsonify(message="Image Cambiada")
+
+@app.route('/changeImage',methods=['POST'])
+def changeImage():
+    data = request.get_json()
+    iduser = data.get("iduser")
+    image = data.get("image")
+    image_url = None
+    if image:  
+        image_url = save_base64_file(image['base64'], image['name'], app.config['UPLOAD_FOLDER_IMAGES'])
+    Users.update(user_image=image_url).where(Users.id == iduser).execute()
+    return jsonify(message="Image Cambiada")
+
+@app.route('/showProfileImage',methods=['POST'])
+def showProfileImage():
     data = request.get_json()
     iduser = data.get("iduser")
     image = data.get("image")
