@@ -1,7 +1,7 @@
 <template>
     <div class="max-w-xs mx-auto my-4 overflow-hidden bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] border border-amber-100">
       <!-- Imagen de la receta -->
-      <div class="relative h-48 overflow-hidden">
+      <div class="relative h-48 overflow-hidden"> 
         <img 
           :src="`http://localhost:5000/${item.image}`" 
           class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"

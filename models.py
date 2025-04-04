@@ -116,10 +116,20 @@ class RecipeStepImage(BaseModel):
     def __str__(self):
         return f"Image for step {self.id_step.id} of recipe {self.id_step.id_recipe.recipe_title}"
 
+# Modelo para la tabla 'recipe_filter'
+class RecipeFilter(BaseModel):
+    id_recipe = ForeignKeyField(Recipe, backref='filters')
+    type = CharField(max_length=50)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+    def __str__(self):
+        return f"Filter '{self.type}' for recipe {self.id_recipe.recipe_title}"
+
 # Para crear las tablas si no existen
 def create_tables():
     with db:
-        db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage])
+        db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter])
 
 if __name__ == '__main__':
     create_tables()

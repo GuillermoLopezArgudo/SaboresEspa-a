@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
-from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage
+from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 from config import Config
@@ -91,6 +91,11 @@ def createRecipe():
     if not steps:
         steps = []
     token = data.get("token")
+    proteins = data.get("proteins")
+    typeeat = data.get("typeeat")
+    ccaa = data.get("ccaa")
+    time = data.get("time")
+    
     if Users.select().where((Users.user_token == token)).exists():
         user = Users.select(Users.id).where((Users.user_token == token)).get()
         recipe = Recipe(recipe_title = title,recipe_image = image_url,recipe_description = description, recipe_video = video_url, id_user_id = user.id, created_at = date.today(), modified_at = date.today())
@@ -132,6 +137,21 @@ def createRecipe():
                     id_image=step_img.id
                 )
                 recipe_step_img.save()
+        """if proteins:
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=proteins,created_at = date.today(), modified_at = date.today())
+            filters.save()"""
+        if typeeat:
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=typeeat,created_at = date.today(), modified_at = date.today())
+            filters.save()
+        if ccaa:
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=ccaa,created_at = date.today(), modified_at = date.today())
+            filters.save()
+        if time:
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=time,created_at = date.today(), modified_at = date.today())
+            filters.save()
+        for protein in proteins:
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=protein,created_at = date.today(), modified_at = date.today())
+            filters.save()
         return jsonify(message= "RECETA SUBIDA")
 
 @app.route('/viewRecipes', methods=['POST'])
@@ -237,6 +257,7 @@ def createComment():
 def deleteRecipe():
     data = request.get_json()
     idrecipe = data.get('idrecipe')
+    RecipeFilter.delete().where(RecipeFilter.id_recipe==idrecipe).execute()
     RecipeIngredient.delete().where(RecipeIngredient.id_recipe == idrecipe).execute()
     RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
     UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
@@ -270,11 +291,24 @@ def editeComment():
 def viewFavs():
     data = request.get_json()
     iduser = data.get("iduser")
-    favorites=UserFavorite.select(UserFavorite.id_recipe).where(UserFavorite.id_user == iduser).execute()
+    favorites = UserFavorite.select(UserFavorite.id_recipe).where(UserFavorite.id_user == iduser).execute()
     favorites_list = [favorite.id_recipe_id for favorite in favorites]
     recipes = Recipe.select().where(Recipe.id.in_(favorites_list))
-    recipes_list = [{"id":recipe.id,"title": recipe.recipe_title, "image":recipe.recipe_image, "description":recipe.recipe_description} for recipe in recipes]
-    return jsonify(message=recipes_list)
+    recipes_list = [{
+        "id": recipe.id,
+        "title": recipe.recipe_title,
+        "image": recipe.recipe_image,
+        "description": recipe.recipe_description
+    } for recipe in recipes]
+    reviews = RecipeReview.select().where(
+        (RecipeReview.id_user_id == iduser) &
+        (RecipeReview.id_recipe_id.in_(favorites_list))
+    )
+    reviews_list = [{
+        "id_recipe": review.id_recipe_id,
+        "review": review.recipe_review_item_value
+    } for review in reviews]
+    return jsonify(message=recipes_list, message2=reviews_list)
 
 @app.route('/viewProfile',methods=['POST'])
 def viewProfile():
@@ -431,6 +465,14 @@ def changeEmail():
         user = Users.select(Users.id).where((Users.user_email == email)).get() 
         Users.update(user_token=token).where(Users.id == user.id).execute()
         return jsonify(message=email,userToken=token)
+
+@app.route('/filterRecipe', methods=['POST'])
+def filterRecipe():
+    data = request.get_json()
+    typeeat = data.get("typeeat")
+    filters=RecipeFilter.select().where(RecipeFilter.type == typeeat).execute()
+    filter_list = [{"idrecipe":filter.id_recipe_id} for filter in filters]
+    return jsonify(message=filter_list)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
