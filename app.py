@@ -470,7 +470,10 @@ def changeEmail():
 def filterRecipe():
     data = request.get_json()
     typeeat = data.get("typeeat")
-    filters=RecipeFilter.select().where(RecipeFilter.type == typeeat).execute()
+    ccaa = data.get("ccaa")
+    time = data.get("time")
+    proteins = data.get("proteins")
+    filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) | (RecipeFilter.type == ccaa) | (RecipeFilter.type == time) | (RecipeFilter.type.in_(proteins))).execute()    
     filter_list = [{"idrecipe":filter.id_recipe_id} for filter in filters]
     return jsonify(message=filter_list)
 

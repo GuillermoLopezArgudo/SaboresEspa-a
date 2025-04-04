@@ -323,7 +323,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 import axios from 'axios';
 
 const activeAccordion = ref('');
@@ -331,6 +331,7 @@ const tipoComida = ref('')
 const ccaa = ref('')
 const tiempo = ref('')
 const proteinas = ref([]);
+const emit = defineEmits(['enviarIdRecipe'])
 
 const toggleAccordion = (section) => {
   activeAccordion.value = activeAccordion.value === section ? '' : section;
@@ -358,11 +359,12 @@ const buscarFiltros = () => {
   axios.post('http://localhost:5000/filterRecipe', payload)
     .then(response => {
       console.log(response.data.message);
+      emit('enviarIdRecipe', response.data.message)
     })
     .catch(error => {
       console.log(error);
     });
-}   
+} 
 </script>
 
 <style scoped>

@@ -45,8 +45,8 @@
           </div>
         </nav>
   
-        <RecipeFilter></RecipeFilter>
-        <ListRecipes :greeting="'all'"></ListRecipes>
+        <RecipeFilter @enviarIdRecipe="recibirMensaje"></RecipeFilter>
+        <ListRecipes :greeting="greeting"></ListRecipes>
 
       </div>
     </div>
@@ -57,7 +57,16 @@
   import 'font-awesome/css/font-awesome.min.css';
   import RecipeFilter from './FilterRecipe.vue';
   import ListRecipes from './ListRecipes.vue';
+  import { ref } from 'vue';
+
   const userToken = localStorage.getItem('userToken');
+  const a = ref('')
+  const greeting = ref("all")
+  function recibirMensaje(mensaje) {
+    a.value= mensaje
+    greeting.value="a"
+  }
+
   </script>
   
   <style scoped>
