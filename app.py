@@ -137,20 +137,17 @@ def createRecipe():
                     id_image=step_img.id
                 )
                 recipe_step_img.save()
-        """if proteins:
-            filters = RecipeFilter(id_recipe_id=recipe.id,type=proteins,created_at = date.today(), modified_at = date.today())
-            filters.save()"""
         if typeeat:
-            filters = RecipeFilter(id_recipe_id=recipe.id,type=typeeat,created_at = date.today(), modified_at = date.today())
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=typeeat,category="typeeat",created_at = date.today(), modified_at = date.today())
             filters.save()
         if ccaa:
-            filters = RecipeFilter(id_recipe_id=recipe.id,type=ccaa,created_at = date.today(), modified_at = date.today())
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=ccaa,category="ccaa",created_at = date.today(), modified_at = date.today())
             filters.save()
         if time:
-            filters = RecipeFilter(id_recipe_id=recipe.id,type=time,created_at = date.today(), modified_at = date.today())
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=time,category="time",created_at = date.today(), modified_at = date.today())
             filters.save()
         for protein in proteins:
-            filters = RecipeFilter(id_recipe_id=recipe.id,type=protein,created_at = date.today(), modified_at = date.today())
+            filters = RecipeFilter(id_recipe_id=recipe.id,type=protein,category="protein",created_at = date.today(), modified_at = date.today())
             filters.save()
         return jsonify(message= "RECETA SUBIDA")
 
@@ -220,11 +217,14 @@ def viewRecipe():
     for step in steps:
         step_image = (StepImage.select(StepImage.step_image).join(RecipeStepImage).where(RecipeStepImage.id_step == step.id).first())
         step_list.append({"title": step.step_title,"description": step.step_description,"image": step_image.step_image if step_image else None})
+    filters = RecipeFilter.select().where(RecipeFilter.id_recipe_id == idrecipe)
+    filters_list = [{"type":filter.type, "category":filter.category} for filter in filters]
+        
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
-        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list)
-    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list)
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list)
+    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list)
 
 @app.route('/viewComment', methods=['POST'])
 def viewComment(): 
@@ -330,7 +330,11 @@ def editeRecipe():
     quantities = data.get("quantities") or []
     steps = data.get("steps") or []
     token = data.get("token")
-
+    proteins = data.get("proteins")
+    typeeat = data.get("typeeat")
+    ccaa = data.get("ccaa")
+    time = data.get("time")
+    
     user = Users.get_or_none(Users.user_token == token)
     if not user:
         return jsonify(message="Usuario no autenticado"), 401
@@ -359,7 +363,7 @@ def editeRecipe():
     recipe.recipe_video = video_url if video_url else recipe.recipe_video  
     recipe.modified_at = date.today()
     recipe.save()
-
+    RecipeFilter.delete().where(RecipeFilter.id_recipe_id == recipe.id).execute()
     RecipeIngredient.delete().where(RecipeIngredient.id_recipe_id == recipe.id).execute()
 
     RecipeStepImage.delete().where(RecipeStepImage.id_step.in_(
@@ -417,7 +421,18 @@ def editeRecipe():
                 id_step=recipe_step.id,
                 id_image=step_img.id
             )
-
+    if typeeat:
+        filters = RecipeFilter(id_recipe_id=recipe.id,type=typeeat,category="typeeat",created_at = date.today(), modified_at = date.today())
+        filters.save()
+    if ccaa:
+        filters = RecipeFilter(id_recipe_id=recipe.id,type=ccaa,category="ccaa",created_at = date.today(), modified_at = date.today())
+        filters.save()
+    if time:
+        filters = RecipeFilter(id_recipe_id=recipe.id,type=time,category="time",created_at = date.today(), modified_at = date.today())
+        filters.save()
+    for protein in proteins:
+        filters = RecipeFilter(id_recipe_id=recipe.id,type=protein,category="protein",created_at = date.today(), modified_at = date.today())
+        filters.save()
     return jsonify(message="Receta actualizada correctamente")
 
 @app.route('/changeImage',methods=['POST'])
@@ -493,6 +508,10 @@ def recipeFilter():
         reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
         return jsonify(filtered_recipes=filtered_recipes, favorites_list=favorites_list, reviews_list=reviews_list)
     return jsonify(filtered_recipes=filtered_recipes)
+
+@app.route('/changePassword', methods=['POST'])
+def changePassword():
+    return jsonify(message="a")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

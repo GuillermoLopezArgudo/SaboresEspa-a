@@ -120,6 +120,7 @@ class RecipeStepImage(BaseModel):
 class RecipeFilter(BaseModel):
     id_recipe = ForeignKeyField(Recipe, backref='filters')
     type = CharField(max_length=50)
+    category = CharField(max_length=50)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
 
