@@ -155,6 +155,7 @@ def createRecipe():
 def viewPersonalRecipes():
     data = request.get_json()
     id = data.get("id")
+    
     recipes = Recipe.select().join(Users).where(Users.id == id)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
     return jsonify(message=recipes_list)
@@ -284,7 +285,7 @@ def editeComment():
     data = request.get_json()
     comment = data.get('comment')
     idcomment = data.get('idcomment')
-    RecipeComment.update(comment_text=comment).where(RecipeComment.id == idcomment).execute()
+    RecipeComment.update(comment_text=comment,modified_at=date.today()).where(RecipeComment.id == idcomment).execute()
     return jsonify(message="Change Comment")
 
 @app.route('/viewFavs', methods=['POST'])
@@ -449,7 +450,7 @@ def changeImage():
         if image_base64:
             image_url = save_base64_file(image_base64, image_name, app.config['UPLOAD_FOLDER_IMAGES'])
             if image_url:
-                Users.update(user_image=image_url).where(Users.id == iduser).execute()
+                Users.update(user_image=image_url,modified_at=date.today()).where(Users.id == iduser).execute()
                 return jsonify(message="Image Changed", newImage=image_url)
             else:
                 return jsonify(message="Failed to save image")
@@ -465,7 +466,7 @@ def changeName():
     iduser = data.get("iduser")
     userToken = data.get("userToken")
     if Users.select().where((Users.user_token == userToken)).exists():
-        Users.update(user_name=name).where(Users.id == iduser).execute()
+        Users.update(user_name=name,modified_at=date.today()).where(Users.id == iduser).execute()
         return jsonify(message=name)
     
 @app.route('/changeEmail',methods=['POST'])
@@ -475,10 +476,10 @@ def changeEmail():
     iduser = data.get("iduser")
     userToken = data.get("userToken")
     if Users.select().where((Users.user_token == userToken)).exists():
-        Users.update(user_email=email).where(Users.id == iduser).execute()
+        Users.update(user_email=email,modified_at=date.today()).where(Users.id == iduser).execute()
         token = create_access_token(identity=email)
         user = Users.select(Users.id).where((Users.user_email == email)).get() 
-        Users.update(user_token=token).where(Users.id == user.id).execute()
+        Users.update(user_token=token,modified_at=date.today()).where(Users.id == user.id).execute()
         return jsonify(message=email,userToken=token)
 
 @app.route('/filterRecipe', methods=['POST'])
@@ -511,7 +512,14 @@ def recipeFilter():
 
 @app.route('/changePassword', methods=['POST'])
 def changePassword():
-    return jsonify(message="a")
+    data = request.get_json()
+    userToken = data.get("userToken")
+    iduser = data.get("iduser")
+    email = data.get("email")
+    newPassword = data.get("newPassword")
+    if Users.select().where((Users.user_token == userToken)).exists():
+        Users.update(user_password=hashlib.sha256(newPassword.encode('utf-8')).hexdigest(),modified_at=date.today()).where(Users.id == iduser).execute()
+        return jsonify(message="Contraseña Actualizada")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

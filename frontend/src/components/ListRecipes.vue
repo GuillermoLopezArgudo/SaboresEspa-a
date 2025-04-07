@@ -206,14 +206,8 @@ function favoritesRecipes() {
         .post('http://localhost:5000/viewFavs', payload)
         .then(response => {
             elementos.recetas = response.data.favorites_list;
-           /* response.data.favorites_list.forEach(id => {
-                favoritos[id.id] = true;
-            });*/
             selectFavorites(response.data.favorites_list)
             selectReviews(response.data.reviews_list)
-            /*response.data.reviews_list.forEach(id => {
-                ratings[id.id_recipe] = id.review;
-            });*/
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -257,14 +251,8 @@ function filterRecipe(){
             .then(response => {
                 elementos.recetas = response.data.filtered_recipes
                 if (iduser) {
-                    /*response.data.favorites_list.forEach(id => {
-                        favoritos[id.id_recipe] = true;
-                    });*/
                     selectFavorites(response.data.favorites_list)
                     selectReviews(response.data.reviews_list)
-                    /*response.data.reviews_list.forEach(id => {
-                        ratings[id.id_recipe] = id.review;
-                    });*/
                 }
             })
             .catch(error => {
