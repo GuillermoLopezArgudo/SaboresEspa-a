@@ -36,6 +36,16 @@
           Información Básica
         </h2>
 
+        <!--Ocultar o Mostrar-->
+        <button @click.prevent="showBasicInfo = !showBasicInfo" class="text-amber-600 hover:text-amber-800">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path v-if="showBasicInfo" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+
         <!-- Título de la receta -->
         <div class="mb-6">
           <label for="titleRecipe" class="block text-lg font-medium text-amber-700 mb-2">Nombre de la receta*</label>
@@ -200,59 +210,95 @@
       <!-- Tipo de comida -->
       <div>
         <legend>Filtro Tipo de comida</legend>
-        <div><input type="radio" id="starters" name="tipoComida" value="starters" v-model="tipoComida" /> <label for="starters">Entrantes</label></div>
-        <div><input type="radio" id="maindishes" name="tipoComida" value="maindishes" v-model="tipoComida" /> <label for="maindishes">Platos principales</label></div>
-        <div><input type="radio" id="accompaniments" name="tipoComida" value="accompaniments" v-model="tipoComida" /> <label for="accompaniments">Acompañamientos</label></div>
-        <div><input type="radio" id="dessert" name="tipoComida" value="dessert" v-model="tipoComida" /> <label for="dessert">Postres</label></div>
-        <div><input type="radio" id="soups" name="tipoComida" value="soups" v-model="tipoComida" /> <label for="soups">Sopas</label></div>
-        <div><input type="radio" id="salads" name="tipoComida" value="salads" v-model="tipoComida" /> <label for="salads">Ensaladas</label></div>
-        <div><input type="radio" id="sauces" name="tipoComida" value="sauces" v-model="tipoComida" /> <label for="sauces">Salsas y aderezos</label></div>
-        <div><input type="radio" id="breads" name="tipoComida" value="breads" v-model="tipoComida" /> <label for="breads">Panes y masas</label></div>
+        <div><input type="radio" id="starters" name="tipoComida" value="starters" v-model="tipoComida" /> <label
+            for="starters">Entrantes</label></div>
+        <div><input type="radio" id="maindishes" name="tipoComida" value="maindishes" v-model="tipoComida" /> <label
+            for="maindishes">Platos principales</label></div>
+        <div><input type="radio" id="accompaniments" name="tipoComida" value="accompaniments" v-model="tipoComida" />
+          <label for="accompaniments">Acompañamientos</label></div>
+        <div><input type="radio" id="dessert" name="tipoComida" value="dessert" v-model="tipoComida" /> <label
+            for="dessert">Postres</label></div>
+        <div><input type="radio" id="soups" name="tipoComida" value="soups" v-model="tipoComida" /> <label
+            for="soups">Sopas</label></div>
+        <div><input type="radio" id="salads" name="tipoComida" value="salads" v-model="tipoComida" /> <label
+            for="salads">Ensaladas</label></div>
+        <div><input type="radio" id="sauces" name="tipoComida" value="sauces" v-model="tipoComida" /> <label
+            for="sauces">Salsas y aderezos</label></div>
+        <div><input type="radio" id="breads" name="tipoComida" value="breads" v-model="tipoComida" /> <label
+            for="breads">Panes y masas</label></div>
       </div>
 
       <!-- CCAA -->
       <div>
         <legend>Filtro CCAA</legend>
-        <div><input type="radio" id="andalucia" name="ccaa" v-model="ccaa" value="andalucia"/> <label for="andalucia">Andalucía</label></div>
-        <div><input type="radio" id="aragon" name="ccaa" v-model="ccaa" value="aragon"/> <label for="aragon">Aragón</label></div>
-        <div><input type="radio" id="asturias" name="ccaa" v-model="ccaa" value="asturias"/> <label for="asturias">Asturias</label></div>
-        <div><input type="radio" id="cantabria" name="ccaa" v-model="ccaa" value="cantabria"/> <label for="cantabria">Cantabria</label></div>
-        <div><input type="radio" id="castillalamancha" name="ccaa" v-model="ccaa" value="castillalamancha"/> <label for="castillalamancha">Castilla-LaMancha</label></div>
-        <div><input type="radio" id="castillaleon" name="ccaa" v-model="ccaa" value="castillaleon"/> <label for="castillaleon">Castilla y León</label></div>
-        <div><input type="radio" id="catalunya" name="ccaa" v-model="ccaa" value="catalunya"/> <label for="catalunya">Cataluña</label></div>
-        <div><input type="radio" id="valencia" name="ccaa" v-model="ccaa" value="valencia"/> <label for="valencia">Comunidad Valenciana</label></div>
-        <div><input type="radio" id="extremadura" name="ccaa" v-model="ccaa" value="extremadura"/> <label for="extremadura">Extremadura</label></div>
-        <div><input type="radio" id="galicia" name="ccaa" v-model="ccaa" value="galicia"/> <label for="galicia">Galicia</label></div>
-        <div><input type="radio" id="baleares" name="ccaa" v-model="ccaa" value="baleares"/> <label for="baleares">Islas Baleares</label></div>
-        <div><input type="radio" id="canarias" name="ccaa" v-model="ccaa" value="canarias"/> <label for="canarias">Islas Canarias</label></div>
-        <div><input type="radio" id="larioja" name="ccaa" v-model="ccaa" value="larioja"/> <label for="larioja">La Rioja</label></div>
-        <div><input type="radio" id="madrid" name="ccaa" v-model="ccaa" value="madrid"/> <label for="madrid">Comunidad de Madrid</label></div>
-        <div><input type="radio" id="murcia" name="ccaa" v-model="ccaa" value="murcia"/> <label for="murcia">Región de Murcia</label></div>
-        <div><input type="radio" id="navarra" name="ccaa" v-model="ccaa" value="navarra"/> <label for="navarra">Navarra</label></div>
-        <div><input type="radio" id="paisvasco" name="ccaa" v-model="ccaa" value="paisvasco"/> <label for="paisvasco">País Vasco</label></div>
+        <div><input type="radio" id="andalucia" name="ccaa" v-model="ccaa" value="andalucia" /> <label
+            for="andalucia">Andalucía</label></div>
+        <div><input type="radio" id="aragon" name="ccaa" v-model="ccaa" value="aragon" /> <label
+            for="aragon">Aragón</label></div>
+        <div><input type="radio" id="asturias" name="ccaa" v-model="ccaa" value="asturias" /> <label
+            for="asturias">Asturias</label></div>
+        <div><input type="radio" id="cantabria" name="ccaa" v-model="ccaa" value="cantabria" /> <label
+            for="cantabria">Cantabria</label></div>
+        <div><input type="radio" id="castillalamancha" name="ccaa" v-model="ccaa" value="castillalamancha" /> <label
+            for="castillalamancha">Castilla-LaMancha</label></div>
+        <div><input type="radio" id="castillaleon" name="ccaa" v-model="ccaa" value="castillaleon" /> <label
+            for="castillaleon">Castilla y León</label></div>
+        <div><input type="radio" id="catalunya" name="ccaa" v-model="ccaa" value="catalunya" /> <label
+            for="catalunya">Cataluña</label></div>
+        <div><input type="radio" id="valencia" name="ccaa" v-model="ccaa" value="valencia" /> <label
+            for="valencia">Comunidad Valenciana</label></div>
+        <div><input type="radio" id="extremadura" name="ccaa" v-model="ccaa" value="extremadura" /> <label
+            for="extremadura">Extremadura</label></div>
+        <div><input type="radio" id="galicia" name="ccaa" v-model="ccaa" value="galicia" /> <label
+            for="galicia">Galicia</label></div>
+        <div><input type="radio" id="baleares" name="ccaa" v-model="ccaa" value="baleares" /> <label
+            for="baleares">Islas Baleares</label></div>
+        <div><input type="radio" id="canarias" name="ccaa" v-model="ccaa" value="canarias" /> <label
+            for="canarias">Islas Canarias</label></div>
+        <div><input type="radio" id="larioja" name="ccaa" v-model="ccaa" value="larioja" /> <label for="larioja">La
+            Rioja</label></div>
+        <div><input type="radio" id="madrid" name="ccaa" v-model="ccaa" value="madrid" /> <label for="madrid">Comunidad
+            de Madrid</label></div>
+        <div><input type="radio" id="murcia" name="ccaa" v-model="ccaa" value="murcia" /> <label for="murcia">Región de
+            Murcia</label></div>
+        <div><input type="radio" id="navarra" name="ccaa" v-model="ccaa" value="navarra" /> <label
+            for="navarra">Navarra</label></div>
+        <div><input type="radio" id="paisvasco" name="ccaa" v-model="ccaa" value="paisvasco" /> <label
+            for="paisvasco">País Vasco</label></div>
       </div>
 
       <!-- Tipo de proteína (permite selección múltiple) -->
       <div>
         <legend>Filtro Tipo de proteína</legend>
-        <div><input type="checkbox" id="pollo" value="pollo" v-model="proteinas" /> <label for="pollo">Pollo</label></div>
+        <div><input type="checkbox" id="pollo" value="pollo" v-model="proteinas" /> <label for="pollo">Pollo</label>
+        </div>
         <div><input type="checkbox" id="res" value="res" v-model="proteinas" /> <label for="res">Res</label></div>
-        <div><input type="checkbox" id="cerdo" value="cerdo" v-model="proteinas" /> <label for="cerdo">Cerdo</label></div>
-        <div><input type="checkbox" id="pescado" value="pescado" v-model="proteinas" /> <label for="pescado">Pescado</label></div>
-        <div><input type="checkbox" id="mariscos" value="mariscos" v-model="proteinas" /> <label for="mariscos">Mariscos</label></div>
-        <div><input type="checkbox" id="huevo" value="huevo" v-model="proteinas" /> <label for="huevo">Huevo</label></div>
-        <div><input type="checkbox" id="vegetariana" value="vegetariana" v-model="proteinas" /> <label for="vegetariana">Vegetariana</label></div>
-        <div><input type="checkbox" id="vegana" value="vegana" v-model="proteinas" /> <label for="vegana">Vegana</label></div>
+        <div><input type="checkbox" id="cerdo" value="cerdo" v-model="proteinas" /> <label for="cerdo">Cerdo</label>
+        </div>
+        <div><input type="checkbox" id="pescado" value="pescado" v-model="proteinas" /> <label
+            for="pescado">Pescado</label></div>
+        <div><input type="checkbox" id="mariscos" value="mariscos" v-model="proteinas" /> <label
+            for="mariscos">Mariscos</label></div>
+        <div><input type="checkbox" id="huevo" value="huevo" v-model="proteinas" /> <label for="huevo">Huevo</label>
+        </div>
+        <div><input type="checkbox" id="vegetariana" value="vegetariana" v-model="proteinas" /> <label
+            for="vegetariana">Vegetariana</label></div>
+        <div><input type="checkbox" id="vegana" value="vegana" v-model="proteinas" /> <label for="vegana">Vegana</label>
+        </div>
       </div>
 
       <!-- Tiempo de preparación -->
       <div>
         <legend>Filtro Tiempo de preparación</legend>
-        <div><input type="radio" id="menos15" name="tiempo" v-model="tiempo" value="menos15"/> <label for="menos15">Rápidas (menos de 15 min)</label>
+        <div><input type="radio" id="menos15" name="tiempo" v-model="tiempo" value="menos15" /> <label
+            for="menos15">Rápidas (menos de 15 min)</label>
         </div>
-        <div><input type="radio" id="15a30" name="tiempo" v-model="tiempo"  value="15a30"/> <label for="15a30">15 – 30 min</label></div>
-        <div><input type="radio" id="30a60" name="tiempo" v-model="tiempo"  value="30a60"/> <label for="30a60">30 – 60 min</label></div>
-        <div><input type="radio" id="mas60" name="tiempo" v-model="tiempo"  value="mas60"/> <label for="mas60">Más de 1 hora</label></div>
+        <div><input type="radio" id="15a30" name="tiempo" v-model="tiempo" value="15a30" /> <label for="15a30">15 – 30
+            min</label></div>
+        <div><input type="radio" id="30a60" name="tiempo" v-model="tiempo" value="30a60" /> <label for="30a60">30 – 60
+            min</label></div>
+        <div><input type="radio" id="mas60" name="tiempo" v-model="tiempo" value="mas60" /> <label for="mas60">Más de 1
+            hora</label></div>
       </div>
 
 
@@ -291,6 +337,7 @@ const tipoComida = ref('')
 const ccaa = ref('')
 const tiempo = ref('')
 const proteinas = ref([]);
+const showBasicInfo = ref(true);
 
 if (userToken.value == null) {
   router.push({ name: "login" });
@@ -348,7 +395,7 @@ function handleStepImageChange(event, index) {
 }
 
 function submitRecipe() {
- const payload = {
+  const payload = {
     title: title.value,
     image: image.value,
     video: video.value,
@@ -364,8 +411,9 @@ function submitRecipe() {
     token: localStorage.getItem("userToken"),
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
-    time:tiempo.value,
-    proteins:proteinas.value,
+    time: tiempo.value,
+    proteins: proteinas.value,
+    visibility:showBasicInfo.value
   };
   axios.post('http://localhost:5000/create', payload)
     .then(response => {

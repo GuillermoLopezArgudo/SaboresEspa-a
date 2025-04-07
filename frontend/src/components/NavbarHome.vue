@@ -1,27 +1,18 @@
 <template>
     <div class="min-h-screen bg-amber-50">
-      <!-- Header con imagen de fondo -->
-      <div class="bg-amber-900 py-8 px-4 sm:px-6 lg:px-8 relative">
-        <div class="absolute inset-0 bg-black opacity-20"></div>
-        <div class="relative max-w-7xl mx-auto text-center">
-          <h1 class="text-4xl md:text-5xl font-bold text-white font-serif mb-2">
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-orange-300">Bienvenido a tu Recetario</span>
-          </h1>
-          <p class="text-xl text-amber-100">Descubre, crea y comparte tus recetas favoritas</p>
-        </div>
-      </div>
+
   
       <!-- Navbar mejorado -->
       <nav class="bg-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-16">
             <!-- Logo -->
-            <router-link to="/" class="flex items-center">
+            <router-link to="/home" class="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Recetario</span>
+              <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Home</span>
             </router-link>
   
             <!-- Mobile menu button -->
@@ -54,6 +45,15 @@
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Mis Recetas
+              </router-link>
+              <router-link to="/"
+                class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Recetario
               </router-link>
               <router-link to="/profile"
                 class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">

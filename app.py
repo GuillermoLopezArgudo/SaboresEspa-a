@@ -95,10 +95,11 @@ def createRecipe():
     typeeat = data.get("typeeat")
     ccaa = data.get("ccaa")
     time = data.get("time")
+    visibility = data.get('visibility')
     
     if Users.select().where((Users.user_token == token)).exists():
         user = Users.select(Users.id).where((Users.user_token == token)).get()
-        recipe = Recipe(recipe_title = title,recipe_image = image_url,recipe_description = description, recipe_video = video_url, id_user_id = user.id, created_at = date.today(), modified_at = date.today())
+        recipe = Recipe(recipe_title = title,recipe_visibility=visibility,recipe_image = image_url,recipe_description = description, recipe_video = video_url, id_user_id = user.id, created_at = date.today(), modified_at = date.today())
         recipe.save() 
         for i in range(len(ingredients)):        
             quantity = quantities[i] if i < len(quantities) else ''
@@ -164,7 +165,7 @@ def viewPersonalRecipes():
 def viewAllRecipes():
     data = request.get_json()
     iduser = data.get("iduser")
-    recipes = Recipe.select()
+    recipes = Recipe.select().where(Recipe.recipe_visibility == True)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
@@ -210,7 +211,7 @@ def viewRecipe():
     idrecipe = data.get("idrecipe")
     iduser = data.get("iduser")
     recipes = Recipe.select().where(Recipe.id == idrecipe)
-    recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description, "video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
+    recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": recipe.recipe_visibility ,"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
     ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
     ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
     steps = RecipeStep.select().where(RecipeStep.id_recipe == idrecipe)
@@ -294,7 +295,7 @@ def viewFavs():
     iduser = data.get("iduser")
     favorites = UserFavorite.select(UserFavorite.id_recipe).where(UserFavorite.id_user == iduser).execute()
     favorites_list = [favorite.id_recipe for favorite in favorites]
-    recipes = Recipe.select().where(Recipe.id.in_(favorites_list))
+    recipes = Recipe.select().where(Recipe.id.in_(favorites_list) & (Recipe.recipe_visibility == True))
     recipes_list = [{
         "id": recipe.id,
         "title": recipe.recipe_title,
@@ -335,6 +336,7 @@ def editeRecipe():
     typeeat = data.get("typeeat")
     ccaa = data.get("ccaa")
     time = data.get("time")
+    visibility = data.get("visibility")
     
     user = Users.get_or_none(Users.user_token == token)
     if not user:
@@ -360,6 +362,7 @@ def editeRecipe():
 
     recipe.recipe_title = title
     recipe.recipe_description = description
+    recipe.recipe_visibility = visibility
     recipe.recipe_image = image_url if image_url else recipe.recipe_image  
     recipe.recipe_video = video_url if video_url else recipe.recipe_video  
     recipe.modified_at = date.today()
