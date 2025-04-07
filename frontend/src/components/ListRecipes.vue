@@ -18,7 +18,7 @@
                 </div>
 
                 <!-- Corazón de favorito (posición absoluta) -->
-                <button v-if="props.greeting !=='personal'" @click="toggleFavorite(item.id)" 
+                <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
                     class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
                     <i class="fa text-2xl"
                         :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
@@ -108,13 +108,18 @@
                     </router-link>
                 </div>
             </div>
+            <!-- Mensaje para "filtred" -->
+            <div v-else>
+                <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas que coincidan con tu filtro</h3>
+                <p class="mt-2 text-amber-600">Intenta ajustar los filtros para encontrar lo que buscas.</p>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 
-import { reactive, defineProps } from 'vue';
+import { reactive, defineProps, watch, onMounted } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -132,27 +137,66 @@ const props = defineProps({
     greeting: {
         type: String,
         required: true
+    },
+    idRecipe: {
+        type: String,
+        required: true
     }
 });
 
-if (props.greeting === "all") {
-    // Solicitar todas las recetas y datos relacionados
+watch(() => props.greeting, (newGreeting) => {
+    if (newGreeting === "filtred") {
+       
+        filterRecipe()
+    } else if (props.greeting === "all") {
+        // Solicitar todas las recetas y datos relacionados
+        allRecipes()
+    }
+})
+
+function selectFavorites(favorites_list) {
+    
+    favorites_list.forEach(recipe => {
+        const recipeId = recipe.id_recipe || recipe.id;
+        favoritos[recipeId] = true;
+    });
+}
+
+function selectReviews(reviews_list) {
+    reviews_list.forEach(recipe => {
+        ratings[recipe.id_recipe] = recipe.review;
+    });
+}
+
+onMounted(() => {
+    if (props.greeting === "all") {
+
+        allRecipes()
+
+    } else if (props.greeting === "favs") {
+
+        favoritesRecipes()
+    } else if (props.greeting === "personal") {
+        personalRecipes()
+    }
+});
+
+
+function allRecipes() {
     axios.post('http://localhost:5000/viewAll', { iduser })
         .then(response => {
             elementos.recetas = response.data.recipes_list;
             if (iduser) {
-                response.data.favorites_list.forEach(id => {
-                    favoritos[id.id_recipe] = true;
-                });
-                response.data.reviews_list.forEach(id => {
-                    ratings[id.id_recipe] = id.review;
-                });
+                selectFavorites(response.data.favorites_list)
+                selectReviews(response.data.reviews_list)
             }
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
         });
-} else if (props.greeting == "favs") {
+}
+
+function favoritesRecipes() {
     const payload = {
         userToken: userToken,
         iduser: iduser
@@ -161,20 +205,22 @@ if (props.greeting === "all") {
     axios
         .post('http://localhost:5000/viewFavs', payload)
         .then(response => {
-            elementos.recetas = response.data.message;
-            response.data.message.forEach(id => {
+            elementos.recetas = response.data.favorites_list;
+           /* response.data.favorites_list.forEach(id => {
                 favoritos[id.id] = true;
-            });
-            response.data.message2.forEach(id => {
+            });*/
+            selectFavorites(response.data.favorites_list)
+            selectReviews(response.data.reviews_list)
+            /*response.data.reviews_list.forEach(id => {
                 ratings[id.id_recipe] = id.review;
-            });
+            });*/
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
         });
+}
 
-} else if (props.greeting == "personal") {
-
+function personalRecipes() {
     if (localStorage.getItem('userToken') == null) {
         router.push({ name: "login" });
     } else {
@@ -195,6 +241,36 @@ if (props.greeting === "all") {
     }
 }
 
+function filterRecipe(){
+    const seen = new Set();
+        const filtered = [];
+
+        props.idRecipe.forEach(element => {
+            const id = element["idrecipe"];
+            if (!seen.has(id)) {
+                seen.add(id);
+                filtered.push(element);
+            }
+        });
+
+        axios.post('http://localhost:5000/recipeFilter', { filtered, iduser })
+            .then(response => {
+                elementos.recetas = response.data.filtered_recipes
+                if (iduser) {
+                    /*response.data.favorites_list.forEach(id => {
+                        favoritos[id.id_recipe] = true;
+                    });*/
+                    selectFavorites(response.data.favorites_list)
+                    selectReviews(response.data.reviews_list)
+                    /*response.data.reviews_list.forEach(id => {
+                        ratings[id.id_recipe] = id.review;
+                    });*/
+                }
+            })
+            .catch(error => {
+                console.error("Error en la solicitud:", error);
+            });
+}
 
 // Cambiar el estado de favoritos
 const toggleFavorite = (id) => {

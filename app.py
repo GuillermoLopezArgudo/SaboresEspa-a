@@ -292,7 +292,7 @@ def viewFavs():
     data = request.get_json()
     iduser = data.get("iduser")
     favorites = UserFavorite.select(UserFavorite.id_recipe).where(UserFavorite.id_user == iduser).execute()
-    favorites_list = [favorite.id_recipe_id for favorite in favorites]
+    favorites_list = [favorite.id_recipe for favorite in favorites]
     recipes = Recipe.select().where(Recipe.id.in_(favorites_list))
     recipes_list = [{
         "id": recipe.id,
@@ -308,7 +308,7 @@ def viewFavs():
         "id_recipe": review.id_recipe_id,
         "review": review.recipe_review_item_value
     } for review in reviews]
-    return jsonify(message=recipes_list, message2=reviews_list)
+    return jsonify(favorites_list=recipes_list, reviews_list=reviews_list)
 
 @app.route('/viewProfile',methods=['POST'])
 def viewProfile():
@@ -476,6 +476,23 @@ def filterRecipe():
     filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) | (RecipeFilter.type == ccaa) | (RecipeFilter.type == time) | (RecipeFilter.type.in_(proteins))).execute()    
     filter_list = [{"idrecipe":filter.id_recipe_id} for filter in filters]
     return jsonify(message=filter_list)
+
+@app.route('/recipeFilter', methods=['POST'])
+def recipeFilter():
+    data = request.get_json()
+    filtered = data.get("filtered")
+    iduser = data.get("iduser")
+    
+    idrecipes = [item["idrecipe"] for item in filtered]
+    filtereds = Recipe.select().where(Recipe.id.in_(idrecipes)).execute()
+    filtered_recipes = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in filtereds]
+    if iduser:
+        favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
+        favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
+        reviews = RecipeReview.select().where(RecipeReview.id_user_id ==iduser)
+        reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
+        return jsonify(filtered_recipes=filtered_recipes, favorites_list=favorites_list, reviews_list=reviews_list)
+    return jsonify(filtered_recipes=filtered_recipes)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

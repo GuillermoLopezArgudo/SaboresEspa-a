@@ -347,6 +347,9 @@ const limpiarFiltros = () => {
   document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
     checkbox.checked = false;
   });
+  
+  emit('limpiarFiltros')
+
 };
 
 const buscarFiltros = () => {
@@ -358,7 +361,6 @@ const buscarFiltros = () => {
   }
   axios.post('http://localhost:5000/filterRecipe', payload)
     .then(response => {
-      console.log(response.data.message);
       emit('enviarIdRecipe', response.data.message)
     })
     .catch(error => {
