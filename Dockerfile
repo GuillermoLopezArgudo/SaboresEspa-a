@@ -10,10 +10,14 @@
     # ---- Etapa del backend ----
     FROM python:3.9-slim
     
-    # Instala dependencias del sistema
+    # Instala dependencias del sistema (incluyendo herramientas de compilación)
     RUN apt-get update && apt-get install -y \
         pkg-config \
         libmariadb-dev-compat \
+        gcc \
+        python3-dev \
+        default-libmysqlclient-dev \
+        build-essential \
         && rm -rf /var/lib/apt/lists/*
     
     WORKDIR /app
