@@ -20,10 +20,11 @@
       <ListRecipes :greeting="'favs'"/>
     </main>
   </div>
+  <FooterPage></FooterPage>
 </template>
 
 <script setup>
-
+import FooterPage from './FooterPage.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ListRecipes from './ListRecipes.vue';
