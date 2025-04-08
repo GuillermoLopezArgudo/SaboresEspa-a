@@ -14,7 +14,7 @@ services:
       - MYSQL_HOST=db
       - MYSQL_USER=root
       - MYSQL_PASSWORD=1234
-      - MYSQL_DB=RecetasEspañolas
+      - MYSQL_DB=recipesSpain
     depends_on:
       - db  
 
@@ -30,13 +30,15 @@ services:
       - db
     environment:
       - VUE_APP_API_URL=http://flask:5000 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     command: npm run serve
   # Servicio de base de datos MySQL
   db:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: RecetasEspañolas
+      MYSQL_DATABASE: recipesSpain
       #MYSQL_USER: root
       #MYSQL_PASSWORD: 1234
     volumes:
