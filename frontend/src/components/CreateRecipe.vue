@@ -37,6 +37,8 @@
         </h2>
 
         <!--Ocultar o Mostrar-->
+        <label for="descriptionRecipe" class="block text-base font-medium text-amber-700 mb-1">Mostrar / Ocultar
+          Receta</label>
         <button @click.prevent="showBasicInfo = !showBasicInfo" class="text-amber-600 hover:text-amber-800">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path v-if="showBasicInfo" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -205,102 +207,123 @@
         </button>
       </div>
 
-      <!-- Filtros -->
+      <!-- Sección de Filtros - Diseño Alternativo -->
+      <div class="p-8 border-b border-amber-100 bg-gradient-to-br from-amber-50 to-amber-100">
+        <h2 class="text-2xl font-bold text-amber-800 mb-6 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros de Receta
+        </h2>
 
-      <!-- Tipo de comida -->
-      <div>
-        <legend>Filtro Tipo de comida</legend>
-        <div><input type="radio" id="starters" name="tipoComida" value="starters" v-model="tipoComida" /> <label
-            for="starters">Entrantes</label></div>
-        <div><input type="radio" id="maindishes" name="tipoComida" value="maindishes" v-model="tipoComida" /> <label
-            for="maindishes">Platos principales</label></div>
-        <div><input type="radio" id="accompaniments" name="tipoComida" value="accompaniments" v-model="tipoComida" />
-          <label for="accompaniments">Acompañamientos</label></div>
-        <div><input type="radio" id="dessert" name="tipoComida" value="dessert" v-model="tipoComida" /> <label
-            for="dessert">Postres</label></div>
-        <div><input type="radio" id="soups" name="tipoComida" value="soups" v-model="tipoComida" /> <label
-            for="soups">Sopas</label></div>
-        <div><input type="radio" id="salads" name="tipoComida" value="salads" v-model="tipoComida" /> <label
-            for="salads">Ensaladas</label></div>
-        <div><input type="radio" id="sauces" name="tipoComida" value="sauces" v-model="tipoComida" /> <label
-            for="sauces">Salsas y aderezos</label></div>
-        <div><input type="radio" id="breads" name="tipoComida" value="breads" v-model="tipoComida" /> <label
-            for="breads">Panes y masas</label></div>
+        <!-- Filtros en acordeón -->
+        <div class="space-y-4">
+          <!-- Tipo de comida -->
+          <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
+            <button type="button" @click="toggleAccordion('foodType')"
+              class="w-full px-6 py-4 flex justify-between items-center text-left">
+              <span class="font-medium text-amber-700">Tipo de comida</span>
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-amber-500 transform transition-transform duration-200"
+                :class="{ 'rotate-180': activeAccordion === 'foodType' }" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'foodType' }">
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <label v-for="(type, index) in foodTypes" :key="index"
+                  class="flex items-center p-2 rounded-lg hover:bg-amber-50 cursor-pointer">
+                  <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
+                  <span class="ml-3 text-sm text-amber-800">{{ type.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comunidad Autónoma -->
+          <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
+            <button type="button" @click="toggleAccordion('region')"
+              class="w-full px-6 py-4 flex justify-between items-center text-left">
+              <span class="font-medium text-amber-700">Comunidad Autónoma</span>
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-amber-500 transform transition-transform duration-200"
+                :class="{ 'rotate-180': activeAccordion === 'region' }" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'region' }">
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <label v-for="(region, index) in regions" :key="index"
+                  class="flex items-center p-2 rounded-lg hover:bg-amber-50 cursor-pointer">
+                  <input type="radio" name="ccaa" :value="region.value" v-model="ccaa"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
+                  <span class="ml-3 text-sm text-amber-800">{{ region.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tipo de proteína -->
+          <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
+            <button type="button" @click="toggleAccordion('protein')"
+              class="w-full px-6 py-4 flex justify-between items-center text-left">
+              <span class="font-medium text-amber-700">Tipo de proteína</span>
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-amber-500 transform transition-transform duration-200"
+                :class="{ 'rotate-180': activeAccordion === 'protein' }" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'protein' }">
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <label v-for="(protein, index) in proteins" :key="index"
+                  class="flex items-center p-2 rounded-lg hover:bg-amber-50 cursor-pointer">
+                  <input type="checkbox" :value="protein.value" v-model="proteinas"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded">
+                  <span class="ml-3 text-sm text-amber-800">{{ protein.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiempo de preparación -->
+          <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
+            <button type="button" @click="toggleAccordion('time')"
+              class="w-full px-6 py-4 flex justify-between items-center text-left">
+              <span class="font-medium text-amber-700">Tiempo de preparación</span>
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-amber-500 transform transition-transform duration-200"
+                :class="{ 'rotate-180': activeAccordion === 'time' }" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'time' }">
+              <div class="grid grid-cols-2 gap-4">
+                <label v-for="(time, index) in prepTimes" :key="index"
+                  class="flex items-center p-3 bg-amber-50 rounded-lg border border-amber-200 cursor-pointer">
+                  <input type="radio" name="tiempo" :value="time.value" v-model="tiempo"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
+                  <div class="ml-3">
+                    <span class="block text-sm font-medium text-amber-800">{{ time.label }}</span>
+                    <span class="block text-xs text-amber-600">{{ time.description }}</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <!-- CCAA -->
-      <div>
-        <legend>Filtro CCAA</legend>
-        <div><input type="radio" id="andalucia" name="ccaa" v-model="ccaa" value="andalucia" /> <label
-            for="andalucia">Andalucía</label></div>
-        <div><input type="radio" id="aragon" name="ccaa" v-model="ccaa" value="aragon" /> <label
-            for="aragon">Aragón</label></div>
-        <div><input type="radio" id="asturias" name="ccaa" v-model="ccaa" value="asturias" /> <label
-            for="asturias">Asturias</label></div>
-        <div><input type="radio" id="cantabria" name="ccaa" v-model="ccaa" value="cantabria" /> <label
-            for="cantabria">Cantabria</label></div>
-        <div><input type="radio" id="castillalamancha" name="ccaa" v-model="ccaa" value="castillalamancha" /> <label
-            for="castillalamancha">Castilla-LaMancha</label></div>
-        <div><input type="radio" id="castillaleon" name="ccaa" v-model="ccaa" value="castillaleon" /> <label
-            for="castillaleon">Castilla y León</label></div>
-        <div><input type="radio" id="catalunya" name="ccaa" v-model="ccaa" value="catalunya" /> <label
-            for="catalunya">Cataluña</label></div>
-        <div><input type="radio" id="valencia" name="ccaa" v-model="ccaa" value="valencia" /> <label
-            for="valencia">Comunidad Valenciana</label></div>
-        <div><input type="radio" id="extremadura" name="ccaa" v-model="ccaa" value="extremadura" /> <label
-            for="extremadura">Extremadura</label></div>
-        <div><input type="radio" id="galicia" name="ccaa" v-model="ccaa" value="galicia" /> <label
-            for="galicia">Galicia</label></div>
-        <div><input type="radio" id="baleares" name="ccaa" v-model="ccaa" value="baleares" /> <label
-            for="baleares">Islas Baleares</label></div>
-        <div><input type="radio" id="canarias" name="ccaa" v-model="ccaa" value="canarias" /> <label
-            for="canarias">Islas Canarias</label></div>
-        <div><input type="radio" id="larioja" name="ccaa" v-model="ccaa" value="larioja" /> <label for="larioja">La
-            Rioja</label></div>
-        <div><input type="radio" id="madrid" name="ccaa" v-model="ccaa" value="madrid" /> <label for="madrid">Comunidad
-            de Madrid</label></div>
-        <div><input type="radio" id="murcia" name="ccaa" v-model="ccaa" value="murcia" /> <label for="murcia">Región de
-            Murcia</label></div>
-        <div><input type="radio" id="navarra" name="ccaa" v-model="ccaa" value="navarra" /> <label
-            for="navarra">Navarra</label></div>
-        <div><input type="radio" id="paisvasco" name="ccaa" v-model="ccaa" value="paisvasco" /> <label
-            for="paisvasco">País Vasco</label></div>
-      </div>
-
-      <!-- Tipo de proteína (permite selección múltiple) -->
-      <div>
-        <legend>Filtro Tipo de proteína</legend>
-        <div><input type="checkbox" id="pollo" value="pollo" v-model="proteinas" /> <label for="pollo">Pollo</label>
-        </div>
-        <div><input type="checkbox" id="res" value="res" v-model="proteinas" /> <label for="res">Res</label></div>
-        <div><input type="checkbox" id="cerdo" value="cerdo" v-model="proteinas" /> <label for="cerdo">Cerdo</label>
-        </div>
-        <div><input type="checkbox" id="pescado" value="pescado" v-model="proteinas" /> <label
-            for="pescado">Pescado</label></div>
-        <div><input type="checkbox" id="mariscos" value="mariscos" v-model="proteinas" /> <label
-            for="mariscos">Mariscos</label></div>
-        <div><input type="checkbox" id="huevo" value="huevo" v-model="proteinas" /> <label for="huevo">Huevo</label>
-        </div>
-        <div><input type="checkbox" id="vegetariana" value="vegetariana" v-model="proteinas" /> <label
-            for="vegetariana">Vegetariana</label></div>
-        <div><input type="checkbox" id="vegana" value="vegana" v-model="proteinas" /> <label for="vegana">Vegana</label>
-        </div>
-      </div>
-
-      <!-- Tiempo de preparación -->
-      <div>
-        <legend>Filtro Tiempo de preparación</legend>
-        <div><input type="radio" id="menos15" name="tiempo" v-model="tiempo" value="menos15" /> <label
-            for="menos15">Rápidas (menos de 15 min)</label>
-        </div>
-        <div><input type="radio" id="15a30" name="tiempo" v-model="tiempo" value="15a30" /> <label for="15a30">15 – 30
-            min</label></div>
-        <div><input type="radio" id="30a60" name="tiempo" v-model="tiempo" value="30a60" /> <label for="30a60">30 – 60
-            min</label></div>
-        <div><input type="radio" id="mas60" name="tiempo" v-model="tiempo" value="mas60" /> <label for="mas60">Más de 1
-            hora</label></div>
-      </div>
-
 
       <!-- Botón de enviar -->
       <div class="px-8 pb-8">
@@ -413,7 +436,7 @@ function submitRecipe() {
     ccaa: ccaa.value,
     time: tiempo.value,
     proteins: proteinas.value,
-    visibility:showBasicInfo.value
+    visibility: showBasicInfo.value
   };
   axios.post('http://localhost:5000/create', payload)
     .then(response => {
@@ -424,6 +447,62 @@ function submitRecipe() {
       console.log(error);
     });
 }
+
+const activeAccordion = ref(null);
+
+const toggleAccordion = (section) => {
+  activeAccordion.value = activeAccordion.value === section ? null : section;
+};
+
+// Datos para los filtros
+const foodTypes = [
+  { value: 'starters', label: 'Entrantes' },
+  { value: 'maindishes', label: 'Platos principales' },
+  { value: 'accompaniments', label: 'Acompañamientos' },
+  { value: 'dessert', label: 'Postres' },
+  { value: 'soups', label: 'Sopas' },
+  { value: 'salads', label: 'Ensaladas' },
+  { value: 'sauces', label: 'Salsas' },
+  { value: 'breads', label: 'Panes y masas' }
+];
+
+const regions = [
+  { value: 'andalucia', label: 'Andalucía' },
+  { value: 'aragon', label: 'Aragón' },
+  { value: 'asturias', label: 'Asturias' },
+  { value: 'cantabria', label: 'Cantabria' },
+  { value: 'castillalamancha', label: 'Castilla-La Mancha' },
+  { value: 'castillaleon', label: 'Castilla y León' },
+  { value: 'catalunya', label: 'Cataluña' },
+  { value: 'valencia', label: 'Com. Valenciana' },
+  { value: 'extremadura', label: 'Extremadura' },
+  { value: 'galicia', label: 'Galicia' },
+  { value: 'baleares', label: 'Baleares' },
+  { value: 'canarias', label: 'Canarias' },
+  { value: 'larioja', label: 'La Rioja' },
+  { value: 'madrid', label: 'Madrid' },
+  { value: 'murcia', label: 'Murcia' },
+  { value: 'navarra', label: 'Navarra' },
+  { value: 'paisvasco', label: 'País Vasco' }
+];
+
+const proteins = [
+  { value: 'pollo', label: 'Pollo' },
+  { value: 'res', label: 'Res' },
+  { value: 'cerdo', label: 'Cerdo' },
+  { value: 'pescado', label: 'Pescado' },
+  { value: 'mariscos', label: 'Mariscos' },
+  { value: 'huevo', label: 'Huevo' },
+  { value: 'vegetariana', label: 'Vegetariana' },
+  { value: 'vegana', label: 'Vegana' }
+];
+
+const prepTimes = [
+  { value: 'menos15', label: 'Rápida', description: '<15 minutos' },
+  { value: '15a30', label: 'Media', description: '15-30 minutos' },
+  { value: '30a60', label: 'Lenta', description: '30-60 minutos' },
+  { value: 'mas60', label: 'Muy lenta', description: '>1 hora' }
+];
 </script>
 
 <style scoped>

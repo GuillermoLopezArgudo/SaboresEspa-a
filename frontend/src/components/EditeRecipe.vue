@@ -37,6 +37,8 @@
         </h2>
 
         <!--Ocultar o Mostrar-->
+        <label for="descriptionRecipe" class="block text-base font-medium text-amber-700 mb-1">Mostrar / Ocultar
+          Receta</label>
         <button @click.prevent="showBasicInfo = !showBasicInfo" class="text-amber-600 hover:text-amber-800">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path v-if="showBasicInfo" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -114,7 +116,8 @@
 
         <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-2 gap-3 mb-3">
           <div>
-            <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">Ingrediente {{ index
+            <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">Ingrediente {{
+              index
               + 1 }}</label>
             <input :id="'ingredient' + index" v-model="recipebook.ingredients[index]" required
               class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
@@ -202,99 +205,75 @@
       </div>
       <!-- Filtros -->
 
-      <!-- Tipo de comida -->
-      <div>
-        <legend>Filtro Tipo de comida</legend>
-        <div><input type="radio" id="starters" name="tipoComida" value="starters" v-model="tipoComida" /> <label
-            for="starters">Entrantes</label></div>
-        <div><input type="radio" id="maindishes" name="tipoComida" value="maindishes" v-model="tipoComida" /> <label
-            for="maindishes">Platos principales</label></div>
-        <div><input type="radio" id="accompaniments" name="tipoComida" value="accompaniments" v-model="tipoComida" />
-          <label for="accompaniments">Acompañamientos</label></div>
-        <div><input type="radio" id="dessert" name="tipoComida" value="dessert" v-model="tipoComida" /> <label
-            for="dessert">Postres</label></div>
-        <div><input type="radio" id="soups" name="tipoComida" value="soups" v-model="tipoComida" /> <label
-            for="soups">Sopas</label></div>
-        <div><input type="radio" id="salads" name="tipoComida" value="salads" v-model="tipoComida" /> <label
-            for="salads">Ensaladas</label></div>
-        <div><input type="radio" id="sauces" name="tipoComida" value="sauces" v-model="tipoComida" /> <label
-            for="sauces">Salsas y aderezos</label></div>
-        <div><input type="radio" id="breads" name="tipoComida" value="breads" v-model="tipoComida" /> <label
-            for="breads">Panes y masas</label></div>
-      </div>
+      <!-- Sección de Filtros -->
+      <div class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
+        <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros de Receta
+        </h2>
 
-      <!-- CCAA -->
-      <div>
-        <legend>Filtro CCAA</legend>
-        <div><input type="radio" id="andalucia" name="ccaa" v-model="ccaa" value="andalucia" /> <label
-            for="andalucia">Andalucía</label></div>
-        <div><input type="radio" id="aragon" name="ccaa" v-model="ccaa" value="aragon" /> <label
-            for="aragon">Aragón</label></div>
-        <div><input type="radio" id="asturias" name="ccaa" v-model="ccaa" value="asturias" /> <label
-            for="asturias">Asturias</label></div>
-        <div><input type="radio" id="cantabria" name="ccaa" v-model="ccaa" value="cantabria" /> <label
-            for="cantabria">Cantabria</label></div>
-        <div><input type="radio" id="castillalamancha" name="ccaa" v-model="ccaa" value="castillalamancha" /> <label
-            for="castillalamancha">Castilla-LaMancha</label></div>
-        <div><input type="radio" id="castillaleon" name="ccaa" v-model="ccaa" value="castillaleon" /> <label
-            for="castillaleon">Castilla y León</label></div>
-        <div><input type="radio" id="catalunya" name="ccaa" v-model="ccaa" value="catalunya" /> <label
-            for="catalunya">Cataluña</label></div>
-        <div><input type="radio" id="valencia" name="ccaa" v-model="ccaa" value="valencia" /> <label
-            for="valencia">Comunidad Valenciana</label></div>
-        <div><input type="radio" id="extremadura" name="ccaa" v-model="ccaa" value="extremadura" /> <label
-            for="extremadura">Extremadura</label></div>
-        <div><input type="radio" id="galicia" name="ccaa" v-model="ccaa" value="galicia" /> <label
-            for="galicia">Galicia</label></div>
-        <div><input type="radio" id="baleares" name="ccaa" v-model="ccaa" value="baleares" /> <label
-            for="baleares">Islas Baleares</label></div>
-        <div><input type="radio" id="canarias" name="ccaa" v-model="ccaa" value="canarias" /> <label
-            for="canarias">Islas Canarias</label></div>
-        <div><input type="radio" id="larioja" name="ccaa" v-model="ccaa" value="larioja" /> <label for="larioja">La
-            Rioja</label></div>
-        <div><input type="radio" id="madrid" name="ccaa" v-model="ccaa" value="madrid" /> <label for="madrid">Comunidad
-            de Madrid</label></div>
-        <div><input type="radio" id="murcia" name="ccaa" v-model="ccaa" value="murcia" /> <label for="murcia">Región de
-            Murcia</label></div>
-        <div><input type="radio" id="navarra" name="ccaa" v-model="ccaa" value="navarra" /> <label
-            for="navarra">Navarra</label></div>
-        <div><input type="radio" id="paisvasco" name="ccaa" v-model="ccaa" value="paisvasco" /> <label
-            for="paisvasco">País Vasco</label></div>
-      </div>
+        <!-- Grid de filtros -->
+        <div class="grid md:grid-cols-2 gap-5">
+          <!-- Tipo de comida -->
+          <div class="space-y-2">
+            <label class="block text-base font-medium text-amber-700">Tipo de comida*</label>
+            <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
+              <div class="space-y-2">
+                <label v-for="(type, index) in foodTypes" :key="index" class="flex items-center">
+                  <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida" required
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
+                  <span class="ml-2 text-sm text-amber-800">{{ type.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
 
-      <!-- Tipo de proteína (permite selección múltiple) -->
-      <div>
-        <legend>Filtro Tipo de proteína</legend>
-        <div><input type="checkbox" id="pollo" value="pollo" v-model="proteinas" /> <label
-            for="pollo">Pollo</label></div>
-        <div><input type="checkbox" id="res" value="res" v-model="proteinas" /> <label
-            for="res">Res</label></div>
-        <div><input type="checkbox" id="cerdo" value="cerdo" v-model="proteinas" /> <label
-            for="cerdo">Cerdo</label></div>
-        <div><input type="checkbox" id="pescado" value="pescado" v-model="proteinas"  /> <label
-            for="pescado">Pescado</label></div>
-        <div><input type="checkbox" id="mariscos" value="mariscos" v-model="proteinas"  /> <label
-            for="mariscos">Mariscos</label></div>
-        <div><input type="checkbox" id="huevo" value="huevo" v-model="proteinas"  /> <label
-            for="huevo">Huevo</label></div>
-        <div><input type="checkbox" id="vegetariana" value="vegetariana" v-model="proteinas"  /> <label
-            for="vegetariana">Vegetariana</label></div>
-        <div><input type="checkbox" id="vegana" value="vegana" v-model="proteinas"  /> <label
-            for="vegana">Vegana</label></div>
-      </div>
+          <!-- Comunidad Autónoma -->
+          <div class="space-y-2">
+            <label class="block text-base font-medium text-amber-700">Comunidad Autónoma</label>
+            <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm max-h-48 overflow-y-auto">
+              <div class="space-y-2">
+                <label v-for="(region, index) in regions" :key="index" class="flex items-center">
+                  <input type="radio" name="ccaa" :value="region.value" v-model="ccaa"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
+                  <span class="ml-2 text-sm text-amber-800">{{ region.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
 
-      <!-- Tiempo de preparación -->
-      <div>
-        <legend>Filtro Tiempo de preparación</legend>
-        <div><input type="radio" id="menos15" name="time" v-model="tiempo" value="menos15" /> <label
-            for="menos15">Rápidas (menos de 15 min)</label>
+          <!-- Tipo de proteína -->
+          <div class="space-y-2">
+            <label class="block text-base font-medium text-amber-700">Tipo de proteína</label>
+            <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
+              <div class="grid grid-cols-2 gap-2">
+                <label v-for="(protein, index) in proteins" :key="index" class="flex items-center">
+                  <input type="checkbox" :value="protein.value" v-model="proteinas"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded">
+                  <span class="ml-2 text-sm text-amber-800">{{ protein.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiempo de preparación -->
+          <div class="space-y-2">
+            <label class="block text-base font-medium text-amber-700">Tiempo de preparación</label>
+            <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
+              <div class="space-y-2">
+                <label v-for="(time, index) in prepTimes" :key="index" class="flex items-center">
+                  <input type="radio" name="tiempo" :value="time.value" v-model="tiempo"
+                    class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
+                  <span class="ml-2 text-sm text-amber-800">{{ time.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
-        <div><input type="radio" id="15a30"  v-model="tiempo" value="15a30" /> <label for="15a30">15 – 30
-            min</label></div>
-        <div><input type="radio" id="30a60"  v-model="tiempo" value="30a60" /> <label for="30a60">30 – 60
-            min</label></div>
-        <div><input type="radio" id="mas60"  v-model="tiempo" value="mas60" /> <label for="mas60">Más de 1
-            hora</label></div>
       </div>
       <!-- Botón de enviar -->
       <div class="px-6 sm:px-8 pb-6 sm:pb-8">
@@ -347,7 +326,7 @@ onMounted(() => {
     .then(response => {
       title.value = response.data.recipe_list[0].title;
       description.value = response.data.recipe_list[0].description;
-      showBasicInfo.value= response.data.recipe_list[0].visibility
+      showBasicInfo.value = Boolean(response.data.recipe_list[0].visibility)
       image.value = response.data.recipe_list[0].image;
       video.value = response.data.recipe_list[0].video;
 
@@ -360,7 +339,6 @@ onMounted(() => {
         recipebook.steps.push(element);
       });
 
-      //console.log(response.data.filters_list)
       response.data.filters_list.forEach(element => {
         if (element.category === 'typeeat') {
           tipoComida.value = element.type;
@@ -372,7 +350,7 @@ onMounted(() => {
           tiempo.value = element.type;
         }
         if (element.category === 'protein') {
-          proteinas.value.push( element.type);
+          proteinas.value.push(element.type);
         }
       });
     })
@@ -439,9 +417,9 @@ function submitEditeRecipe() {
     })) : [],
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
-    time:tiempo.value,
-    proteins:proteinas.value,
-    visibility: showBasicInfo.value,
+    time: tiempo.value,
+    proteins: proteinas.value,
+    visibility: showBasicInfo.value ? 1 : 0,
     idUser: localStorage.getItem("iduser"),
     token: localStorage.getItem("userToken")
   };
@@ -455,6 +433,55 @@ function submitEditeRecipe() {
       console.error(error);
     });
 }
+
+const foodTypes = [
+  { value: 'starters', label: 'Entrantes' },
+  { value: 'maindishes', label: 'Platos principales' },
+  { value: 'accompaniments', label: 'Acompañamientos' },
+  { value: 'dessert', label: 'Postres' },
+  { value: 'soups', label: 'Sopas' },
+  { value: 'salads', label: 'Ensaladas' },
+  { value: 'sauces', label: 'Salsas' },
+  { value: 'breads', label: 'Panes y masas' }
+];
+
+const regions = [
+  { value: 'andalucia', label: 'Andalucía' },
+  { value: 'aragon', label: 'Aragón' },
+  { value: 'asturias', label: 'Asturias' },
+  { value: 'cantabria', label: 'Cantabria' },
+  { value: 'castillalamancha', label: 'Castilla-La Mancha' },
+  { value: 'castillaleon', label: 'Castilla y León' },
+  { value: 'catalunya', label: 'Cataluña' },
+  { value: 'valencia', label: 'Com. Valenciana' },
+  { value: 'extremadura', label: 'Extremadura' },
+  { value: 'galicia', label: 'Galicia' },
+  { value: 'baleares', label: 'Baleares' },
+  { value: 'canarias', label: 'Canarias' },
+  { value: 'larioja', label: 'La Rioja' },
+  { value: 'madrid', label: 'Madrid' },
+  { value: 'murcia', label: 'Murcia' },
+  { value: 'navarra', label: 'Navarra' },
+  { value: 'paisvasco', label: 'País Vasco' }
+];
+
+const proteins = [
+  { value: 'pollo', label: 'Pollo' },
+  { value: 'res', label: 'Res' },
+  { value: 'cerdo', label: 'Cerdo' },
+  { value: 'pescado', label: 'Pescado' },
+  { value: 'mariscos', label: 'Mariscos' },
+  { value: 'huevo', label: 'Huevo' },
+  { value: 'vegetariana', label: 'Vegetariana' },
+  { value: 'vegana', label: 'Vegana' }
+];
+
+const prepTimes = [
+  { value: 'menos15', label: 'Rápida (<15 min)' },
+  { value: '15a30', label: 'Media (15-30 min)' },
+  { value: '30a60', label: 'Lenta (30-60 min)' },
+  { value: 'mas60', label: 'Muy lenta (>1 hora)' }
+];
 </script>
 
 <style scoped>

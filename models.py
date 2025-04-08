@@ -34,7 +34,7 @@ class Recipe(BaseModel):
     recipe_title = CharField(max_length=255)
     recipe_image = CharField(max_length=255)
     recipe_description = TextField()
-    recipe_visibility = CharField(max_length=50)
+    recipe_visibility = BooleanField()
     recipe_video = CharField(max_length=255, null=True)
     id_user = ForeignKeyField(Users, backref='recipes')
     created_at = DateTimeField(default=datetime.datetime.now)

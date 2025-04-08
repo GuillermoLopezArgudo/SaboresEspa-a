@@ -29,6 +29,11 @@
             <div class="p-5">
                 <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
                 <p class="text-amber-600 text-sm mt-2 line-clamp-2">{{ item.description }}</p>
+                <!-- Valoración con estrellas -->
+                <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'">
+                    <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
+                </div>
+
                 <!-- Botón para ver receta -->
                 <router-link :to="'/recipe?id=' + item.id"
                     class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
@@ -41,9 +46,18 @@
                     </svg>
                     Ver Receta
                 </router-link>
-                <!-- Valoración con estrellas -->
-                <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'">
-                    <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
+
+                <!--Zona de Categorias-->
+                <div class="text-sm text-amber-700 mt-2">
+                    <span class="font-semibold">Categorías:</span>
+                    <template v-if="categorias.filter(c => c.recipe_id === item.id).length > 0">
+                        <span v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
+                            :key="cat.type + cat.category"
+                            class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
+                            {{ cat.type }}
+                        </span>
+                    </template>
+                    <span v-else class="text-amber-500 italic">No tiene categorías</span>
                 </div>
             </div>
         </div>
@@ -132,6 +146,7 @@ const router = useRouter();
 const elementos = reactive({
     recetas: []
 });
+const categorias = reactive([])
 
 const props = defineProps({
     greeting: {
@@ -146,7 +161,7 @@ const props = defineProps({
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
-       
+
         filterRecipe()
     } else if (props.greeting === "all") {
         // Solicitar todas las recetas y datos relacionados
@@ -155,7 +170,7 @@ watch(() => props.greeting, (newGreeting) => {
 })
 
 function selectFavorites(favorites_list) {
-    
+
     favorites_list.forEach(recipe => {
         const recipeId = recipe.id_recipe || recipe.id;
         favoritos[recipeId] = true;
@@ -170,11 +185,8 @@ function selectReviews(reviews_list) {
 
 onMounted(() => {
     if (props.greeting === "all") {
-
         allRecipes()
-
     } else if (props.greeting === "favs") {
-
         favoritesRecipes()
     } else if (props.greeting === "personal") {
         personalRecipes()
@@ -189,6 +201,9 @@ function allRecipes() {
             if (iduser) {
                 selectFavorites(response.data.favorites_list)
                 selectReviews(response.data.reviews_list)
+                response.data.categories_list.forEach(element => {
+                    categorias.push(element)
+                });
             }
         })
         .catch(error => {
@@ -235,29 +250,29 @@ function personalRecipes() {
     }
 }
 
-function filterRecipe(){
+function filterRecipe() {
     const seen = new Set();
-        const filtered = [];
+    const filtered = [];
 
-        props.idRecipe.forEach(element => {
-            const id = element["idrecipe"];
-            if (!seen.has(id)) {
-                seen.add(id);
-                filtered.push(element);
+    props.idRecipe.forEach(element => {
+        const id = element["idrecipe"];
+        if (!seen.has(id)) {
+            seen.add(id);
+            filtered.push(element);
+        }
+    });
+
+    axios.post('http://localhost:5000/recipeFilter', { filtered, iduser })
+        .then(response => {
+            elementos.recetas = response.data.filtered_recipes
+            if (iduser) {
+                selectFavorites(response.data.favorites_list)
+                selectReviews(response.data.reviews_list)
             }
+        })
+        .catch(error => {
+            console.error("Error en la solicitud:", error);
         });
-
-        axios.post('http://localhost:5000/recipeFilter', { filtered, iduser })
-            .then(response => {
-                elementos.recetas = response.data.filtered_recipes
-                if (iduser) {
-                    selectFavorites(response.data.favorites_list)
-                    selectReviews(response.data.reviews_list)
-                }
-            })
-            .catch(error => {
-                console.error("Error en la solicitud:", error);
-            });
 }
 
 // Cambiar el estado de favoritos

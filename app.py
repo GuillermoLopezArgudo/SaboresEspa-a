@@ -165,15 +165,24 @@ def viewPersonalRecipes():
 def viewAllRecipes():
     data = request.get_json()
     iduser = data.get("iduser")
-    recipes = Recipe.select().where(Recipe.recipe_visibility == True)
+    recipes = Recipe.select().where(Recipe.recipe_visibility == 1)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
         reviews = RecipeReview.select().where(RecipeReview.id_user_id ==iduser)
         reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
-        return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list)
-    return jsonify(recipes_list=recipes_list)
+        categories_list = []
+        for recipe in recipes:
+            categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
+            for categorie in categories:
+                categories_list.append({
+                    "recipe_id": recipe.id,
+                    "type": categorie.type,
+                    "category": categorie.category
+                })
+        return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list)
+    return jsonify(recipes_list=recipes_list,categories_list=categories_list)
 
 @app.route('/updateFavs', methods=['POST'])
 def updateFavs():
@@ -211,7 +220,7 @@ def viewRecipe():
     idrecipe = data.get("idrecipe")
     iduser = data.get("iduser")
     recipes = Recipe.select().where(Recipe.id == idrecipe)
-    recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": recipe.recipe_visibility ,"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
+    recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": bool(recipe.recipe_visibility),"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
     ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
     ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
     steps = RecipeStep.select().where(RecipeStep.id_recipe == idrecipe)
@@ -295,7 +304,7 @@ def viewFavs():
     iduser = data.get("iduser")
     favorites = UserFavorite.select(UserFavorite.id_recipe).where(UserFavorite.id_user == iduser).execute()
     favorites_list = [favorite.id_recipe for favorite in favorites]
-    recipes = Recipe.select().where(Recipe.id.in_(favorites_list) & (Recipe.recipe_visibility == True))
+    recipes = Recipe.select().where(Recipe.id.in_(favorites_list) & (Recipe.recipe_visibility == 1))
     recipes_list = [{
         "id": recipe.id,
         "title": recipe.recipe_title,
