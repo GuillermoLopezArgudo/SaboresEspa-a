@@ -159,7 +159,16 @@ def viewPersonalRecipes():
     
     recipes = Recipe.select().join(Users).where(Users.id == id)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
-    return jsonify(message=recipes_list)
+    categories_list = []
+    for recipe in recipes:
+        categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
+        for categorie in categories:
+            categories_list.append({
+                "recipe_id": recipe.id,
+                "type": categorie.type,
+                "category": categorie.category
+            })    
+    return jsonify(message=recipes_list,categories_list=categories_list)
     
 @app.route('/viewAll', methods=['POST'])
 def viewAllRecipes():
@@ -319,7 +328,16 @@ def viewFavs():
         "id_recipe": review.id_recipe_id,
         "review": review.recipe_review_item_value
     } for review in reviews]
-    return jsonify(favorites_list=recipes_list, reviews_list=reviews_list)
+    categories_list = []
+    for recipe in recipes:
+        categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
+        for categorie in categories:
+            categories_list.append({
+                "recipe_id": recipe.id,
+                "type": categorie.type,
+                "category": categorie.category
+            })
+    return jsonify(favorites_list=recipes_list, reviews_list=reviews_list,categories_list=categories_list)
 
 @app.route('/viewProfile',methods=['POST'])
 def viewProfile():
@@ -560,11 +578,35 @@ def allUsers():
     data = request.get_json()
     type = data.get('type')
     userToken = data.get('userToken')
-    if Users.select().where(Users.user_token == userToken):
+    if Users.select().where((Users.user_token == userToken) & (Users.user_type == "admin")):
         users = Users.select().where(Users.user_type != type)
-        users_list = [{"name":user.user_name,"email":user.user_email}for user in users]
+        users_list = [{"iduser":user.id,"name":user.user_name,"email":user.user_email}for user in users]
         return jsonify(users_list=users_list)
     return jsonify(users_list=[])
+
+@app.route('/deleteUser', methods=['POST'])
+def deleteUser():
+    data = request.get_json()
+    iduser = data.get('iduser')
+    userToken = data.get('userToken')
+    if Users.select().where((Users.user_token == userToken) & (Users.user_type=="admin")):
+        idRecipes = Recipe.select().where(Recipe.id_user == iduser)
+        for recipe in idRecipes:
+            steps = RecipeStep.select().where(RecipeStep.id_recipe == recipe.id)
+            for step in steps:
+                RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
+            RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
+            RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
+            RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
+            RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+            RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
+
+            StepImage.delete().where(StepImage.id_user == iduser).execute()
+            UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
+
+        Recipe.delete().where(Recipe.id_user == iduser).execute()
+        Users.delete().where(Users.id == iduser).execute()    
+        return jsonify(message="Perfil eliminado")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

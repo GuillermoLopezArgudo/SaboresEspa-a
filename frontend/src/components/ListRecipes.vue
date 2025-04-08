@@ -163,7 +163,6 @@ const props = defineProps({
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
-
         filterRecipe()
     } else if (props.greeting === "all") {
         // Solicitar todas las recetas y datos relacionados
@@ -225,6 +224,9 @@ function favoritesRecipes() {
             elementos.recetas = response.data.favorites_list;
             selectFavorites(response.data.favorites_list)
             selectReviews(response.data.reviews_list)
+            response.data.categories_list.forEach(element => {
+                    categorias.push(element)
+            });
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -244,6 +246,9 @@ function personalRecipes() {
             .then(response => {
                 if (response.data.message && response.data.message.length > 0) {
                     elementos.recetas = response.data.message;
+                    response.data.categories_list.forEach(element => {
+                        categorias.push(element)
+                    });
                 }
             })
             .catch(error => {
@@ -255,7 +260,7 @@ function personalRecipes() {
 function filterRecipe() {
     const seen = new Set();
     const filtered = [];
-
+    
     props.idRecipe.forEach(element => {
         const id = element["idrecipe"];
         if (!seen.has(id)) {
@@ -263,7 +268,6 @@ function filterRecipe() {
             filtered.push(element);
         }
     });
-
     axios.post('http://localhost:5000/recipeFilter', { filtered, iduser })
         .then(response => {
             elementos.recetas = response.data.filtered_recipes

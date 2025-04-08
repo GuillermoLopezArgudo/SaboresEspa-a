@@ -130,10 +130,14 @@ const greeting = ref("all")
 
 function recibirIdRecipe(mensaje) {
   idRecipe.value = mensaje
-  greeting.value = "filtred"
+  greeting.value = "all";
+  setTimeout(() => {
+    greeting.value = "filtred";
+  }, 0);
 }
 
 const limpiarFiltros = () => {
+  
   greeting.value = "all";
 }
 

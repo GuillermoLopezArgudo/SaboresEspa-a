@@ -279,6 +279,7 @@ const buscarFiltros = () => {
     time: tiempo.value,
     proteins: proteinas.value,
   }
+  
   axios.post('http://localhost:5000/filterRecipe', payload)
     .then(response => {
       emit('enviarIdRecipe', response.data.message)
