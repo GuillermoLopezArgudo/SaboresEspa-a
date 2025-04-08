@@ -7,6 +7,7 @@ from flask_mysqldb import MySQL
 from config import Config
 from peewee import DoesNotExist
 from datetime import date
+from peewee import fn
 import hashlib
 import os
 import base64
@@ -176,20 +177,21 @@ def viewAllRecipes():
     iduser = data.get("iduser")
     recipes = Recipe.select().where(Recipe.recipe_visibility == 1)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
+    categories_list = []
+    for recipe in recipes:
+        categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
+        for categorie in categories:
+            categories_list.append({
+                "recipe_id": recipe.id,
+                "type": categorie.type,
+                "category": categorie.category
+            })
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
         reviews = RecipeReview.select().where(RecipeReview.id_user_id ==iduser)
         reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
-        categories_list = []
-        for recipe in recipes:
-            categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
-            for categorie in categories:
-                categories_list.append({
-                    "recipe_id": recipe.id,
-                    "type": categorie.type,
-                    "category": categorie.category
-                })
+
         return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list)
     return jsonify(recipes_list=recipes_list,categories_list=categories_list)
 
@@ -530,7 +532,7 @@ def recipeFilter():
     iduser = data.get("iduser")
     
     idrecipes = [item["idrecipe"] for item in filtered]
-    filtereds = Recipe.select().where(Recipe.id.in_(idrecipes)).execute()
+    filtereds = Recipe.select().where((Recipe.id.in_(idrecipes))& (Recipe.recipe_visibility==1)).execute()
     filtered_recipes = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in filtereds]
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
@@ -607,6 +609,26 @@ def deleteUser():
         Recipe.delete().where(Recipe.id_user == iduser).execute()
         Users.delete().where(Users.id == iduser).execute()    
         return jsonify(message="Perfil eliminado")
+
+@app.route('/averageStars', methods=["POST"])
+def averageStars():
+    try:
+        query = (RecipeReview
+                 .select(RecipeReview.id_recipe_id, fn.AVG(RecipeReview.recipe_review_item_value).alias('average_rating'))
+                 .group_by(RecipeReview.id_recipe_id))
+
+        result = []
+        for item in query:
+            average_rating = item.average_rating if item.average_rating is not None else 0
+            result.append({
+                'recipe_id': item.id_recipe_id, 
+                'average_rating': round(average_rating, 2) 
+            })
+
+        return jsonify(media=result)
+
+    except Exception as e:
+        return jsonify(message="Error: " + str(e)), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

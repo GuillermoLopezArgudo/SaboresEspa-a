@@ -5,6 +5,12 @@
             class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
             <!-- Imagen con corazón superpuesto -->
             <div class="relative">
+                <!-- Mostrar la media a la izquierda de la imagen -->
+                <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
+                    {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2) 
+                        : "Sin calificación" }} ★
+                </div>
+
                 <!-- Imagen de la receta -->
                 <img v-if="item.image" :src="`http://localhost:5000/${item.image}`" class="w-full h-48 object-cover"
                     alt="Imagen de receta">
@@ -129,7 +135,6 @@
             </div>
         </div>
     </div>
-    <FooterPage></FooterPage>
 </template>
 
 <script setup>
@@ -138,10 +143,11 @@ import { reactive, defineProps, watch, onMounted } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import FooterPage from './FooterPage.vue';
+
 
 const favoritos = reactive({});
 const ratings = reactive({});
+const average = reactive({})
 const userToken = localStorage.getItem('userToken');
 const iduser = localStorage.getItem('iduser');
 const router = useRouter();
@@ -192,6 +198,7 @@ onMounted(() => {
     } else if (props.greeting === "personal") {
         personalRecipes()
     }
+    averageStars();
 });
 
 
@@ -225,7 +232,7 @@ function favoritesRecipes() {
             selectFavorites(response.data.favorites_list)
             selectReviews(response.data.reviews_list)
             response.data.categories_list.forEach(element => {
-                    categorias.push(element)
+                categorias.push(element)
             });
         })
         .catch(error => {
@@ -260,7 +267,7 @@ function personalRecipes() {
 function filterRecipe() {
     const seen = new Set();
     const filtered = [];
-    
+
     props.idRecipe.forEach(element => {
         const id = element["idrecipe"];
         if (!seen.has(id)) {
@@ -337,6 +344,7 @@ const ratingChanged = (recipeId) => {
             axios.post('http://localhost:5000/updateRating', payload)
                 .then(response => {
                     console.log(response.data.message);
+                    averageStars()
                 })
                 .catch(error => {
                     console.error("Error en la solicitud:", error);
@@ -344,6 +352,19 @@ const ratingChanged = (recipeId) => {
         };
     }
 };
+
+function averageStars() {
+    axios.post('http://localhost:5000/averageStars')
+        .then(response => {
+            response.data.media.forEach(rating => {
+                average[rating.recipe_id] = rating.average_rating
+            });
+        })
+        .catch(error => {
+            console.error("Error en la solicitud:", error);
+        });
+}
+
 </script>
 
 <style scoped>

@@ -29,11 +29,13 @@
       <ListRecipes :greeting="'personal'" />
     </main>
   </div>
+  <FooterPage></FooterPage>
 </template>
 
 <script setup>
 import ListRecipes from './ListRecipes.vue';
 import NavbarHome from './NavbarHome.vue';
+import FooterPage from './FooterPage.vue';
 </script>
 
 <style scoped>

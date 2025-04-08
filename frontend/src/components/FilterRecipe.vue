@@ -192,13 +192,25 @@ const regions = [
 
 const proteins = [
   { value: 'pollo', label: 'Pollo' },
-  { value: 'res', label: 'Res' },
-  { value: 'cerdo', label: 'Cerdo' },
-  { value: 'pescado', label: 'Pescado' },
+  { value: 'res', label: 'Res / Ternera' },
+  { value: 'cerdo', label: 'Cerdo / Ibérico' },
+  { value: 'cordero', label: 'Cordero' },
+  { value: 'conejo', label: 'Conejo' },
+  { value: 'pato', label: 'Pato' },
+  { value: 'pescado', label: 'Pescado blanco' },
+  { value: 'atun', label: 'Atún' },
+  { value: 'bacalao', label: 'Bacalao' },
+  { value: 'salmon', label: 'Salmón' },
+  { value: 'anguila', label: 'Anguila' },
   { value: 'mariscos', label: 'Mariscos' },
+  { value: 'pulpo', label: 'Pulpo' },
+  { value: 'calamar', label: 'Calamar / Sepia' },
   { value: 'huevo', label: 'Huevo' },
+  { value: 'queso', label: 'Queso' },
+  { value: 'legumbres', label: 'Legumbres (lentejas, garbanzos)' },
+  { value: 'setas', label: 'Setas / Champiñones' },
   { value: 'vegetariana', label: 'Vegetariana' },
-  { value: 'vegana', label: 'Vegana' }
+  { value: 'vegana', label: 'Vegana' },
 ];
 
 const prepTimes = [

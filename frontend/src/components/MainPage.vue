@@ -13,11 +13,8 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Recetario</span>
+            <img src="@/assets/logo.png" alt="Logo" class="h-8 w-8" /> <!-- Aquí carga tu imagen -->
+            <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Sabores España</span>
           </router-link>
 
           <!-- Mobile menu button -->
@@ -31,16 +28,17 @@
               </svg>
             </button>
           </div>
-          
+
           <!-- Desktop Navigation -->
           <div class="hidden lg:flex lg:items-center lg:space-x-8">
             <router-link to="/home"
               class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-             Home
+              Home
             </router-link>
             <router-link @click="closeSession" to="/login"
               class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
@@ -107,21 +105,21 @@
         </div>
       </div>
     </nav>
+    <RecipeFilter @enviarIdRecipe="recibirIdRecipe" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
     <!-- Contenido principal -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Barra de navegación actualizada -->
-
-      <RecipeFilter @enviarIdRecipe="recibirIdRecipe" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
       <ListRecipes :greeting="greeting" :idRecipe="idRecipe"></ListRecipes>
     </div>
   </div>
+  <FooterPage></FooterPage>
 </template>
 
 <script setup>
 import 'font-awesome/css/font-awesome.min.css';
 import RecipeFilter from './FilterRecipe.vue';
 import ListRecipes from './ListRecipes.vue';
-
+import FooterPage from './FooterPage.vue';
 import { ref } from 'vue';
 
 const navbarOpen = ref(false);
@@ -137,7 +135,7 @@ function recibirIdRecipe(mensaje) {
 }
 
 const limpiarFiltros = () => {
-  
+
   greeting.value = "all";
 }
 
