@@ -531,7 +531,7 @@ def recipeFilter():
     iduser = data.get("iduser")
     
     idrecipes = [item["idrecipe"] for item in filtered]
-    filtereds = Recipe.select().where(Recipe.id.in_(idrecipes)).execute()
+    filtereds = Recipe.select().where((Recipe.id.in_(idrecipes))& (Recipe.recipe_visibility==1)).execute()
     filtered_recipes = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in filtereds]
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
