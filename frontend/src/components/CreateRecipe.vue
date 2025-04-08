@@ -116,20 +116,32 @@
           Ingredientes
         </h2>
 
-        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-2 gap-4 mb-4">
-          <div>
+        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-12 gap-4 mb-4">
+          <div class="md:col-span-5">
             <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">Ingrediente {{
-              index
-              + 1 }}</label>
-            <input :id="'ingredient' + index" v-model="recipebook.ingredients[index]" required
-              class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
-              placeholder="Ej: Arroz bomba">
+              index + 1 }}</label>
+            <div class="flex">
+              <input :id="'ingredient' + index" v-model="recipebook.ingredients[index]" required
+                class="w-full px-4 py-2 rounded-l-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+                placeholder="Ej: Arroz bomba">
+              <button @click.prevent="removeIngredient(index)"
+                class="px-3 bg-red-100 text-red-600 rounded-r-lg border border-l-0 border-amber-300 hover:bg-red-200 transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <div>
+          <div class="md:col-span-5">
             <label :for="'quantity' + index" class="block text-sm font-medium text-amber-700 mb-1">Cantidad</label>
             <input :id="'quantity' + index" v-model="recipebook.quantities[index]" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Ej: 300 gramos">
+          </div>
+          <div class="md:col-span-2 flex items-end">
+            <!-- Espacio para alinear correctamente -->
           </div>
         </div>
 
@@ -156,7 +168,15 @@
         </h2>
 
         <div v-for="(step, index) in recipebook.steps" :key="index"
-          class="mb-8 p-6 bg-amber-50 rounded-lg border border-amber-200">
+          class="mb-8 p-6 bg-amber-50 rounded-lg border border-amber-200 relative">
+          <button @click.prevent="removeStep(index)"
+            class="absolute top-2 right-2 p-1 text-red-600 hover:text-red-800 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           <h3 class="text-lg font-semibold text-amber-700 mb-3">Paso {{ index + 1 }}</h3>
 
           <div class="mb-4">
@@ -488,13 +508,25 @@ const regions = [
 
 const proteins = [
   { value: 'pollo', label: 'Pollo' },
-  { value: 'res', label: 'Res' },
-  { value: 'cerdo', label: 'Cerdo' },
-  { value: 'pescado', label: 'Pescado' },
+  { value: 'res', label: 'Res / Ternera' },
+  { value: 'cerdo', label: 'Cerdo / Ibérico' },
+  { value: 'cordero', label: 'Cordero' },
+  { value: 'conejo', label: 'Conejo' },
+  { value: 'pato', label: 'Pato' },
+  { value: 'pescado', label: 'Pescado blanco' },
+  { value: 'atun', label: 'Atún' },
+  { value: 'bacalao', label: 'Bacalao' },
+  { value: 'salmon', label: 'Salmón' },
+  { value: 'anguila', label: 'Anguila' },
   { value: 'mariscos', label: 'Mariscos' },
+  { value: 'pulpo', label: 'Pulpo' },
+  { value: 'calamar', label: 'Calamar / Sepia' },
   { value: 'huevo', label: 'Huevo' },
+  { value: 'queso', label: 'Queso' },
+  { value: 'legumbres', label: 'Legumbres (lentejas, garbanzos)' },
+  { value: 'setas', label: 'Setas / Champiñones' },
   { value: 'vegetariana', label: 'Vegetariana' },
-  { value: 'vegana', label: 'Vegana' }
+  { value: 'vegana', label: 'Vegana' },
 ];
 
 const prepTimes = [
@@ -503,6 +535,21 @@ const prepTimes = [
   { value: '30a60', label: 'Lenta', description: '30-60 minutos' },
   { value: 'mas60', label: 'Muy lenta', description: '>1 hora' }
 ];
+
+// Función para eliminar ingrediente
+function removeIngredient(index) {
+
+    recipebook.ingredients.splice(index, 1);
+    recipebook.quantities.splice(index, 1);
+
+}
+
+// Función para eliminar paso
+function removeStep(index) {
+
+    recipebook.steps.splice(index, 1);
+
+}
 </script>
 
 <style scoped>

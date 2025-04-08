@@ -7,6 +7,7 @@ from flask_mysqldb import MySQL
 from config import Config
 from peewee import DoesNotExist
 from datetime import date
+from peewee import fn
 import hashlib
 import os
 import base64
@@ -608,6 +609,26 @@ def deleteUser():
         Recipe.delete().where(Recipe.id_user == iduser).execute()
         Users.delete().where(Users.id == iduser).execute()    
         return jsonify(message="Perfil eliminado")
+
+@app.route('/averageStars', methods=["POST"])
+def averageStars():
+    try:
+        query = (RecipeReview
+                 .select(RecipeReview.id_recipe_id, fn.AVG(RecipeReview.recipe_review_item_value).alias('average_rating'))
+                 .group_by(RecipeReview.id_recipe_id))
+
+        result = []
+        for item in query:
+            average_rating = item.average_rating if item.average_rating is not None else 0
+            result.append({
+                'recipe_id': item.id_recipe_id, 
+                'average_rating': round(average_rating, 2) 
+            })
+
+        return jsonify(media=result)
+
+    except Exception as e:
+        return jsonify(message="Error: " + str(e)), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

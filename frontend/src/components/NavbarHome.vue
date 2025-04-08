@@ -116,9 +116,7 @@ const toggleNavbar = () => {
 };
 
 const logout = () => {
-  localStorage.removeItem('userToken');
-  localStorage.removeItem('iduser');
-  localStorage.removeItem('type');
+  localStorage.clear();
   router.push('/login');
 };
 </script>

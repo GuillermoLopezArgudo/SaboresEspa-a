@@ -14,7 +14,7 @@
           <!-- Logo -->
           <router-link to="/" class="flex items-center">
             <img src="@/assets/logo.png" alt="Logo" class="h-8 w-8" /> <!-- Aquí carga tu imagen -->
-            <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Recetario</span>
+            <span class="ml-2 text-2xl font-bold text-amber-800 font-serif">Sabores España</span>
           </router-link>
 
           <!-- Mobile menu button -->
@@ -105,11 +105,10 @@
         </div>
       </div>
     </nav>
+    <RecipeFilter @enviarIdRecipe="recibirIdRecipe" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
     <!-- Contenido principal -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Barra de navegación actualizada -->
-
-      <RecipeFilter @enviarIdRecipe="recibirIdRecipe" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
       <ListRecipes :greeting="greeting" :idRecipe="idRecipe"></ListRecipes>
     </div>
   </div>
