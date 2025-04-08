@@ -1,44 +1,19 @@
-# ---- Etapa de construcción del frontend ----
-    FROM node:16 as frontend-builder
+FROM python:3.9-slim
 
-    WORKDIR /frontend
-    COPY frontend/package*.json ./
-    RUN npm ci --silent
-    COPY frontend .
-    RUN npm run build
-    
-    # ---- Etapa del backend ----
-    FROM python:3.9-slim
-    
-    # Instala dependencias del sistema (incluyendo herramientas de compilación)
-    RUN apt-get update && apt-get install -y \
-        pkg-config \
-        libmariadb-dev-compat \
-        gcc \
-        python3-dev \
-        default-libmysqlclient-dev \
-        build-essential \
-        && rm -rf /var/lib/apt/lists/*
-    
-    WORKDIR /app
-    
-    # Instala dependencias de Python
-    COPY requirements.txt .
-    RUN pip install --no-cache-dir -r requirements.txt gunicorn
-    
-    # Copia el backend
-    COPY app.py .
-    COPY models.py .
-    COPY config.py .
-    
-    # Copia el frontend construido
-    COPY --from=frontend-builder /frontend/dist /static
-    
-    # Crea directorios para uploads
-    RUN mkdir -p /app/static/images /app/static/videos
-    
-    # Puerto expuesto
-    EXPOSE 5000
-    
-    # Comando de inicio
-    CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libmariadb-dev-compat \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt /app/
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]

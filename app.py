@@ -18,7 +18,7 @@ app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
 app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
 app.config.from_object('config.Config')
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
