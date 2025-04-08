@@ -176,20 +176,21 @@ def viewAllRecipes():
     iduser = data.get("iduser")
     recipes = Recipe.select().where(Recipe.recipe_visibility == 1)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
+    categories_list = []
+    for recipe in recipes:
+        categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
+        for categorie in categories:
+            categories_list.append({
+                "recipe_id": recipe.id,
+                "type": categorie.type,
+                "category": categorie.category
+            })
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
         reviews = RecipeReview.select().where(RecipeReview.id_user_id ==iduser)
         reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
-        categories_list = []
-        for recipe in recipes:
-            categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
-            for categorie in categories:
-                categories_list.append({
-                    "recipe_id": recipe.id,
-                    "type": categorie.type,
-                    "category": categorie.category
-                })
+
         return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list)
     return jsonify(recipes_list=recipes_list,categories_list=categories_list)
 
