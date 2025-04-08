@@ -54,7 +54,7 @@ def register():
         return jsonify(message="ERROR")
     user = Users(user_name = name,user_email = email, user_password = hashlib.sha256(password.encode('utf-8')).hexdigest(), user_type = type,user_token = token, user_image= "/static/images/NonPerfil.webp", created_at = date.today(), modified_at = date.today())
     user.save()
-    return jsonify(userToken = token, iduser = user.id)
+    return jsonify(userToken = token, iduser = user.id, type = user.user_type)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -63,9 +63,9 @@ def login():
     password = data.get("password")
     token = create_access_token(identity=email)
     if Users.select().where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).exists():
-        user = Users.select(Users.id).where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).get()       
+        user = Users.select(Users.id,Users.user_type).where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).get()       
         Users.update(user_token=token).where(Users.id == user.id).execute()
-        return jsonify(userToken=token, iduser=user.id)
+        return jsonify(userToken=token, iduser=user.id, type = user.user_type)
     return jsonify(message="ERROR User NOT LOGGED")
 
 @app.route('/create', methods=['POST'])
@@ -532,6 +532,39 @@ def changePassword():
     if Users.select().where((Users.user_token == userToken)).exists():
         Users.update(user_password=hashlib.sha256(newPassword.encode('utf-8')).hexdigest(),modified_at=date.today()).where(Users.id == iduser).execute()
         return jsonify(message="Contraseña Actualizada")
+
+@app.route('/deleteProfile', methods=['POST'])
+def deleteProfile():
+    data = request.get_json()
+    iduser = data.get('iduser')
+    idRecipes = Recipe.select().where(Recipe.id_user == iduser)
+    for recipe in idRecipes:
+        steps = RecipeStep.select().where(RecipeStep.id_recipe == recipe.id)
+        for step in steps:
+            RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
+        RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
+        RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
+        RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
+        RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+        RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
+
+    StepImage.delete().where(StepImage.id_user == iduser).execute()
+    UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
+
+    Recipe.delete().where(Recipe.id_user == iduser).execute()
+    Users.delete().where(Users.id == iduser).execute()    
+    return jsonify(message="Perfil eliminado")
+
+@app.route('/allUsers', methods=['POST'])
+def allUsers():
+    data = request.get_json()
+    type = data.get('type')
+    userToken = data.get('userToken')
+    if Users.select().where(Users.user_token == userToken):
+        users = Users.select().where(Users.user_type != type)
+        users_list = [{"name":user.user_name,"email":user.user_email}for user in users]
+        return jsonify(users_list=users_list)
+    return jsonify(users_list=[])
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

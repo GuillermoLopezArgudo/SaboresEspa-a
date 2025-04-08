@@ -30,7 +30,7 @@
                 <span class="font-medium">{{ isFavorite ? 'En favoritos' : 'Añadir a favoritos' }}</span>
               </button>
             </div>
-            <div v-if="iduser == receta.id_user" class="flex space-x-2">
+            <div v-if="iduser == receta.id_user || type == 'admin'" class="flex space-x-2">
               <button @click="editeRecipe" 
                       class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition duration-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,7 +146,7 @@
               <div v-else>
                 <p class="text-amber-800">{{ comment.comment }}</p>
                 <p class="text-sm text-amber-600 mt-1">Por: {{ comment.username }}</p>
-                <div v-if="iduser == comment.iduser" class="flex space-x-2 mt-2">
+                <div v-if="iduser == comment.iduser || type == 'admin'" class="flex space-x-2 mt-2">
                   <button @click="startEditComment(comment)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition duration-300">
                     Editar
                   </button>
@@ -200,6 +200,7 @@
   const comment = ref("");
   const userToken = localStorage.getItem('userToken');
   const iduser = localStorage.getItem('iduser');
+  const type = localStorage.getItem('type')
   const ingredients = ref([]);
   const quantity = ref([]);
   const steps = ref([]);
@@ -214,7 +215,6 @@
       iduser: iduser,
       idcomment: 0
   };
-  
   const toggleFavorite = () => {
       if (iduser) {
           isFavorite.value = !isFavorite.value;

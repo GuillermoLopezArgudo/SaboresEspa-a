@@ -1,6 +1,7 @@
 <template>
+  <NavbarHome></NavbarHome>
   <div class="min-h-screen bg-amber-50 py-12 px-4 sm:px-6 lg:px-8">
-    <NavbarHome></NavbarHome>
+
     <div class="max-w-md mx-auto bg-white rounded-xl shadow-xl overflow-hidden">
       <!-- Encabezado -->
       <div class="bg-gradient-to-r from-amber-600 to-amber-700 py-4 px-6">
@@ -142,15 +143,29 @@
           </div>
           {{ error }}
         </div>
+        <!-- Botón para eliminar perfil -->
+        <div class="mt-6 text-center">
+          <button @click="deleteProfile"
+            class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-300">
+            Eliminar perfil
+          </button>
+        </div>
       </div>
     </div>
+
   </div>
+  <div v-for="(item) in users" :key="item.id">
+    <p>{{ item.name }}</p>
+  </div>
+  <FooterPage></FooterPage>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import NavbarHome from './NavbarHome.vue';
+import { useRouter } from 'vue-router';
+import FooterPage from './FooterPage.vue';
 
 const image = ref("");
 const imageUrl = ref("");
@@ -163,13 +178,17 @@ const payload = ref({
   name: "",
   email: "",
   newPassword: "",
-  confirmPassword: ""
+  confirmPassword: "",
+  type: localStorage.getItem("type")
 });
 const newPassword = ref('');
 const confirmPassword = ref('');
 const boolChangeName = ref(true);
 const boolChangeEmail = ref(true);
 const boolChangePassword = ref(true)
+const router = useRouter();
+const type = localStorage.getItem("type")
+const users = []
 
 function handleImageChange(event) {
   const file = event.target.files[0];
@@ -217,7 +236,7 @@ function changePassword() {
       .catch(error => {
         console.log(error);
       })
-      handleChangePassword();
+    handleChangePassword();
   }
 
 }
@@ -276,7 +295,36 @@ onMounted(() => {
     .catch(error => {
       console.log(error);
     });
+  if (type == "admin") {
+    axios
+      .post('http://localhost:5000/allUsers', payload.value)
+      .then(response => {
+        users.push(response.data.users_list)
+        console.log(response.data.users_list)
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 });
+
+function deleteProfile() {
+  axios
+    .post('http://localhost:5000/deleteProfile', payload.value)
+    .then(response => {
+      console.log(response.data.message);
+      localStorage.removeItem("iduser");
+      localStorage.removeItem("token");
+      localStorage.removeItem("type");
+      router.push({ name: "register" });
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
+
+
+
 </script>
 
 <style scoped>

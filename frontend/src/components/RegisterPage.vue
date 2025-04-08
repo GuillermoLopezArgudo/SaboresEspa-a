@@ -70,16 +70,6 @@
           </div>
         </div>
 
-        <!-- Tipo de usuario -->
-        <div class="mb-6">
-          <label for="type" class="block text-sm font-medium text-amber-700 mb-1">Tipo de cuenta</label>
-          <select id="type" v-model="type" 
-                  class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 shadow-sm bg-white">
-            <option value="user">Usuario</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </div>
-
         <!-- Botón de registro -->
         <button type="submit" 
                 class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-800 transition duration-300 flex items-center justify-center">
@@ -137,6 +127,7 @@ function OnSubmit() {
       if (response.data.userToken) {
         localStorage.setItem("userToken", response.data.userToken);
         localStorage.setItem("iduser", response.data.iduser);
+        localStorage.setItem("type", response.data.type);
         router.push({ name: "home" });
       } else {
         error.value = response.data.message;

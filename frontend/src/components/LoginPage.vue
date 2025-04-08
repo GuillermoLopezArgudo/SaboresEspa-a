@@ -104,6 +104,7 @@ function OnSubmit() {
       if (response.data.userToken) {
         localStorage.setItem('userToken', response.data.userToken);
         localStorage.setItem('iduser', response.data.iduser);
+        localStorage.setItem('type', response.data.type)
         router.push({ name: 'home' });
       } else {
         error.value = response.data.message;

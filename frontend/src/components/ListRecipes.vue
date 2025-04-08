@@ -129,6 +129,7 @@
             </div>
         </div>
     </div>
+    <FooterPage></FooterPage>
 </template>
 
 <script setup>
@@ -137,6 +138,7 @@ import { reactive, defineProps, watch, onMounted } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import FooterPage from './FooterPage.vue';
 
 const favoritos = reactive({});
 const ratings = reactive({});
