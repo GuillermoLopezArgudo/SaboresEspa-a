@@ -177,7 +177,7 @@ class RecipeSubStepImage(BaseModel):
 
 # Para crear las tablas si no existen
 def create_tables():
-    print(db)
+    print(f'DB complete: {db}')
     print(f"MYSQL_HOST: {Config.MYSQL_HOST}")
     print(f"MYSQL_USER: {Config.MYSQL_USER}")
     print(f"MYSQL_PASSWORD: {Config.MYSQL_PASSWORD}")

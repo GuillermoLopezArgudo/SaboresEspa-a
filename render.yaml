@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: flask-backend
+    env: docker
+    plan: free
+    autoDeploy: true
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: FLASK_ENV
+        value: development
+      - key: MYSQL_HOST
+        fromService:
+          name: mysql-db
+          type: private
+      - key: MYSQL_USER
+        value: root
+      - key: MYSQL_PASSWORD
+        value: 1234
+      - key: MYSQL_DB
+        value: recipesSpain
+
+  - type: web
+    name: vue-frontend
+    env: static
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    rootDir: frontend
+    envVars:
+      - key: VUE_APP_API_URL
+        value: https://flask-backend.onrender.com
+
+  - type: private
+    name: mysql-db
+    env: docker
+    plan: free
+    autoDeploy: false
+    image: mysql:8.0
+    disk:
+      name: mysql-disk
+      mountPath: /var/lib/mysql
+      sizeGB: 1
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: 1234
+      - key: MYSQL_DATABASE
+        value: recipesSpain
+      - key: MYSQL_USER
+        value: root
