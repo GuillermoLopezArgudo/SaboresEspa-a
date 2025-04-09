@@ -17,7 +17,9 @@ import base64
 import time
 
 app = Flask(__name__)
+print("Waiting for MySQL to be ready...")
 time.sleep(5)
+print("Trying to create tables now.")
 create_tables()
 
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
