@@ -1,8 +1,17 @@
-from flask import Flask, jsonify, request, abort
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from werkzeug.utils import secure_filename
+import os
 from dotenv import load_dotenv
 load_dotenv()
+
+print(f"MYSQL_HOST: {os.getenv('MYSQL_HOST')}")
+print(f"MYSQL_USER: {os.getenv('MYSQL_USER')}")
+print(f"MYSQL_PASSWORD: {os.getenv('MYSQL_PASSWORD')}")
+print(f"MYSQL_DB: {os.getenv('MYSQL_DB')}")
+
+
+from flask import Flask, jsonify, request, abort
+
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
 from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage
 from flask_cors import CORS
 from flask_mysqldb import MySQL
@@ -11,7 +20,6 @@ from peewee import DoesNotExist
 from datetime import date
 from peewee import fn
 import hashlib
-import os
 import base64
 
 app = Flask(__name__)
