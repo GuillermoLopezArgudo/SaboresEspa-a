@@ -17,6 +17,7 @@ services:
       - MYSQL_DB=recipesSpain
     depends_on:
       - db  
+    entrypoint: ["./wait-for-it.sh", "db:3306", "--", "python", "app.py"]
 
   # Tu servicio de Vue.js (Frontend)
   vue:
