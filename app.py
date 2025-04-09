@@ -14,8 +14,10 @@ from datetime import date
 from peewee import fn
 import hashlib
 import base64
+import time
 
 app = Flask(__name__)
+time.sleep(5)
 create_tables()
 
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
