@@ -1,27 +1,12 @@
-# Frontend (Vue.js) - Static Site
-- type: web
-  name: vue-frontend
-  env: static
-  rootDir: frontend  # El directorio donde está tu frontend (el que contiene Dockerfile de Vue)
-  buildCommand: npm install && npm run build  # Instalar dependencias y construir la app de Vue
-  staticPublishPath: dist  # El directorio generado por `npm run build` que contiene los archivos estáticos
-  envVars:
-    - key: VUE_APP_API_URL
-      value: https://saboresespa-a-1.onrender.com  # URL del backend de Flask
-  routes:
-    - type: rewrite
-      source: /app/*
-      destination: /index.html  # Redirige rutas SPA a index.html
-
-# Flask Backend - Docker
+# Backend - Flask API
 - type: web
   name: flask-backend
   env: docker
-  buildCommand: docker build -t flask-backend .  # Construir la imagen Docker para Flask
-  startCommand: docker run -p 5000:5000 flask-backend  # Ejecuta el contenedor de Flask
+  buildCommand: docker build -t flask-backend .  # Construir imagen Docker de Flask
+  startCommand: docker run -p 5000:5000 flask-backend  # Ejecutar contenedor Flask
   envVars:
     - key: MYSQL_HOST
-      value: mysql-db  # Este es el nombre del servicio de base de datos MySQL gestionado por Render
+      value: mysql-db  # Nombre del servicio de MySQL en Render
     - key: MYSQL_USER
       value: root
     - key: MYSQL_PASSWORD
@@ -29,9 +14,22 @@
     - key: MYSQL_DB
       value: recipesSpain
   routes:
-    - type: rewrite
-      source: /api/*
-      destination: http://localhost:5000/api/*  # Redirige las rutas /api a Flask
+    - source: /api/*
+      destination: http://localhost:5000/api/*  # Redirigir las rutas /api a Flask
+
+# Frontend - Vue.js (Static Site)
+- type: web
+  name: vue-frontend
+  env: static
+  rootDir: frontend  # Directorio donde está tu frontend (con Dockerfile)
+  buildCommand: npm install && npm run build  # Instalar dependencias y construir la app Vue
+  staticPublishPath: dist  # Directorio generado por `npm run build` que contiene los archivos estáticos
+  envVars:
+    - key: VUE_APP_API_URL
+      value: https://saboresespa-a-1.onrender.com  # URL de tu backend de Flask
+  routes:
+    - source: /*  # Redirigir todas las rutas de frontend
+      destination: /index.html  # Redirigir todo a index.html para las rutas SPA
 
 # MySQL Database - Managed MySQL Database on Render
 - type: database
