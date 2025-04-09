@@ -279,7 +279,7 @@ const limpiarFiltros = () => {
   tipoComida.value= "";
   ccaa.value="";
   tiempo.value="";
-  proteinas.value="";
+  proteinas.value=[];
   emit('limpiarFiltros');
 
 };

@@ -18,7 +18,7 @@ import time
 
 app = Flask(__name__)
 print("Waiting for MySQL to be ready...")
-time.sleep(5)
+time.sleep(15)
 print("Trying to create tables now.")
 create_tables()
 
