@@ -1,18 +1,24 @@
+import os
 from dotenv import load_dotenv
 load_dotenv()
-import peewee
+
 from peewee import *
 import datetime
 from config import Config  # Importa la configuración
 
 # Configura la conexión a la base de datos MySQL usando los valores de Config
-db = peewee.MySQLDatabase(
+db = MySQLDatabase(
     Config.MYSQL_DB, 
     user=Config.MYSQL_USER, 
     password=Config.MYSQL_PASSWORD, 
     host=Config.MYSQL_HOST, 
     port=3306
 )
+
+print(f"MYSQL_HOST: {os.getenv('MYSQL_HOST')}")
+print(f"MYSQL_USER: {os.getenv('MYSQL_USER')}")
+print(f"MYSQL_PASSWORD: {os.getenv('MYSQL_PASSWORD')}")
+print(f"MYSQL_DB: {os.getenv('MYSQL_DB')}")
 
 class BaseModel(Model):
     class Meta:
