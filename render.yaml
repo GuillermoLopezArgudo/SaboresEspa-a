@@ -1,48 +1,34 @@
-# Backend - Flask API
-- type: web
-  name: flask-backend
-  env: docker
-  buildCommand: docker build -t flask-backend .  # Construir imagen Docker de Flask
-  startCommand: docker run -p 5000:5000 flask-backend  # Ejecutar contenedor Flask
-  envVars:
-    - key: MYSQL_HOST
-      value: mysql-db  # Nombre del servicio de MySQL en Render
-    - key: MYSQL_USER
-      value: root
-    - key: MYSQL_PASSWORD
-      value: 1234
-    - key: MYSQL_DB
-      value: recipesSpain
-  routes:
-    - source: /api/*
-      destination: http://localhost:5000/api/*  # Redirigir las rutas /api a Flask
+# render.yaml
 
-# Frontend - Vue.js (Static Site)
-- type: web
-  name: vue-frontend
-  env: static
-  rootDir: frontend  # Directorio donde está tu frontend (con Dockerfile)
-  buildCommand: npm install && npm run build  # Instalar dependencias y construir la app Vue
-  staticPublishPath: dist  # Directorio generado por `npm run build` que contiene los archivos estáticos
-  envVars:
-    - key: VUE_APP_API_URL
-      value: https://saboresespa-a-1.onrender.com  # URL de tu backend de Flask
-  routes:
-    - source: /*  # Redirigir todas las rutas de frontend
-      destination: /index.html  # Redirigir todo a index.html para las rutas SPA
+services:
+  # 1. Base de datos PostgreSQL
+  - type: postgres
+    name: mi-db-flask
+    plan: free  # Cambia a "starter" o "standard" en producción
+    databaseName: flask_db
+    user: flask_user
 
-# MySQL Database - Managed MySQL Database on Render
-- type: database
-  name: mysql-db
-  engine: mysql
-  version: 8.0
-  plan: free  # O ajusta el plan según sea necesario
-  envVars:
-    - key: MYSQL_ROOT_PASSWORD
-      value: 1234  # Contraseña root para la base de datos
-    - key: MYSQL_USER
-      value: root  # Usuario root para MySQL
-    - key: MYSQL_PASSWORD
-      value: 1234  # Contraseña para el usuario root
-    - key: MYSQL_DB
-      value: recipesSpain  # Nombre de la base de datos
+  # 2. Backend con Flask (Python)
+  - type: web
+    name: backend-flask
+    runtime: python
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app  # Ajusta "app:app" según tu archivo Flask
+    env:
+      DATABASE_URL: postgres://flask_user:@mi-db-flask:5432/flask_db
+      FLASK_ENV: production
+      # Otras variables que necesites (ej: SECRET_KEY)
+    plan: free
+
+  # 3. Frontend con Vue (Static Site)
+  - type: web
+    name: frontend-vue
+    runtime: node
+    buildCommand: |
+      cd frontend && npm install && npm run build
+    staticSite: true  # Importante para Vue/React
+    publish: frontend/dist  # Ruta donde se genera el build
+    env:
+      VITE_API_URL: https://backend-flask.onrender.com  # Usado en axios/fetch
+    plan: free
