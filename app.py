@@ -24,7 +24,7 @@ app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
 
 CORS(app, resources={r"/*": {"origins": "*"}})
-#app.config['JWT_SECRET_KEY'] = 'supersecretkey'
+app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
 mysql = MySQL(app)
 

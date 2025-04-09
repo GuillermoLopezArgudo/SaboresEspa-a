@@ -1,49 +1,50 @@
-services:
-  - type: web
-    name: flask-backend
-    env: docker
-    plan: free
-    autoDeploy: true
-    region: oregon
-    dockerfilePath: ./Dockerfile
-    envVars:
-      - key: MYSQL_HOST
-        fromService:
-          name: mysql-db
-          type: private
-      - key: MYSQL_USER
-        value: root
-      - key: MYSQL_PASSWORD
-        value: 1234
-      - key: MYSQL_DB
-        value: recipesSpain
+# Frontend (Vue.js) - Static Site
+- type: web
+  name: vue-frontend
+  env: static
+  rootDir: frontend  # Apunta al directorio donde está tu frontend (el directorio con el Dockerfile de Vue)
+  buildCommand: npm install && npm run build  # Instala dependencias y construye la app de Vue
+  staticPublishPath: dist  # El directorio generado por `npm run build`
+  envVars:
+    - key: VUE_APP_API_URL
+      value: https://saboresespa-a-1.onrender.com  # URL de la API Flask en Render
+  routes:
+    - type: rewrite
+      source: /app/*
+      destination: /index.html  # Rutas de Vue (SPA) serán redirigidas al index.html
 
-  - type: web
-    name: vue-frontend
-    env: static
-    plan: free
-    autoDeploy: true
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    rootDir: frontend
-    envVars:
-      - key: VUE_APP_API_URL
-        value: https://flask-backend.onrender.com
+# Flask Backend - Docker
+- type: web
+  name: flask-backend
+  env: docker
+  buildCommand: docker build -t flask-backend .  # Construye la imagen de Docker para Flask
+  startCommand: docker run -p 5000:5000 flask-backend  # Ejecuta el contenedor de Flask
+  envVars:
+    - key: MYSQL_HOST
+      value: mysql-db  # Nombre del servicio de MySQL que definimos a continuación
+    - key: MYSQL_USER
+      value: root
+    - key: MYSQL_PASSWORD
+      value: 1234
+    - key: MYSQL_DB
+      value: recipesSpain
+  routes:
+    - type: rewrite
+      source: /api/*
+      destination: http://localhost:5000/api/*  # Redirige las rutas a Flask
 
-  - type: private
-    name: mysql-db
-    env: docker
-    plan: free
-    autoDeploy: false
-    image: mysql:8.0
-    disk:
-      name: mysql-disk
-      mountPath: /var/lib/mysql
-      sizeGB: 1
-    envVars:
-      - key: MYSQL_ROOT_PASSWORD
-        value: 1234
-      - key: MYSQL_DATABASE
-        value: recipesSpain
-      - key: MYSQL_USER
-        value: root
+# MySQL Database - Managed MySQL Database on Render
+- type: database
+  name: mysql-db
+  engine: mysql
+  version: 8.0
+  plan: free  # O ajusta el plan según lo que necesites
+  envVars:
+    - key: MYSQL_ROOT_PASSWORD
+      value: 1234  # Contraseña root para la base de datos
+    - key: MYSQL_USER
+      value: root  # Usuario root para MySQL
+    - key: MYSQL_PASSWORD
+      value: 1234  # Contraseña para el usuario root
+    - key: MYSQL_DB
+      value: recipesSpain  # Nombre de la base de datos
