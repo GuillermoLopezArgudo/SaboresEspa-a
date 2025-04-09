@@ -2,26 +2,26 @@
 - type: web
   name: vue-frontend
   env: static
-  rootDir: frontend  # Apunta al directorio donde está tu frontend (el directorio con el Dockerfile de Vue)
-  buildCommand: npm install && npm run build  # Instala dependencias y construye la app de Vue
-  staticPublishPath: dist  # El directorio generado por `npm run build`
+  rootDir: frontend  # El directorio donde está tu frontend (el que contiene Dockerfile de Vue)
+  buildCommand: npm install && npm run build  # Instalar dependencias y construir la app de Vue
+  staticPublishPath: dist  # El directorio generado por `npm run build` que contiene los archivos estáticos
   envVars:
     - key: VUE_APP_API_URL
-      value: https://saboresespa-a-1.onrender.com  # URL de la API Flask en Render
+      value: https://saboresespa-a-1.onrender.com  # URL del backend de Flask
   routes:
     - type: rewrite
       source: /app/*
-      destination: /index.html  # Rutas de Vue (SPA) serán redirigidas al index.html
+      destination: /index.html  # Redirige rutas SPA a index.html
 
 # Flask Backend - Docker
 - type: web
   name: flask-backend
   env: docker
-  buildCommand: docker build -t flask-backend .  # Construye la imagen de Docker para Flask
+  buildCommand: docker build -t flask-backend .  # Construir la imagen Docker para Flask
   startCommand: docker run -p 5000:5000 flask-backend  # Ejecuta el contenedor de Flask
   envVars:
     - key: MYSQL_HOST
-      value: mysql-db  # Nombre del servicio de MySQL que definimos a continuación
+      value: mysql-db  # Este es el nombre del servicio de base de datos MySQL gestionado por Render
     - key: MYSQL_USER
       value: root
     - key: MYSQL_PASSWORD
@@ -31,14 +31,14 @@
   routes:
     - type: rewrite
       source: /api/*
-      destination: http://localhost:5000/api/*  # Redirige las rutas a Flask
+      destination: http://localhost:5000/api/*  # Redirige las rutas /api a Flask
 
 # MySQL Database - Managed MySQL Database on Render
 - type: database
   name: mysql-db
   engine: mysql
   version: 8.0
-  plan: free  # O ajusta el plan según lo que necesites
+  plan: free  # O ajusta el plan según sea necesario
   envVars:
     - key: MYSQL_ROOT_PASSWORD
       value: 1234  # Contraseña root para la base de datos
