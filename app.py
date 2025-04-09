@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+load_dotenv()
 from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage
 from flask_cors import CORS
 from flask_mysqldb import MySQL
@@ -8,8 +10,6 @@ from config import Config
 from peewee import DoesNotExist
 from datetime import date
 from peewee import fn
-from dotenv import load_dotenv
-load_dotenv()
 import hashlib
 import os
 import base64
