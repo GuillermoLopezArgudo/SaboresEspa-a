@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from peewee import *
 import datetime
 from config import Config  # Importa la configuración
