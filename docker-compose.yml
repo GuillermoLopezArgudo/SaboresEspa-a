@@ -16,8 +16,7 @@ services:
       - MYSQL_PASSWORD=1234
       - MYSQL_DB=recipesSpain
     depends_on:
-      - db  
-    entrypoint: ["./wait-for-it.sh", "db:3306", "--", "python", "app.py"]
+      - db   
 
   # Tu servicio de Vue.js (Frontend)
   vue:
