@@ -1,34 +1,40 @@
-# render.yaml
-
 services:
-  # 1. Base de datos PostgreSQL
-  - type: postgres
-    name: mi-db-flask
-    plan: free  # Cambia a "starter" o "standard" en producción
-    databaseName: flask_db
-    user: flask_user
-
-  # 2. Backend con Flask (Python)
+  # 1. Base de datos MySQL (Render no ofrece MySQL gestionado, usaremos un contenedor)
   - type: web
-    name: backend-flask
-    runtime: python
-    buildCommand: |
-      pip install -r requirements.txt
-    startCommand: gunicorn app:app  # Ajusta "app:app" según tu archivo Flask
+    name: mysql-db
+    runtime: docker
+    dockerfilePath: Dockerfile.mysql  # Necesitarás crear este archivo
     env:
-      DATABASE_URL: postgres://flask_user:@mi-db-flask:5432/flask_db
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: recipesSpain
+      MYSQL_USER: root
+    plan: shared  # MySQL no puede ir en plan "free" (requiere contenedor persistente)
+
+  # 2. Backend Flask (Python)
+  - type: web
+    name: flask-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:5000
+    env:
+      MYSQL_HOST: mysql-db  # Nombre del servicio MySQL
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      MYSQL_DB: recipesSpain
       FLASK_ENV: production
-      # Otras variables que necesites (ej: SECRET_KEY)
     plan: free
 
-  # 3. Frontend con Vue (Static Site)
+  # 3. Frontend Vue (Static Site)
   - type: web
-    name: frontend-vue
+    name: vue-frontend
     runtime: node
     buildCommand: |
       cd frontend && npm install && npm run build
-    staticSite: true  # Importante para Vue/React
-    publish: frontend/dist  # Ruta donde se genera el build
+    staticSite: true
+    publish: frontend/dist
     env:
-      VITE_API_URL: https://backend-flask.onrender.com  # Usado en axios/fetch
+      VUE_APP_API_URL: https://flask-backend.onrender.com  # Cambia a tu URL de Flask en Render
+    routes:
+      - path: /*
+        staticSite: true  # Para Vue Router
     plan: free
