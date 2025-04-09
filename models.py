@@ -1,7 +1,3 @@
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
 from peewee import *
 import datetime
 from config import Config  # Importa la configuración
@@ -14,11 +10,6 @@ db = MySQLDatabase(
     host=Config.MYSQL_HOST, 
     port=3306
 )
-
-print(f"MYSQL_HOST: {Config.MYSQL_HOST}")
-print(f"MYSQL_USER: {Config.MYSQL_USER}")
-print(f"MYSQL_PASSWORD: {Config.MYSQL_PASSWORD}")
-print(f"MYSQL_DB: {Config.MYSQL_DB}")
 
 class BaseModel(Model):
     class Meta:
@@ -177,11 +168,6 @@ class RecipeSubStepImage(BaseModel):
 
 # Para crear las tablas si no existen
 def create_tables():
-    print(f'DB complete: {db}')
-    print(f"MYSQL_HOST: {Config.MYSQL_HOST}")
-    print(f"MYSQL_USER: {Config.MYSQL_USER}")
-    print(f"MYSQL_PASSWORD: {Config.MYSQL_PASSWORD}")
-    print(f"MYSQL_DB: {Config.MYSQL_DB}")
     with db:
         db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage])
 

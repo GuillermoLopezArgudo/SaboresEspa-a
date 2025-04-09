@@ -14,23 +14,29 @@ from datetime import date
 from peewee import fn
 import hashlib
 import base64
-import time
+from models import db, BaseModel
 
 app = Flask(__name__)
-print("Waiting for MySQL to be ready...")
-time.sleep(15)
-print("Trying to create tables now.")
-create_tables()
 
+app.config.from_object(Config)
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
 app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
-app.config.from_object('config.Config')
-app.config['JWT_SECRET_KEY'] = 'supersecretkey'
+CORS(app, resources={r"/*": {"origins": "*"}})
+#app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
 mysql = MySQL(app)
+
+try:
+    db.connect(reuse_if_open=True)
+    print("✅ Conectado a MySQL")
+except Exception as e:
+    print("❌ Error al conectar a la base de datos:", e)
+
+def create_tables():
+    from models import SomeModel
+    db.create_tables([SomeModel], safe=True)
 
 def save_base64_file(base64_data, file_name, folder):
     if base64_data:
