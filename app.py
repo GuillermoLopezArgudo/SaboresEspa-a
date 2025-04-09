@@ -8,12 +8,14 @@ from config import Config
 from peewee import DoesNotExist
 from datetime import date
 from peewee import fn
+from dotenv import load_dotenv
 import hashlib
 import os
 import base64
 
 app = Flask(__name__)
 create_tables()
+load_dotenv()
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
 app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
