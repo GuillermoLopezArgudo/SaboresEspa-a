@@ -43,7 +43,7 @@ services:
       - "8081:80"  
     depends_on:
       - db  
-        # Tu servicio de Flask (Backend)
+  # Tu servicio de Flask (Backend)
   flask:
     build:
       context: .

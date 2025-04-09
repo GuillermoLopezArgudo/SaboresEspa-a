@@ -1,12 +1,12 @@
 from dotenv import load_dotenv
 load_dotenv()
-
+import peewee
 from peewee import *
 import datetime
 from config import Config  # Importa la configuración
 
 # Configura la conexión a la base de datos MySQL usando los valores de Config
-db = MySQLDatabase(
+db = peewee.MySQLDatabase(
     Config.MYSQL_DB, 
     user=Config.MYSQL_USER, 
     password=Config.MYSQL_PASSWORD, 
