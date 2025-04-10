@@ -1,14 +1,17 @@
 services:
-  # 1. Base de datos MySQL (Render no ofrece MySQL gestionado, usaremos un contenedor)
-  - type: web
+  # 1. Base de datos MySQL (en contenedor privado)
+  - type: pserv
     name: mysql-db
     runtime: docker
-    dockerfilePath: Dockerfile.mysql  # Necesitarás crear este archivo
-    env:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: recipesSpain
-      MYSQL_USER: root
-    plan: shared  # MySQL no puede ir en plan "free" (requiere contenedor persistente)
+    dockerfilePath: Dockerfile.mysql
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: 1234
+      - key: MYSQL_DATABASE
+        value: recipesSpain
+      - key: MYSQL_USER
+        value: root
+    plan: starter  # o "standard", según lo que tengas habilitado
 
   # 2. Backend Flask (Python)
   - type: web
@@ -16,25 +19,28 @@ services:
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:5000
-    env:
-      MYSQL_HOST: mysql-db  # Nombre del servicio MySQL
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 1234
-      MYSQL_DB: recipesSpain
-      FLASK_ENV: production
+    envVars:
+      - key: MYSQL_HOST
+        value: mysql-db
+      - key: MYSQL_USER
+        value: root
+      - key: MYSQL_PASSWORD
+        value: 1234
+      - key: MYSQL_DB
+        value: recipesSpain
+      - key: FLASK_ENV
+        value: production
     plan: free
 
-  # 3. Frontend Vue (Static Site)
-  - type: web
+  # 3. Frontend Vue (sitio estático)
+  - type: static
     name: vue-frontend
-    runtime: node
-    buildCommand: |
-      cd frontend && npm install && npm run build
-    staticSite: true
-    publish: frontend/dist
-    env:
-      VUE_APP_API_URL: https://flask-backend.onrender.com  # Cambia a tu URL de Flask en Render
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    envVars:
+      - key: VUE_APP_API_URL
+        value: https://flask-backend.onrender.com
     routes:
       - path: /*
-        staticSite: true  # Para Vue Router
+        redirect: /index.html  # Redirige rutas del frontend SPA a index.html
     plan: free
