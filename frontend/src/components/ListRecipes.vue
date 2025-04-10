@@ -7,7 +7,8 @@
             <div class="relative">
                 <!-- Mostrar la media a la izquierda de la imagen -->
                 <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
-                    {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2) 
+                    {{ average[item.id] !== undefined && average[item.id] !== null ?
+                        Number(average[item.id]).toFixed(2)
                         : "Sin calificación" }} ★
                 </div>
 
@@ -56,12 +57,12 @@
                 <!--Zona de Categorias-->
                 <div class="text-sm text-amber-700 mt-2">
                     <span class="font-semibold">Categorías:</span>
-                    <template v-if="categorias.filter(c => c.recipe_id === item.id).length > 0">
-                        <span v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
+                    <template v-if="categorias.filter(c => c.recipe_id === item.id)">
+                        <button @click="filter(cat)" v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
                             :key="cat.type + cat.category"
                             class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
                             {{ cat.type }}
-                        </span>
+                        </button>
                     </template>
                     <span v-else class="text-amber-500 italic">No tiene categorías</span>
                 </div>
@@ -139,7 +140,7 @@
 
 <script setup>
 
-import { reactive, defineProps, watch, onMounted } from 'vue';
+import { reactive, defineProps, watch, onMounted, ref, defineEmits } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -166,12 +167,16 @@ const props = defineProps({
         required: true
     }
 });
+const tipoComida = ref('');
+const ccaa = ref('');
+const tiempo = ref('');
+const proteinas = ref([]);
+const emit = defineEmits(['enviarFiltros'])
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
         filterRecipe()
     } else if (props.greeting === "all") {
-        // Solicitar todas las recetas y datos relacionados
         allRecipes()
     }
 })
@@ -203,12 +208,12 @@ onMounted(() => {
 
 
 function allRecipes() {
-
+    categorias.length = 0;
     axios.post('http://localhost:5000/viewAll', { iduser })
         .then(response => {
             elementos.recetas = response.data.recipes_list;
             response.data.categories_list.forEach(element => {
-                    categorias.push(element)
+                categorias.push(element)
             });
             if (iduser) {
                 selectFavorites(response.data.favorites_list)
@@ -265,10 +270,38 @@ function personalRecipes() {
     }
 }
 
+function filter(categorias) {
+    if (categorias.category == "typeeat") {
+        tipoComida.value = categorias.type
+    } else if (categorias.category == "ccaa") {
+        ccaa.value = categorias.type
+    } else if (categorias.category == "time") {
+        tiempo.value = categorias.type
+    } else if (categorias.category == "protein") {
+        proteinas.value = categorias.type
+    }
+    const payload = {
+        typeeat: tipoComida.value,
+        ccaa: ccaa.value,
+        time: tiempo.value,
+        proteins: proteinas.value,
+    }
+
+    axios.post('http://localhost:5000/filterRecipe', payload)
+        .then(response => {
+            emit('enviarFiltros', {
+                idRecipe: response.data.message,
+                greeting: 'filtred'
+            });
+        })
+        .catch(error => {
+            console.log(error);
+        });
+}
+
 function filterRecipe() {
     const seen = new Set();
     const filtered = [];
-
     props.idRecipe.forEach(element => {
         const id = element["idrecipe"];
         if (!seen.has(id)) {

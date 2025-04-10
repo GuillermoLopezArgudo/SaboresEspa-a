@@ -652,30 +652,52 @@ def filterRecipe():
     typeeat = data.get("typeeat")
     ccaa = data.get("ccaa")
     time = data.get("time")
-    proteins = data.get("proteins")
-    if typeeat and ccaa:
-        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) and (RecipeFilter.type == ccaa)).execute() 
-    if typeeat and time:
-        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) and (RecipeFilter.type == time)).execute() 
-    if typeeat and proteins:
-        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) and (RecipeFilter.type == proteins)).execute()  
-    if ccaa and time:
-        filters = RecipeFilter.select().where((RecipeFilter.type == ccaa) and (RecipeFilter.type == time)).execute() 
-    if ccaa and proteins:
-        filters = RecipeFilter.select().where((RecipeFilter.type == ccaa) and (RecipeFilter.type == proteins)).execute() 
-    if time and proteins:
-        filters = RecipeFilter.select().where((RecipeFilter.type == time) and (RecipeFilter.type == proteins)).execute() 
+    proteins = data.get("proteins", [])
+    
+    query = RecipeFilter.select(RecipeFilter.id_recipe_id)
+    
     if typeeat:
-        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat)).execute() 
+        query = query.where(
+            RecipeFilter.id_recipe_id.in_(
+                RecipeFilter.select(RecipeFilter.id_recipe_id)
+                .where((RecipeFilter.category == 'typeeat') & (RecipeFilter.type == typeeat))
+            )
+        )
+    
     if ccaa:
-        filters = RecipeFilter.select().where((RecipeFilter.type == ccaa)).execute() 
+        query = query.where(
+            RecipeFilter.id_recipe_id.in_(
+                RecipeFilter.select(RecipeFilter.id_recipe_id)
+                .where((RecipeFilter.category == 'ccaa') & (RecipeFilter.type == ccaa))
+            )
+        )
+    
     if time:
-        filters = RecipeFilter.select().where((RecipeFilter.type == time)).execute() 
+        query = query.where(
+            RecipeFilter.id_recipe_id.in_(
+                RecipeFilter.select(RecipeFilter.id_recipe_id)
+                .where((RecipeFilter.category == 'time') & (RecipeFilter.type == time))
+            )
+        )
+    
     if proteins:
-        filters = RecipeFilter.select().where((RecipeFilter.type == proteins)).execute() 
+        query = query.where(
+            RecipeFilter.id_recipe_id.in_(
+                RecipeFilter.select(RecipeFilter.id_recipe_id)
+                .where((RecipeFilter.category == 'protein') & (RecipeFilter.type.in_(proteins)))
+            )
+        )
+    
+    query = query.group_by(RecipeFilter.id_recipe_id)
 
-    filter_list = [{"idrecipe":filter.id_recipe_id} for filter in filters]
-    return jsonify(message=filter_list)
+    active_filters = sum([1 for f in [typeeat, ccaa, time, proteins] if f])
+    
+    if active_filters > 0:
+        query = query.having(fn.COUNT(RecipeFilter.id_recipe_id) >= active_filters)
+
+    recipe_ids = [r.id_recipe_id for r in query.distinct()]
+    
+    return jsonify(message=[{"idrecipe": id_} for id_ in recipe_ids])
 
 @app.route('/recipeFilter', methods=['POST'])
 def recipeFilter():

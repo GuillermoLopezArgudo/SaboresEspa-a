@@ -211,7 +211,7 @@ const regions = [
 
 const proteins = [
   { value: 'pollo', label: 'Pollo' },
-  { value: 'res', label: 'Res / Ternera' },
+  { value: 'res', label: 'Ternera' },
   { value: 'cerdo', label: 'Cerdo / Ibérico' },
   { value: 'cordero', label: 'Cordero' },
   { value: 'conejo', label: 'Conejo' },
@@ -246,16 +246,19 @@ const filtrosSeleccionados = computed(() => {
   if (tipoComida.value) {
     const tipo = foodTypes.find(t => t.value === tipoComida.value);
     seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
+    closeAllAccordions();
   }
 
   if (ccaa.value) {
     const region = regions.find(r => r.value === ccaa.value);
     seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
+    closeAllAccordions();
   }
 
   if (tiempo.value) {
     const tiempoSel = prepTimes.find(t => t.value === tiempo.value);
     seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
+    closeAllAccordions();
   }
 
   if (proteinas.value.length > 0) {
@@ -306,6 +309,10 @@ const limpiarFiltros = () => {
 };
 
 const buscarFiltros = () => {
+  const isEmpty = !tipoComida.value && !ccaa.value && !tiempo.value && proteinas.value.length === 0;
+  if (isEmpty) {
+    return;
+  }
 
   closeAllAccordions();
 
