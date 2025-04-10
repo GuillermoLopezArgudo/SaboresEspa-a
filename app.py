@@ -653,7 +653,27 @@ def filterRecipe():
     ccaa = data.get("ccaa")
     time = data.get("time")
     proteins = data.get("proteins")
-    filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) | (RecipeFilter.type == ccaa) | (RecipeFilter.type == time) | (RecipeFilter.type.in_(proteins))).execute()    
+    if typeeat and ccaa:
+        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) and (RecipeFilter.type == ccaa)).execute() 
+    if typeeat and time:
+        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) and (RecipeFilter.type == time)).execute() 
+    if typeeat and proteins:
+        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat) and (RecipeFilter.type == proteins)).execute()  
+    if ccaa and time:
+        filters = RecipeFilter.select().where((RecipeFilter.type == ccaa) and (RecipeFilter.type == time)).execute() 
+    if ccaa and proteins:
+        filters = RecipeFilter.select().where((RecipeFilter.type == ccaa) and (RecipeFilter.type == proteins)).execute() 
+    if time and proteins:
+        filters = RecipeFilter.select().where((RecipeFilter.type == time) and (RecipeFilter.type == proteins)).execute() 
+    if typeeat:
+        filters = RecipeFilter.select().where((RecipeFilter.type == typeeat)).execute() 
+    if ccaa:
+        filters = RecipeFilter.select().where((RecipeFilter.type == ccaa)).execute() 
+    if time:
+        filters = RecipeFilter.select().where((RecipeFilter.type == time)).execute() 
+    if proteins:
+        filters = RecipeFilter.select().where((RecipeFilter.type == proteins)).execute() 
+
     filter_list = [{"idrecipe":filter.id_recipe_id} for filter in filters]
     return jsonify(message=filter_list)
 

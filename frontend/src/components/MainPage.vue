@@ -105,7 +105,7 @@
         </div>
       </div>
     </nav>
-    <RecipeFilter @enviarIdRecipe="recibirIdRecipe" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
+    <RecipeFilter @enviarFiltros="recibirFiltros" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
     <!-- Contenido principal -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Barra de navegación actualizada -->
@@ -126,12 +126,13 @@ const navbarOpen = ref(false);
 const idRecipe = ref('')
 const greeting = ref("all")
 
-function recibirIdRecipe(mensaje) {
-  idRecipe.value = mensaje
-  greeting.value = "all";
+function recibirFiltros(datos) {
+  idRecipe.value = datos.idRecipe;
+  greeting.value = "";
   setTimeout(() => {
-    greeting.value = "filtred";
-  }, 0);
+    greeting.value = datos.greeting;
+  }, 1);
+  
 }
 
 const limpiarFiltros = () => {

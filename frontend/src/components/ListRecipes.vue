@@ -203,15 +203,16 @@ onMounted(() => {
 
 
 function allRecipes() {
+
     axios.post('http://localhost:5000/viewAll', { iduser })
         .then(response => {
             elementos.recetas = response.data.recipes_list;
+            response.data.categories_list.forEach(element => {
+                    categorias.push(element)
+            });
             if (iduser) {
                 selectFavorites(response.data.favorites_list)
                 selectReviews(response.data.reviews_list)
-                response.data.categories_list.forEach(element => {
-                    categorias.push(element)
-                });
             }
         })
         .catch(error => {
