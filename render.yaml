@@ -1,5 +1,5 @@
 services:
-  # 1. Base de datos MySQL (en contenedor privado)
+  # 1. Base de datos MySQL (contenedor privado)
   - type: pserv
     name: mysql-db
     runtime: docker
@@ -11,7 +11,7 @@ services:
         value: recipesSpain
       - key: MYSQL_USER
         value: root
-    plan: starter  # o "standard", según lo que tengas habilitado
+    plan: starter  # o el plan de pago que tengas
 
   # 2. Backend Flask (Python)
   - type: web
@@ -32,15 +32,18 @@ services:
         value: production
     plan: free
 
-  # 3. Frontend Vue (sitio estático)
-  - type: static
+  # 3. Frontend Vue (como sitio estático dentro de un servicio web)
+  - type: web
     name: vue-frontend
-    buildCommand: cd frontend && npm install && npm run build
+    runtime: node
+    buildCommand: |
+      cd frontend && npm install && npm run build
+    staticSite: true
     publishPath: frontend/dist
     envVars:
       - key: VUE_APP_API_URL
         value: https://flask-backend.onrender.com
     routes:
       - path: /*
-        redirect: /index.html  # Redirige rutas del frontend SPA a index.html
+        staticSite: true  # para manejar rutas del Vue Router
     plan: free
