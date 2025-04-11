@@ -22,11 +22,11 @@ app.config.from_object(Config)
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
 app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Servidor SMTP de Gmail
-app.config['MAIL_PORT'] = 465  # Puerto de SMTP seguro
-app.config['MAIL_USE_SSL'] = True  # Usar SSL
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # From environment variables
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # From environment variables
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD') 
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 
