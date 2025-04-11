@@ -1,8 +1,7 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, render_template, request, redirect, url_for
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage
@@ -15,6 +14,7 @@ from peewee import fn
 import hashlib
 import base64
 from models import db, BaseModel
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 
@@ -22,11 +22,20 @@ app.config.from_object(Config)
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
 app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Servidor SMTP de Gmail
+app.config['MAIL_PORT'] = 465  # Puerto de SMTP seguro
+app.config['MAIL_USE_SSL'] = True  # Usar SSL
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # From environment variables
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # From environment variables
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
 mysql = MySQL(app)
+mail = Mail(app)
+
 
 try:
     db.connect(reuse_if_open=True)
@@ -302,35 +311,36 @@ def viewRecipe():
     idrecipe = data.get("idrecipe")
     token = data.get("userToken")
     user = Users.select().where(Users.user_token == token).first()
+    recipes = Recipe.select().where(Recipe.id == idrecipe)
+    recipe = Recipe.select().where(Recipe.id == idrecipe).first()
+    names =Users.select().where(Users.id == recipe.id_user).first()
+    user_name = names.user_name
+    recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": bool(recipe.recipe_visibility),"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
+    ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
+    ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
+    steps = RecipeStep.select().where(RecipeStep.id_recipe == idrecipe)
+    step_list = []
+    for step in steps:
+        step_image = (StepImage.select(StepImage.step_image).join(RecipeStepImage).where(RecipeStepImage.id_step == step.id).first())
+        step_list.append({"title": step.step_title,"description": step.step_description,"image": step_image.step_image if step_image else None})
+    subingredientes = SubRecipeIngredient.select().where(SubRecipeIngredient.id_recipe_id ==idrecipe)
+    subingredient_list = [{"ingredients":subingredient.ingredients_text, "quantity":subingredient.quantity_unit} for subingredient in subingredientes]
+    substeps = SubRecipeStep.select().where(SubRecipeStep.id_recipe == idrecipe)
+    substep_list = []
+    for substep in substeps:
+        step_image = (SubStepImage.select(SubStepImage.step_image).join(RecipeSubStepImage).where(RecipeSubStepImage.id_step == substep.id).first())
+        substep_list.append({"title": substep.step_title,"description": substep.step_description,"image": step_image.step_image if step_image else None})        
+    filters = RecipeFilter.select().where(RecipeFilter.id_recipe_id == idrecipe)
+    filters_list = [{"type":filter.type, "category":filter.category} for filter in filters]
     if user:
         user_id = user.id
         user_token = user.user_token
-        #users = Users.select().where(Users.id == iduser)
-        #user_list =[{"name":user.user_name} for user in users]
-        recipes = Recipe.select().where(Recipe.id == idrecipe)
-        recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": bool(recipe.recipe_visibility),"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
-        ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
-        ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
-        steps = RecipeStep.select().where(RecipeStep.id_recipe == idrecipe)
-        step_list = []
-        for step in steps:
-            step_image = (StepImage.select(StepImage.step_image).join(RecipeStepImage).where(RecipeStepImage.id_step == step.id).first())
-            step_list.append({"title": step.step_title,"description": step.step_description,"image": step_image.step_image if step_image else None})
-        subingredientes = SubRecipeIngredient.select().where(SubRecipeIngredient.id_recipe_id ==idrecipe)
-        subingredient_list = [{"ingredients":subingredient.ingredients_text, "quantity":subingredient.quantity_unit} for subingredient in subingredientes]
-        substeps = SubRecipeStep.select().where(SubRecipeStep.id_recipe == idrecipe)
-        substep_list = []
-        for substep in substeps:
-            step_image = (SubStepImage.select(SubStepImage.step_image).join(RecipeSubStepImage).where(RecipeSubStepImage.id_step == substep.id).first())
-            substep_list.append({"title": substep.step_title,"description": substep.step_description,"image": step_image.step_image if step_image else None})        
-        filters = RecipeFilter.select().where(RecipeFilter.id_recipe_id == idrecipe)
-        filters_list = [{"type":filter.type, "category":filter.category} for filter in filters]
-            
         if user_id:
             favorites = UserFavorite.select().where(UserFavorite.id_user_id ==user_id)
             favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
-            return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token)
-        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list)
+            return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name)
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name)
+    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name)
 
 @app.route('/viewComment', methods=['POST'])
 def viewComment(): 
@@ -842,6 +852,144 @@ def averageStars():
     except Exception as e:
         return jsonify(message="Error: " + str(e)), 500
 
+@app.route('/report-recipe', methods=['POST'])
+def report_recipe():
+    try:
+        # Validate request
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+            
+        data = request.get_json()
+        required_fields = ['idrecipe', 'reason', 'usertoken']
+        
+        if not all(field in data for field in required_fields):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Get data from request
+        recipe_id = data['idrecipe']
+        reason = data['reason']
+        user_token = data['usertoken']
+        
+        # Validate recipe exists
+        try:
+            recipe = Recipe.get_by_id(recipe_id)
+            recipe_owner = Users.get_by_id(recipe.id_user_id)
+        except DoesNotExist:
+            return jsonify({"error": "Recipe not found"}), 404
+            
+        # Validate reporting user exists
+        try:
+            reporting_user = Users.get(Users.user_token == user_token)
+        except DoesNotExist:
+            return jsonify({"error": "User not found"}), 404
+
+        # Prepare email
+        msg = Message(
+            subject=f"🚨 Reporte de Receta #{recipe_id} - {recipe.recipe_title}",
+            recipients=['Calvopika@gmail.com'],  # Your admin email
+            html=render_template(
+                'report_email.html',
+                recipe=recipe,
+                recipe_id=recipe_id,
+                reason=reason,
+                reporting_user=reporting_user,
+                recipe_owner=recipe_owner,
+                report_date=date.today().strftime('%d/%m/%Y')
+            )
+        )
+
+        # Send email with error handling
+        try:
+            mail.send(msg)
+            return jsonify({
+                "message": "Report sent successfully",
+                "details": {
+                    "recipe_id": recipe_id,
+                    "reported_by": reporting_user.user_email
+                }
+            }), 200
+        except Exception as e:
+            app.logger.error(f"Failed to send report email: {str(e)}")
+            return jsonify({
+                "error": "Failed to send report email",
+                "details": str(e)
+            }), 500
+
+    except Exception as e:
+        app.logger.error(f"Error in report-recipe: {str(e)}")
+        return jsonify({
+            "error": "Internal server error",
+            "details": str(e)
+        }), 500
+    
+@app.route('/report-comment', methods=['POST'])
+def report_comment():
+    try:
+        data = request.get_json()
+        required_fields = ['commentId', 'reason', 'userToken']
+        
+        if not all(field in data for field in required_fields):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Get data from request
+        comment_id = data['commentId']
+        reason = data['reason']
+        user_token = data['userToken']
+        
+        # Validate comment exists
+        try:
+            comment = RecipeComment.get_by_id(comment_id)
+            recipe = Recipe.get_by_id(comment.id_recipe_id)
+            comment_author = Users.get_by_id(comment.id_user_id)
+        except DoesNotExist:
+            return jsonify({"error": "Comment not found"}), 404
+            
+        # Validate reporting user exists
+        try:
+            reporting_user = Users.get(Users.user_token == user_token)
+        except DoesNotExist:
+            return jsonify({"error": "User not found"}), 404
+
+        # Prepare email
+        msg = Message(
+            subject=f"🚨 Reporte de Comentario #{comment_id}",
+            recipients=['Calvopika@gmail.com'],  # Your admin email
+            html=render_template(
+                'comment_report_email.html',
+                comment=comment,
+                comment_id=comment_id,
+                reason=reason,
+                reporting_user=reporting_user,
+                comment_author=comment_author,
+                recipe=recipe,
+                report_date=date.today().strftime('%d/%m/%Y')
+            )
+        )
+
+        # Send email
+        try:
+            mail.send(msg)
+            return jsonify({
+                "message": "Comment report sent successfully",
+                "details": {
+                    "comment_id": comment_id,
+                    "reported_by": reporting_user.user_email
+                }
+            }), 200
+        except Exception as e:
+            app.logger.error(f"Failed to send comment report email: {str(e)}")
+            return jsonify({
+                "error": "Failed to send report email",
+                "details": str(e)
+            }), 500
+
+    except Exception as e:
+        app.logger.error(f"Error in report-comment: {str(e)}")
+        return jsonify({
+            "error": "Internal server error",
+            "details": str(e)
+        }), 500    
+    
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
