@@ -512,7 +512,6 @@ if (userToken.value == null) {
 }
 
 function handleImageChange(event) {
-  console.log(event)
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
@@ -607,7 +606,6 @@ function submitRecipe() {
       text: step.text,
       image: step.image
     })) : [],
-    idUser: localStorage.getItem("iduser"),
     token: localStorage.getItem("userToken"),
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
@@ -615,7 +613,6 @@ function submitRecipe() {
     proteins: proteinas.value,
     visibility: showBasicInfo.value
   };
-  console.log(recipebook.substeps)
   axios.post('http://localhost:5000/create', payload)
     .then(response => {
       console.log(response.data.message);

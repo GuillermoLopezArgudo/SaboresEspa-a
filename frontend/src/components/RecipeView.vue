@@ -30,7 +30,7 @@
                 <span class="font-medium">{{ isFavorite ? 'En favoritos' : 'Añadir a favoritos' }}</span>
               </button>
             </div>
-            <div v-if="iduser == receta.id_user || type == 'admin'" class="flex space-x-2">
+            <div v-if="userToken == receta.userToken || type == 'admin'" class="flex space-x-2">
               <button @click="editeRecipe" 
                       class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition duration-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,13 +55,6 @@
         <div v-if="receta.image" class="p-6 sm:p-8">
           <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
             <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta" class="w-full h-auto object-cover">
-          </div>
-        </div>
-  
-        <!-- Video de la receta -->
-        <div v-if="receta.video" class="p-6 sm:p-8 pt-0">
-          <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
-            <video controls :src="'http://localhost:5000/' + receta.video" class="w-full"></video>
           </div>
         </div>
   
@@ -149,16 +142,16 @@
           </div>
         </div>
   
-        <!-- Valoración -->
-        <div v-if="receta.assessment" class="p-6 sm:p-8 border-t border-amber-100 bg-amber-50">
-          <h3 class="text-xl font-bold text-amber-800 mb-2">Valoración</h3>
-          <div class="flex items-center">
-            <div class="flex text-amber-500 mr-2">
-              <svg v-for="star in 5" :key="star" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :class="{'text-amber-300': star > receta.valoraciones}" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            </div>
-            <span class="text-amber-700 font-medium">{{ receta.valoraciones }} estrellas</span>
+        <!-- Video de la receta -->
+        <div v-if="receta.video" class="p-6 sm:p-8 pt-0">
+          <h3 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Video
+          </h3>
+          <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
+            <video controls :src="'http://localhost:5000/' + receta.video" class="w-full"></video>
           </div>
         </div>
   
@@ -188,7 +181,7 @@
               <div v-else>
                 <p class="text-amber-800">{{ comment.comment }}</p>
                 <p class="text-sm text-amber-600 mt-1">Por: {{ comment.username }}</p>
-                <div v-if="iduser == comment.iduser || type == 'admin'" class="flex space-x-2 mt-2">
+                <div v-if="userToken == comment.userToken || comment.type == 'admin'" class="flex space-x-2 mt-2">
                   <button @click="startEditComment(comment)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition duration-300">
                     Editar
                   </button>
@@ -241,8 +234,6 @@
   const receta = ref(null);
   const comment = ref("");
   const userToken = localStorage.getItem('userToken');
-  const iduser = localStorage.getItem('iduser');
-  const type = localStorage.getItem('type')
   const ingredients = ref([]);
   const quantity = ref([]);
   const steps = ref([]);
@@ -257,11 +248,10 @@
       idrecipe: parseInt(recipeId),
       userToken: userToken,
       comment: "",
-      iduser: iduser,
       idcomment: 0
   };
   const toggleFavorite = () => {
-      if (iduser) {
+      if (userToken) {
           isFavorite.value = !isFavorite.value;
           if (isFavorite.value) {
               axios
@@ -300,6 +290,10 @@
       axios
           .post('http://localhost:5000/viewRecipe', payload)
           .then(response => {
+            
+            if(response.data.recipe_list[0].id_user == response.data.user_id){
+              response.data.recipe_list[0].userToken = response.data.user_token
+            }     
               receta.value = response.data.recipe_list[0]
               response.data.ingredient_list.forEach(element => {
                   ingredients.value.push(element.ingredients);
@@ -312,7 +306,7 @@
               });
               substeps.value = response.data.substep_list;
               fetchRecipe();
-              if (iduser) {
+              if (response.data.user_token) {
                   response.data.favorites_list.forEach(id => {
                       if (id.id_recipe === parseInt(recipeId)) {
                           isFavorite.value = true;

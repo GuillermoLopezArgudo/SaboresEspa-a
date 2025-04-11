@@ -444,6 +444,7 @@ const ccaa = ref('')
 const tiempo = ref('')
 const proteinas = ref([]);
 const showBasicInfo = ref();
+const userToken = localStorage.getItem('userToken');
 const recipebook = reactive({
   ingredients: [],
   quantities: [],
@@ -476,7 +477,7 @@ const addSubStep = () => {
 };
 
 onMounted(() => {
-  axios.post('http://localhost:5000/viewRecipe', { idrecipe: recipeId })
+  axios.post('http://localhost:5000/viewRecipe', { idrecipe: recipeId, userToken: userToken})
     .then(response => {
       title.value = response.data.recipe_list[0].title;
       description.value = response.data.recipe_list[0].description;
@@ -604,7 +605,6 @@ function submitEditeRecipe() {
     time: tiempo.value,
     proteins: proteinas.value,
     visibility: showBasicInfo.value ? 1 : 0,
-    idUser: localStorage.getItem("iduser"),
     token: localStorage.getItem("userToken")
   };
 

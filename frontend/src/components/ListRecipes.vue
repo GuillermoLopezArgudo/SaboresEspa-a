@@ -5,31 +5,33 @@
             class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
             <!-- Imagen con corazón superpuesto -->
             <div class="relative">
-                <!-- Mostrar la media a la izquierda de la imagen -->
-                <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
-                    {{ average[item.id] !== undefined && average[item.id] !== null ?
-                        Number(average[item.id]).toFixed(2)
-                        : "Sin calificación" }} ★
-                </div>
+                <router-link :to="'/recipe?id=' + item.id">
+                    <!-- Mostrar la media a la izquierda de la imagen -->
+                    <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
+                        {{ average[item.id] !== undefined && average[item.id] !== null ?
+                            Number(average[item.id]).toFixed(2)
+                            : "Sin calificación" }} ★
+                    </div>
 
-                <!-- Imagen de la receta -->
-                <img v-if="item.image" :src="`http://localhost:5000/${item.image}`" class="w-full h-48 object-cover"
-                    alt="Imagen de receta">
-                <!-- Placeholder si no hay imagen -->
-                <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                </div>
+                    <!-- Imagen de la receta -->
+                    <img v-if="item.image" :src="`http://localhost:5000/${item.image}`" class="w-full h-48 object-cover"
+                        alt="Imagen de receta">
+                    <!-- Placeholder si no hay imagen -->
+                    <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                </router-link>
+                    <!-- Corazón de favorito (posición absoluta) -->
+                    <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
+                        class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
+                        <i class="fa text-2xl"
+                            :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
+                    </button>
 
-                <!-- Corazón de favorito (posición absoluta) -->
-                <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
-                    class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
-                    <i class="fa text-2xl"
-                        :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
-                </button>
             </div>
 
             <!-- Contenido de la tarjeta -->
@@ -150,7 +152,6 @@ const favoritos = reactive({});
 const ratings = reactive({});
 const average = reactive({})
 const userToken = localStorage.getItem('userToken');
-const iduser = localStorage.getItem('iduser');
 const router = useRouter();
 const elementos = reactive({
     recetas: []
@@ -209,13 +210,19 @@ onMounted(() => {
 
 function allRecipes() {
     categorias.length = 0;
-    axios.post('http://localhost:5000/viewAll', { iduser })
+
+    const payload = {
+            userToken: localStorage.getItem('userToken')
+    }
+
+
+    axios.post('http://localhost:5000/viewAll', payload)
         .then(response => {
             elementos.recetas = response.data.recipes_list;
             response.data.categories_list.forEach(element => {
                 categorias.push(element)
             });
-            if (iduser) {
+            if (response.data.user_id) {
                 selectFavorites(response.data.favorites_list)
                 selectReviews(response.data.reviews_list)
             }
@@ -227,8 +234,7 @@ function allRecipes() {
 
 function favoritesRecipes() {
     const payload = {
-        userToken: userToken,
-        iduser: iduser
+        userToken: userToken
     };
 
     axios
@@ -251,14 +257,13 @@ function personalRecipes() {
         router.push({ name: "login" });
     } else {
         const payload = {
-            id: localStorage.getItem("iduser"),
-            userToken: userToken.value
+            userToken: localStorage.getItem('userToken')
         }
 
         axios.post('http://localhost:5000/viewRecipes', payload)
             .then(response => {
-                if (response.data.message && response.data.message.length > 0) {
-                    elementos.recetas = response.data.message;
+                if (response.data.recipes_list && response.data.recipes_list.length > 0) {
+                    elementos.recetas = response.data.recipes_list;
                     response.data.categories_list.forEach(element => {
                         categorias.push(element)
                     });
@@ -309,10 +314,10 @@ function filterRecipe() {
             filtered.push(element);
         }
     });
-    axios.post('http://localhost:5000/recipeFilter', { filtered, iduser })
+    axios.post('http://localhost:5000/recipeFilter', { filtered, userToken })
         .then(response => {
             elementos.recetas = response.data.filtered_recipes
-            if (iduser) {
+            if (userToken) {
                 selectFavorites(response.data.favorites_list)
                 selectReviews(response.data.reviews_list)
             }
@@ -329,7 +334,6 @@ const toggleFavorite = (id) => {
             idrecipe: id,
             userToken,
             comment: "",
-            iduser,
             idcomment: 0
         };
 
@@ -370,11 +374,8 @@ const ratingChanged = (recipeId) => {
             const payload = {
                 idrecipe: recipeId,
                 rating: newRating,
-                userToken,
-                iduser
+                userToken
             };
-
-            localStorage.setItem('ratings', JSON.stringify(ratings));
             axios.post('http://localhost:5000/updateRating', payload)
                 .then(response => {
                     console.log(response.data.message);
