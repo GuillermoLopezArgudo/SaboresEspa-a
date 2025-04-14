@@ -161,8 +161,19 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits } from 'vue';
+import { ref, computed, defineEmits,defineProps,watch } from 'vue';
 import axios from 'axios';
+
+const props = defineProps({
+  type: {
+        type: String,
+        required: true
+    },
+  category: {
+      type: String,
+      required: true
+  }
+});
 
 const emit = defineEmits(['enviarFiltros'])
 
@@ -176,6 +187,34 @@ const tipoComida = ref('');
 const ccaa = ref('');
 const tiempo = ref('');
 const proteinas = ref([]);
+
+// Watch para tipoComida (filtro de tipo de comida)
+watch(() => props.type, (newType) => {
+  if (props.category === 'typeeat' && newType) {
+    tipoComida.value = newType;
+  }
+});
+
+// Watch para ccaa (filtro de región)
+watch(() => props.type, (newType) => {
+  if (props.category === 'ccaa' && newType) {
+    ccaa.value = newType;
+  }
+});
+
+// Watch para tiempo (filtro de tiempo de preparación)
+watch(() => props.type, (newType) => {
+  if (props.category === 'time' && newType) {
+    tiempo.value = newType;
+  }
+});
+
+// Watch para proteinas (filtro de proteínas)
+watch(() => props.type, (newType) => {
+  if (props.category === 'protein' && newType) {
+    proteinas.value = newType.split(',');
+  }
+})
 
 // Datos para los filtros
 const foodTypes = [
@@ -243,31 +282,30 @@ const prepTimes = [
 const filtrosSeleccionados = computed(() => {
   const seleccionados = [];
 
-  if (tipoComida.value) {
+  if (tipoComida.value || props.category =="typeeat") {
     const tipo = foodTypes.find(t => t.value === tipoComida.value);
     seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
     closeAllAccordions();
   }
 
-  if (ccaa.value) {
+  if (ccaa.value || props.category =="ccaa") {
     const region = regions.find(r => r.value === ccaa.value);
     seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
     closeAllAccordions();
   }
 
-  if (tiempo.value) {
+  if (tiempo.value || props.category =="time") {
     const tiempoSel = prepTimes.find(t => t.value === tiempo.value);
     seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
     closeAllAccordions();
   }
 
-  if (proteinas.value.length > 0) {
+  if (proteinas.value.length > 0 || props.category =="protein") {
     proteinas.value.forEach(p => {
       const proteina = proteins.find(pro => pro.value === p);
       seleccionados.push({ category: 'proteinas', label: 'Proteína', value: proteina.label });
     });
   }
-
   return seleccionados;
 });
 
@@ -313,7 +351,6 @@ const buscarFiltros = () => {
   if (isEmpty) {
     return;
   }
-
   closeAllAccordions();
 
   const payload = {

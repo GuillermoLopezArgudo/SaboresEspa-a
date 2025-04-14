@@ -290,6 +290,7 @@
                     <span class="text-green-800 text-sm">{{ conteoDisLikes[comment.id] || 0 }}</span>
                   </button>
                 </div>
+                <button>Responder</button>
               </div>
             </div>
           </div>
@@ -702,16 +703,16 @@ const toggleLike = (commentId) => {
   if (!likedComments.value[commentId]) {
 
     likedComments.value[commentId] = !likedComments.value[commentId]
-    
+
     if (likedComments.value[commentId]) {
       dislikedComments.value[commentId] = false
     }
     payload.idcomment = commentId
     axios.post('http://localhost:5000/likeComment', payload)
       .then(() => {
-        conteoLikes.value[commentId]=(conteoLikes.value[commentId] || 0) + 1
-        if(conteoDisLikes.value[commentId] > 0){
-          conteoDisLikes.value[commentId]=(conteoDisLikes.value[commentId] || 0) - 1
+        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) + 1
+        if (conteoDisLikes.value[commentId] > 0) {
+          conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1
         }
       })
       .catch(error => console.error("Error en la solicitud:", error));
@@ -738,9 +739,9 @@ const toggleDislike = (commentId) => {
     payload.idcomment = commentId
     axios.post('http://localhost:5000/disLikeComment', payload)
       .then(() => {
-        conteoDisLikes.value[commentId]=(conteoDisLikes.value[commentId] || 0) + 1
-        if(conteoLikes.value[commentId] > 0){
-        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1
+        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) + 1
+        if (conteoLikes.value[commentId] > 0) {
+          conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1
         }
       })
       .catch(error => console.error("Error en la solicitud:", error));
@@ -749,7 +750,7 @@ const toggleDislike = (commentId) => {
     payload.idcomment = commentId
     axios.post('http://localhost:5000/deleteDisLike', payload)
       .then(() => {
-        conteoDisLikes.value[commentId]=(conteoDisLikes.value[commentId] || 0) - 1
+        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1
       })
       .catch(error => console.error("Error en la solicitud:", error))
   }

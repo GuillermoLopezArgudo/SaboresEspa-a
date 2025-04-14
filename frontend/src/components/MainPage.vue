@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <RecipeFilter @enviarFiltros="recibirFiltros" @limpiarFiltros="limpiarFiltros"></RecipeFilter>
+    <RecipeFilter :type="type" :category="category" @enviarFiltros="recibirFiltros" @limpiarFiltros="limpiarFiltros" ></RecipeFilter>
     <!-- Contenido principal -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Barra de navegación actualizada -->
@@ -27,9 +27,13 @@ import { ref } from 'vue';
 
 const idRecipe = ref('')
 const greeting = ref("all")
+const type = ref("")
+const category = ref('')
 
 function recibirFiltros(datos) {
   idRecipe.value = datos.idRecipe;
+  type.value = datos.type
+  category.value = datos.category
   greeting.value = "";
   setTimeout(() => {
     greeting.value = datos.greeting;
