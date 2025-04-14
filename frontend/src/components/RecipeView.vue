@@ -2,7 +2,8 @@
   <div class="min-h-screen bg-amber-50 py-8 px-4 sm:px-6 lg:px-8">
     <!-- Encabezado -->
     <div class="max-w-7xl mx-auto text-center mb-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
+      <h1
+        class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
         Detalle de Receta
       </h1>
     </div>
@@ -40,7 +41,7 @@
 
           <!-- Botón de reporte -->
           <div v-if="userToken != 'notoken'" class="flex items-start space-x-2">
-            <button @click="showReportDialog" 
+            <button @click="showReportDialog"
               class="text-red-600 hover:text-red-800 transition duration-300 p-2 rounded-full hover:bg-red-50"
               title="Reportar receta">
               <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -215,26 +216,32 @@
             class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm hover:shadow-md transition duration-300">
 
             <div v-if="editingCommentId === comment.id" class="mb-3">
+
               <textarea v-model="editedComment" rows="3"
                 class="w-full px-4 py-2 rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
               <div class="flex space-x-2 mt-2">
                 <button @click="updateComment(comment.id)"
                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd" />
                   </svg>
                   Guardar
                 </button>
                 <button @click="cancelEdit"
                   class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clip-rule="evenodd" />
                   </svg>
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
+
               <p class="text-amber-800">{{ comment.comment }}</p>
               <p class="text-sm text-amber-600 mt-1">Por: {{ comment.username }}</p>
               <div class="flex space-x-2 mt-2">
@@ -253,6 +260,36 @@
                   class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition duration-300 flex items-center">
                   <i class="fa fa-trash mr-1"></i> Eliminar
                 </button>
+                <div class="flex gap-4 items-center">
+                  <!-- LIKE -->
+                  <button @click="toggleLike(comment.id)" class="focus:outline-none">
+                    <svg class="w-6 h-6 transition text-green-800 hover:text-green-900"
+                      :fill="likedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 
+             1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 
+             1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 
+             0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 
+             1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475" />
+                    </svg>
+                    <span class="text-green-800 text-sm">{{ conteoLikes[comment.id] || 0 }}</span>
+                  </button>
+
+                  <!-- DISLIKE -->
+                  <button @click="toggleDislike(comment.id)" class="focus:outline-none">
+                    <svg class="w-6 h-6 transition text-red-600 hover:text-red-700"
+                      :fill="dislikedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13c-.889.086-1.416.543-2.156 1.057a22.322 22.322 0 0 0-3.958 5.084 
+             1.6 1.6 0 0 1-.582.628 1.549 1.549 0 0 1-1.466.087 1.587 1.587 0 0 
+             1-.537-.406 1.666 1.666 0 0 1-.384-1.279l1.389-4.114M17 13h3V6.5A1.5 1.5 0 0 
+             0 18.5 5v0A1.5 1.5 0 0 0 17 6.5V13Zm-6.5 1H5.585c-.286 0-.372-.014-.626-.15a1.797 
+             1.797 0 0 1-.637-.572 1.873 1.873 0 0 1-.215-1.673l2.098-6.4C6.462 4.48 
+             6.632 4 7.88 4c2.302 0 4.79.943 6.67 1.475" />
+                    </svg>
+                    <span class="text-green-800 text-sm">{{ conteoDisLikes[comment.id] || 0 }}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -285,14 +322,14 @@
       <p class="mt-4 text-amber-700">Cargando receta...</p>
     </div>
 
-    <!-- Diálogo de reporte de receta (mejorado) -->
+    <!-- Diálogo de reporte de receta -->
     <div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-4">
           <h3 class="text-xl font-bold text-white font-serif">Reportar Receta</h3>
         </div>
-        
+
         <!-- Contenido -->
         <div class="p-6">
           <div class="mb-5">
@@ -318,14 +355,18 @@
             <button @click="cancelReport"
               class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition duration-300 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <path fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
               </svg>
               Cancelar
             </button>
             <button @click="submitReportRecipe"
               class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300 flex items-center shadow-md">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
               </svg>
               Enviar Reporte
             </button>
@@ -334,14 +375,15 @@
       </div>
     </div>
 
-    <!-- Diálogo de reporte de comentario (mejorado) -->
-    <div v-if="showCommentReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <!-- Diálogo de reporte de comentario -->
+    <div v-if="showCommentReportModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-4">
           <h3 class="text-xl font-bold text-white font-serif">Reportar Comentario</h3>
         </div>
-        
+
         <!-- Contenido -->
         <div class="p-6">
           <div class="mb-5">
@@ -367,14 +409,18 @@
             <button @click="cancelCommentReport"
               class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition duration-300 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <path fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
               </svg>
               Cancelar
             </button>
             <button @click="submitCommentReport"
               class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300 flex items-center shadow-md">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
               </svg>
               Enviar Reporte
             </button>
@@ -415,12 +461,18 @@ const showCommentReportModal = ref(false);
 const commentReportReason = ref('');
 const commentCustomReason = ref('');
 const currentCommentId = ref(null);
+const type = ref("");
+const likedComments = ref({})
+const dislikedComments = ref({})
+const conteoLikes = ref({})
+const conteoDisLikes = ref({})
 const payload = {
   idrecipe: parseInt(recipeId),
   userToken: userToken,
   comment: "",
   idcomment: 0
 };
+
 const toggleFavorite = () => {
   if (userToken) {
     isFavorite.value = !isFavorite.value;
@@ -476,12 +528,30 @@ onMounted(() => {
         subquantity.value.push(element.quantity)
       });
       substeps.value = response.data.substep_list;
+      type.value = response.data.user_type
       fetchRecipe();
+      conteoLikes.value = response.data.countLikes_list.reduce((acc, item) => {
+        const id = item.id_comment;
+        acc[id] = (acc[id] || 0) + 1;
+        return acc;
+      }, {});
+      conteoDisLikes.value = response.data.countDisLikes_list.reduce((acc, item) => {
+        const id = item.id_comment;
+        acc[id] = (acc[id] || 0) + 1;
+        return acc;
+      }, {});
+
       if (response.data.user_token) {
         response.data.favorites_list.forEach(id => {
           if (id.id_recipe === parseInt(recipeId)) {
             isFavorite.value = true;
           }
+        });
+        response.data.likes_list.forEach(element => {
+          likedComments.value[element.id_recipe] = true
+        });
+        response.data.dislikes_list.forEach(element => {
+          dislikedComments.value[element.id_recipe] = true
         });
       }
     })
@@ -606,8 +676,8 @@ const submitCommentReport = async () => {
     return;
   }
 
-  const reason = commentReportReason.value === 'Otro' 
-    ? commentCustomReason.value 
+  const reason = commentReportReason.value === 'Otro'
+    ? commentCustomReason.value
     : commentReportReason.value;
 
   try {
@@ -627,6 +697,64 @@ const submitCommentReport = async () => {
     showCommentReportModal.value = false;
   }
 };
+
+const toggleLike = (commentId) => {
+  if (!likedComments.value[commentId]) {
+
+    likedComments.value[commentId] = !likedComments.value[commentId]
+    
+    if (likedComments.value[commentId]) {
+      dislikedComments.value[commentId] = false
+    }
+    payload.idcomment = commentId
+    axios.post('http://localhost:5000/likeComment', payload)
+      .then(() => {
+        conteoLikes.value[commentId]=(conteoLikes.value[commentId] || 0) + 1
+        if(conteoDisLikes.value[commentId] > 0){
+          conteoDisLikes.value[commentId]=(conteoDisLikes.value[commentId] || 0) - 1
+        }
+      })
+      .catch(error => console.error("Error en la solicitud:", error));
+  } else {
+    likedComments.value[commentId] = !likedComments.value[commentId]
+    payload.idcomment = commentId
+    axios.post('http://localhost:5000/deleteLike', payload)
+      .then(() => {
+        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1
+      })
+      .catch(error => console.error("Error en la solicitud:", error))
+  }
+
+}
+
+const toggleDislike = (commentId) => {
+  if (!dislikedComments.value[commentId]) {
+
+    dislikedComments.value[commentId] = !dislikedComments.value[commentId]
+
+    if (dislikedComments.value[commentId]) {
+      likedComments.value[commentId] = false
+    }
+    payload.idcomment = commentId
+    axios.post('http://localhost:5000/disLikeComment', payload)
+      .then(() => {
+        conteoDisLikes.value[commentId]=(conteoDisLikes.value[commentId] || 0) + 1
+        if(conteoLikes.value[commentId] > 0){
+        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1
+        }
+      })
+      .catch(error => console.error("Error en la solicitud:", error));
+  } else {
+    dislikedComments.value[commentId] = !dislikedComments.value[commentId]
+    payload.idcomment = commentId
+    axios.post('http://localhost:5000/deleteDisLike', payload)
+      .then(() => {
+        conteoDisLikes.value[commentId]=(conteoDisLikes.value[commentId] || 0) - 1
+      })
+      .catch(error => console.error("Error en la solicitud:", error))
+  }
+}
+
 
 </script>
 

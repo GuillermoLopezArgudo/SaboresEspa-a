@@ -164,12 +164,37 @@ class RecipeSubStepImage(BaseModel):
     def __str__(self):
         return f"Image for step {self.id_step.id} of recipe {self.id_step.id_recipe.recipe_title}"
 
+# Modelo para la tabla 'likes_comments'
+class LikseComments(BaseModel):
+    id_user = ForeignKeyField(Users, backref='step_images')
+    step_image = CharField(max_length=255)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
 
+    def __str__(self):
+        return f"Image by {self.id_user.user_name}"
+    
+    
+# Tabla de likes a comentarios 
+class LikesComment(BaseModel):
+    id_comment = ForeignKeyField(RecipeComment, backref='likes')
+    id_user = ForeignKeyField(Users, backref='liked_comments')
+    id_recipe = ForeignKeyField(Recipe, backref='comment_likes') 
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+    
+# Tabla de dislikes a comentarios 
+class DislikeComment(BaseModel):
+    id_comment = ForeignKeyField(RecipeComment, backref='dislikes')
+    id_user = ForeignKeyField(Users, backref='disliked_comments')
+    id_recipe = ForeignKeyField(Recipe, backref='comment_dislikes')
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
 
 # Para crear las tablas si no existen
 def create_tables():
     with db:
-        db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage])
+        db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage,LikesComment,DislikeComment])
 
 if __name__ == '__main__':
     create_tables()

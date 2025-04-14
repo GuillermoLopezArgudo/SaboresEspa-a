@@ -8,6 +8,8 @@ import Profile from '@/components/ProfileUser.vue';
 import MainPage from '@/components/MainPage.vue';
 import HomeRecipe from '@/components/HomeRecipe.vue';
 import PersonalRecipes from '@/components/PersonalRecipes.vue';
+import AboutUs from '@/components/AboutUs.vue';
+import ContactPage from '@/components/ContactPage.vue';
 
 
 const routes = [
@@ -19,7 +21,9 @@ const routes = [
   { path: '/recipe', component: Recipe, name:"recipe", meta: { title: "Ver Receta" }, props: route => ({ id: route.query.id }) },
   { path: '/edite', component: EditeRecipe, name:"edite", meta: { title: "Editar Receta" }, props: route => ({ id: route.query.id }) },
   { path: '/profile', component: Profile, name:"profile", meta: { title: "Mi Perfil" }},
-  { path: '/recipes_personal', component: PersonalRecipes, name:"recipes_personal", meta: { title: "Mis Recetas" }}
+  { path: '/recipes_personal', component: PersonalRecipes, name:"recipes_personal", meta: { title: "Mis Recetas" }},
+  { path: '/sobre-nosotros', name: 'SobreNosotros', component: AboutUs },
+  { path: '/contacto', name: 'Contacto', component: ContactPage },
 ];
 
 const router = createRouter({

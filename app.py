@@ -4,7 +4,7 @@ load_dotenv()
 from flask import Flask, jsonify, request, abort, render_template, request, redirect, url_for
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
-from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage
+from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage,LikesComment,DislikeComment
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 from config import Config
@@ -42,10 +42,6 @@ try:
     print("✅ Conectado a MySQL")
 except Exception as e:
     print("❌ Error al conectar a la base de datos:", e)
-
-def create_tables():
-    from models import SomeModel
-    db.create_tables([SomeModel], safe=True)
 
 def save_base64_file(base64_data, file_name, folder):
     if base64_data:
@@ -94,6 +90,7 @@ def login():
 
 @app.route('/create', methods=['POST'])
 def createRecipe():
+    #create_tables()
     data = request.get_json()
     title = data.get("title")
     image = data.get("image")
@@ -245,6 +242,7 @@ def viewPersonalRecipes():
     
 @app.route('/viewAll', methods=['POST'])
 def viewAllRecipes():
+
     data = request.get_json()
     recipes = Recipe.select().where(Recipe.recipe_visibility == 1)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
@@ -315,6 +313,7 @@ def viewRecipe():
     recipe = Recipe.select().where(Recipe.id == idrecipe).first()
     names =Users.select().where(Users.id == recipe.id_user).first()
     user_name = names.user_name
+    user_type = user.user_type
     recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": bool(recipe.recipe_visibility),"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
     ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
     ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
@@ -332,23 +331,33 @@ def viewRecipe():
         substep_list.append({"title": substep.step_title,"description": substep.step_description,"image": step_image.step_image if step_image else None})        
     filters = RecipeFilter.select().where(RecipeFilter.id_recipe_id == idrecipe)
     filters_list = [{"type":filter.type, "category":filter.category} for filter in filters]
+    countLikes = LikesComment.select()
+    countLikes_list = [{"id_comment":countLike.id_comment_id} for countLike in countLikes]
+    countDisLikes = DislikeComment.select()
+    countDisLikes_list = [{"id_comment":countDisLike.id_comment_id} for countDisLike in countDisLikes]
     if user:
         user_id = user.id
         user_token = user.user_token
         if user_id:
             favorites = UserFavorite.select().where(UserFavorite.id_user_id ==user_id)
             favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
-            return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name)
-        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name)
-    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name)
+            likes = LikesComment.select().where(LikesComment.id_user == user.id)
+            likes_list = [{"id_recipe":like.id_comment_id } for like in likes]
+            dislikes = DislikeComment.select().where(DislikeComment.id_user == user.id)
+            dislikes_list = [{"id_recipe":like.id_comment_id } for like in dislikes]
+            return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
+    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
 
 @app.route('/viewComment', methods=['POST'])
 def viewComment(): 
     data = request.get_json()
     idrecipe = data.get("idrecipe") 
+    token = data.get("userToken")
     comments = RecipeComment.select().where(RecipeComment.id_recipe_id ==idrecipe)
     comment_list = []
     for comment in comments:
+        users = Users.select().where(Users.user_token == token).first()
         user = Users.get(Users.id == comment.id_user_id)
         comment_list.append({
             "id": comment.id,
@@ -356,7 +365,7 @@ def viewComment():
             "iduser": comment.id_user_id,
             "username": user.user_name,
             "userToken": user.user_token,
-            "type": user.user_type
+            "type": users.user_type
         })
     return jsonify(comment_list=comment_list)
     
@@ -797,6 +806,7 @@ def allUsers():
     data = request.get_json()
     token = data.get("userToken")
     user = Users.select().where((Users.user_token == token) & (Users.user_type == "admin")).first()
+    type = "admin"
     if user:
         if Users.select().where((Users.user_token == token) & (Users.user_type == "admin")):
             users = Users.select().where(Users.user_type != type)
@@ -990,6 +1000,70 @@ def report_comment():
             "details": str(e)
         }), 500    
     
+@app.route('/likeComment', methods=['POST'])
+def likeComment():
+    data = request.get_json()
+    idcomment = data.get("idcomment")
+    DislikeComment.delete().where(DislikeComment.id_comment == idcomment).execute()
+    
+    token = data.get("userToken")
+    users = Users.select().where((Users.user_token == token)).first()
+    iduser = users.id
+    idrecipe = data.get('idrecipe')
+    user = LikesComment(id_comment = idcomment,id_user = iduser, id_recipe = idrecipe,created_at = date.today(), modified_at = date.today())
+    user.save()
+    return '', 204 
+
+@app.route('/disLikeComment', methods=['POST'])
+def disLikeComment():
+    data = request.get_json()
+    idcomment = data.get("idcomment")
+    LikesComment.delete().where(LikesComment.id_comment == idcomment).execute()
+    
+    token = data.get("userToken")
+    users = Users.select().where((Users.user_token == token)).first()
+    iduser = users.id
+    idrecipe = data.get('idrecipe')
+    user = DislikeComment(id_comment = idcomment,id_user = iduser, id_recipe = idrecipe,created_at = date.today(), modified_at = date.today())
+    user.save()
+    return '', 204 
+
+@app.route('/deleteLike', methods=['POST'])
+def deleteLike():
+    data = request.get_json()
+    idcomment = data.get("idcomment")
+    LikesComment.delete().where(LikesComment.id_comment == idcomment).execute()
+    return '', 204 
+
+@app.route('/deleteDisLike', methods=['POST'])
+def deleteDisLike():
+    data = request.get_json()
+    idcomment = data.get("idcomment")
+    DislikeComment.delete().where(DislikeComment.id_comment == idcomment).execute()
+    return '', 204 
+
+@app.route('/send-email', methods=['POST'])
+def contact():
+    data = request.get_json()
+    name = data.get("name")
+    email = data.get("email")
+    message = data.get("message")
+
+    if not name or not email or not message:
+        return jsonify({"error": "Todos los campos son obligatorios"}), 400
+
+    try:
+        msg = Message(
+            subject=f"Nuevo mensaje de contacto de {name}",
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[app.config['MAIL_USERNAME']],
+            body=f"Nombre: {name}\nCorreo: {email}\n\nMensaje:\n{message}"
+        )
+        mail.send(msg)
+        return jsonify({"message": "Correo enviado correctamente"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
