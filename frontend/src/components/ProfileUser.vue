@@ -280,7 +280,7 @@ function changeImage(imageData) {
       imageUrl.value = `http://localhost:5000/${response.data.newImage}`;
     })
     .catch(error => {
-      console.log("aaa"+error);
+      console.log(error);
     });
 }
 

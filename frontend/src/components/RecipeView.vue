@@ -200,7 +200,7 @@
       </div>
 
       <!-- Comentarios -->
-
+       
       <div class="p-6 sm:p-8 border-t border-amber-100">
         <h3 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
