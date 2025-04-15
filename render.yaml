@@ -1,0 +1,49 @@
+services:
+  # 1. Base de datos MySQL (contenedor privado)
+  - type: pserv
+    name: mysql-db
+    runtime: docker
+    dockerfilePath: Dockerfile.mysql
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: 1234
+      - key: MYSQL_DATABASE
+        value: recipesSpain
+      - key: MYSQL_USER
+        value: root
+    plan: starter  # o el plan de pago que tengas
+
+  # 2. Backend Flask (Python)
+  - type: web
+    name: flask-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:5000
+    envVars:
+      - key: MYSQL_HOST
+        value: mysql-db
+      - key: MYSQL_USER
+        value: root
+      - key: MYSQL_PASSWORD
+        value: 1234
+      - key: MYSQL_DB
+        value: recipesSpain
+      - key: FLASK_ENV
+        value: production
+    plan: free
+
+  # 3. Frontend Vue (como sitio estático dentro de un servicio web)
+  - type: web
+    name: vue-frontend
+    runtime: node
+    buildCommand: |
+      cd frontend && npm install && npm run build
+    staticSite: true
+    publishPath: frontend/dist
+    envVars:
+      - key: VUE_APP_API_URL
+        value: https://flask-backend.onrender.com
+    routes:
+      - path: /*
+        staticSite: true  # para manejar rutas del Vue Router
+    plan: free
