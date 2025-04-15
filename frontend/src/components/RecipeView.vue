@@ -741,7 +741,8 @@ function updateSubcomment(idcomment) {
   payload.idcomment = idcomment;
   payload.comment = editedSubcomment.value;
   axios.post('http://localhost:5000/editeSubComment', payload)
-    .then(() => {
+    .then(response => {
+      console.log(response.data.message)
       fetchRecipe();
       cancelEditSubcomment();
     })

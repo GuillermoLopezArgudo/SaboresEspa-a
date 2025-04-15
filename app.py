@@ -459,7 +459,7 @@ def deleteComment():
 def deleteSubComment():
     data = request.get_json()
     idcomment = data.get('idcomment')
-    RecipeSubComment.delete().where(RecipeSubComment.id_comment == idcomment).execute()
+    RecipeSubComment.delete().where(RecipeSubComment.id == idcomment).execute()
     return jsonify(message="Recipe deleted")
 
 @app.route('/editeComment', methods=['POST'])
@@ -475,7 +475,7 @@ def editeSubComment():
     data = request.get_json()
     comment = data.get('comment')
     idcomment = data.get('idcomment')
-    RecipeSubComment.update(comment_text=comment,modified_at=date.today()).where(RecipeSubComment.id_comment == idcomment).execute()
+    RecipeSubComment.update(comment_text=comment,modified_at=date.today()).where(RecipeSubComment.id == idcomment).execute()
     return jsonify(message="Change Comment")
 
 @app.route('/viewFavs', methods=['POST'])
