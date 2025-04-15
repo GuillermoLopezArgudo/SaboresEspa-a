@@ -1,63 +1,33 @@
-version: '3.7'
-
 services:
-  # Tu servicio de Flask (Backend)
-  flask:
-    build:
-      context: .
-    volumes:
-      - .:/app
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=development
-      - MYSQL_HOST=db
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=1234
-      - MYSQL_DB=recipesSpain
-    depends_on:
-      - db  
+  # 1. Base de datos MySQL (contenedor privado)
+  - type: pserv
+    name: mysql-db
+    runtime: docker
+    dockerfilePath: Dockerfile.mysql
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: 1234
+      - key: MYSQL_DATABASE
+        value: recipesSpain
+      - key: MYSQL_USER
+        value: root
+    plan: starter  # o tu plan de pago, ya que "pserv" requiere persistencia
 
-  # Tu servicio de Vue.js (Frontend)
-  vue:
-    build:
-      context: ./frontend
-    volumes:
-      - ./frontend:/app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    environment:
-      - VUE_APP_API_URL=http://flask:5000 
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-    command: npm run serve
-  # Servicio de base de datos MySQL
-  db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: recipesSpain
-      #MYSQL_USER: root
-      #MYSQL_PASSWORD: 1234
-    volumes:
-      - mysql-data:/var/lib/mysql  
-    ports:
-      - "3306:3306"  
-
-  # Servicio phpMyAdmin
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234 
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 1234
-      MYSQL_HOST: db  
-    ports:
-      - "8081:80"  
-    depends_on:
-      - db  
-volumes:
-  mysql-data:
+  # 2. Backend Flask (Python)
+  - type: web
+    name: flask-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:5000
+    envVars:
+      - key: MYSQL_HOST
+        value: mysql-db
+      - key: MYSQL_USER
+        value: root
+      - key: MYSQL_PASSWORD
+        value: 1234
+      - key: MYSQL_DB
+        value: recipesSpain
+      - key: FLASK_ENV
+        value: production
+    plan: free

@@ -1,7 +1,11 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
-from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter
+from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 from config import Config
@@ -9,20 +13,30 @@ from peewee import DoesNotExist
 from datetime import date
 from peewee import fn
 import hashlib
-import os
 import base64
+from models import db, BaseModel
 
 app = Flask(__name__)
-create_tables()
+
+app.config.from_object(Config)
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
 app.config['UPLOAD_FOLDER_VIDEOS'] = 'static/videos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
-app.config.from_object('config.Config')
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
 mysql = MySQL(app)
+
+try:
+    db.connect(reuse_if_open=True)
+    print("✅ Conectado a MySQL")
+except Exception as e:
+    print("❌ Error al conectar a la base de datos:", e)
+
+def create_tables():
+    from models import SomeModel
+    db.create_tables([SomeModel], safe=True)
 
 def save_base64_file(base64_data, file_name, folder):
     if base64_data:
@@ -71,6 +85,7 @@ def login():
 
 @app.route('/create', methods=['POST'])
 def createRecipe():
+    create_tables()
     data = request.get_json()
     title = data.get("title")
     image = data.get("image")
@@ -85,12 +100,21 @@ def createRecipe():
     ingredients = data.get("ingredients")
     quantities = data.get("quantities")
     steps = data.get("steps")
+    subingredients = data.get("subingredients")
+    subquantities = data.get("subquantities")
+    substeps = data.get("substeps")
     if not quantities:
         quantities = []
     if not ingredients:
         ingredients = []
     if not steps:
         steps = []
+    if not subquantities:
+        subquantities = []
+    if not subingredients:
+        subingredients = []
+    if not substeps:
+        substeps = []
     token = data.get("token")
     proteins = data.get("proteins")
     typeeat = data.get("typeeat")
@@ -135,6 +159,43 @@ def createRecipe():
                 step_img.save()
 
                 recipe_step_img = RecipeStepImage(
+                    id_step=recipe_step.id,
+                    id_image=step_img.id
+                )
+                recipe_step_img.save()
+        for i in range(len(subingredients)):        
+            subquantity = subquantities[i] if i < len(subquantities) else ''
+            recipe_ingredient = SubRecipeIngredient(id_recipe_id = recipe.id, id_user_id = user.id,ingredients_text=subingredients[i],quantity_unit=subquantity, created_at = date.today(), modified_at = date.today())
+            recipe_ingredient.save()
+        for i in range(len(substeps)):
+            step_title = substeps[i].get('title')
+            step_text = substeps[i].get('text')
+            step_image = substeps[i].get('image')
+
+            step_image_url = None
+            if step_image:
+                step_image_url = save_base64_file(step_image['base64'], step_image['name'], app.config['UPLOAD_FOLDER_IMAGES'])
+
+            recipe_step = SubRecipeStep(
+                id_recipe=recipe.id,
+                id_user_id=user.id,
+                step_title=step_title,
+                step_description=step_text,
+                created_at=date.today(),
+                modified_at=date.today()
+            )
+            recipe_step.save()
+            
+            if step_image_url:
+                step_img = SubStepImage(
+                    id_user_id=user.id,
+                    step_image=step_image_url,
+                    created_at=date.today(),
+                    modified_at=date.today()
+                )
+                step_img.save()
+
+                recipe_step_img = RecipeSubStepImage(
                     id_step=recipe_step.id,
                     id_image=step_img.id
                 )
@@ -239,14 +300,21 @@ def viewRecipe():
     for step in steps:
         step_image = (StepImage.select(StepImage.step_image).join(RecipeStepImage).where(RecipeStepImage.id_step == step.id).first())
         step_list.append({"title": step.step_title,"description": step.step_description,"image": step_image.step_image if step_image else None})
+    subingredientes = SubRecipeIngredient.select().where(SubRecipeIngredient.id_recipe_id ==idrecipe)
+    subingredient_list = [{"ingredients":subingredient.ingredients_text, "quantity":subingredient.quantity_unit} for subingredient in subingredientes]
+    substeps = SubRecipeStep.select().where(SubRecipeStep.id_recipe == idrecipe)
+    substep_list = []
+    for substep in substeps:
+        step_image = (SubStepImage.select(SubStepImage.step_image).join(RecipeSubStepImage).where(RecipeSubStepImage.id_step == substep.id).first())
+        substep_list.append({"title": substep.step_title,"description": substep.step_description,"image": step_image.step_image if step_image else None})        
     filters = RecipeFilter.select().where(RecipeFilter.id_recipe_id == idrecipe)
     filters_list = [{"type":filter.type, "category":filter.category} for filter in filters]
         
     if iduser:
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==iduser)
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
-        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list)
-    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list)
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list)
+    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list)
 
 @app.route('/viewComment', methods=['POST'])
 def viewComment(): 
@@ -281,6 +349,7 @@ def deleteRecipe():
     idrecipe = data.get('idrecipe')
     RecipeFilter.delete().where(RecipeFilter.id_recipe==idrecipe).execute()
     RecipeIngredient.delete().where(RecipeIngredient.id_recipe == idrecipe).execute()
+    SubRecipeIngredient.delete().where(SubRecipeIngredient.id_recipe == idrecipe).execute()
     RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
     UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
     RecipeReview.delete().where(RecipeReview.id_recipe == idrecipe).execute()
@@ -291,6 +360,13 @@ def deleteRecipe():
             RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
         StepImage.delete().where(StepImage.id == step_image.id_image).execute()
     RecipeStep.delete().where(RecipeStep.id_recipe == idrecipe).execute()
+    recipe_substeps = SubRecipeStep.select(SubRecipeStep.id).where(SubRecipeStep.id_recipe == idrecipe).execute()
+    for step in recipe_substeps:
+        substep_images = RecipeSubStepImage.select().where(RecipeSubStepImage.id_step == step.id)
+        for step_image in substep_images:     
+            RecipeSubStepImage.delete().where(RecipeSubStepImage.id_step == step.id).execute()
+        SubStepImage.delete().where(SubStepImage.id == step_image.id_image).execute()
+    SubRecipeStep.delete().where(SubRecipeStep.id_recipe == idrecipe).execute()
     Recipe.delete().where(Recipe.id == idrecipe).execute()
     return jsonify(message="Recipe comment")
 
@@ -360,6 +436,9 @@ def editeRecipe():
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
     steps = data.get("steps") or []
+    subingredients = data.get("subingredients") or []
+    subquantities = data.get("subquantities") or []
+    substeps = data.get("substeps") or []
     token = data.get("token")
     proteins = data.get("proteins")
     typeeat = data.get("typeeat")
@@ -398,9 +477,13 @@ def editeRecipe():
     recipe.save()
     RecipeFilter.delete().where(RecipeFilter.id_recipe_id == recipe.id).execute()
     RecipeIngredient.delete().where(RecipeIngredient.id_recipe_id == recipe.id).execute()
-
+    SubRecipeIngredient.delete().where(SubRecipeIngredient.id_recipe_id == recipe.id).execute()
+    
     RecipeStepImage.delete().where(RecipeStepImage.id_step.in_(
         RecipeStep.select(RecipeStep.id).where(RecipeStep.id_recipe == recipe.id)
+    )).execute()
+    RecipeSubStepImage.delete().where(RecipeSubStepImage.id_step.in_(
+        SubRecipeStep.select(SubRecipeStep.id).where(SubRecipeStep.id_recipe == recipe.id)
     )).execute()
 
     StepImage.delete().where(StepImage.id.in_(
@@ -408,8 +491,14 @@ def editeRecipe():
             RecipeStepImage.id_step.in_(RecipeStep.select(RecipeStep.id).where(RecipeStep.id_recipe == recipe.id))
         )
     )).execute()
+    SubStepImage.delete().where(SubStepImage.id.in_(
+        RecipeSubStepImage.select(RecipeSubStepImage.id_image).where(
+            RecipeSubStepImage.id_step.in_(SubRecipeStep.select(SubRecipeStep.id).where(SubRecipeStep.id_recipe == recipe.id))
+        )
+    )).execute()
 
     RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+    SubRecipeStep.delete().where(SubRecipeStep.id_recipe == recipe.id).execute()
 
     for i in range(len(ingredients)):
         quantity = quantities[i] if i < len(quantities) else ''
@@ -451,6 +540,49 @@ def editeRecipe():
             )
 
             RecipeStepImage.create(
+                id_step=recipe_step.id,
+                id_image=step_img.id
+            )
+           
+    for i in range(len(subingredients)):
+        quantity = subquantities[i] if i < len(subquantities) else ''
+        SubRecipeIngredient.create(
+            id_recipe_id=recipe.id,
+            id_user_id=user.id,
+            ingredients_text=subingredients[i],
+            quantity_unit=quantity,
+            created_at=date.today(),
+            modified_at=date.today()
+        ) 
+    for step in substeps:
+        step_title = step.get('title')
+        step_text = step.get('description')
+        step_image = step.get('image')
+
+        step_image_url = None
+        if step_image and isinstance(step_image, dict):
+            if "base64" in step_image and step_image["base64"]:
+                step_image_url = save_base64_file(step_image['base64'], step_image['name'], app.config['UPLOAD_FOLDER_IMAGES'])
+            else:
+                step_image_url = step_image.get("name")
+
+        recipe_step = SubRecipeStep.create(
+            id_recipe=recipe.id,
+            id_user_id=user.id,
+            step_title=step_title,
+            step_description=step_text,
+            created_at=date.today(),
+            modified_at=date.today()
+        )
+        if step_image_url:
+            step_img = SubStepImage.create(
+                id_user_id=user.id,
+                step_image=step_image_url,
+                created_at=date.today(),
+                modified_at=date.today()
+            )
+
+            RecipeSubStepImage.create(
                 id_step=recipe_step.id,
                 id_image=step_img.id
             )
@@ -595,14 +727,18 @@ def deleteUser():
         idRecipes = Recipe.select().where(Recipe.id_user == iduser)
         for recipe in idRecipes:
             steps = RecipeStep.select().where(RecipeStep.id_recipe == recipe.id)
+            substeps = SubRecipeStep.select().where(SubRecipeStep.id_recipe == recipe.id)
             for step in steps:
                 RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
+            for step in substeps:
+                RecipeSubStepImage.delete().where(RecipeSubStepImage.id_step == step.id).execute()
             RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
             RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
+            SubRecipeIngredient.delete().where(SubRecipeIngredient.id_recipe == recipe.id).execute()
             RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
             RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
             RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
-
+            SubStepImage.delete().where(SubStepImage.id_user == iduser).execute()
             StepImage.delete().where(StepImage.id_user == iduser).execute()
             UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
 

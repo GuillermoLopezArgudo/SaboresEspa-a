@@ -66,12 +66,12 @@
         </div>
   
         <!-- Ingredientes -->
-        <div class="p-6 sm:p-8 border-t border-amber-100">
+        <div v-if="ingredients.length > 0" class="p-6 sm:p-8 border-t border-amber-100">
           <h3 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Ingredientes
+            Ingredientes Receta
           </h3>
           <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <li v-for="(ingrediente, idx) in ingredients" :key="idx" class="bg-amber-50 p-3 rounded-lg border border-amber-200">
@@ -87,10 +87,52 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            Pasos de Preparación
+            Pasos de Preparación Receta
           </h3>
           <div class="space-y-6">
             <div v-for="(step, idx) in steps" :key="idx" class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm">
+              <div class="flex items-start">
+                <span class="bg-amber-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
+                  {{ idx + 1 }}
+                </span>
+                <div>
+                  <h4 class="font-semibold text-amber-800 text-lg">{{ step.title }}</h4>
+                  <p class="text-amber-700 mt-1">{{ step.description }}</p>
+                  <div v-if="step.image" class="mt-3 rounded-lg overflow-hidden border border-amber-200">
+                    <img :src="`http://localhost:5000/${step.image}`" :alt="`Imagen del paso ${idx + 1}`" class="w-full max-w-md">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredientes SubReceta -->
+        <div v-if="subingredients.length > 0" class="p-6 sm:p-8 border-t border-amber-100">
+          <h3 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Ingredientes SubReceta
+          </h3>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <li v-for="(ingrediente, idx) in subingredients" :key="idx" class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+              <span class="font-medium text-amber-800">{{ ingrediente }}</span>
+              <span class="block text-amber-600 text-sm">{{ quantity[idx] || 'Cantidad no disponible' }}</span>
+           </li>
+          </ul>
+        </div>
+  
+        <!-- Pasos de la Subreceta -->
+        <div v-if="substeps.length > 0" class="p-6 sm:p-8 border-t border-amber-100">
+          <h3 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Pasos de Preparación SubReceta
+          </h3>
+          <div class="space-y-6">
+            <div v-for="(step, idx) in substeps" :key="idx" class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm">
               <div class="flex items-start">
                 <span class="bg-amber-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
                   {{ idx + 1 }}
@@ -204,6 +246,9 @@
   const ingredients = ref([]);
   const quantity = ref([]);
   const steps = ref([]);
+  const subingredients = ref([]);
+  const subquantity = ref([]);
+  const substeps = ref([]);
   const comments = ref([]);
   const isFavorite = ref(false);
   const editingCommentId = ref(null);
@@ -261,6 +306,11 @@
                   quantity.value.push(element.quantity)
               });
               steps.value = response.data.step_list;
+              response.data.subingredient_list.forEach(element => {
+                subingredients.value.push(element.ingredients);
+                subquantity.value.push(element.quantity)
+              });
+              substeps.value = response.data.substep_list;
               fetchRecipe();
               if (iduser) {
                   response.data.favorites_list.forEach(id => {

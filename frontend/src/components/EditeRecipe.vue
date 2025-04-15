@@ -111,14 +111,13 @@
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Ingredientes
+          Ingredientes Receta
         </h2>
 
-        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-2 gap-3 mb-3">
+        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-3 gap-3 mb-3">
           <div>
             <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">Ingrediente {{
-              index
-              + 1 }}</label>
+              index + 1 }}</label>
             <input :id="'ingredient' + index" v-model="recipebook.ingredients[index]" required
               class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Nombre del ingrediente">
@@ -129,7 +128,17 @@
               class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Cantidad necesaria">
           </div>
+          <div class="flex items-end">
+            <button @click="removeIngredient(index)" type="button" class="text-red-500 hover:text-red-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
+
 
         <button type="button" @click="addIngredient"
           class="mt-3 flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
@@ -150,11 +159,19 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           </svg>
-          Pasos de Preparación
+          Pasos de Preparación Receta
         </h2>
 
         <div v-for="(step, index) in recipebook.steps" :key="index"
-          class="mb-5 p-4 bg-amber-50 rounded-lg border border-amber-200">
+          class="mb-5 p-4 bg-amber-50 rounded-lg border border-amber-200 relative">
+          <button @click="removeStep(index)" type="button"
+            class="absolute top-2 right-2 text-red-500 hover:text-red-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
           <h3 class="text-base font-semibold text-amber-700 mb-2">Paso {{ index + 1 }}</h3>
 
           <div class="mb-3">
@@ -193,6 +210,8 @@
           </div>
         </div>
 
+
+
         <button type="button" @click="addStep"
           class="flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -203,6 +222,127 @@
           Añadir paso
         </button>
       </div>
+
+      <!-- SubIngredientes -->
+      <div class="p-6 sm:p-8 border-b border-amber-100">
+        <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Ingredientes SubReceta
+        </h2>
+
+        <div v-for="(ingredient, index) in recipebook.subingredients" :key="index"
+          class="grid md:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label :for="'subingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">SubIngrediente
+              {{ index + 1 }}</label>
+            <input :id="'subingredient' + index" v-model="recipebook.subingredients[index]" required
+              class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+              placeholder="Nombre del ingrediente">
+          </div>
+          <div>
+            <label :for="'subquantity' + index"
+              class="block text-sm font-medium text-amber-700 mb-1">SubCantidad</label>
+            <input :id="'subquantity' + index" v-model="recipebook.subquantities[index]" required
+              class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+              placeholder="Cantidad necesaria">
+          </div>
+          <div class="flex items-end">
+            <button @click="removeSubIngredient(index)" type="button" class="text-red-500 hover:text-red-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" @click="addSubIngredient"
+          class="mt-3 flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clip-rule="evenodd" />
+          </svg>
+          Añadir ingrediente
+        </button>
+      </div>
+
+      <!-- SubPasos de preparación -->
+      <div class="p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          Pasos de Preparación SubReceta
+        </h2>
+
+        <div v-for="(step, index) in recipebook.substeps" :key="index"
+          class="mb-5 p-4 bg-amber-50 rounded-lg border border-amber-200 relative">
+          <button @click="removeSubStep(index)" type="button"
+            class="absolute top-2 right-2 text-red-500 hover:text-red-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          <h3 class="text-base font-semibold text-amber-700 mb-2">Paso {{ index + 1 }}</h3>
+
+          <div class="mb-3">
+            <label :for="'stepTitle' + index" class="block text-sm font-medium text-amber-700 mb-1">Título del
+              subpaso</label>
+            <input :id="'stepTitle' + index" v-model="step.title" required
+              class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+              placeholder="Título breve">
+          </div>
+
+          <div class="mb-3">
+            <label :for="'stepDesc' + index" class="block text-sm font-medium text-amber-700 mb-1">Descripción</label>
+            <textarea :id="'stepDesc' + index" v-model="step.description" rows="2" required
+              class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+              placeholder="Describe este paso..."></textarea>
+          </div>
+
+          <div>
+            <label :for="'stepImage' + index" class="block text-sm font-medium text-amber-700 mb-1">Imagen
+              (Opcional)</label>
+            <div class="relative">
+              <input type="file" :id="'stepImage' + index" @change="handleSubStepImageChange($event, index)"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+              <div
+                class="flex items-center justify-between px-3 py-1.5 bg-white rounded-lg border border-amber-300 shadow-sm">
+                <span class="text-xs text-amber-600 truncate">
+                  {{ step.image ? (typeof step.image === 'object' ? step.image.name : 'Imagen existente') : 'Seleccionar imagen...' }}
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <button type="button" @click="addSubStep"
+          class="flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clip-rule="evenodd" />
+          </svg>
+          Añadir paso
+        </button>
+      </div>
+
       <!-- Filtros -->
 
       <!-- Sección de Filtros -->
@@ -224,7 +364,7 @@
             <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
               <div class="space-y-2">
                 <label v-for="(type, index) in foodTypes" :key="index" class="flex items-center">
-                  <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida" required
+                  <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida"
                     class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300">
                   <span class="ml-2 text-sm text-amber-800">{{ type.label }}</span>
                 </label>
@@ -307,7 +447,10 @@ const showBasicInfo = ref();
 const recipebook = reactive({
   ingredients: [],
   quantities: [],
-  steps: []
+  steps: [],
+  subingredients: [],
+  subquantities: [],
+  substeps: []
 });
 
 // Función para añadir ingrediente
@@ -319,6 +462,17 @@ const addIngredient = () => {
 // Función para añadir paso
 const addStep = () => {
   recipebook.steps.push({ title: '', description: '', image: null });
+};
+
+// Función para añadir ingrediente
+const addSubIngredient = () => {
+  recipebook.subingredients.push('');
+  recipebook.subquantities.push('');
+};
+
+// Función para añadir paso
+const addSubStep = () => {
+  recipebook.substeps.push({ title: '', description: '', image: null });
 };
 
 onMounted(() => {
@@ -337,6 +491,15 @@ onMounted(() => {
 
       response.data.step_list.forEach(element => {
         recipebook.steps.push(element);
+      });
+
+      response.data.subingredient_list.forEach(element => {
+        recipebook.subingredients.push(element.ingredients);
+        recipebook.subquantities.push(element.quantity);
+      });
+
+      response.data.substep_list.forEach(element => {
+        recipebook.substeps.push(element);
       });
 
       response.data.filters_list.forEach(element => {
@@ -401,6 +564,20 @@ function handleStepImageChange(event, index) {
   }
 }
 
+function handleSubStepImageChange(event, index) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      recipebook.substeps[index].image = {
+        base64: reader.result.split(",")[1],
+        name: file.name
+      };
+    };
+  }
+}
+
 function submitEditeRecipe() {
   const payload = {
     idrecipe: recipeId,
@@ -411,6 +588,13 @@ function submitEditeRecipe() {
     ingredients: recipebook.ingredients.length > 0 ? recipebook.ingredients : [],
     quantities: recipebook.quantities.length > 0 ? recipebook.quantities : [],
     steps: recipebook.steps.length > 0 ? recipebook.steps.map(step => ({
+      title: step.title,
+      description: step.description,
+      image: typeof step.image === 'object' ? step.image : { base64: null, name: step.image }
+    })) : [],
+    subingredients: recipebook.subingredients.length > 0 ? recipebook.subingredients : [],
+    subquantities: recipebook.subquantities.length > 0 ? recipebook.subquantities : [],
+    substeps: recipebook.substeps.length > 0 ? recipebook.substeps.map(step => ({
       title: step.title,
       description: step.description,
       image: typeof step.image === 'object' ? step.image : { base64: null, name: step.image }
@@ -487,12 +671,35 @@ const proteins = [
   { value: 'vegetariana', label: 'Vegetariana' },
   { value: 'vegana', label: 'Vegana' },
 ];
+
 const prepTimes = [
   { value: 'menos15', label: 'Rápida (<15 min)' },
   { value: '15a30', label: 'Media (15-30 min)' },
   { value: '30a60', label: 'Lenta (30-60 min)' },
   { value: 'mas60', label: 'Muy lenta (>1 hora)' }
 ];
+
+// Función para eliminar ingrediente
+const removeIngredient = (index) => {
+  recipebook.ingredients.splice(index, 1);
+  recipebook.quantities.splice(index, 1);
+};
+
+// Función para eliminar subingrediente
+const removeSubIngredient = (index) => {
+  recipebook.subingredients.splice(index, 1);
+  recipebook.subquantities.splice(index, 1);
+};
+
+// Función para eliminar paso
+const removeStep = (index) => {
+  recipebook.steps.splice(index, 1);
+};
+
+// Función para eliminar subpaso
+const removeSubStep = (index) => {
+  recipebook.substeps.splice(index, 1);
+};
 </script>
 
 <style scoped>

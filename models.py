@@ -128,10 +128,48 @@ class RecipeFilter(BaseModel):
     def __str__(self):
         return f"Filter '{self.type}' for recipe {self.id_recipe.recipe_title}"
 
+# Modelo para la tabla 'sub_recipe_steps'
+class SubRecipeStep(BaseModel):
+    id_recipe = ForeignKeyField(Recipe, backref='steps')    
+    id_user = ForeignKeyField(Users, backref='steps')
+    step_title = CharField(max_length=255)
+    step_description = TextField()
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+# Modelo para la tabla 'sub_recipe_ingredients'
+class SubRecipeIngredient(BaseModel):
+    id_recipe = ForeignKeyField(Recipe, backref='ingredients')
+    id_user = ForeignKeyField(Users, backref='ingredients')
+    ingredients_text = TextField(null=True)
+    quantity_unit = CharField(max_length=50, null=True)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+    
+# Modelo para la tabla 'sub_steps_image'
+class SubStepImage(BaseModel):
+    id_user = ForeignKeyField(Users, backref='step_images')
+    step_image = CharField(max_length=255)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+    def __str__(self):
+        return f"Image by {self.id_user.user_name}"
+
+# Modelo para la tabla 'recipe_sub_step_images'
+class RecipeSubStepImage(BaseModel):
+    id_step = ForeignKeyField(SubRecipeStep, backref='step_images')
+    id_image = ForeignKeyField(SubStepImage, backref='step_images')
+
+    def __str__(self):
+        return f"Image for step {self.id_step.id} of recipe {self.id_step.id_recipe.recipe_title}"
+
+
+
 # Para crear las tablas si no existen
 def create_tables():
     with db:
-        db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter])
+        db.create_tables([Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage])
 
 if __name__ == '__main__':
     create_tables()
