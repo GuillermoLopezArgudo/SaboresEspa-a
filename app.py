@@ -4,7 +4,7 @@ load_dotenv()
 from flask import Flask, jsonify, request, abort, render_template, request, redirect, url_for
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
-from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage,LikesComment,DislikeComment
+from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage,LikesComment,DislikeComment,RecipeSubComment
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 from config import Config
@@ -64,6 +64,7 @@ def save_base64_file(base64_data, file_name, folder):
 
 @app.route('/register', methods=['POST'])
 def register():
+    create_tables()
     data = request.get_json()
     name = data.get("name")
     email = data.get("email")
@@ -313,7 +314,6 @@ def viewRecipe():
     recipe = Recipe.select().where(Recipe.id == idrecipe).first()
     names =Users.select().where(Users.id == recipe.id_user).first()
     user_name = names.user_name
-    user_type = user.user_type
     recipe_list = [{"title": recipe.recipe_title, "description": recipe.recipe_description,"visibility": bool(recipe.recipe_visibility),"video":recipe.recipe_video,"id_user":recipe.id_user_id, "image":recipe.recipe_image} for recipe in recipes]
     ingredientes = RecipeIngredient.select().where(RecipeIngredient.id_recipe_id ==idrecipe)
     ingredient_list = [{"ingredients":ingredient.ingredients_text, "quantity":ingredient.quantity_unit} for ingredient in ingredientes]
@@ -338,6 +338,7 @@ def viewRecipe():
     if user:
         user_id = user.id
         user_token = user.user_token
+        user_type = user.user_type
         if user_id:
             favorites = UserFavorite.select().where(UserFavorite.id_user_id ==user_id)
             favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
@@ -346,7 +347,7 @@ def viewRecipe():
             dislikes = DislikeComment.select().where(DislikeComment.id_user == user.id)
             dislikes_list = [{"id_recipe":like.id_comment_id } for like in dislikes]
             return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
-        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
     return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
 
 @app.route('/viewComment', methods=['POST'])
@@ -354,32 +355,63 @@ def viewComment():
     data = request.get_json()
     idrecipe = data.get("idrecipe") 
     token = data.get("userToken")
-    comments = RecipeComment.select().where(RecipeComment.id_recipe_id ==idrecipe)
+    comments = RecipeComment.select().where(RecipeComment.id_recipe_id == idrecipe)
+    subcomments = RecipeSubComment.select().where(RecipeSubComment.id_recipe == idrecipe)
     comment_list = []
     for comment in comments:
         users = Users.select().where(Users.user_token == token).first()
         user = Users.get(Users.id == comment.id_user_id)
+        user_type = users.user_type if users else ''
         comment_list.append({
             "id": comment.id,
             "comment": comment.comment_text,
             "iduser": comment.id_user_id,
             "username": user.user_name,
             "userToken": user.user_token,
-            "type": users.user_type
+            "type": user_type
         })
-    return jsonify(comment_list=comment_list)
+    subcomments_list = []
+    for subcomment in subcomments:
+        users = Users.select().where(Users.user_token == token).first()
+        user = Users.get(Users.id == comment.id_user_id)
+        user_type = users.user_type if users else ''
+        subcomments_list.append({
+            "id": subcomment.id,
+            "id_comment": subcomment.id_comment_id,
+            "comment": subcomment.comment_text,
+            "iduser": subcomment.id_user_id,
+            "username": user.user_name,
+            "userToken": user.user_token,
+            "type": user_type
+        })
+    return jsonify(comment_list=comment_list,subcomments_list=subcomments_list)
     
 @app.route('/createComment', methods=['POST'])
 def createComment():
     data = request.get_json()
     idrecipe = data.get("idrecipe")
     token = data.get("userToken")
+    comment=data.get("comment")
     user = Users.select().where(Users.user_token == token).first()
     if user:
         user_id = user.id
-        comment=data.get("comment")
         user = Users.select(Users.user_name).where(Users.id == user_id).execute()
         commentRecipe = RecipeComment(comment_text= comment,id_recipe_id= idrecipe, id_user_id= user_id,created_at = date.today(), modified_at = date.today())
+        commentRecipe.save() 
+        return jsonify(message ="Comment Update",username=user[0].user_name)
+
+@app.route('/createSubComment', methods=['POST'])
+def createSubComment():
+    data = request.get_json()
+    idrecipe = data.get("idrecipe")
+    token = data.get("userToken")
+    comment=data.get("comment")
+    idcomment = data.get("idcomment")
+    user = Users.select().where(Users.user_token == token).first()
+    if user:
+        user_id = user.id
+        user = Users.select(Users.user_name).where(Users.id == user_id).execute()
+        commentRecipe = RecipeSubComment(id_comment_id = idcomment, comment_text= comment,id_recipe_id= idrecipe, id_user_id= user_id,created_at = date.today(), modified_at = date.today())
         commentRecipe.save() 
         return jsonify(message ="Comment Update",username=user[0].user_name)
 
@@ -390,6 +422,9 @@ def deleteRecipe():
     RecipeFilter.delete().where(RecipeFilter.id_recipe==idrecipe).execute()
     RecipeIngredient.delete().where(RecipeIngredient.id_recipe == idrecipe).execute()
     SubRecipeIngredient.delete().where(SubRecipeIngredient.id_recipe == idrecipe).execute()
+    DislikeComment.delete().where(DislikeComment.id_recipe== idrecipe).execute()
+    LikesComment.delete().where(LikesComment.id_recipe== idrecipe).execute()
+    RecipeSubComment.delete().where(RecipeSubComment.id_recipe == idrecipe).execute()
     RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
     UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
     RecipeReview.delete().where(RecipeReview.id_recipe == idrecipe).execute()
@@ -414,7 +449,17 @@ def deleteRecipe():
 def deleteComment():
     data = request.get_json()
     idcomment = data.get('idcomment')
+    DislikeComment.delete().where(DislikeComment.id_comment== idcomment).execute()
+    LikesComment.delete().where(LikesComment.id_comment== idcomment).execute()
+    RecipeSubComment.delete().where(RecipeSubComment.id_comment == idcomment).execute()
     RecipeComment.delete().where(RecipeComment.id == idcomment).execute()
+    return jsonify(message="Recipe deleted")
+
+@app.route('/deleteSubComment', methods=['POST'])
+def deleteSubComment():
+    data = request.get_json()
+    idcomment = data.get('idcomment')
+    RecipeSubComment.delete().where(RecipeSubComment.id_comment == idcomment).execute()
     return jsonify(message="Recipe deleted")
 
 @app.route('/editeComment', methods=['POST'])
@@ -423,6 +468,14 @@ def editeComment():
     comment = data.get('comment')
     idcomment = data.get('idcomment')
     RecipeComment.update(comment_text=comment,modified_at=date.today()).where(RecipeComment.id == idcomment).execute()
+    return jsonify(message="Change Comment")
+
+@app.route('/editeSubComment', methods=['POST'])
+def editeSubComment():
+    data = request.get_json()
+    comment = data.get('comment')
+    idcomment = data.get('idcomment')
+    RecipeSubComment.update(comment_text=comment,modified_at=date.today()).where(RecipeSubComment.id_comment == idcomment).execute()
     return jsonify(message="Change Comment")
 
 @app.route('/viewFavs', methods=['POST'])
@@ -781,25 +834,50 @@ def deleteProfile():
     data = request.get_json()
     token = data.get("userToken")
     user = Users.select().where(Users.user_token == token).first()
-    if user:
-        user_id = user.id
-        idRecipes = Recipe.select().where(Recipe.id_user == user_id)
-        for recipe in idRecipes:
-            steps = RecipeStep.select().where(RecipeStep.id_recipe == recipe.id)
-            for step in steps:
-                RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
-            RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
-            RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
-            RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
-            RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
-            RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
 
-        StepImage.delete().where(StepImage.id_user == user_id).execute()
-        UserFavorite.delete().where(UserFavorite.id_user == user_id).execute()
+    if not user:
+        return jsonify(message="Usuario no encontrado"), 404
 
-        Recipe.delete().where(Recipe.id_user == user_id).execute()
-        Users.delete().where(Users.id == user_id).execute()    
-        return jsonify(message="Perfil eliminado")
+    user_id = user.id
+    idRecipes = Recipe.select().where(Recipe.id_user == user_id)
+
+    for recipe in idRecipes:
+        # Eliminar imágenes de pasos
+        steps = RecipeStep.select().where(RecipeStep.id_recipe == recipe.id)
+        for step in steps:
+            RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
+        RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+        # Eliminar imágenes de los subpasos
+        subSteps = SubRecipeStep.select().where(SubRecipeStep.id_recipe == recipe.id)
+        for subStep in subSteps:
+            SubStepImage.delete().where(SubStepImage.id_step == subStep.id).execute()
+        SubRecipeStep.delete().where(SubRecipeStep.id_recipe == recipe.id).execute()
+        # Eliminar filtros, ingredientes y reviews
+        RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
+        RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
+        
+        RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
+
+        # Eliminar comentarios secundarios y likes/dislikes de cada comentario
+        comments = RecipeComment.select().where(RecipeComment.id_recipe == recipe.id)
+        for comment in comments:
+            LikesComment.delete().where(LikesComment.id_comment_id == comment.id).execute()
+            DislikeComment.delete().where(DislikeComment.id_comment_id == comment.id).execute()
+            RecipeSubComment.delete().where(RecipeSubComment.id_comment == comment.id).execute()
+
+        RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
+
+    # Eliminar imágenes subidas por el usuario
+    StepImage.delete().where(StepImage.id_user == user_id).execute()
+
+    # Eliminar favoritos del usuario
+    UserFavorite.delete().where(UserFavorite.id_user == user_id).execute()
+
+    # Eliminar recetas y el perfil
+    Recipe.delete().where(Recipe.id_user == user_id).execute()
+    Users.delete().where(Users.id == user_id).execute()
+
+    return jsonify(message="Perfil eliminado correctamente")
 
 @app.route('/allUsers', methods=['POST'])
 def allUsers():

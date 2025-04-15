@@ -239,10 +239,10 @@
 
         <div v-for="(ingredient, index) in recipebook.subingredients" :key="index" class="grid md:grid-cols-12 gap-4 mb-4">
           <div class="md:col-span-5">
-            <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">SubIngrediente {{
+            <label :for="'subingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">SubIngrediente {{
               index + 1 }}</label>
             <div class="flex">
-              <input :id="'ingredient' + index" v-model="recipebook.subingredients[index]" required
+              <input :id="'subingredient' + index" v-model="recipebook.subingredients[index]" required
                 class="w-full px-4 py-2 rounded-l-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
                 placeholder="Ej: Arroz bomba">
               <button @click.prevent="removeSubIngredient(index)"
@@ -256,8 +256,8 @@
             </div>
           </div>
           <div class="md:col-span-5">
-            <label :for="'quantity' + index" class="block text-sm font-medium text-amber-700 mb-1">SubCantidad</label>
-            <input :id="'quantity' + index" v-model="recipebook.subquantities[index]" required
+            <label :for="'subquantity' + index" class="block text-sm font-medium text-amber-700 mb-1">SubCantidad</label>
+            <input :id="'subquantity' + index" v-model="recipebook.subquantities[index]" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Ej: 300 gramos">
           </div>
@@ -301,26 +301,26 @@
           <h3 class="text-lg font-semibold text-amber-700 mb-3">SubPaso {{ index + 1 }}</h3>
 
           <div class="mb-4">
-            <label :for="'stepTitle' + index" class="block text-sm font-medium text-amber-700 mb-1">Título del
+            <label :for="'substepTitle' + index" class="block text-sm font-medium text-amber-700 mb-1">Título del
               subpaso</label>
-            <input :id="'stepTitle' + index" v-model="step.title" required
+            <input :id="'substepTitle' + index" v-model="step.title" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Ej: Preparar el sofrito">
           </div>
 
           <div class="mb-4">
-            <label :for="'stepDesc' + index" class="block text-sm font-medium text-amber-700 mb-1">Descripción
+            <label :for="'substepDesc' + index" class="block text-sm font-medium text-amber-700 mb-1">Descripción
               detallada</label>
-            <textarea :id="'stepDesc' + index" v-model="step.text" rows="3" required
+            <textarea :id="'substepDesc' + index" v-model="step.text" rows="3" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Describe este paso con detalle..."></textarea>
           </div>
 
           <div>
-            <label :for="'stepImage' + index" class="block text-sm font-medium text-amber-700 mb-1">Imagen
+            <label :for="'substepImage' + index" class="block text-sm font-medium text-amber-700 mb-1">Imagen
               (Opcional)</label>
             <div class="relative">
-              <input type="file" :id="'stepImage' + index" @change="handleSubStepImageChange($event, index)"
+              <input type="file" :id="'substepImage' + index" @change="handleSubStepImageChange($event, index)"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
               <div
                 class="flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-amber-300 shadow-sm">

@@ -200,6 +200,7 @@
       </div>
 
       <!-- Comentarios -->
+
       <div class="p-6 sm:p-8 border-t border-amber-100">
         <h3 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
@@ -211,102 +212,162 @@
         </h3>
 
         <!-- Lista de comentarios -->
-        <div v-if="comments.length > 0" class="space-y-4 mb-6">
-          <div v-for="comment in comments" :key="comment.id"
+        <div v-if="comments.length > 0" class="space-y-6 mb-6">
+          <div v-for="comment in commentsWithSubcomments" :key="comment.id"
             class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm hover:shadow-md transition duration-300">
+            <!-- Comentario principal -->
+            <div class="mb-4">
+              <div v-if="editingCommentId === comment.id" class="mb-3">
+                <textarea v-model="editedComment" rows="3"
+                  class="w-full px-4 py-2 rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+                <div class="flex space-x-2 mt-2">
+                  <button @click="updateComment(comment.id)"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                      fill="currentColor">
+                      <path fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    Guardar
+                  </button>
+                  <button @click="cancelEdit"
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                      fill="currentColor">
+                      <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+              <div v-else>
+                <p class="text-amber-800">{{ comment.comment }}</p>
+                <p class="text-sm text-amber-600 mt-1">Por: {{ comment.username }}</p>
+                <div class="flex flex-wrap items-center gap-4 mt-3">
+                  <!-- Botones de interacción -->
+                  <div class="flex gap-2 items-center">
+                    <!-- LIKE -->
+                    <button @click="toggleLike(comment.id)" class="focus:outline-none flex items-center gap-1">
+                      <svg class="w-5 h-5 transition text-green-800 hover:text-green-900"
+                        :fill="likedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475" />
+                      </svg>
+                      <span class="text-green-800 text-sm">{{ conteoLikes[comment.id] || 0 }}</span>
+                    </button>
 
-            <div v-if="editingCommentId === comment.id" class="mb-3">
+                    <!-- DISLIKE -->
+                    <button @click="toggleDislike(comment.id)" class="focus:outline-none flex items-center gap-1">
+                      <svg class="w-5 h-5 transition text-red-600 hover:text-red-700"
+                        :fill="dislikedComments[comment.id] ? 'currentColor' : 'none'"
+                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 13c-.889.086-1.416.543-2.156 1.057a22.322 22.322 0 0 0-3.958 5.084 1.6 1.6 0 0 1-.582.628 1.549 1.549 0 0 1-1.466.087 1.587 1.587 0 0 1-.537-.406 1.666 1.666 0 0 1-.384-1.279l1.389-4.114M17 13h3V6.5A1.5 1.5 0 0 0 18.5 5v0A1.5 1.5 0 0 0 17 6.5V13Zm-6.5 1H5.585c-.286 0-.372-.014-.626-.15a1.797 1.797 0 0 1-.637-.572 1.873 1.873 0 0 1-.215-1.673l2.098-6.4C6.462 4.48 6.632 4 7.88 4c2.302 0 4.79.943 6.67 1.475" />
+                      </svg>
+                      <span class="text-red-600 text-sm">{{ conteoDisLikes[comment.id] || 0 }}</span>
+                    </button>
+                  </div>
 
-              <textarea v-model="editedComment" rows="3"
+                  <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
+                    class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm transition duration-300 flex items-center">
+                    <i class="fa fa-flag mr-1"></i> Reportar
+                  </button>
+
+                  <button v-if="userToken == comment.userToken || type == 'admin'" @click="startEditComment(comment)"
+                    class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition duration-300 flex items-center">
+                    <i class="fa fa-pencil mr-1"></i> Editar
+                  </button>
+
+                  <button v-if="userToken == comment.userToken || type == 'admin'" @click="deleteComment(comment.id)"
+                    class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition duration-300 flex items-center">
+                    <i class="fa fa-trash mr-1"></i> Eliminar
+                  </button>
+
+                  <button @click="toggleReply(comment.id)"
+                    class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg text-sm transition duration-300 flex items-center">
+                    <i class="fa fa-reply mr-1"></i> Responder
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subcomentarios -->
+            <div v-if="comment.subcomments && comment.subcomments.length > 0"
+              class="ml-8 pl-4 border-l-2 border-amber-200 space-y-4">
+              <div v-for="subcomment in comment.subcomments" :key="subcomment.id" class="bg-amber-50 p-3 rounded-lg">
+                <div v-if="editingSubcommentId === subcomment.id">
+                  <textarea v-model="editedSubcomment" rows="2"
+                    class="w-full px-3 py-1 rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+                  <div class="flex space-x-2 mt-2">
+                    <button @click="updateSubcomment(subcomment.id)"
+                      class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm">
+                      Guardar
+                    </button>
+                    <button @click="cancelEditSubcomment"
+                      class="px-3 py-1 bg-gray-400 hover:bg-gray-500 text-white rounded text-sm">
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+                <div v-else>
+                  <p class="text-amber-700">{{ subcomment.comment }}</p>
+                  <p class="text-xs text-amber-500 mt-1">Por: {{ subcomment.username }}</p>
+
+                  <div class="flex space-x-2 mt-2">
+                    <button v-if="userToken" @click="showCommentReportDialog(subcomment.id)"
+                      class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded text-xs">
+                      <i class="fa fa-flag mr-1"></i> Reportar
+                    </button>
+
+                    <button v-if="userToken == subcomment.userToken || type == 'admin'"
+                      @click="startEditSubcomment(subcomment)"
+                      class="px-2 py-1 bg-amber-400 hover:bg-amber-500 text-white rounded text-xs">
+                      <i class="fa fa-pencil mr-1"></i> Editar
+                    </button>
+
+                    <button v-if="userToken == subcomment.userToken || type == 'admin'"
+                      @click="deleteSubcomment(subcomment.id)"
+                      class="px-2 py-1 bg-red-400 hover:bg-red-500 text-white rounded text-xs">
+                      <i class="fa fa-trash mr-1"></i> Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulario de respuesta (subcomentario) -->
+            <div v-if="replyingTo === comment.id" class="mt-4 ml-8">
+              <textarea v-model="replyComment" rows="2" placeholder="Escribe tu respuesta..."
                 class="w-full px-4 py-2 rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
               <div class="flex space-x-2 mt-2">
-                <button @click="updateComment(comment.id)"
-                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd" />
-                  </svg>
-                  Guardar
+                <button @click="createSubcomment(comment.id)"
+                  class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition duration-300">
+                  Enviar respuesta
                 </button>
-                <button @click="cancelEdit"
-                  class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clip-rule="evenodd" />
-                  </svg>
+                <button @click="cancelReply"
+                  class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300">
                   Cancelar
                 </button>
               </div>
             </div>
-            <div v-else>
-
-              <p class="text-amber-800">{{ comment.comment }}</p>
-              <p class="text-sm text-amber-600 mt-1">Por: {{ comment.username }}</p>
-              <div class="flex space-x-2 mt-2">
-                <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
-                  class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm transition duration-300 flex items-center">
-                  <i class="fa fa-flag mr-1"></i> Reportar
-                </button>
-
-                <button v-if="userToken == comment.userToken || comment.type == 'admin'"
-                  @click="startEditComment(comment)"
-                  class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition duration-300 flex items-center">
-                  <i class="fa fa-pencil mr-1"></i> Editar
-                </button>
-                <button v-if="userToken == comment.userToken || comment.type == 'admin'"
-                  @click="deleteComment(comment.id)"
-                  class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition duration-300 flex items-center">
-                  <i class="fa fa-trash mr-1"></i> Eliminar
-                </button>
-                <div class="flex gap-4 items-center">
-                  <!-- LIKE -->
-                  <button @click="toggleLike(comment.id)" class="focus:outline-none">
-                    <svg class="w-6 h-6 transition text-green-800 hover:text-green-900"
-                      :fill="likedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 
-             1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 
-             1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 
-             0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 
-             1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475" />
-                    </svg>
-                    <span class="text-green-800 text-sm">{{ conteoLikes[comment.id] || 0 }}</span>
-                  </button>
-
-                  <!-- DISLIKE -->
-                  <button @click="toggleDislike(comment.id)" class="focus:outline-none">
-                    <svg class="w-6 h-6 transition text-red-600 hover:text-red-700"
-                      :fill="dislikedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13c-.889.086-1.416.543-2.156 1.057a22.322 22.322 0 0 0-3.958 5.084 
-             1.6 1.6 0 0 1-.582.628 1.549 1.549 0 0 1-1.466.087 1.587 1.587 0 0 
-             1-.537-.406 1.666 1.666 0 0 1-.384-1.279l1.389-4.114M17 13h3V6.5A1.5 1.5 0 0 
-             0 18.5 5v0A1.5 1.5 0 0 0 17 6.5V13Zm-6.5 1H5.585c-.286 0-.372-.014-.626-.15a1.797 
-             1.797 0 0 1-.637-.572 1.873 1.873 0 0 1-.215-1.673l2.098-6.4C6.462 4.48 
-             6.632 4 7.88 4c2.302 0 4.79.943 6.67 1.475" />
-                    </svg>
-                    <span class="text-green-800 text-sm">{{ conteoDisLikes[comment.id] || 0 }}</span>
-                  </button>
-                </div>
-                <button>Responder</button>
-              </div>
-            </div>
           </div>
         </div>
+
         <div v-else class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-center text-amber-700 mb-6">
           No hay comentarios aún. ¡Sé el primero en comentar!
         </div>
 
-        <!-- Formulario de comentario -->
-        <div v-if="userToken" class="mt-4">
-          <textarea v-model="comment" rows="3" placeholder="Escribe tu comentario..."
+        <!-- Formulario de comentario principal -->
+        <div v-if="userToken !== 'notoken'" class="mt-4">
+          <textarea v-model="newComment" rows="3" placeholder="Escribe tu comentario..."
             class="w-full px-4 py-2 rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
-          <button @click.prevent="createComment"
+          <button @click="createComment"
             class="mt-2 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition duration-300 flex items-center justify-center">
-            <i class="fa fa-paper-plane mr-2"></i>
-            Enviar Comentario
+            <i class="fa fa-paper-plane mr-2"></i> Enviar Comentario
           </button>
         </div>
         <div v-else class="text-center py-4">
@@ -433,7 +494,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
@@ -443,8 +504,9 @@ const route = useRoute();
 const router = useRouter();
 const recipeId = route.query.id;
 const receta = ref(null);
-const comment = ref("");
-const userToken = localStorage.getItem('userToken') || "notoken";
+const newComment = ref("");
+const replyComment = ref("");
+const userToken = ref(localStorage.getItem('userToken') || "notoken");
 const ingredients = ref([]);
 const quantity = ref([]);
 const steps = ref([]);
@@ -452,9 +514,12 @@ const subingredients = ref([]);
 const subquantity = ref([]);
 const substeps = ref([]);
 const comments = ref([]);
+const subcomments = ref([]);
 const isFavorite = ref(false);
 const editingCommentId = ref(null);
+const editingSubcommentId = ref(null);
 const editedComment = ref("");
+const editedSubcomment = ref("");
 const showReportModal = ref(false);
 const reportReason = ref('');
 const customReason = ref('');
@@ -463,19 +528,30 @@ const commentReportReason = ref('');
 const commentCustomReason = ref('');
 const currentCommentId = ref(null);
 const type = ref("");
-const likedComments = ref({})
-const dislikedComments = ref({})
-const conteoLikes = ref({})
-const conteoDisLikes = ref({})
+const likedComments = ref({});
+const dislikedComments = ref({});
+const conteoLikes = ref({});
+const conteoDisLikes = ref({});
+const replyingTo = ref(null);
+
 const payload = {
   idrecipe: parseInt(recipeId),
-  userToken: userToken,
+  userToken: userToken.value,
   comment: "",
   idcomment: 0
 };
 
+const commentsWithSubcomments = computed(() => {
+  return comments.value.map(comment => {
+    return {
+      ...comment,
+      subcomments: subcomments.value.filter(sub => sub.id_comment === comment.id)
+    };
+  });
+});
+
 const toggleFavorite = () => {
-  if (userToken) {
+  if (userToken.value) {
     isFavorite.value = !isFavorite.value;
     if (isFavorite.value) {
       axios
@@ -506,6 +582,7 @@ function fetchRecipe() {
     .post('http://localhost:5000/viewComment', payload)
     .then(response => {
       comments.value = response.data.comment_list;
+      subcomments.value = response.data.subcomments_list || [];
     })
     .catch(error => console.error("Error en la solicitud:", error));
 }
@@ -515,44 +592,53 @@ onMounted(() => {
     .post('http://localhost:5000/viewRecipe', payload)
     .then(response => {
       if (response.data.recipe_list[0].id_user == response.data.user_id) {
-        response.data.recipe_list[0].userToken = response.data.user_token
+        response.data.recipe_list[0].userToken = response.data.user_token;
       }
-      response.data.recipe_list[0].user_name = response.data.user_name
-      receta.value = response.data.recipe_list[0]
+      response.data.recipe_list[0].user_name = response.data.user_name;
+      receta.value = response.data.recipe_list[0];
+
       response.data.ingredient_list.forEach(element => {
         ingredients.value.push(element.ingredients);
-        quantity.value.push(element.quantity)
+        quantity.value.push(element.quantity);
       });
+
       steps.value = response.data.step_list;
+
       response.data.subingredient_list.forEach(element => {
         subingredients.value.push(element.ingredients);
-        subquantity.value.push(element.quantity)
+        subquantity.value.push(element.quantity);
       });
+
       substeps.value = response.data.substep_list;
-      type.value = response.data.user_type
+      type.value = response.data.user_type;
+
       fetchRecipe();
-      conteoLikes.value = response.data.countLikes_list.reduce((acc, item) => {
+
+      conteoLikes.value = response.data.countLikes_list?.reduce((acc, item) => {
         const id = item.id_comment;
         acc[id] = (acc[id] || 0) + 1;
         return acc;
-      }, {});
-      conteoDisLikes.value = response.data.countDisLikes_list.reduce((acc, item) => {
+      }, {}) || {};
+
+      conteoDisLikes.value = response.data.countDisLikes_list?.reduce((acc, item) => {
         const id = item.id_comment;
         acc[id] = (acc[id] || 0) + 1;
         return acc;
-      }, {});
+      }, {}) || {};
 
       if (response.data.user_token) {
-        response.data.favorites_list.forEach(id => {
+        response.data.favorites_list?.forEach(id => {
           if (id.id_recipe === parseInt(recipeId)) {
             isFavorite.value = true;
           }
         });
-        response.data.likes_list.forEach(element => {
-          likedComments.value[element.id_recipe] = true
+
+        response.data.likes_list?.forEach(element => {
+          likedComments.value[element.id_recipe] = true;
         });
-        response.data.dislikes_list.forEach(element => {
-          dislikedComments.value[element.id_recipe] = true
+
+        response.data.dislikes_list?.forEach(element => {
+          dislikedComments.value[element.id_recipe] = true;
         });
       }
     })
@@ -580,23 +666,59 @@ function editeRecipe() {
 }
 
 function createComment() {
-  payload.comment = comment.value;
-  if (userToken) {
-    axios.post('http://localhost:5000/createComment', payload)
-      .then(() => {
-        fetchRecipe();
-        comment.value = "";
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
-  } else {
-    router.push({ name: "login" });
-  }
+  if (!newComment.value.trim()) return;
+
+  payload.comment = newComment.value;
+  payload.idcomment = 0; // Reset para comentario principal
+
+  axios.post('http://localhost:5000/createComment', payload)
+    .then(() => {
+      fetchRecipe();
+      newComment.value = "";
+    })
+    .catch(error => {
+      console.error("Error en la solicitud:", error);
+      if (error.response?.status === 401) {
+        router.push({ name: "login" });
+      }
+    });
+}
+
+function createSubcomment(commentId) {
+  if (!replyComment.value.trim()) return;
+
+  payload.comment = replyComment.value;
+  payload.idcomment = commentId;
+
+  axios.post('http://localhost:5000/createSubComment', payload)
+    .then(() => {
+      fetchRecipe();
+      replyComment.value = "";
+      replyingTo.value = null;
+    })
+    .catch(error => {
+      console.error("Error en la solicitud:", error);
+      if (error.response?.status === 401) {
+        router.push({ name: "login" });
+      }
+    });
 }
 
 function deleteComment(idcomment) {
   if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
     payload.idcomment = idcomment;
     axios.post('http://localhost:5000/deleteComment', payload)
+      .then(() => {
+        fetchRecipe();
+      })
+      .catch(error => console.error("Error en la solicitud:", error));
+  }
+}
+
+function deleteSubcomment(idcomment) {
+  if (confirm('¿Estás seguro de que quieres eliminar esta respuesta?')) {
+    payload.idcomment = idcomment;
+    axios.post('http://localhost:5000/deleteSubComment', payload)
       .then(() => {
         fetchRecipe();
       })
@@ -615,14 +737,47 @@ function updateComment(idcomment) {
     .catch(error => console.error("Error en la solicitud:", error));
 }
 
+function updateSubcomment(idcomment) {
+  payload.idcomment = idcomment;
+  payload.comment = editedSubcomment.value;
+  axios.post('http://localhost:5000/editeSubComment', payload)
+    .then(() => {
+      fetchRecipe();
+      cancelEditSubcomment();
+    })
+    .catch(error => console.error("Error en la solicitud:", error));
+}
+
 function startEditComment(comment) {
   editingCommentId.value = comment.id;
   editedComment.value = comment.comment;
 }
 
+function startEditSubcomment(subcomment) {
+  editingSubcommentId.value = subcomment.id;
+  editedSubcomment.value = subcomment.comment;
+}
+
 function cancelEdit() {
   editingCommentId.value = null;
   editedComment.value = "";
+}
+
+function cancelEditSubcomment() {
+  editingSubcommentId.value = null;
+  editedSubcomment.value = "";
+}
+
+function toggleReply(commentId) {
+  replyingTo.value = replyingTo.value === commentId ? null : commentId;
+  if (replyingTo.value === commentId) {
+    replyComment.value = "";
+  }
+}
+
+function cancelReply() {
+  replyingTo.value = null;
+  replyComment.value = "";
 }
 
 function cancelReport() {
@@ -636,7 +791,6 @@ function showReportDialog() {
 }
 
 function submitReportRecipe() {
-
   if (!reportReason.value) {
     alert('Por favor selecciona un motivo para el reporte');
     return;
@@ -647,7 +801,7 @@ function submitReportRecipe() {
   axios.post('http://localhost:5000/report-recipe', {
     idrecipe: recipeId,
     reason: reason,
-    usertoken: userToken
+    usertoken: userToken.value
   })
     .then(() => {
       alert('Gracias por tu reporte. Hemos notificado al equipo administrativo.');
@@ -657,7 +811,6 @@ function submitReportRecipe() {
       console.error("Error al reportar:", error);
       alert('Ocurrió un error al enviar el reporte. Por favor intenta nuevamente.');
     });
-
 }
 
 const showCommentReportDialog = (commentId) => {
@@ -685,7 +838,7 @@ const submitCommentReport = async () => {
     const response = await axios.post('http://localhost:5000/report-comment', {
       commentId: currentCommentId.value,
       reason: reason,
-      userToken: userToken
+      userToken: userToken.value
     });
 
     if (response.data.message) {
@@ -701,62 +854,63 @@ const submitCommentReport = async () => {
 
 const toggleLike = (commentId) => {
   if (!likedComments.value[commentId]) {
-
-    likedComments.value[commentId] = !likedComments.value[commentId]
+    likedComments.value[commentId] = !likedComments.value[commentId];
 
     if (likedComments.value[commentId]) {
-      dislikedComments.value[commentId] = false
+      dislikedComments.value[commentId] = false;
     }
-    payload.idcomment = commentId
+
+    payload.idcomment = commentId;
     axios.post('http://localhost:5000/likeComment', payload)
       .then(() => {
-        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) + 1
+        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) + 1;
         if (conteoDisLikes.value[commentId] > 0) {
-          conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1
+          conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
         }
+        fetchRecipe();
       })
       .catch(error => console.error("Error en la solicitud:", error));
   } else {
-    likedComments.value[commentId] = !likedComments.value[commentId]
-    payload.idcomment = commentId
+    likedComments.value[commentId] = !likedComments.value[commentId];
+    payload.idcomment = commentId;
     axios.post('http://localhost:5000/deleteLike', payload)
       .then(() => {
-        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1
+        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1;
+        fetchRecipe();
       })
-      .catch(error => console.error("Error en la solicitud:", error))
+      .catch(error => console.error("Error en la solicitud:", error));
   }
-
-}
+};
 
 const toggleDislike = (commentId) => {
   if (!dislikedComments.value[commentId]) {
-
-    dislikedComments.value[commentId] = !dislikedComments.value[commentId]
+    dislikedComments.value[commentId] = !dislikedComments.value[commentId];
 
     if (dislikedComments.value[commentId]) {
-      likedComments.value[commentId] = false
+      likedComments.value[commentId] = false;
     }
-    payload.idcomment = commentId
+
+    payload.idcomment = commentId;
     axios.post('http://localhost:5000/disLikeComment', payload)
       .then(() => {
-        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) + 1
+        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) + 1;
         if (conteoLikes.value[commentId] > 0) {
-          conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1
+          conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1;
         }
+        fetchRecipe();
       })
       .catch(error => console.error("Error en la solicitud:", error));
   } else {
-    dislikedComments.value[commentId] = !dislikedComments.value[commentId]
-    payload.idcomment = commentId
+    dislikedComments.value[commentId] = !dislikedComments.value[commentId];
+    payload.idcomment = commentId;
     axios.post('http://localhost:5000/deleteDisLike', payload)
       .then(() => {
-        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1
+        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
+        fetchRecipe();
       })
-      .catch(error => console.error("Error en la solicitud:", error))
+      .catch(error => console.error("Error en la solicitud:", error));
   }
-}
-
-
+};
 </script>
 
 <style scoped>
@@ -793,5 +947,40 @@ const toggleDislike = (commentId) => {
 img:hover {
   transform: scale(1.02);
   transition: transform 0.3s ease;
+}
+
+/* Estilo para subcomentarios */
+.subcomment {
+  position: relative;
+}
+
+.subcomment::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #f59e0b;
+  opacity: 0.3;
+}
+
+/* Estilo para el botón de responder */
+.reply-btn {
+  transition: all 0.2s ease;
+}
+
+.reply-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Estilo para el área de texto de comentarios */
+.comment-textarea {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comment-textarea:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 </style>
