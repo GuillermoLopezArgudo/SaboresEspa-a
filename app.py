@@ -1,13 +1,12 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-import pymysql
-pymysql.install_as_MySQLdb()
 from flask import Flask, jsonify, request, abort, render_template, request, redirect, url_for
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from models import create_tables,Users, Recipe, RecipeComment, RecipeReview, UserFavorite, RecipeIngredient, StepImage, RecipeStep, RecipeStepImage, RecipeFilter,SubRecipeStep,SubRecipeIngredient,RecipeSubStepImage,SubStepImage,LikesComment,DislikeComment,RecipeSubComment
 from flask_cors import CORS
+from flask_mysqldb import MySQL
 from config import Config
 from peewee import DoesNotExist
 from datetime import date
@@ -34,6 +33,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
+mysql = MySQL(app)
 mail = Mail(app)
 
 
