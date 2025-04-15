@@ -273,7 +273,6 @@ function changeImage(imageData) {
   axios
     .post('http://localhost:5000/changeImage', {
       image: imageData,
-      iduser: payload.value.iduser,
       userToken: payload.value.userToken
     })
     .then(response => {
@@ -281,7 +280,7 @@ function changeImage(imageData) {
       imageUrl.value = `http://localhost:5000/${response.data.newImage}`;
     })
     .catch(error => {
-      console.log(error);
+      console.log("aaa"+error);
     });
 }
 

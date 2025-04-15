@@ -702,24 +702,27 @@ def editeRecipe():
 @app.route('/changeImage',methods=['POST'])
 def changeImage():
     data = request.get_json()
-    iduser = data.get("iduser")
-    image = data.get("image")
-    image_url = None
-    if image:  
-        image_base64 = image.get("base64")
-        image_name = image.get("name")
-        
-        if image_base64:
-            image_url = save_base64_file(image_base64, image_name, app.config['UPLOAD_FOLDER_IMAGES'])
-            if image_url:
-                Users.update(user_image=image_url,modified_at=date.today()).where(Users.id == iduser).execute()
-                return jsonify(message="Image Changed", newImage=image_url)
+    token = data.get("userToken")
+    user = Users.select().where(Users.user_token == token).first()
+    if user:
+        user_id = user.id
+        image = data.get("image")
+        image_url = None
+        if image:  
+            image_base64 = image.get("base64")
+            image_name = image.get("name")
+            
+            if image_base64:
+                image_url = save_base64_file(image_base64, image_name, app.config['UPLOAD_FOLDER_IMAGES'])
+                if image_url:
+                    Users.update(user_image=image_url,modified_at=date.today()).where(Users.id == user_id).execute()
+                    return jsonify(message="Image Changed", newImage=image_url)
+                else:
+                    return jsonify(message="Failed to save image")
             else:
-                return jsonify(message="Failed to save image")
-        else:
-            return jsonify(message="No base64 data found")
+                return jsonify(message="No base64 data found")
 
-    return jsonify(message="Image data not valid")
+        return jsonify(message="Image data not valid")
 
 @app.route('/changeName',methods=['POST'])
 def changeName():
