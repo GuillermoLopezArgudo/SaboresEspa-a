@@ -1,7 +1,5 @@
 <template>
   <div class="min-h-screen bg-amber-50">
-    <!-- Navbar Component -->
-    <NavbarHome />
 
     <!-- Encabezado -->
     <div class="max-w-7xl mx-auto text-center mb-8 pt-8 px-4 sm:px-6 lg:px-8">
@@ -29,13 +27,11 @@
       <ListRecipes :greeting="'personal'" />
     </main>
   </div>
-  <FooterPage></FooterPage>
+
 </template>
 
 <script setup>
 import ListRecipes from './ListRecipes.vue';
-import NavbarHome from './NavbarHome.vue';
-import FooterPage from './FooterPage.vue';
 </script>
 
 <style scoped>

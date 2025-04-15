@@ -1,44 +1,34 @@
 <template>
   <div class="min-h-screen bg-amber-50">
-
-          <!-- Header con imagen de fondo -->
-          <div class="bg-amber-900 py-8 px-4 sm:px-6 lg:px-8 relative">
-        <div class="absolute inset-0 bg-black opacity-20"></div>
-        <div class="relative max-w-7xl mx-auto text-center">
-          <h1 class="text-4xl md:text-5xl font-bold text-white font-serif mb-2">
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-orange-300">Bienvenido a tu Recetario</span>
-          </h1>
-          <p class="text-xl text-amber-100">Descubre, crea y comparte tus recetas favoritas</p>
-        </div>
+    <!-- Header con imagen de fondo -->
+    <div class="bg-amber-900 py-8 px-4 sm:px-6 lg:px-8 relative">
+      <div class="absolute inset-0 bg-black opacity-20"></div>
+      <div class="relative max-w-7xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-white font-serif mb-2">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-orange-300">Bienvenido a tu
+            Recetario</span>
+        </h1>
+        <p class="text-xl text-amber-100">Descubre, crea y comparte tus recetas favoritas</p>
       </div>
-    <!-- Navbar mejorado -->
-    <NavbarHome/>
-
-
+    </div>
     <!-- Main content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <ListRecipes :greeting="'favs'"/>
+      <ListRecipes :greeting="'favs'" />
     </main>
   </div>
-  <FooterPage></FooterPage>
 </template>
 
 <script setup>
-import FooterPage from './FooterPage.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ListRecipes from './ListRecipes.vue';
-import NavbarHome from './NavbarHome.vue';
 
 const userToken = ref(localStorage.getItem("userToken"));
 const router = useRouter();
 
-
-// Redirigir al login si no hay token
 if (userToken.value == null) {
   router.push({ name: "login" });
 }
-
 
 </script>
 

@@ -1,22 +1,6 @@
 version: '3.7'
 
 services:
-  # Tu servicio de Flask (Backend)
-  flask:
-    build:
-      context: .
-    volumes:
-      - .:/app
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=development
-      - MYSQL_HOST=db
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=1234
-      - MYSQL_DB=recipesSpain
-    depends_on:
-      - db  
 
   # Tu servicio de Vue.js (Frontend)
   vue:
@@ -39,7 +23,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: recipesSpain
-      #MYSQL_USER: root
+      MYSQL_USER: root
       #MYSQL_PASSWORD: 1234
     volumes:
       - mysql-data:/var/lib/mysql  
@@ -59,5 +43,28 @@ services:
       - "8081:80"  
     depends_on:
       - db  
+  # Tu servicio de Flask (Backend)
+  flask:
+    build:
+      context: .
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DB=recipesSpain
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USE_TLS=true
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+    env_file:
+      - .env
+    depends_on:
+      - db   
 volumes:
   mysql-data:
