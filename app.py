@@ -1030,7 +1030,12 @@ def report_comment():
             recipe = Recipe.get_by_id(comment.id_recipe_id)
             comment_author = Users.get_by_id(comment.id_user_id)
         except DoesNotExist:
-            return jsonify({"error": "Comment not found"}), 404
+            try:
+                comment = RecipeSubComment.get_by_id(comment_id)
+                recipe = Recipe.get_by_id(comment.id_recipe_id)
+                comment_author = Users.get_by_id(comment.id_user_id)
+            except DoesNotExist:
+                return jsonify({"error": "Comment not found"}), 404
             
         # Validate reporting user exists
         try:

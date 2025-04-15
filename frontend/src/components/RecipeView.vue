@@ -825,6 +825,7 @@ const cancelCommentReport = () => {
 };
 
 const submitCommentReport = async () => {
+
   if (!commentReportReason.value) {
     alert('Por favor selecciona un motivo para el reporte');
     return;
@@ -835,6 +836,8 @@ const submitCommentReport = async () => {
     : commentReportReason.value;
 
   try {
+
+    
     const response = await axios.post('http://localhost:5000/report-comment', {
       commentId: currentCommentId.value,
       reason: reason,
