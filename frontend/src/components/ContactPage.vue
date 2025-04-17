@@ -61,7 +61,7 @@
   
   const handleSubmit = async () => {
   try {
-    await axios.post('http://localhost:5000/send-email', form)
+    await axios.post(`${process.env.VUE_APP_API_URL}/send-email`, form)
     submitted.value = true
     form.name = ''
     form.email = ''

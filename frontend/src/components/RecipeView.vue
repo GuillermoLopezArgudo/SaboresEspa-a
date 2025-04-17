@@ -81,7 +81,7 @@
       <!-- Imagen de la receta -->
       <div v-if="receta.image" class="p-6 sm:p-8">
         <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
-          <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta"
+          <img :src="`http://48.217.185.80/api/${receta.image}`" alt="Imagen de la receta"
             class="w-full h-auto object-cover">
         </div>
       </div>
@@ -126,7 +126,7 @@
                 <h4 class="font-semibold text-amber-800 text-lg">{{ step.title }}</h4>
                 <p class="text-amber-700 mt-1">{{ step.description }}</p>
                 <div v-if="step.image" class="mt-3 rounded-lg overflow-hidden border border-amber-200">
-                  <img :src="`http://localhost:5000/${step.image}`" :alt="`Imagen del paso ${idx + 1}`"
+                  <img :src="`http://48.217.185.80/api/${step.image}`" :alt="`Imagen del paso ${idx + 1}`"
                     class="w-full max-w-md">
                 </div>
               </div>
@@ -175,7 +175,7 @@
                 <h4 class="font-semibold text-amber-800 text-lg">{{ step.title }}</h4>
                 <p class="text-amber-700 mt-1">{{ step.description }}</p>
                 <div v-if="step.image" class="mt-3 rounded-lg overflow-hidden border border-amber-200">
-                  <img :src="`http://localhost:5000/${step.image}`" :alt="`Imagen del paso ${idx + 1}`"
+                  <img :src="`http://48.217.185.80/api/${step.image}`" :alt="`Imagen del paso ${idx + 1}`"
                     class="w-full max-w-md">
                 </div>
               </div>
@@ -195,7 +195,7 @@
           Video
         </h3>
         <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
-          <video controls :src="'http://localhost:5000/' + receta.video" class="w-full"></video>
+          <video controls :src="'http://48.217.185.80/api/' + receta.video" class="w-full"></video>
         </div>
       </div>
 
@@ -555,7 +555,7 @@ const toggleFavorite = () => {
     isFavorite.value = !isFavorite.value;
     if (isFavorite.value) {
       axios
-        .post('http://localhost:5000/updateFavs', payload)
+        .post(`${process.env.VUE_APP_API_URL}/updateFavs`, payload)
         .then(response => {
           console.log(response.data.message)
         })
@@ -564,7 +564,7 @@ const toggleFavorite = () => {
         });
     } else {
       axios
-        .post('http://localhost:5000/deleteFavs', payload)
+        .post(`${process.env.VUE_APP_API_URL}/deleteFavs`, payload)
         .then(response => {
           console.log(response.data.message)
         })
@@ -579,7 +579,7 @@ const toggleFavorite = () => {
 
 function fetchRecipe() {
   axios
-    .post('http://localhost:5000/viewComment', payload)
+    .post(`${process.env.VUE_APP_API_URL}/viewComment`, payload)
     .then(response => {
       comments.value = response.data.comment_list;
       subcomments.value = response.data.subcomments_list || [];
@@ -589,7 +589,7 @@ function fetchRecipe() {
 
 onMounted(() => {
   axios
-    .post('http://localhost:5000/viewRecipe', payload)
+    .post(`${process.env.VUE_APP_API_URL}/viewRecipe`, payload)
     .then(response => {
       if (response.data.recipe_list[0].id_user == response.data.user_id) {
         response.data.recipe_list[0].userToken = response.data.user_token;
@@ -650,7 +650,7 @@ onMounted(() => {
 function deleteRecipe() {
   if (confirm('¿Estás seguro de que quieres eliminar esta receta?')) {
     axios
-      .post('http://localhost:5000/deleteRecipe', payload)
+      .post(`${process.env.VUE_APP_API_URL}/deleteRecipe`, payload)
       .then(response => {
         console.log(response.data.message);
         router.push({ name: "home" });
@@ -671,7 +671,7 @@ function createComment() {
   payload.comment = newComment.value;
   payload.idcomment = 0; // Reset para comentario principal
 
-  axios.post('http://localhost:5000/createComment', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/createComment`, payload)
     .then(() => {
       fetchRecipe();
       newComment.value = "";
@@ -690,7 +690,7 @@ function createSubcomment(commentId) {
   payload.comment = replyComment.value;
   payload.idcomment = commentId;
 
-  axios.post('http://localhost:5000/createSubComment', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/createSubComment`, payload)
     .then(() => {
       fetchRecipe();
       replyComment.value = "";
@@ -707,7 +707,7 @@ function createSubcomment(commentId) {
 function deleteComment(idcomment) {
   if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
     payload.idcomment = idcomment;
-    axios.post('http://localhost:5000/deleteComment', payload)
+    axios.post(`${process.env.VUE_APP_API_URL}/deleteComment`, payload)
       .then(() => {
         fetchRecipe();
       })
@@ -718,7 +718,7 @@ function deleteComment(idcomment) {
 function deleteSubcomment(idcomment) {
   if (confirm('¿Estás seguro de que quieres eliminar esta respuesta?')) {
     payload.idcomment = idcomment;
-    axios.post('http://localhost:5000/deleteSubComment', payload)
+    axios.post(`${process.env.VUE_APP_API_URL}/deleteSubComment`, payload)
       .then(() => {
         fetchRecipe();
       })
@@ -729,7 +729,7 @@ function deleteSubcomment(idcomment) {
 function updateComment(idcomment) {
   payload.idcomment = idcomment;
   payload.comment = editedComment.value;
-  axios.post('http://localhost:5000/editeComment', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/editeComment`, payload)
     .then(() => {
       fetchRecipe();
       cancelEdit();
@@ -740,7 +740,7 @@ function updateComment(idcomment) {
 function updateSubcomment(idcomment) {
   payload.idcomment = idcomment;
   payload.comment = editedSubcomment.value;
-  axios.post('http://localhost:5000/editeSubComment', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/editeSubComment`, payload)
     .then(response => {
       console.log(response.data.message)
       fetchRecipe();
@@ -799,7 +799,7 @@ function submitReportRecipe() {
 
   const reason = reportReason.value === 'Otro' ? customReason.value : reportReason.value;
 
-  axios.post('http://localhost:5000/report-recipe', {
+  axios.post(`${process.env.VUE_APP_API_URL}/report-recipe`, {
     idrecipe: recipeId,
     reason: reason,
     usertoken: userToken.value
@@ -839,7 +839,7 @@ const submitCommentReport = async () => {
   try {
 
     
-    const response = await axios.post('http://localhost:5000/report-comment', {
+    const response = await axios.post(`${process.env.VUE_APP_API_URL}/report-comment`, {
       commentId: currentCommentId.value,
       reason: reason,
       userToken: userToken.value
@@ -865,7 +865,7 @@ const toggleLike = (commentId) => {
     }
 
     payload.idcomment = commentId;
-    axios.post('http://localhost:5000/likeComment', payload)
+    axios.post(`${process.env.VUE_APP_API_URL}/likeComment`, payload)
       .then(() => {
         conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) + 1;
         if (conteoDisLikes.value[commentId] > 0) {
@@ -877,7 +877,7 @@ const toggleLike = (commentId) => {
   } else {
     likedComments.value[commentId] = !likedComments.value[commentId];
     payload.idcomment = commentId;
-    axios.post('http://localhost:5000/deleteLike', payload)
+    axios.post(`${process.env.VUE_APP_API_URL}/deleteLike`, payload)
       .then(() => {
         conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1;
         fetchRecipe();
@@ -895,7 +895,7 @@ const toggleDislike = (commentId) => {
     }
 
     payload.idcomment = commentId;
-    axios.post('http://localhost:5000/disLikeComment', payload)
+    axios.post(`${process.env.VUE_APP_API_URL}/disLikeComment`, payload)
       .then(() => {
         conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) + 1;
         if (conteoLikes.value[commentId] > 0) {
@@ -907,7 +907,7 @@ const toggleDislike = (commentId) => {
   } else {
     dislikedComments.value[commentId] = !dislikedComments.value[commentId];
     payload.idcomment = commentId;
-    axios.post('http://localhost:5000/deleteDisLike', payload)
+    axios.post(`${process.env.VUE_APP_API_URL}/deleteDisLike`, payload)
       .then(() => {
         conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
         fetchRecipe();

@@ -258,7 +258,7 @@ function changePassword() {
   } else {
     payload.value.newPassword = newPassword.value;
     axios
-      .post('http://localhost:5000/changePassword', payload.value)
+      .post(`${process.env.VUE_APP_API_URL}/changePassword`, payload.value)
       .then(response => {
         console.log(response.data.message)
       })
@@ -271,13 +271,13 @@ function changePassword() {
 
 function changeImage(imageData) {
   axios
-    .post('http://localhost:5000/changeImage', {
+    .post(`${process.env.VUE_APP_API_URL}/changeImage`, {
       image: imageData,
       userToken: payload.value.userToken
     })
     .then(response => {
       console.log(response.data);
-      imageUrl.value = `http://localhost:5000/${response.data.newImage}`;
+      imageUrl.value =  `${process.env.VUE_APP_API_URL}/${response.data.newImage}`;
     })
     .catch(error => {
       console.log(error);
@@ -287,7 +287,7 @@ function changeImage(imageData) {
 function changeName() {
   payload.value.name = name.value;
   axios
-    .post('http://localhost:5000/changeName', payload.value)
+    .post(`${process.env.VUE_APP_API_URL}/changeNmae`, payload.value)
     .then(response => {
       console.log(response.data.message);
       handleNameChange();
@@ -300,7 +300,7 @@ function changeName() {
 function changeEmail() {
   payload.value.email = email.value;
   axios
-    .post('http://localhost:5000/changeEmail', payload.value)
+    .post(`${process.env.VUE_APP_API_URL}/changeEmail`, payload.value)
     .then(response => {
       console.log(response.data.message);
       localStorage.setItem('userToken', response.data.userToken);
@@ -313,34 +313,23 @@ function changeEmail() {
 
 onMounted(() => {
   axios
-    .post('http://localhost:5000/viewProfile', payload.value)
+    .post(`${process.env.VUE_APP_API_URL}/viewProfile`, payload.value)
     .then(response => {
       name.value = response.data.message[0].name;
       email.value = response.data.message[0].email;
-      imageUrl.value = `http://localhost:5000/${response.data.message[0].image}`;
+      imageUrl.value = `${process.env.VUE_APP_API_URL}/${response.data.message[0].image}` ;
       type.value = response.data.type
+      allusers(response.data.type)
     })
     .catch(error => {
       console.log(error);
     });
-  setTimeout(() => {
-    if (type.value == "admin") {
-      axios
-        .post('http://localhost:5000/allUsers', payload.value)
-        .then(response => {
-          users.value.push(...response.data.users_list)
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-  }, 100);
 
 });
 
 function deleteProfile() {
   axios
-    .post('http://localhost:5000/deleteProfile', payload.value)
+    .post(`${process.env.VUE_APP_API_URL}/deleteProfile`, payload.value)
     .then(response => {
       console.log(response.data.message);
       localStorage.removeItem("userToken");
@@ -355,7 +344,7 @@ function deleteUser(index) {
   if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
     const userId = users.value[index].iduser;
     axios
-      .post('http://localhost:5000/deleteUser', {
+      .post(`${process.env.VUE_APP_API_URL}/deleteUser`, {
         iduser: userId,
         userToken: payload.value.userToken
       })
@@ -367,6 +356,19 @@ function deleteUser(index) {
         console.log(error);
       });
   }
+}
+
+function allusers(type){
+  if (type == "admin") {
+      axios
+        .post(`${process.env.VUE_APP_API_URL}/allUsers`, payload.value)
+        .then(response => {
+          users.value.push(...response.data.users_list)
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
 }
 </script>
 

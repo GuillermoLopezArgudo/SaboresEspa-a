@@ -16,7 +16,7 @@ import base64
 from models import db, BaseModel
 from flask_mail import Mail, Message
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 app.config.from_object(Config)
 app.config['UPLOAD_FOLDER_IMAGES'] = 'static/images'
@@ -30,7 +30,7 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 jwt = JWTManager(app)
 mysql = MySQL(app)

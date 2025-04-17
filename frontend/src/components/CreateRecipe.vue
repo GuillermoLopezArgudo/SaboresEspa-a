@@ -613,7 +613,7 @@ function submitRecipe() {
     proteins: proteinas.value,
     visibility: showBasicInfo.value
   };
-  axios.post('http://localhost:5000/create', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/create`, payload)
     .then(response => {
       console.log(response.data.message);
       router.push({ name: "home" });

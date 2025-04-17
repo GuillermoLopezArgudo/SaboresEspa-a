@@ -360,7 +360,7 @@ const buscarFiltros = () => {
     proteins: proteinas.value,
   }
 
-  axios.post('http://localhost:5000/filterRecipe', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/filterRecipe`, payload)
     .then(response => {
       emit('enviarFiltros', { idRecipe: response.data.message, greeting: 'filtred' });
     })

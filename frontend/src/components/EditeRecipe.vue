@@ -477,7 +477,7 @@ const addSubStep = () => {
 };
 
 onMounted(() => {
-  axios.post('http://localhost:5000/viewRecipe', { idrecipe: recipeId, userToken: userToken})
+  axios.post(`${process.env.VUE_APP_API_URL}/viewRecipe`, { idrecipe: recipeId, userToken: userToken})
     .then(response => {
       title.value = response.data.recipe_list[0].title;
       description.value = response.data.recipe_list[0].description;
@@ -608,7 +608,7 @@ function submitEditeRecipe() {
     token: localStorage.getItem("userToken")
   };
 
-  axios.post('http://localhost:5000/editeRecipe', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/editeRecipe`, payload)
     .then(response => {
       console.log(response.data.message);
       router.push({ name: 'home' });

@@ -122,7 +122,7 @@ function OnSubmit() {
     type: type.value,
   };
 
-  axios.post('http://localhost:5000/register', payload)
+  axios.post(`${process.env.VUE_APP_API_URL}/register`, payload)
     .then(response => {
       if (response.data.userToken) {
         localStorage.setItem("userToken", response.data.userToken);
