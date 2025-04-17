@@ -224,6 +224,7 @@ function allRecipes() {
             elementos.recetas = response.data.recipes_list;
             response.data.categories_list.forEach(element => {
                 categorias.push(element)
+                
             });
             if (response.data.user_id) {
                 selectFavorites(response.data.favorites_list)

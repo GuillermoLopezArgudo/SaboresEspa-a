@@ -260,11 +260,29 @@ def viewAllRecipes():
     user = Users.select().where(Users.user_token == token).first()
     if user:
         user_id = user.id
+        user_type = user.user_type
         favorites = UserFavorite.select().where(UserFavorite.id_user_id ==user_id)
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
         reviews = RecipeReview.select().where(RecipeReview.id_user_id ==user_id)
         reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
+        if user_type == "admin":
+            recipes = Recipe.select()
+            recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
+            categories_list = []
+            for recipe in recipes:
+                categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
+                for categorie in categories:
+                    categories_list.append({
+                        "recipe_id": recipe.id,
+                        "type": categorie.type,
+                        "category": categorie.category
+                    }) 
+            favorites = UserFavorite.select().where(UserFavorite.id_user_id ==user_id)
+            favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
+            reviews = RecipeReview.select().where(RecipeReview.id_user_id ==user_id)
+            reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
 
+            return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list,user_id=user_id)
         return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list,user_id=user_id)
     return jsonify(recipes_list=recipes_list,categories_list=categories_list)
 
