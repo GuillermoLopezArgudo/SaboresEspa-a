@@ -1,7 +1,7 @@
 <template>
   <div class="w-full bg-white rounded-xl shadow-sm border border-amber-200 p-3 sm:p-4">
 
-    <div class="flex flex-wrap gap-2 sm:gap-3 md:gap-4">
+    <div class="flex flex-wrap items-stretch gap-2 sm:gap-3 md:gap-4">
       <!-- Filtro Tipo de Comida -->
       <div class="relative flex-1 min-w-[120px]">
         <button @click="toggleAccordion('tipoComida')"
@@ -133,7 +133,7 @@
       </div>
 
       <!-- Botones de acción -->
-      <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+      <div class="flex items-stretch gap-2 w-full sm:w-auto">
         <button @click="limpiarFiltros" 
           class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-amber-700 hover:text-amber-900 flex items-center justify-center text-xs sm:text-sm border border-amber-300 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
@@ -282,62 +282,60 @@ const proteins = [
 ];
 
 const prepTimes = [
-  { value: 'menos15', label: 'Rápida', description: '<15 minutos' },
-  { value: '15a30', label: 'Media', description: '15-30 minutos' },
-  { value: '30a60', label: 'Lenta', description: '30-60 minutos' },
-  { value: 'mas60', label: 'Muy lenta', description: '>1 hora' }
+  { value: "<15'⏱️", label: 'Rápida', description: '<15 minutos' },
+  { value: '15-30 ⏱️', label: 'Media', description: '15-30 minutos' },
+  { value: "30'-60' ⏱️", label: 'Lenta', description: '30-60 minutos' },
+  { value: ">60' ⏱️", label: 'Muy lenta', description: '>1 hora' }
 ];
 
 // Computed para mostrar los filtros seleccionados
 const filtrosSeleccionados = computed(() => {
   const seleccionados = [];
 
-  if (tipoComida.value || props.category =="typeeat") {
+  if (tipoComida.value) {
     const tipo = foodTypes.find(t => t.value === tipoComida.value);
-    seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
-    closeAllAccordions();
+    if (tipo) {
+      seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
+    }
   }
 
-  if (ccaa.value || props.category =="ccaa") {
+  if (ccaa.value) {
     const region = regions.find(r => r.value === ccaa.value);
-    seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
-    closeAllAccordions();
+    if (region) {
+      seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
+    }
   }
 
-  if (tiempo.value || props.category =="time") {
+  if (tiempo.value) {
     const tiempoSel = prepTimes.find(t => t.value === tiempo.value);
-    seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
-    closeAllAccordions();
+    if (tiempoSel) {
+      seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
+    }
   }
 
-  if (proteinas.value.length > 0 || props.category =="protein") {
+  if (proteinas.value.length > 0) {
     proteinas.value.forEach(p => {
       const proteina = proteins.find(pro => pro.value === p);
-      seleccionados.push({ category: 'proteinas', label: 'Proteína', value: proteina.label });
+      if (proteina) {
+        seleccionados.push({ category: 'proteinas', label: 'Proteína', value: proteina.label });
+      }
     });
   }
+  
   return seleccionados;
 });
 
 const eliminarFiltro = (filtro) => {
-
-  switch (filtro.category) {
-    case 'tipo':
-      tipoComida.value = '';
-      break;
-    case 'ccaa':
-      ccaa.value = '';
-      break;
-    case 'tiempo':
-      tiempo.value = '';
-      break;
-    case 'proteinas':
-      proteinas.value = proteinas.value.filter(p => p !== filtro.value.toLowerCase());
-      break;
+  if (filtro.label === 'Tipo') tipoComida.value = '';
+  else if (filtro.label === 'Región') ccaa.value = '';
+  else if (filtro.label === 'Tiempo') tiempo.value = '';
+  else if (filtro.label === 'Proteínas') {
+    proteinas.value = proteinas.value.filter(p => p !== filtro.value);
   }
 };
 
 const limpiarFiltros = () => {
+
   // Limpiar radio buttons
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.checked = false;

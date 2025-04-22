@@ -2,7 +2,8 @@
   <div class="min-h-screen bg-amber-50 py-4 px-2 sm:px-4 lg:px-8">
     <!-- Encabezado -->
     <div class="max-w-7xl mx-auto text-center mb-4 sm:mb-6">
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
+      <h1
+        class="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
         Detalle de Receta
       </h1>
     </div>
@@ -11,7 +12,8 @@
     <div class="max-w-7xl mx-auto mb-4 sm:mb-6">
       <router-link to="/"
         class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition duration-300 shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" viewBox="0 0 20 20"
+          fill="currentColor">
           <path fill-rule="evenodd"
             d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
             clip-rule="evenodd" />
@@ -39,39 +41,40 @@
           </div>
 
           <!-- Botón de reporte -->
-          <div v-if="userToken != 'notoken'" class="flex items-start space-x-2 self-end sm:self-auto">
-            <button @click="showReportDialog"
-              class="text-red-600 hover:text-red-800 transition duration-300 p-1 sm:p-2 rounded-full hover:bg-red-50"
-              title="Reportar receta">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
-                  d="m6 6 12 12m3-6a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-              <span class="sr-only">Reportar receta</span>
+          <div v-if="userToken != 'notoken'" class="flex items-start gap-1 sm:gap-2 self-end sm:self-auto">
+            <!-- Reportar -->
+            <button v-if="userToken" @click="showReportDialog"
+              class="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200">
+              <i class="fa fa-flag text-xs"></i>
+              Reportar
             </button>
 
-            <div v-if="userToken == receta.userToken || type == 'admin'" class="flex space-x-1 sm:space-x-2">
+            <!-- Editar / Eliminar -->
+            <template v-if="userToken == receta.userToken || type == 'admin'">
+              <!-- Editar -->
               <button @click="editeRecipe"
-                class="px-2 py-1 sm:px-4 sm:py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" fill="none" viewBox="0 0 24 24"
+                class="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-xs text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 Editar
               </button>
+
+              <!-- Eliminar -->
               <button @click="deleteRecipe"
-                class="px-2 py-1 sm:px-4 sm:py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" fill="none" viewBox="0 0 24 24"
+                class="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-xs text-white bg-red-500 hover:bg-red-600 rounded-lg transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 Eliminar
               </button>
-            </div>
+            </template>
           </div>
+
         </div>
 
         <p class="mt-2 sm:mt-4 text-amber-700 text-sm sm:text-base md:text-lg">{{ receta.description }}</p>
@@ -88,8 +91,8 @@
       <!-- Ingredientes -->
       <div v-if="ingredients.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
           Ingredientes Receta
@@ -106,8 +109,8 @@
       <!-- Pasos de la receta -->
       <div v-if="steps.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -137,8 +140,8 @@
       <!-- Ingredientes SubReceta -->
       <div v-if="subingredients.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
           Ingredientes SubReceta
@@ -155,8 +158,8 @@
       <!-- Pasos de la Subreceta -->
       <div v-if="substeps.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -186,8 +189,8 @@
       <!-- Video de la receta -->
       <div v-if="receta.video" class="p-4 sm:p-6 md:p-8 pt-0">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
@@ -201,8 +204,8 @@
       <!-- Comentarios -->
       <div class="p-4 sm:p-6 md:p-8 border-t border-amber-100">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
@@ -217,12 +220,12 @@
             <div class="mb-3 sm:mb-4">
               <div v-if="editingCommentId === comment.id" class="mb-2 sm:mb-3">
                 <textarea v-model="editedComment" rows="3"
-                  class="w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+                  class="resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
                 <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
                   <button @click="updateComment(comment.id)"
                     class="px-2 py-1 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
-                      fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1"
+                      viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd"
                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                         clip-rule="evenodd" />
@@ -231,8 +234,8 @@
                   </button>
                   <button @click="cancelEdit"
                     class="px-2 py-1 sm:px-4 sm:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
-                      fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1"
+                      viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd"
                         d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                         clip-rule="evenodd" />
@@ -248,7 +251,8 @@
                   <!-- Botones de interacción -->
                   <div class="flex gap-1 sm:gap-2 items-center">
                     <!-- LIKE -->
-                    <button @click="toggleLike(comment.id)" class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
+                    <button @click="toggleLike(comment.id)"
+                      class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
                       <svg class="w-4 h-4 sm:w-5 sm:h-5 transition text-green-800 hover:text-green-900"
                         :fill="likedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24">
@@ -259,7 +263,8 @@
                     </button>
 
                     <!-- DISLIKE -->
-                    <button @click="toggleDislike(comment.id)" class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
+                    <button @click="toggleDislike(comment.id)"
+                      class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
                       <svg class="w-4 h-4 sm:w-5 sm:h-5 transition text-red-600 hover:text-red-700"
                         :fill="dislikedComments[comment.id] ? 'currentColor' : 'none'"
                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -270,25 +275,42 @@
                     </button>
                   </div>
 
-                  <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
-                    class="px-2 py-0.5 sm:px-3 sm:py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
-                    <i class="fa fa-flag text-xs sm:text-sm mr-0.5 sm:mr-1"></i> Reportar
-                  </button>
+                  <!-- Botón para mostrar el menú (Reportar, Editar, Eliminar) -->
+                  <div class="ml-auto relative">
+                    <button @click="toggleMenu"
+                      class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                      <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-0.5 sm:mr-1"></i>
+                    </button>
 
-                  <button v-if="userToken == comment.userToken || type == 'admin'" @click="startEditComment(comment)"
-                    class="px-2 py-0.5 sm:px-3 sm:py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
-                    <i class="fa fa-pencil text-xs sm:text-sm mr-0.5 sm:mr-1"></i> Editar
-                  </button>
+                    <!-- Menú desplegable -->
+                    <div v-if="isMenuVisible" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg">
+                      <!-- BOTON DE REPORTAR-->
+                      <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
+                        class="w-full px-3 py-2 text-red-600 hover:bg-red-100 rounded-t-lg text-xs sm:text-sm transition duration-300">
+                        <i class="fa fa-flag text-xs sm:text-sm mr-1"></i> Reportar
+                      </button>
+                      <!-- BOTON DE EDITAR-->
+                      <button v-if="userToken == comment.userToken || type == 'admin'"
+                        @click="startEditComment(comment)"
+                        class="w-full px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-t-lg text-xs sm:text-sm transition duration-300">
+                        <i class="fa fa-pencil text-xs sm:text-sm mr-1"></i> Editar
+                      </button>
+                      <!-- BOTON DE ELIMINAR-->
+                      <button v-if="userToken == comment.userToken || type == 'admin'"
+                        @click="deleteComment(comment.id)"
+                        class="w-full px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-b-lg text-xs sm:text-sm transition duration-300">
+                        <i class="fa fa-trash text-xs sm:text-sm mr-1"></i> Eliminar
+                      </button>
+                    </div>
+                  </div>
 
-                  <button v-if="userToken == comment.userToken || type == 'admin'" @click="deleteComment(comment.id)"
-                    class="px-2 py-0.5 sm:px-3 sm:py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
-                    <i class="fa fa-trash text-xs sm:text-sm mr-0.5 sm:mr-1"></i> Eliminar
-                  </button>
-
-                  <button @click="toggleReply(comment.id)"
-                    class="px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
-                    <i class="fa fa-reply text-xs sm:text-sm mr-0.5 sm:mr-1"></i> Responder
-                  </button>
+                  <!-- BOTON DE RESPUESTA -->
+                  <div class="ml-auto">
+                    <button @click="toggleReply(comment.id)"
+                      class="px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                      <i class="fa fa-reply text-xs sm:text-sm mr-0.5 sm:mr-1"></i> Responder
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -296,10 +318,11 @@
             <!-- Subcomentarios -->
             <div v-if="comment.subcomments && comment.subcomments.length > 0"
               class="ml-4 sm:ml-6 md:ml-8 pl-2 sm:pl-3 md:pl-4 border-l-2 border-amber-200 space-y-2 sm:space-y-3">
-              <div v-for="subcomment in comment.subcomments" :key="subcomment.id" class="bg-amber-50 p-2 sm:p-3 rounded-lg">
+              <div v-for="subcomment in comment.subcomments" :key="subcomment.id"
+                class="bg-amber-50 p-2 sm:p-3 rounded-lg">
                 <div v-if="editingSubcommentId === subcomment.id">
                   <textarea v-model="editedSubcomment" rows="2"
-                    class="w-full px-2 py-1 sm:px-3 sm:py-1 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+                    class="resize-none w-full px-2 py-1 sm:px-3 sm:py-1 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
                   <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
                     <button @click="updateSubcomment(subcomment.id)"
                       class="px-2 py-0.5 sm:px-3 sm:py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs sm:text-sm">
@@ -340,7 +363,7 @@
             <!-- Formulario de respuesta (subcomentario) -->
             <div v-if="replyingTo === comment.id" class="mt-2 sm:mt-3 ml-4 sm:ml-6 md:ml-8">
               <textarea v-model="replyComment" rows="2" placeholder="Escribe tu respuesta..."
-                class="w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+                class="resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
               <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
                 <button @click="createSubcomment(comment.id)"
                   class="px-2 py-1 sm:px-4 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition duration-300 text-xs sm:text-sm">
@@ -355,14 +378,15 @@
           </div>
         </div>
 
-        <div v-else class="bg-amber-50 p-3 sm:p-4 rounded-lg border border-amber-200 text-center text-amber-700 mb-4 sm:mb-6 text-sm sm:text-base">
+        <div v-else
+          class="bg-amber-50 p-3 sm:p-4 rounded-lg border border-amber-200 text-center text-amber-700 mb-4 sm:mb-6 text-sm sm:text-base">
           No hay comentarios aún. ¡Sé el primero en comentar!
         </div>
 
         <!-- Formulario de comentario principal -->
         <div v-if="userToken !== 'notoken'" class="mt-3 sm:mt-4">
           <textarea v-model="newComment" rows="3" placeholder="Escribe tu comentario..."
-            class="w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+            class="resize-none resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
           <button @click="createComment"
             class="mt-1 sm:mt-2 w-full py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition duration-300 flex items-center justify-center text-sm sm:text-base">
             <i class="fa fa-paper-plane text-xs sm:text-sm mr-1 sm:mr-2"></i> Enviar Comentario
@@ -378,12 +402,15 @@
 
     <!-- Cargando -->
     <div v-else class="max-w-7xl mx-auto text-center py-8 sm:py-12">
-      <div class="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-amber-600"></div>
+      <div
+        class="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-amber-600">
+      </div>
       <p class="mt-3 sm:mt-4 text-amber-700 text-sm sm:text-base">Cargando receta...</p>
     </div>
 
     <!-- Diálogo de reporte de receta -->
-    <div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+    <div v-if="showReportModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
       <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md">
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-3 sm:p-4">
@@ -406,15 +433,17 @@
           </div>
 
           <div v-if="reportReason === 'Otro'" class="mb-3 sm:mb-5">
-            <label class="block text-amber-800 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Explica el problema</label>
+            <label class="block text-amber-800 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Explica el
+              problema</label>
             <textarea v-model="customReason" rows="3" placeholder="Por favor, describe el problema en detalle..."
-              class="w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+              class="resize-none resize-none w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
           </div>
 
           <div class="flex justify-end space-x-2 sm:space-x-3 pt-1 sm:pt-2">
             <button @click="cancelReport"
               class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
+                fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                   clip-rule="evenodd" />
@@ -423,7 +452,8 @@
             </button>
             <button @click="submitReportRecipe"
               class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300 flex items-center shadow-md text-xs sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
+                fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                   clip-rule="evenodd" />
@@ -460,15 +490,17 @@
           </div>
 
           <div v-if="commentReportReason === 'Otro'" class="mb-3 sm:mb-5">
-            <label class="block text-amber-800 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Explica el problema</label>
+            <label class="block text-amber-800 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Explica el
+              problema</label>
             <textarea v-model="commentCustomReason" rows="3" placeholder="Por favor, describe el problema en detalle..."
-              class="w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
+              class="resize-none w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300"></textarea>
           </div>
 
           <div class="flex justify-end space-x-2 sm:space-x-3 pt-1 sm:pt-2">
             <button @click="cancelCommentReport"
               class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
+                fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                   clip-rule="evenodd" />
@@ -477,7 +509,8 @@
             </button>
             <button @click="submitCommentReport"
               class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300 flex items-center shadow-md text-xs sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
+                fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                   clip-rule="evenodd" />
@@ -533,6 +566,7 @@ const conteoLikes = ref({});
 const conteoDisLikes = ref({});
 const replyingTo = ref(null);
 const toast = useToast()
+const isMenuVisible = ref(false);
 
 const payload = {
   idrecipe: parseInt(recipeId),
@@ -689,7 +723,7 @@ function createSubcomment(commentId) {
 
   payload.comment = replyComment.value;
   payload.idcomment = commentId;
-  
+
   axios.post(`${process.env.VUE_APP_API_URL}/createSubComment`, payload)
     .then(() => {
       fetchRecipe();
@@ -702,7 +736,7 @@ function createSubcomment(commentId) {
         router.push({ name: "login" });
       }
     });
-    
+
 }
 
 function deleteComment(idcomment) {
@@ -839,7 +873,7 @@ const submitCommentReport = async () => {
 
   try {
 
-    
+
     const response = await axios.post(`${process.env.VUE_APP_API_URL}/report-comment`, {
       commentId: currentCommentId.value,
       reason: reason,
@@ -916,6 +950,10 @@ const toggleDislike = (commentId) => {
       .catch(error => console.error("Error en la solicitud:", error));
   }
 };
+
+const toggleMenu = () => {
+      isMenuVisible.value = !isMenuVisible.value;
+    };
 </script>
 
 <style scoped>

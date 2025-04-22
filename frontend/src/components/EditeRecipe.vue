@@ -673,10 +673,10 @@ const proteins = [
 ];
 
 const prepTimes = [
-  { value: 'menos15', label: 'Rápida (<15 min)' },
-  { value: '15a30', label: 'Media (15-30 min)' },
-  { value: '30a60', label: 'Lenta (30-60 min)' },
-  { value: 'mas60', label: 'Muy lenta (>1 hora)' }
+  { value: "<15'⏱️", label: 'Rápida', description: '<15 minutos' },
+  { value: '15-30 ⏱️', label: 'Media', description: '15-30 minutos' },
+  { value: "30'-60' ⏱️", label: 'Lenta', description: '30-60 minutos' },
+  { value: ">60' ⏱️", label: 'Muy lenta', description: '>1 hora' }
 ];
 
 // Función para eliminar ingrediente
