@@ -1,84 +1,89 @@
 <template>
-  <!-- Navbar con sombra suave y fondo cálido -->
-  <nav class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-md sticky top-0 z-50 border-b border-amber-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Logo con imagen y texto -->
+  <!-- Navbar con sombra suave y fondo cálido - Mejorado para mobile -->
+  <nav class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14 sm:h-16">
+        <!-- Logo con imagen y texto - Optimizado para mobile -->
         <router-link to="/" class="flex items-center group">
-          <div class="p-1.5 rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
-            <img src="@/assets/logo.png" alt="Logo" class="h-8 w-8" />
+          <div class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
+            <img src="@/assets/logo.png" alt="Logo" class="h-7 w-7 sm:h-8 sm:w-8" />
           </div>
-          <span class="ml-3 text-2xl font-bold text-amber-800 font-serif tracking-tight">Sabores España</span>
+          <span class="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-amber-800 font-serif tracking-tight">Sabores España</span>
         </router-link>
 
-        <!-- Mobile menu button -->
+        <!-- Mobile menu button - Mejorado accesibilidad -->
         <div class="flex lg:hidden">
-          <button @click="toggleNavbar"
-            class="inline-flex items-center justify-center p-2 rounded-md text-amber-700 hover:text-amber-900 hover:bg-amber-200 focus:outline-none transition duration-300">
-            <span class="sr-only">Menú principal</span>
-            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          <button @click="toggleNavbar" aria-label="Menú principal"
+            class="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-md text-amber-700 hover:text-amber-900 hover:bg-amber-200 focus:outline-none transition duration-300"
+            :aria-expanded="navbarOpen">
+            <svg class="h-5 w-5 sm:h-6 sm:w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
 
-        <!-- Desktop Navigation -->
+        <!-- Desktop Navigation - Espaciado mejorado -->
         <div v-if="isLoggedIn">
-          <div class="hidden lg:flex lg:items-center lg:space-x-1">
+          <div class="hidden lg:flex lg:items-center lg:space-x-2 xl:space-x-3">
             <router-link v-for="item in navItems" :key="item.to" :to="item.to"
-              class="px-4 py-2.5 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center group">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+              class="px-3 py-2 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center group"
+              active-class="bg-amber-200 text-amber-900 font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
               </svg>
-              <span>{{ item.text }}</span>
+              <span class="whitespace-nowrap">{{ item.text }}</span>
             </router-link>
 
             <button @click="logout"
-              class="ml-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 transition duration-300 flex items-center group">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+              class="ml-1 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 transition duration-300 flex items-center group">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span>Cerrar Sesión</span>
+              <span class="whitespace-nowrap">Cerrar Sesión</span>
             </button>
           </div>
         </div>
         <div v-else>
-          <div class="hidden lg:flex lg:items-center lg:space-x-8">
-            <router-link @click="closeSession" to="/login"
-              class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+          <div class="hidden lg:flex lg:items-center lg:space-x-4 xl:space-x-6">
+            <router-link to="/login"
+              class="px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center whitespace-nowrap"
+              active-class="text-amber-900 font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
               </svg>
-              Loguear
+              Iniciar Sesión
             </router-link>
-            <router-link @click="closeSession" to="/register"
-              class="px-3 py-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+            <router-link to="/register"
+              class="px-3 py-2 rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 transition duration-300 flex items-center whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
               </svg>
-              Registrar
+              Registrarse
             </router-link>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Navigation -->
+    <!-- Mobile Navigation - Mejorado para touch -->
     <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 scale-95"
       enter-to-class="opacity-100 scale-100" leave-active-class="transition ease-in duration-150"
       leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
 
       <div v-show="navbarOpen" class="lg:hidden bg-amber-50 shadow-xl border-t border-amber-200">
-        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <router-link v-for="item in navItems" :key="item.to" :to="item.to"
-            class="block px-3 py-3 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
-            @click="navbarOpen = false">
+        <div class="px-2 pt-1 pb-2 space-y-1 sm:px-3">
+          
+          <div v-if="isLoggedIn">
+            <router-link v-for="item in navItems" :key="item.to" :to="item.to"
+            class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
+            @click="navbarOpen = false"
+            active-class="bg-amber-200 text-amber-900 font-semibold">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
@@ -86,29 +91,49 @@
             <span>{{ item.text }}</span>
           </router-link>
 
-          <button @click="logout"
-            class="w-full text-left block px-3 py-3 rounded-lg text-base font-medium text-red-600 hover:bg-red-100 transition duration-300 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Cerrar Sesión
-          </button>
+            <button @click="logout"
+              class="w-full text-left block px-3 py-2.5 rounded-lg text-base font-medium text-red-600 hover:bg-red-100 transition duration-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar Sesión
+            </button>
+          </div>
+          <div v-else class="space-y-1">
+            <router-link to="/login"
+              class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
+              @click="navbarOpen = false">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+              </svg>
+              Iniciar Sesión
+            </router-link>
+            <router-link to="/register"
+              class="block px-3 py-2.5 rounded-lg text-base font-medium bg-amber-500 text-white hover:bg-amber-600 transition duration-300 flex items-center justify-center"
+              @click="navbarOpen = false">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+              </svg>
+              Registrarse
+            </router-link>
+          </div>
         </div>
       </div>
-
     </transition>
   </nav>
 </template>
 
 <script setup>
-import { ref,onMounted,onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const navbarOpen = ref(false);
-const isLoggedIn = ref(!!localStorage.getItem("userToken"))
+const isLoggedIn = ref(!!localStorage.getItem("userToken"));
 
 const checkAuth = () => {
   isLoggedIn.value = !!localStorage.getItem('userToken');
@@ -139,7 +164,6 @@ onMounted(() => {
     window.removeEventListener('storage', handleStorageChange);
   });
 });
-
 
 const navItems = [
   {
@@ -172,15 +196,13 @@ const logout = async () => {
   try {
     // Limpiar datos de autenticación
     localStorage.removeItem('userToken');
+    navbarOpen.value = false;
     
     // Forzar actualización inmediata
     isLoggedIn.value = false;
     
     // Redirigir al login
     await router.push('/login');
-    
-    // Recargar para limpiar completamente el estado
-    window.location.reload();
   } catch (error) {
     console.error('Error durante logout:', error);
   }
@@ -188,24 +210,36 @@ const logout = async () => {
 </script>
 
 <style scoped>
-.router-link-exact-active {
-  @apply bg-amber-200 text-amber-900 font-semibold;
+/* Mejoras de animación */
+.router-link-active:first-child:hover img {
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Animación para el logo */
 @keyframes pulse {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
   }
-
   50% {
-    transform: scale(1.05);
+    transform: scale(1.1);
   }
 }
 
-.router-link-active:first-child:hover img {
-  animation: pulse 1s infinite;
+/* Mejoras para mobile */
+@media (max-width: 1023px) {
+  nav {
+    backdrop-filter: blur(5px);
+  }
+  
+  .router-link-exact-active {
+    @apply bg-amber-200;
+  }
+}
+
+/* Mejor contraste para accesibilidad */
+.text-amber-700 {
+  color: #b45309;
+}
+.hover\:text-amber-900:hover {
+  color: #78350f;
 }
 </style>

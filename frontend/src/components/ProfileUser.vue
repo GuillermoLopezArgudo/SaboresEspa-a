@@ -1,23 +1,23 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto space-y-8">
+  <div class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto space-y-6 sm:space-y-8">
       <!-- Tarjeta principal de perfil -->
-      <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+      <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden transition-all duration-300 hover:shadow-lg sm:hover:shadow-xl">
         <!-- Encabezado con gradiente mejorado -->
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-5 px-6">
-          <h2 class="text-2xl font-bold text-white text-center font-serif tracking-wide">MI PERFIL</h2>
+        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide">MI PERFIL</h2>
         </div>
 
         <!-- Contenido -->
-        <div class="p-6 md:p-8">
+        <div class="p-4 sm:p-6 md:p-8">
           <!-- Foto de perfil con efecto hover mejorado -->
-          <div class="text-center mb-8">
+          <div class="text-center mb-6 sm:mb-8">
             <div class="relative inline-block group">
               <img :src="imageUrl" alt="Imagen de perfil"
-                class="w-36 h-36 rounded-full mx-auto object-cover border-4 border-white shadow-lg transition-all duration-300 group-hover:border-amber-200 group-hover:shadow-md">
+                class="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full mx-auto object-cover border-4 border-white shadow-md transition-all duration-300 group-hover:border-amber-200 group-hover:shadow-lg">
               <label for="imageRecipe"
-                class="absolute bottom-2 right-2 bg-amber-500 text-white p-2 rounded-full cursor-pointer hover:bg-amber-600 transition duration-300 shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                class="absolute bottom-0 sm:bottom-2 right-0 sm:right-2 bg-amber-500 text-white p-1.5 sm:p-2 rounded-full cursor-pointer hover:bg-amber-600 transition duration-300 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -30,16 +30,16 @@
           </div>
 
           <!-- Sección de nombre -->
-          <div class="mb-6 p-5 bg-amber-50 rounded-xl border border-amber-100">
-            <div v-if="!boolChangeName" class="space-y-4">
-              <h3 class="text-lg font-semibold text-amber-800 mb-3">Nombre</h3>
+          <div class="mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100">
+            <div v-if="!boolChangeName" class="space-y-3 sm:space-y-4">
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3">Nombre</h3>
               <input type="text" v-model="name"
-                class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
 
-              <div class="flex space-x-3 pt-2">
+              <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changeName"
-                  class="flex-1 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium shadow hover:shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                       clip-rule="evenodd" />
@@ -47,17 +47,17 @@
                   Guardar
                 </button>
                 <button @click="handleNameChange"
-                  class="flex-1 py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base">
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
-              <h3 class="text-lg font-semibold text-amber-800 mb-1">Nombre</h3>
-              <p class="text-gray-700 mb-3">{{ name }}</p>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1">Nombre</h3>
+              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">{{ name }}</p>
               <button @click="handleNameChange"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -68,16 +68,16 @@
           </div>
 
           <!-- Sección de email -->
-          <div class="mb-6 p-5 bg-amber-50 rounded-xl border border-amber-100">
-            <div v-if="!boolChangeEmail" class="space-y-4">
-              <h3 class="text-lg font-semibold text-amber-800 mb-3">Email</h3>
+          <div class="mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100">
+            <div v-if="!boolChangeEmail" class="space-y-3 sm:space-y-4">
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3">Email</h3>
               <input type="email" v-model="email"
-                class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
 
-              <div class="flex space-x-3 pt-2">
+              <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changeEmail"
-                  class="flex-1 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium shadow hover:shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                       clip-rule="evenodd" />
@@ -85,17 +85,17 @@
                   Guardar
                 </button>
                 <button @click="handleChangeEmail"
-                  class="flex-1 py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base">
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
-              <h3 class="text-lg font-semibold text-amber-800 mb-1">Email</h3>
-              <p class="text-gray-700 mb-3">{{ email }}</p>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1">Email</h3>
+              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">{{ email }}</p>
               <button @click="handleChangeEmail"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -106,30 +106,30 @@
           </div>
 
           <!-- Sección de contraseña -->
-          <div class="mb-8 p-5 bg-amber-50 rounded-xl border border-amber-100">
-            <div v-if="!boolChangePassword" class="space-y-4">
-              <h3 class="text-lg font-semibold text-amber-800 mb-3">Cambiar Contraseña</h3>
+          <div class="mb-6 sm:mb-8 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100">
+            <div v-if="!boolChangePassword" class="space-y-3 sm:space-y-4">
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3">Cambiar Contraseña</h3>
 
-              <div class="space-y-3">
+              <div class="space-y-2 sm:space-y-3">
                 <div>
-                  <label class="block text-sm font-medium text-amber-700 mb-1">Nueva Contraseña</label>
+                  <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1">Nueva Contraseña</label>
                   <input type="password" v-model="newPassword"
-                    class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-amber-700 mb-1">Confirmar Contraseña</label>
+                  <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1">Confirmar Contraseña</label>
                   <input type="password" v-model="confirmPassword"
-                    class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
                 </div>
               </div>
 
-              <div v-if="error" class="text-red-500 text-sm mt-2 animate-pulse">{{ error }}</div>
+              <div v-if="error" class="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 animate-pulse">{{ error }}</div>
 
-              <div class="flex space-x-3 pt-2">
+              <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changePassword"
-                  class="flex-1 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium shadow hover:shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                       clip-rule="evenodd" />
@@ -137,15 +137,15 @@
                   Guardar
                 </button>
                 <button @click="handleChangePassword"
-                  class="flex-1 py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base">
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
               <button @click="handleChangePassword"
-                class="w-full py-2.5 text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center transition duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                class="w-full py-2 sm:py-2.5 text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center transition duration-200 text-sm sm:text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -156,9 +156,9 @@
           </div>
 
           <!-- Botón para eliminar perfil -->
-          <div class="mt-6 text-center">
+          <div class="mt-4 sm:mt-6 text-center">
             <button @click="deleteProfile"
-              class="w-full max-w-xs mx-auto py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition duration-300 shadow-md hover:shadow-lg">
+              class="w-full max-w-xs mx-auto py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
               Eliminar perfil
             </button>
           </div>
@@ -166,21 +166,21 @@
       </div>
 
       <!-- Sección de administración (solo para admin) -->
-      <div v-if="type === 'admin'" class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-5 px-6">
-          <h2 class="text-2xl font-bold text-white text-center font-serif tracking-wide">ADMINISTRACIÓN DE USUARIOS</h2>
+      <div v-if="type === 'admin'" class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide">ADMINISTRACIÓN DE USUARIOS</h2>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
           <div v-for="(item, index) in users" :key="index"
-            class="mb-4 p-4 bg-amber-50 rounded-lg border border-amber-100 flex justify-between items-center transition duration-200 hover:bg-amber-100">
-            <div>
-              <p class="text-lg font-semibold text-amber-800">{{ item.name }}</p>
-              <p class="text-sm text-amber-600">{{ item.email }}</p>
+            class="mb-3 sm:mb-4 p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-100 flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-200 hover:bg-amber-100">
+            <div class="mb-2 sm:mb-0">
+              <p class="text-base sm:text-lg font-semibold text-amber-800">{{ item.name }}</p>
+              <p class="text-xs sm:text-sm text-amber-600">{{ item.email }}</p>
             </div>
             <button @click="deleteUser(index)"
-              class="ml-4 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 flex items-center shadow hover:shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+              class="ml-0 sm:ml-4 py-1.5 px-3 sm:py-2 sm:px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 flex items-center shadow hover:shadow-md text-xs sm:text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -403,5 +403,15 @@ img:hover {
 input:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5);
+}
+
+/* Mejoras para móviles */
+@media (max-width: 640px) {
+  .flex-col-on-mobile {
+    flex-direction: column;
+  }
+  .space-y-2-on-mobile > * + * {
+    margin-top: 0.5rem;
+  }
 }
 </style>
