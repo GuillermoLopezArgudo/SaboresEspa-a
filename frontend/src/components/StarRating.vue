@@ -26,8 +26,13 @@
         </svg>
       </button>
     </div>
-    <span v-if="showRatingText" class="ml-2 text-sm text-gray-600">
+    
+    <!-- Mostrar calificación o el mensaje para calificar -->
+    <span v-if="effectiveRating > 0" class="ml-2 text-sm text-gray-600">
       {{ effectiveRating }} de 5
+    </span>
+    <span v-else class="ml-2 text-sm text-gray-600">
+      ¡Sé el primero en calificar!
     </span>
   </div>
 </template>
@@ -80,12 +85,10 @@ const setRating = (star) => {
   min-height: 2rem;
 }
 
-/* Animación para las estrellas */
 button {
   transition: all 0.2s ease-in-out;
 }
 
-/* Efecto para cuando no es interactivo */
 .star-rating.non-interactive {
   pointer-events: none;
 }
