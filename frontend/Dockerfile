@@ -1,24 +1,26 @@
-# Usa la imagen oficial de Node.js
+# Usa Node oficial
 FROM node:16
 
-# Configura el directorio de trabajo
+# Directorio de trabajo
 WORKDIR /app
 
-# Copia los archivos de tu proyecto al contenedor
-COPY package.json /app/
-COPY package-lock.json /app/
+# Copia los archivos de dependencias
+COPY package*.json ./
 
-# Instala las dependencias de Vue
+# Instala dependencias
 RUN npm install
 
-# Copia el resto de tu aplicación (src, public, etc.)
-COPY . /app/
+# Copia el resto del código fuente
+COPY . .
 
-# Expón el puerto 8080 donde Vue sirve la aplicación
-EXPOSE 8080
-
-# Construye la aplicación de Vue para producción
+# Construye la app
 RUN npm run build
 
-# Define el comando para servir la aplicación en producción
-CMD ["npm", "run", "serve"]
+# Instala 'serve' para servir archivos estáticos
+RUN npm install -g serve
+
+# Expón el puerto para producción
+EXPOSE 8080
+
+# Sirve el contenido estático de 'dist'
+CMD ["serve", "-s", "dist", "-l", "8080"]

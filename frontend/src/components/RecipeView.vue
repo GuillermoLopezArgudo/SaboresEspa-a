@@ -689,7 +689,7 @@ function createSubcomment(commentId) {
 
   payload.comment = replyComment.value;
   payload.idcomment = commentId;
-
+  
   axios.post(`${process.env.VUE_APP_API_URL}/createSubComment`, payload)
     .then(() => {
       fetchRecipe();
@@ -702,6 +702,7 @@ function createSubcomment(commentId) {
         router.push({ name: "login" });
       }
     });
+    
 }
 
 function deleteComment(idcomment) {

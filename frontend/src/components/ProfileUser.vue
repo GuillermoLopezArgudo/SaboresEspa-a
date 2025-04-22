@@ -286,8 +286,9 @@ function changeImage(imageData) {
 
 function changeName() {
   payload.value.name = name.value;
+  console.log("a")
   axios
-    .post(`${process.env.VUE_APP_API_URL}/changeNmae`, payload.value)
+    .post(`${process.env.VUE_APP_API_URL}/changeName`, payload.value)
     .then(response => {
       console.log(response.data.message);
       handleNameChange();

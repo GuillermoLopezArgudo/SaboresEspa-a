@@ -15,6 +15,7 @@ import hashlib
 import base64
 from models import db, BaseModel
 from flask_mail import Mail, Message
+from datetime import timedelta
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
@@ -32,6 +33,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
 jwt = JWTManager(app)
 mysql = MySQL(app)
 mail = Mail(app)
@@ -373,36 +375,39 @@ def viewComment():
     data = request.get_json()
     idrecipe = data.get("idrecipe") 
     token = data.get("userToken")
+
+    viewer_user = Users.select().where(Users.user_token == token).first()
+    viewer_type = viewer_user.user_type if viewer_user else ''
+
     comments = RecipeComment.select().where(RecipeComment.id_recipe_id == idrecipe)
     subcomments = RecipeSubComment.select().where(RecipeSubComment.id_recipe == idrecipe)
+
     comment_list = []
     for comment in comments:
-        users = Users.select().where(Users.user_token == token).first()
-        user = Users.get(Users.id == comment.id_user_id)
-        user_type = users.user_type if users else ''
+        user = Users.get_or_none(Users.id == comment.id_user_id)
         comment_list.append({
             "id": comment.id,
             "comment": comment.comment_text,
             "iduser": comment.id_user_id,
-            "username": user.user_name,
-            "userToken": user.user_token,
-            "type": user_type
+            "username": user.user_name if user else '',
+            "userToken": user.user_token if user else '',
+            "type": viewer_type
         })
+
     subcomments_list = []
     for subcomment in subcomments:
-        users = Users.select().where(Users.user_token == token).first()
-        user = Users.get(Users.id == comment.id_user_id)
-        user_type = users.user_type if users else ''
+        user = Users.get_or_none(Users.id == subcomment.id_user_id)
         subcomments_list.append({
             "id": subcomment.id,
             "id_comment": subcomment.id_comment_id,
             "comment": subcomment.comment_text,
             "iduser": subcomment.id_user_id,
-            "username": user.user_name,
-            "userToken": user.user_token,
-            "type": user_type
+            "username": user.user_name if user else '',
+            "userToken": user.user_token if user else '',
+            "type": viewer_type
         })
-    return jsonify(comment_list=comment_list,subcomments_list=subcomments_list)
+
+    return jsonify(comment_list=comment_list, subcomments_list=subcomments_list)
     
 @app.route('/createComment', methods=['POST'])
 def createComment():
