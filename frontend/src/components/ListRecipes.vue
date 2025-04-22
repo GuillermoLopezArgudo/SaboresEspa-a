@@ -32,9 +32,7 @@
                         <i class="fa text-2xl"
                             :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
                     </button>
-
                 </div>
-
                 <!-- Contenido de la tarjeta -->
                 <div class="p-5">
                     <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>

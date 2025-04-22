@@ -1,18 +1,21 @@
 <template>
   <!-- Navbar con sombra suave y fondo cálido - Mejorado para mobile -->
-  <nav class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
+  <nav
+    class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
       <div class="flex justify-between items-center h-14 sm:h-16">
         <!-- Logo con imagen y texto - Optimizado para mobile -->
         <router-link to="/" class="flex items-center group">
-          <div class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
+          <div
+            class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
             <img src="@/assets/logo.png" alt="Logo" class="h-7 w-7 sm:h-8 sm:w-8" />
           </div>
-          <span class="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-amber-800 font-serif tracking-tight">Sabores España</span>
+          <span class="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-amber-800 font-serif tracking-tight">Sabores
+            España</span>
         </router-link>
 
         <!-- Mobile menu button - Mejorado accesibilidad -->
-        <div class="flex lg:hidden">
+        <div class="flex lg:hidden justify-end flex-1">
           <button @click="toggleNavbar" aria-label="Menú principal"
             class="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-md text-amber-700 hover:text-amber-900 hover:bg-amber-200 focus:outline-none transition duration-300"
             :aria-expanded="navbarOpen">
@@ -29,8 +32,8 @@
             <router-link v-for="item in navItems" :key="item.to" :to="item.to"
               class="px-3 py-2 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center group"
               active-class="bg-amber-200 text-amber-900 font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
               </svg>
               <span class="whitespace-nowrap">{{ item.text }}</span>
@@ -38,8 +41,8 @@
 
             <button @click="logout"
               class="ml-1 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 transition duration-300 flex items-center group">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
@@ -54,7 +57,9 @@
               active-class="text-amber-900 font-semibold">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
-                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd"
+                  d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                  clip-rule="evenodd" />
               </svg>
               Iniciar Sesión
             </router-link>
@@ -62,7 +67,9 @@
               class="px-3 py-2 rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 transition duration-300 flex items-center whitespace-nowrap">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
-                <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd"
+                  d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z"
+                  clip-rule="evenodd" />
               </svg>
               Registrarse
             </router-link>
@@ -72,24 +79,26 @@
     </div>
 
     <!-- Mobile Navigation - Mejorado para touch -->
-    <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100" leave-active-class="transition ease-in duration-150"
-      leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+    <transition enter-active-class="transition ease-out duration-200 transform"
+      enter-from-class="opacity-0 -translate-y-4" enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition ease-in duration-150 transform" leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-4">
 
-      <div v-show="navbarOpen" class="lg:hidden bg-amber-50 shadow-xl border-t border-amber-200">
+      <div v-show="navbarOpen"
+        class="absolute top-14 left-0 w-full bg-amber-50 shadow-xl border-t border-amber-200 z-40">
+
         <div class="px-2 pt-1 pb-2 space-y-1 sm:px-3">
-          
+
           <div v-if="isLoggedIn">
             <router-link v-for="item in navItems" :key="item.to" :to="item.to"
-            class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
-            @click="navbarOpen = false"
-            active-class="bg-amber-200 text-amber-900 font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
-            </svg>
-            <span>{{ item.text }}</span>
-          </router-link>
+              class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
+              @click="navbarOpen = false" active-class="bg-amber-200 text-amber-900 font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
+              </svg>
+              <span>{{ item.text }}</span>
+            </router-link>
 
             <button @click="logout"
               class="w-full text-left block px-3 py-2.5 rounded-lg text-base font-medium text-red-600 hover:bg-red-100 transition duration-300 flex items-center">
@@ -107,7 +116,9 @@
               @click="navbarOpen = false">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
-                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd"
+                  d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                  clip-rule="evenodd" />
               </svg>
               Iniciar Sesión
             </router-link>
@@ -116,7 +127,9 @@
               @click="navbarOpen = false">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
-                <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd"
+                  d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z"
+                  clip-rule="evenodd" />
               </svg>
               Registrarse
             </router-link>
@@ -156,9 +169,9 @@ watch(
 
 onMounted(() => {
   window.addEventListener('storage', handleStorageChange);
-  
+
   const authCheckInterval = setInterval(checkAuth, 1000);
-  
+
   onUnmounted(() => {
     clearInterval(authCheckInterval);
     window.removeEventListener('storage', handleStorageChange);
@@ -197,10 +210,10 @@ const logout = async () => {
     // Limpiar datos de autenticación
     localStorage.removeItem('userToken');
     navbarOpen.value = false;
-    
+
     // Forzar actualización inmediata
     isLoggedIn.value = false;
-    
+
     // Redirigir al login
     await router.push('/login');
   } catch (error) {
@@ -216,9 +229,12 @@ const logout = async () => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
@@ -229,7 +245,7 @@ const logout = async () => {
   nav {
     backdrop-filter: blur(5px);
   }
-  
+
   .router-link-exact-active {
     @apply bg-amber-200;
   }
@@ -239,6 +255,7 @@ const logout = async () => {
 .text-amber-700 {
   color: #b45309;
 }
+
 .hover\:text-amber-900:hover {
   color: #78350f;
 }
