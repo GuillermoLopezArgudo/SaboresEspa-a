@@ -245,7 +245,44 @@
                 </div>
               </div>
               <div v-else>
-                <p class="text-amber-800 text-sm sm:text-base">{{ comment.comment }}</p>
+                <!-- Contenedor del botón -->
+                <div class="flex justify-end">
+                  <div class="relative">
+                    <!-- Botón tres puntitos -->
+                    <button @click="toggleMenu"
+                      class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                      <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
+                    </button>
+
+                    <!-- Menú desplegable -->
+                    <div v-if="isMenuVisible"
+                      class="absolute right-0 mt-2 w-40 sm:w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-1 p-1 sm:p-2">
+
+                      <!-- BOTÓN: Reportar -->
+                      <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
+                        class="w-full flex items-center px-2 py-1 text-red-600 bg-red-100 hover:bg-red-200 rounded text-xs sm:text-sm transition">
+                        <i class="fa fa-flag mr-1"></i> Reportar
+                      </button>
+
+                      <!-- BOTÓN: Editar -->
+                      <button v-if="userToken == comment.userToken || type == 'admin'"
+                        @click="startEditComment(comment)"
+                        class="w-full flex items-center px-2 py-1 text-white bg-amber-500 hover:bg-amber-600 rounded text-xs sm:text-sm transition">
+                        <i class="fa fa-pencil mr-1"></i> Editar
+                      </button>
+
+                      <!-- BOTÓN: Eliminar -->
+                      <button v-if="userToken == comment.userToken || type == 'admin'"
+                        @click="deleteComment(comment.id)"
+                        class="w-full flex items-center px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded text-xs sm:text-sm transition">
+                        <i class="fa fa-trash mr-1"></i> Eliminar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p
+                  class="text-amber-800 text-sm sm:text-base break-words w-full max-w-[90%] sm:max-w-[90%] md:max-w-[95%] lg:max-w-[90%]">
+                  {{ comment.comment }}</p>
                 <p class="text-xs text-amber-600 mt-0.5 sm:mt-1">Por: {{ comment.username }}</p>
                 <div class="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 sm:mt-2">
                   <!-- Botones de interacción -->
@@ -261,7 +298,6 @@
                       </svg>
                       <span class="text-green-800 text-xs sm:text-sm">{{ conteoLikes[comment.id] || 0 }}</span>
                     </button>
-
                     <!-- DISLIKE -->
                     <button @click="toggleDislike(comment.id)"
                       class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
@@ -275,34 +311,6 @@
                     </button>
                   </div>
 
-                  <!-- Botón para mostrar el menú (Reportar, Editar, Eliminar) -->
-                  <div class="ml-auto relative">
-                    <button @click="toggleMenu"
-                      class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
-                      <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-0.5 sm:mr-1"></i>
-                    </button>
-
-                    <!-- Menú desplegable -->
-                    <div v-if="isMenuVisible" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg">
-                      <!-- BOTON DE REPORTAR-->
-                      <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
-                        class="w-full px-3 py-2 text-red-600 hover:bg-red-100 rounded-t-lg text-xs sm:text-sm transition duration-300">
-                        <i class="fa fa-flag text-xs sm:text-sm mr-1"></i> Reportar
-                      </button>
-                      <!-- BOTON DE EDITAR-->
-                      <button v-if="userToken == comment.userToken || type == 'admin'"
-                        @click="startEditComment(comment)"
-                        class="w-full px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-t-lg text-xs sm:text-sm transition duration-300">
-                        <i class="fa fa-pencil text-xs sm:text-sm mr-1"></i> Editar
-                      </button>
-                      <!-- BOTON DE ELIMINAR-->
-                      <button v-if="userToken == comment.userToken || type == 'admin'"
-                        @click="deleteComment(comment.id)"
-                        class="w-full px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-b-lg text-xs sm:text-sm transition duration-300">
-                        <i class="fa fa-trash text-xs sm:text-sm mr-1"></i> Eliminar
-                      </button>
-                    </div>
-                  </div>
 
                   <!-- BOTON DE RESPUESTA -->
                   <div class="ml-auto">
@@ -335,27 +343,46 @@
                   </div>
                 </div>
                 <div v-else>
-                  <p class="text-amber-700 text-sm sm:text-base">{{ subcomment.comment }}</p>
+                  <!-- Botón que activa el submenú -->
+                  <div class="flex justify-end">
+                    <div class="relative">
+                      <button @click="toggleSubMenu"
+                        class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                        <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
+                      </button>
+
+                      <!-- Menú desplegable -->
+                      <div v-if="isSubMenuVisible"
+                        class="absolute right-0 mt-2 w-40 sm:w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-1 p-1 sm:p-2">
+
+                        <!-- BOTÓN: Reportar -->
+                        <button v-if="userToken" @click="showCommentReportDialog(subcomment.id)"
+                          class="w-full flex items-center px-2 py-1 text-red-600 bg-red-100 hover:bg-red-200 rounded text-xs sm:text-sm transition">
+                          <i class="fa fa-flag mr-1"></i> Reportar
+                        </button>
+
+                        <!-- BOTÓN: Editar -->
+                        <button v-if="userToken == subcomment.userToken || type == 'admin'"
+                          @click="startEditSubcomment(subcomment)"
+                          class="w-full flex items-center px-2 py-1 text-white bg-amber-400 hover:bg-amber-500 rounded text-xs sm:text-sm transition">
+                          <i class="fa fa-pencil mr-1"></i> Editar
+                        </button>
+
+                        <!-- BOTÓN: Eliminar -->
+                        <button v-if="userToken == subcomment.userToken || type == 'admin'"
+                          @click="deleteSubcomment(subcomment.id)"
+                          class="w-full flex items-center px-2 py-1 text-white bg-red-400 hover:bg-red-500 rounded text-xs sm:text-sm transition">
+                          <i class="fa fa-trash mr-1"></i> Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p
+                    class="text-amber-700 text-sm sm:text-base break-words w-full max-w-[90%] sm:max-w-[90%] md:max-w-[90%] lg:max-w-[90%]">
+                    {{ subcomment.comment }}</p>
                   <p class="text-xs text-amber-500 mt-0.5 sm:mt-1">Por: {{ subcomment.username }}</p>
 
-                  <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
-                    <button v-if="userToken" @click="showCommentReportDialog(subcomment.id)"
-                      class="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded text-xs">
-                      <i class="fa fa-flag mr-0.5 sm:mr-1"></i> Reportar
-                    </button>
-
-                    <button v-if="userToken == subcomment.userToken || type == 'admin'"
-                      @click="startEditSubcomment(subcomment)"
-                      class="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-amber-400 hover:bg-amber-500 text-white rounded text-xs">
-                      <i class="fa fa-pencil mr-0.5 sm:mr-1"></i> Editar
-                    </button>
-
-                    <button v-if="userToken == subcomment.userToken || type == 'admin'"
-                      @click="deleteSubcomment(subcomment.id)"
-                      class="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-red-400 hover:bg-red-500 text-white rounded text-xs">
-                      <i class="fa fa-trash mr-0.5 sm:mr-1"></i> Eliminar
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -567,6 +594,7 @@ const conteoDisLikes = ref({});
 const replyingTo = ref(null);
 const toast = useToast()
 const isMenuVisible = ref(false);
+const isSubMenuVisible = ref(false);
 
 const payload = {
   idrecipe: parseInt(recipeId),
@@ -952,8 +980,13 @@ const toggleDislike = (commentId) => {
 };
 
 const toggleMenu = () => {
-      isMenuVisible.value = !isMenuVisible.value;
-    };
+  isMenuVisible.value = !isMenuVisible.value;
+};
+
+const toggleSubMenu = () => {
+  isSubMenuVisible.value = !isSubMenuVisible.value;
+};
+
 </script>
 
 <style scoped>
