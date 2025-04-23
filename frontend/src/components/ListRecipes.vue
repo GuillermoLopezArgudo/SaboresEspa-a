@@ -1,99 +1,99 @@
 <template>
-    <!-- Listado de recetas -->
-    <div class="min-h-screen bg-amber-50">
-        <div v-if="elementos.recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-for="(item) in elementos.recetas" :key="item.id"
-                class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
+    <div class="min-h-screen bg-amber-50 flex flex-col">
+        <!-- Contenido principal -->
+        <div v-if="elementos.recetas.length > 0" class="flex-1 flex flex-col justify-between">
+            <!-- Grid de recetas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="item in paginatedRecipes" :key="item.id"
+                    class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
 
-                <!-- Imagen con corazón superpuesto -->
-                <div class="relative">
-                    <router-link :to="'/recipe?id=' + item.id">
-                        <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
-                            {{ average[item.id] !== undefined && average[item.id] !== null ?
-                                Number(average[item.id]).toFixed(2)
-                                : "Sin calificación" }} ★
+                    <!-- Imagen con calificación y botón de favorito -->
+                    <div class="relative">
+                        <router-link :to="'/recipe?id=' + item.id">
+                            <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
+                                {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2) : "Sin calificación" }} ★
+                            </div>
+                            <img v-if="item.image" :src="`http://48.217.185.80/api/${item.image}`" class="w-full h-48 object-cover" alt="Imagen de receta">
+                            <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                        </router-link>
+
+                        <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
+                            class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-xl shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
+                            <i class="fa text-2xl" :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
+                        </button>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="p-5">
+                        <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
+                        <p class="text-amber-600 text-sm mt-2"
+                            :class="{ 'line-clamp-2': !expanded[item.id], 'line-clamp-none': expanded[item.id] }">
+                            {{ item.description }}
+                        </p>
+                        <button v-if="item.description.length > 100" @click="toggleExpand(item.id)"
+                            class="text-amber-800 text-sm font-medium mt-2 underline hover:text-amber-800 focus:outline-none">
+                            {{ expanded[item.id] ? 'Leer menos...' : 'Leer más...' }}
+                        </button>
+
+                        <div class="mt-4 pt-4 border-t border-amber-100">
+                            <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
+                            <div v-if="ratings[item.id] === 0" class="text-amber-500 mt-2 text-sm">¡Sé el primero en calificar!</div>
                         </div>
-                        <img v-if="item.image" :src="`http://48.217.185.80/api/${item.image}`"
-                            class="w-full h-48 object-cover" alt="Imagen de receta">
-                        <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+
+                        <div class="my-4 border-t border-amber-200"></div>
+
+                        <router-link :to="'/recipe?id=' + item.id"
+                            class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                        </div>
-                    </router-link>
+                            Ver Receta
+                        </router-link>
 
-                    <!-- Corazón de favorito -->
-                    <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
-                        class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-xl shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
-                        <i class="fa text-2xl"
-                            :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
-                    </button>
-                </div>
-
-                <!-- Contenido de la tarjeta -->
-                <div class="p-5">
-                    <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
-                    <p class="text-amber-600 text-sm mt-2"
-                        :class="{ 'line-clamp-2': !expanded[item.id], 'line-clamp-none': expanded[item.id] }">
-                        {{ item.description }}
-                    </p>
-                    <button v-if="item.description.length > 100" @click="toggleExpand(item.id)"
-                        class="text-amber-800 text-sm font-medium mt-2 underline hover:text-amber-800 focus:outline-none">
-                        {{ expanded[item.id] ? 'Leer menos...' : 'Leer más...' }}
-                    </button>
-
-                    <!-- Valoración con estrellas -->
-                    <div class="mt-4 pt-4 border-t border-amber-100">
-                        <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
-                        <!-- Mostrar texto adicional si no hay calificación -->
-                        <div v-if="ratings[item.id] === 0" class="text-amber-500 mt-2 text-sm">
-                            ¡Sé el primero en calificar!
+                        <div class="text-sm text-amber-700 mt-4 p-3 rounded-lg">
+                            <template v-if="categorias.filter(c => c.recipe_id === item.id).length">
+                                <button @click="filter(cat)"
+                                    v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
+                                    :key="cat.type + cat.category"
+                                    class="inline-block bg-amber-200 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
+                                    {{ cat.type }}
+                                </button>
+                            </template>
+                            <span v-else class="text-amber-500 italic">No tiene categorías</span>
                         </div>
                     </div>
-
-                    <!-- Separador entre valoración y botón -->
-                    <div class="my-4 border-t border-amber-200"></div>
-
-                    <!-- Botón para ver receta -->
-                    <router-link :to="'/recipe?id=' + item.id"
-                        class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        Ver Receta
-                    </router-link>
-
-                    <!-- Zona de Categorías -->
-                    <div class="text-sm text-amber-700 mt-4 p-3 rounded-lg">
-                        <template v-if="categorias.filter(c => c.recipe_id === item.id)">
-                            <button @click="filter(cat)" v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
-                                :key="cat.type + cat.category"
-                                class="inline-block bg-amber-200 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
-                                {{ cat.type }}
-                            </button>
-                        </template>
-                        <span v-else class="text-amber-500 italic">No tiene categorías</span>
-                    </div>
                 </div>
+            </div>
+
+            <!-- Paginador -->
+            <div class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm sm:text-base">
+                <button @click="currentPage--" :disabled="currentPage === 1"
+                    class="px-3 py-1 bg-amber-300 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400">
+                    Anterior
+                </button>
+                <span class="px-4 py-1 bg-white text-amber-800 border border-amber-300 rounded shadow-sm">
+                    Página {{ currentPage }} de {{ totalPages }}
+                </span>
+                <button @click="currentPage++" :disabled="currentPage === totalPages"
+                    class="px-3 py-1 bg-amber-300 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400">
+                    Siguiente
+                </button>
             </div>
         </div>
 
         <!-- Mensaje si no hay recetas -->
         <div v-else class="text-center py-12">
             <div class="max-w-md mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                         d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
 
-                <!-- Mensaje para "all" -->
                 <div v-if="props.greeting === 'all'">
                     <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas disponibles</h3>
                     <p class="mt-2 text-amber-600">Parece que aún no hay recetas. ¡Sé el primero en compartir una!</p>
@@ -102,19 +102,16 @@
                             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
                             Crear nueva receta
                         </router-link>
                     </div>
                 </div>
 
-                <!-- Mensaje para "favs" -->
                 <div v-else-if="props.greeting === 'favs'">
                     <h3 class="mt-4 text-lg font-medium text-amber-800">No tienes recetas favoritas</h3>
-                    <p class="mt-2 text-amber-600">Añade recetas a tus favoritos para encontrarlas fácilmente más tarde.
-                    </p>
+                    <p class="mt-2 text-amber-600">Añade recetas a tus favoritos para encontrarlas fácilmente más tarde.</p>
                     <div class="mt-6">
                         <router-link to="/"
                             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
@@ -128,7 +125,6 @@
                     </div>
                 </div>
 
-                <!-- Mensaje para "personal" -->
                 <div v-else-if="props.greeting === 'personal'">
                     <h3 class="mt-4 text-lg font-medium text-amber-800">No has creado ninguna receta</h3>
                     <p class="mt-2 text-amber-600">Comparte tus creaciones culinarias con la comunidad.</p>
@@ -137,14 +133,13 @@
                             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
                             Crear mi primera receta
                         </router-link>
                     </div>
                 </div>
-                <!-- Mensaje para "filtred" -->
+
                 <div v-else>
                     <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas que coincidan con tu filtro</h3>
                     <p class="mt-2 text-amber-600">Intenta ajustar los filtros para encontrar lo que buscas.</p>
@@ -155,9 +150,10 @@
 </template>
 
 
+
 <script setup>
 
-import { reactive, defineProps, watch, onMounted, ref, defineEmits } from 'vue';
+import { reactive, defineProps, watch, onMounted, ref, defineEmits, computed } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -189,6 +185,8 @@ const tiempo = ref('');
 const proteinas = ref([]);
 const emit = defineEmits(['enviarFiltros'])
 const expanded = reactive({});
+const currentPage = ref(1);
+const itemsPerPage = ref(6)
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
@@ -422,6 +420,16 @@ function averageStars() {
 const toggleExpand = (id) => {
     expanded[id] = !expanded[id];
 };
+
+const paginatedRecipes = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    const end = start + itemsPerPage.value;
+    return elementos.recetas.slice(start, end);
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(elementos.recetas.length / itemsPerPage.value);
+});
 
 </script>
 

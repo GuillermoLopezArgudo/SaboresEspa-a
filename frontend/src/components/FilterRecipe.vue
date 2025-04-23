@@ -3,7 +3,7 @@
 
     <div class="flex flex-wrap items-stretch gap-2 sm:gap-3 md:gap-4">
       <!-- Filtro Tipo de Comida -->
-      <div class="relative flex-1 min-w-[120px]">
+      <div class="relative flex-1 min-w-[120px]"  ref="tipoRef">
         <button @click="toggleAccordion('tipoComida')"
           class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
           :class="{ 'bg-amber-100': activeAccordion === 'tipoComida' }">
@@ -36,7 +36,7 @@
       </div>
 
       <!-- Filtro CCAA -->
-      <div class="relative flex-1 min-w-[120px]">
+      <div class="relative flex-1 min-w-[120px]" ref="ccaaRef">
         <button @click="toggleAccordion('ccaa')"
           class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
           :class="{ 'bg-amber-100': activeAccordion === 'ccaa' }">
@@ -68,7 +68,7 @@
       </div>
 
       <!-- Filtro Proteínas -->
-      <div class="relative flex-1 min-w-[120px]">
+      <div class="relative flex-1 min-w-[120px]" ref="proteinasRef">
         <button @click="toggleAccordion('proteinas')"
           class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
           :class="{ 'bg-amber-100': activeAccordion === 'proteinas' }">
@@ -100,7 +100,7 @@
       </div>
 
       <!-- Filtro Tiempo -->
-      <div class="relative flex-1 min-w-[120px]">
+      <div class="relative flex-1 min-w-[120px]" ref="tiempoRef">
         <button @click="toggleAccordion('tiempo')"
           class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
           :class="{ 'bg-amber-100': activeAccordion === 'tiempo' }">
@@ -171,7 +171,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits,defineProps,watch } from 'vue';
+import { ref, computed, defineEmits,defineProps,watch, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -197,6 +197,10 @@ const tipoComida = ref('');
 const ccaa = ref('');
 const tiempo = ref('');
 const proteinas = ref([]);
+const tipoRef = ref(null);
+const ccaaRef = ref(null);
+const proteinasRef = ref(null);
+const tiempoRef = ref(null);
 
 // Watch para tipoComida (filtro de tipo de comida)
 watch(() => props.type, (newType) => {
@@ -329,8 +333,11 @@ const eliminarFiltro = (filtro) => {
   if (filtro.label === 'Tipo') tipoComida.value = '';
   else if (filtro.label === 'Región') ccaa.value = '';
   else if (filtro.label === 'Tiempo') tiempo.value = '';
-  else if (filtro.label === 'Proteínas') {
-    proteinas.value = proteinas.value.filter(p => p !== filtro.value);
+  else if (filtro.label === 'Proteína') {
+    const prot = proteins.find(p => p.label === filtro.value);
+    if (prot) {
+      proteinas.value = proteinas.value.filter(p => p !== prot.value);
+    }
   }
 };
 
@@ -380,6 +387,29 @@ const buscarFiltros = () => {
 const closeAllAccordions = () => {
   activeAccordion.value = '';
 };
+
+const handleClickOutside = (event) => {
+  const refs = {
+    tipoComida: tipoRef,
+    ccaa: ccaaRef,
+    proteinas: proteinasRef,
+    tiempo: tiempoRef
+  };
+
+  const currentRef = refs[activeAccordion.value];
+  if (currentRef?.value && !currentRef.value.contains(event.target)) {
+    activeAccordion.value = '';
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
 </script>
 
 <style scoped>

@@ -40,43 +40,56 @@
             </button>
           </div>
 
-          <!-- Botón de reporte -->
-          <div v-if="userToken != 'notoken'" class="flex items-start gap-1 sm:gap-2 self-end sm:self-auto">
-            <!-- Reportar -->
-            <button v-if="userToken" @click="showReportDialog"
-              class="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200">
-              <i class="fa fa-flag text-xs"></i>
-              Reportar
-            </button>
-
-            <!-- Editar / Eliminar -->
-            <template v-if="userToken == receta.userToken || type == 'admin'">
-              <!-- Editar -->
-              <button @click="editeRecipe"
-                class="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-xs text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Editar
+          <!-- Contenedor del botón -->
+          <div class="flex justify-end">
+            <div class="relative">
+              <!-- Botón tres puntitos -->
+              <button @click="toggleMenuRecipe"
+                class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm transition duration-300 flex items-center">
+                <i class="fa fa-ellipsis-h text-sm mr-1"></i>
               </button>
 
-              <!-- Eliminar -->
-              <button @click="deleteRecipe"
-                class="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-xs text-white bg-red-500 hover:bg-red-600 rounded-lg transition duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Eliminar
-              </button>
-            </template>
+              <!-- Menú desplegable -->
+              <div v-if="istoggleMenuRecipe"
+                class="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-2 p-2">
+
+                <!-- Botón de reporte -->
+                <template v-if="userToken != 'notoken'">
+                  <button v-if="userToken" @click="showReportDialog"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200">
+                    <i class="fa fa-flag text-sm"></i>
+                    Reportar
+                  </button>
+                </template>
+
+                <!-- Editar / Eliminar -->
+                <template v-if="userToken == receta.userToken || type == 'admin'">
+                  <button @click="editeRecipe"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Editar
+                  </button>
+
+                  <button @click="deleteRecipe"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Eliminar
+                  </button>
+                </template>
+              </div>
+            </div>
           </div>
 
-        </div>
 
+        </div>
         <p class="mt-2 sm:mt-4 text-amber-700 text-sm sm:text-base md:text-lg">{{ receta.description }}</p>
       </div>
 
@@ -595,6 +608,7 @@ const replyingTo = ref(null);
 const toast = useToast()
 const isMenuVisible = ref(false);
 const isSubMenuVisible = ref(false);
+const istoggleMenuRecipe = ref(false)
 
 const payload = {
   idrecipe: parseInt(recipeId),
@@ -985,6 +999,10 @@ const toggleMenu = () => {
 
 const toggleSubMenu = () => {
   isSubMenuVisible.value = !isSubMenuVisible.value;
+};
+
+const toggleMenuRecipe = () => {
+  istoggleMenuRecipe.value = !istoggleMenuRecipe.value;
 };
 
 </script>

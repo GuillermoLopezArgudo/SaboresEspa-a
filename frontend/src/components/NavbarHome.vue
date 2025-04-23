@@ -1,17 +1,15 @@
 <template>
   <!-- Navbar con sombra suave y fondo cálido - Mejorado para mobile -->
-  <nav
-    class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
+  <nav class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-14 sm:h-16">
+      <!-- Ajusté la altura a 24 para pantallas grandes -->
+      <div class="flex justify-between items-center h-20 lg:h-24">
         <!-- Logo con imagen y texto - Optimizado para mobile -->
         <router-link to="/" class="flex items-center group">
-          <div
-            class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
-            <img src="@/assets/logo.png" alt="Logo" class="h-7 w-7 sm:h-8 sm:w-8" />
+          <div class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
+            <img src="@/assets/logo.png" alt="Logo" class="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 lg:h-20 lg:w-20" />
           </div>
-          <span class="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-amber-800 font-serif tracking-tight">Sabores
-            España</span>
+          <span class="ml-2 sm:ml-3 text-xl sm:text-2xl lg:text-3xl font-bold text-amber-800 font-serif tracking-tight">Sabores España</span>
         </router-link>
 
         <!-- Mobile menu button - Mejorado accesibilidad -->
@@ -28,11 +26,11 @@
 
         <!-- Desktop Navigation - Espaciado mejorado -->
         <div v-if="isLoggedIn">
-          <div class="hidden lg:flex lg:items-center lg:space-x-2 xl:space-x-3">
+          <div class="hidden lg:flex lg:items-center lg:space-x-4 xl:space-x-6">
             <router-link v-for="item in navItems" :key="item.to" :to="item.to"
               class="px-3 py-2 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center group"
               active-class="bg-amber-200 text-amber-900 font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none"
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1.5" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
               </svg>
@@ -41,7 +39,7 @@
 
             <button @click="logout"
               class="ml-1 px-3 py-2 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 flex items-center group">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1.5" fill="none"
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1.5" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -55,7 +53,7 @@
             <router-link to="/login"
               class="px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center whitespace-nowrap"
               active-class="text-amber-900 font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path fill-rule="evenodd"
                   d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
@@ -65,7 +63,7 @@
             </router-link>
             <router-link to="/register"
               class="px-3 py-2 rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 transition duration-300 flex items-center whitespace-nowrap">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path fill-rule="evenodd"
                   d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z"
@@ -85,7 +83,7 @@
       leave-to-class="opacity-0 -translate-y-4">
 
       <div v-show="navbarOpen"
-        class="absolute top-14 left-0 w-full bg-amber-50 shadow-xl border-t border-amber-200 z-40">
+        class="absolute top-20 left-0 w-full bg-amber-50 shadow-xl border-t border-amber-200 z-40">
 
         <div class="px-2 pt-1 pb-2 space-y-1 sm:px-3">
 
