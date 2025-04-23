@@ -227,9 +227,11 @@ watch(() => props.type, (newType) => {
 // Watch para proteinas (filtro de proteínas)
 watch(() => props.type, (newType) => {
   if (props.category === 'protein' && newType) {
-    proteinas.value = newType.split(',');
+    // Usamos concat para añadir los nuevos valores de proteínas correctamente
+    proteinas.value = proteinas.value.concat(newType.split(','));
+    console.log(proteinas.value);  // Para depuración
   }
-})
+});
 
 // Datos para los filtros
 const foodTypes = [
@@ -330,7 +332,6 @@ const filtrosSeleccionados = computed(() => {
   return seleccionados;
 });
 
-
 const eliminarFiltro = (filtro) => {
   if (filtro.label === 'Tipo') tipoComida.value = '';
   else if (filtro.label === 'Región') ccaa.value = '';
@@ -340,6 +341,9 @@ const eliminarFiltro = (filtro) => {
     if (prot) {
       proteinas.value = proteinas.value.filter(p => p !== prot.value);
     }
+  }
+  if(filtrosSeleccionados.value.length == 0){
+    limpiarFiltros()
   }
 };
 
@@ -370,7 +374,6 @@ const buscarFiltros = () => {
     return;
   }
   closeAllAccordions();
-
   const payload = {
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
@@ -412,7 +415,6 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
-
 
 </script>
 

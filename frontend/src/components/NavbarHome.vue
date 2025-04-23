@@ -1,19 +1,24 @@
 <template>
   <!-- Navbar con sombra suave y fondo cálido - Mejorado para mobile -->
-  <nav class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
+  <nav
+    class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
       <!-- Ajusté la altura a 24 para pantallas grandes -->
       <div class="flex justify-between items-center h-20 lg:h-24">
         <!-- Logo con imagen y texto - Optimizado para mobile -->
         <router-link to="/" class="flex items-center group">
-          <div class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
+          <div
+            class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
             <img src="@/assets/logo.png" alt="Logo" class="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 lg:h-20 lg:w-20" />
           </div>
-          <span class="ml-2 sm:ml-3 text-xl sm:text-2xl lg:text-3xl font-bold text-amber-800 font-serif tracking-tight">Sabores España</span>
+          <span
+            class="ml-3 mr-4 sm:ml-3 sm:mr-2 text-xl sm:text-2xl lg:text-3xl font-bold text-amber-800 font-serif tracking-tight">
+            Sabores España
+          </span>
         </router-link>
 
         <!-- Mobile menu button - Mejorado accesibilidad -->
-        <div class="flex lg:hidden justify-end flex-1">
+        <div class="flex lg:hidden justify-end flex-1" ref="NavbarRef">
           <button @click="toggleNavbar" aria-label="Menú principal"
             class="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-md text-amber-700 hover:text-amber-900 hover:bg-amber-200 focus:outline-none transition duration-300"
             :aria-expanded="navbarOpen">
@@ -139,23 +144,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, refs } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const navbarOpen = ref(false);
 const isLoggedIn = ref(!!localStorage.getItem("userToken"));
+const NavbarRef = ref(null);
+const activeAccordion = ref(''); // Definir activeAccordion correctamente
 
+// Función para comprobar la autenticación
 const checkAuth = () => {
   isLoggedIn.value = !!localStorage.getItem('userToken');
 };
 
+// Manejar los cambios en localStorage
 const handleStorageChange = (event) => {
   if (event.key === 'userToken') {
     checkAuth();
   }
 };
 
+// Detectar cambios en userToken usando watch
 watch(
   () => localStorage.getItem('userToken'),
   (newVal, oldVal) => {
@@ -176,6 +186,7 @@ onMounted(() => {
   });
 });
 
+// Lista de elementos de navegación
 const navItems = [
   {
     to: '/create',
@@ -194,15 +205,17 @@ const navItems = [
   },
   {
     to: '/profile',
-    text: 'Ajustes',
-    iconPath: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+    text: 'Perfil',
+    iconPath: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z M4.5 20.25a8.25 8.25 0 0115 0 M9 2l1.5-2 1.5 2h-3z M9 3h6v1H9V3z M7.5 2.25l1.5-1.25h4.5l1.5 1.25z'
   }
 ];
 
+// Función para alternar la visibilidad del navbar
 const toggleNavbar = () => {
   navbarOpen.value = !navbarOpen.value;
 };
 
+// Función de logout
 const logout = async () => {
   try {
     // Limpiar datos de autenticación
@@ -218,7 +231,30 @@ const logout = async () => {
     console.error('Error durante logout:', error);
   }
 };
+
+// Función para manejar el clic fuera del navbar
+const handleClickOutside = (event) => {
+  if (NavbarRef.value && !NavbarRef.value.contains(event.target)) {
+    navbarOpen.value = false;
+  }
+
+  if (activeAccordion.value) {
+    const currentRef = refs[activeAccordion.value];
+    if (currentRef?.value && !currentRef.value.contains(event.target)) {
+      activeAccordion.value = '';
+    }
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
+
 
 <style scoped>
 /* Mejoras de animación */
