@@ -3,7 +3,7 @@
 
     <div class="flex flex-wrap items-stretch gap-2 sm:gap-3 md:gap-4">
       <!-- Filtro Tipo de Comida -->
-      <div class="relative flex-1 min-w-[120px]"  ref="tipoRef">
+      <div class="relative flex-1 min-w-[120px]" ref="tipoRef">
         <button @click="toggleAccordion('tipoComida')"
           class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
           :class="{ 'bg-amber-100': activeAccordion === 'tipoComida' }">
@@ -134,7 +134,7 @@
 
       <!-- Botones de acción -->
       <div class="flex items-stretch gap-2 w-full sm:w-auto">
-        <button @click="limpiarFiltros" 
+        <button @click="limpiarFiltros"
           class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-amber-700 hover:text-amber-900 flex items-center justify-center text-xs sm:text-sm border border-amber-300 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -161,7 +161,8 @@
         class="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs sm:text-sm">
         {{ filtro.label }}: {{ filtro.value }}
         <button @click="eliminarFiltro(filtro)" class="ml-2 text-amber-600 hover:text-amber-800">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -171,17 +172,17 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits,defineProps,watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, defineEmits, defineProps, watch, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
   type: {
-        type: String,
-        required: true
-    },
+    type: String,
+    required: true
+  },
   category: {
-      type: String,
-      required: true
+    type: String,
+    required: true
   }
 });
 
@@ -325,9 +326,10 @@ const filtrosSeleccionados = computed(() => {
       }
     });
   }
-  
+
   return seleccionados;
 });
+
 
 const eliminarFiltro = (filtro) => {
   if (filtro.label === 'Tipo') tipoComida.value = '';
@@ -364,6 +366,7 @@ const limpiarFiltros = () => {
 const buscarFiltros = () => {
   const isEmpty = !tipoComida.value && !ccaa.value && !tiempo.value && proteinas.value.length === 0;
   if (isEmpty) {
+    limpiarFiltros();
     return;
   }
   closeAllAccordions();
@@ -382,7 +385,7 @@ const buscarFiltros = () => {
     .catch(error => {
       console.log(error);
     });
-} 
+}
 
 const closeAllAccordions = () => {
   activeAccordion.value = '';
@@ -409,6 +412,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
+
 
 </script>
 
@@ -457,12 +461,12 @@ button:hover {
   .flex-wrap {
     gap: 0.5rem;
   }
-  
+
   .relative {
     flex: 1 1 45%;
     min-width: 0;
   }
-  
+
   button {
     white-space: nowrap;
     overflow: hidden;

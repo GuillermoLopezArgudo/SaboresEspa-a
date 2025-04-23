@@ -25,10 +25,61 @@
     <!-- Contenido principal -->
     <div v-if="receta" class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
       <!-- Sección superior -->
+
       <div class="p-4 sm:p-6 md:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div class="w-full">
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800 font-serif">{{ receta.title }}</h2>
+            <div class="flex justify-between items-center">
+              <!-- Título -->
+              <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800 font-serif">{{ receta.title }}</h2>
+
+              <!-- Contenedor del botón -->
+              <div class="relative">
+                <!-- Botón tres puntitos -->
+                <button @click="toggleMenuRecipe"
+                  class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm transition duration-300 flex items-center">
+                  <i class="fa fa-ellipsis-h text-sm mr-1"></i>
+                </button>
+
+                <!-- Menú desplegable -->
+                <div v-if="istoggleMenuRecipe"
+                  class="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-2 p-2">
+
+                  <!-- Botón de reporte -->
+                  <template v-if="userToken != 'notoken'">
+                    <button v-if="userToken" @click="showReportDialog"
+                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200">
+                      <i class="fa fa-flag text-sm"></i>
+                      Reportar
+                    </button>
+                  </template>
+
+                  <!-- Editar / Eliminar -->
+                  <template v-if="userToken == receta.userToken || type == 'admin'">
+                    <button @click="editeRecipe"
+                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition duration-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Editar
+                    </button>
+
+                    <button @click="deleteRecipe"
+                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition duration-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Eliminar
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </div>
+
             <div class="mt-1 sm:mt-2 inline-block bg-amber-100 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
               <span class="text-xs sm:text-sm text-amber-700 font-medium">Por </span>
               <span class="text-xs sm:text-sm text-amber-800 font-semibold">{{ receta.user_name }}</span>
@@ -38,54 +89,6 @@
               <i class="fa text-xl sm:text-2xl mr-1 sm:mr-2" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i>
               <span class="font-medium">{{ isFavorite ? 'En favoritos' : 'Añadir a favoritos' }}</span>
             </button>
-          </div>
-
-          <!-- Contenedor del botón -->
-          <div class="flex justify-end">
-            <div class="relative">
-              <!-- Botón tres puntitos -->
-              <button @click="toggleMenuRecipe"
-                class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm transition duration-300 flex items-center">
-                <i class="fa fa-ellipsis-h text-sm mr-1"></i>
-              </button>
-
-              <!-- Menú desplegable -->
-              <div v-if="istoggleMenuRecipe"
-                class="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-2 p-2">
-
-                <!-- Botón de reporte -->
-                <template v-if="userToken != 'notoken'">
-                  <button v-if="userToken" @click="showReportDialog"
-                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200">
-                    <i class="fa fa-flag text-sm"></i>
-                    Reportar
-                  </button>
-                </template>
-
-                <!-- Editar / Eliminar -->
-                <template v-if="userToken == receta.userToken || type == 'admin'">
-                  <button @click="editeRecipe"
-                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Editar
-                  </button>
-
-                  <button @click="deleteRecipe"
-                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Eliminar
-                  </button>
-                </template>
-              </div>
-            </div>
           </div>
 
 
@@ -262,13 +265,13 @@
                 <div class="flex justify-end">
                   <div class="relative">
                     <!-- Botón tres puntitos -->
-                    <button @click="toggleMenu"
+                    <button @click="toggleMenu(comment.id)"
                       class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
                       <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
                     </button>
 
                     <!-- Menú desplegable -->
-                    <div v-if="isMenuVisible"
+                    <div v-if="isMenuVisible[comment.id]"
                       class="absolute right-0 mt-2 w-40 sm:w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-1 p-1 sm:p-2">
 
                       <!-- BOTÓN: Reportar -->
@@ -323,8 +326,6 @@
                       <span class="text-red-600 text-xs sm:text-sm">{{ conteoDisLikes[comment.id] || 0 }}</span>
                     </button>
                   </div>
-
-
                   <!-- BOTON DE RESPUESTA -->
                   <div class="ml-auto">
                     <button @click="toggleReply(comment.id)"
@@ -359,13 +360,13 @@
                   <!-- Botón que activa el submenú -->
                   <div class="flex justify-end">
                     <div class="relative">
-                      <button @click="toggleSubMenu"
+                      <button @click="toggleSubMenu(subcomment.id)"
                         class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
                         <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
                       </button>
 
                       <!-- Menú desplegable -->
-                      <div v-if="isSubMenuVisible"
+                      <div v-if="isSubMenuVisible[subcomment.id]"
                         class="absolute right-0 mt-2 w-40 sm:w-44 bg-white shadow-lg rounded-lg z-50 flex flex-col gap-1 p-1 sm:p-2">
 
                         <!-- BOTÓN: Reportar -->
@@ -606,8 +607,8 @@ const conteoLikes = ref({});
 const conteoDisLikes = ref({});
 const replyingTo = ref(null);
 const toast = useToast()
-const isMenuVisible = ref(false);
-const isSubMenuVisible = ref(false);
+const isMenuVisible = ref({});
+const isSubMenuVisible = ref({});
 const istoggleMenuRecipe = ref(false)
 
 const payload = {
@@ -993,12 +994,12 @@ const toggleDislike = (commentId) => {
   }
 };
 
-const toggleMenu = () => {
-  isMenuVisible.value = !isMenuVisible.value;
+const toggleMenu = (commentId) => {
+  isMenuVisible.value[commentId] = !isMenuVisible.value[commentId];
 };
 
-const toggleSubMenu = () => {
-  isSubMenuVisible.value = !isSubMenuVisible.value;
+const toggleSubMenu = (subCommentId) => {
+  isSubMenuVisible.value[subCommentId] = !isSubMenuVisible.value[subCommentId];
 };
 
 const toggleMenuRecipe = () => {

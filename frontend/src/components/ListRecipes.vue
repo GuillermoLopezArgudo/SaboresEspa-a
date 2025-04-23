@@ -149,8 +149,6 @@
     </div>
 </template>
 
-
-
 <script setup>
 
 import { reactive, defineProps, watch, onMounted, ref, defineEmits, computed } from 'vue';
@@ -337,6 +335,7 @@ function filterRecipe() {
             if (userToken) {
                 selectFavorites(response.data.favorites_list)
                 selectReviews(response.data.reviews_list)
+                currentPage.value = 1;
             }
         })
         .catch(error => {
