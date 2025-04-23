@@ -34,7 +34,7 @@
               <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800 font-serif">{{ receta.title }}</h2>
 
               <!-- Contenedor del botón -->
-              <div class="relative">
+              <div class="relative" ref="menuRecipeRef">
                 <!-- Botón tres puntitos -->
                 <button @click="toggleMenuRecipe"
                   class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm transition duration-300 flex items-center">
@@ -262,8 +262,8 @@
               </div>
               <div v-else>
                 <!-- Contenedor del botón -->
-                <div class="flex justify-end">
-                  <div class="relative">
+                <div class="flex justify-end" >
+                  <div class="relative" :ref="el => menuRefs[comment.id] = el">
                     <!-- Botón tres puntitos -->
                     <button @click="toggleMenu(comment.id)"
                       class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
@@ -359,7 +359,7 @@
                 <div v-else>
                   <!-- Botón que activa el submenú -->
                   <div class="flex justify-end">
-                    <div class="relative">
+                    <div class="relative" :ref="el => subMenuRefs[subcomment.id] = el">
                       <button @click="toggleSubMenu(subcomment.id)"
                         class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
                         <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
@@ -452,7 +452,7 @@
     <!-- Diálogo de reporte de receta -->
     <div v-if="showReportModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md">
+      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md" ref="reportModalRef">
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-3 sm:p-4">
           <h3 class="text-lg sm:text-xl font-bold text-white font-serif">Reportar Receta</h3>
@@ -509,7 +509,7 @@
     <!-- Diálogo de reporte de comentario -->
     <div v-if="showCommentReportModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md">
+      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md" ref="commentReportModalRef">
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-3 sm:p-4">
           <h3 class="text-lg sm:text-xl font-bold text-white font-serif">Reportar Comentario</h3>
@@ -566,7 +566,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed,onBeforeUnmount  } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
@@ -610,6 +610,11 @@ const toast = useToast()
 const isMenuVisible = ref({});
 const isSubMenuVisible = ref({});
 const istoggleMenuRecipe = ref(false)
+const menuRecipeRef = ref(null);
+const menuRefs = ref({});
+const subMenuRefs = ref({});
+const reportModalRef = ref(null);
+const commentReportModalRef = ref(null);
 
 const payload = {
   idrecipe: parseInt(recipeId),
@@ -1006,6 +1011,70 @@ const toggleMenuRecipe = () => {
   istoggleMenuRecipe.value = !istoggleMenuRecipe.value;
 };
 
+const handleClickOutsideRecipeMenu = (event) => {
+  if (menuRecipeRef.value && !menuRecipeRef.value.contains(event.target)) {
+    istoggleMenuRecipe.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideRecipeMenu);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutsideRecipeMenu);
+});
+
+const handleClickOutsideCommentMenu = (event) => {
+  Object.keys(menuRefs.value).forEach(commentId => {
+    if (menuRefs.value[commentId] && !menuRefs.value[commentId].contains(event.target)) {
+      isMenuVisible.value[commentId] = false;
+    }
+  });
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideCommentMenu);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutsideCommentMenu);
+});
+
+const handleClickOutsideSubCommentMenu = (event) => {
+  Object.keys(subMenuRefs.value).forEach(subCommentId => {
+    if (subMenuRefs.value[subCommentId] && !subMenuRefs.value[subCommentId].contains(event.target)) {
+      isSubMenuVisible.value[subCommentId] = false;
+    }
+  });
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideSubCommentMenu);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutsideSubCommentMenu);
+});
+
+const handleClickOutsideModals = (event) => {
+  console.log(reportModalRef.value)
+  if (reportModalRef.value && !reportModalRef.value.contains(event.target)) {
+    showReportModal.value = false;
+  }
+  
+  if (commentReportModalRef.value && !commentReportModalRef.value.contains(event.target)) {
+    showCommentReportModal.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideModals);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutsideModals);
+})
 </script>
 
 <style scoped>
