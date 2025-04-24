@@ -1,13 +1,15 @@
 <template>
-  <div class="w-full bg-white rounded-xl shadow-sm border border-amber-200 p-3 sm:p-4">
+  <div
+    class="w-full bg-white/80 dark:bg-zinc-900 rounded-xl shadow-sm border border-amber-200 dark:border-zinc-700 p-3 sm:p-4">
 
     <div class="flex flex-wrap items-stretch gap-2 sm:gap-3 md:gap-4">
       <!-- Filtro Tipo de Comida -->
       <div class="relative flex-1 min-w-[120px]" ref="tipoRef">
         <button @click="toggleAccordion('tipoComida')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
-          :class="{ 'bg-amber-100': activeAccordion === 'tipoComida' }">
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-zinc-800 hover:bg-amber-100 dark:hover:bg-zinc-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          :class="{ 'bg-amber-100 dark:bg-zinc-700': activeAccordion === 'tipoComida' }">
           <div class="flex items-center">
+            <!-- Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -22,11 +24,11 @@
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-amber-200 transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-zinc-800 rounded-md shadow-lg border border-amber-200 dark:border-zinc-700 transition-all duration-200 origin-top"
           :class="activeAccordion === 'tipoComida' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 max-h-60 overflow-y-auto text-xs sm:text-sm">
             <label v-for="type in foodTypes" :key="type.value"
-              class="flex items-center px-2 py-1.5 hover:bg-amber-50 rounded cursor-pointer">
+              class="flex items-center px-2 py-1.5 hover:bg-amber-50 dark:hover:bg-zinc-700 rounded cursor-pointer text-zinc-800 dark:text-zinc-100">
               <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida"
                 class="text-amber-600 focus:ring-amber-500 h-3 w-3">
               <span class="ml-2">{{ type.label }}</span>
@@ -38,8 +40,8 @@
       <!-- Filtro CCAA -->
       <div class="relative flex-1 min-w-[120px]" ref="ccaaRef">
         <button @click="toggleAccordion('ccaa')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
-          :class="{ 'bg-amber-100': activeAccordion === 'ccaa' }">
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-zinc-800 hover:bg-amber-100 dark:hover:bg-zinc-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          :class="{ 'bg-amber-100 dark:bg-zinc-700': activeAccordion === 'ccaa' }">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
@@ -54,11 +56,11 @@
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-amber-200 max-h-60 sm:max-h-96 overflow-y-auto transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-zinc-800 rounded-md shadow-lg border border-amber-200 dark:border-zinc-700 max-h-60 sm:max-h-96 overflow-y-auto transition-all duration-200 origin-top"
           :class="activeAccordion === 'ccaa' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 text-xs sm:text-sm">
             <label v-for="region in regions" :key="region.value"
-              class="flex items-center px-2 py-1.5 hover:bg-amber-50 rounded cursor-pointer">
+              class="flex items-center px-2 py-1.5 hover:bg-amber-50 dark:hover:bg-zinc-700 rounded cursor-pointer text-zinc-800 dark:text-zinc-100">
               <input type="radio" name="ccaa" :value="region.value" v-model="ccaa"
                 class="text-amber-600 focus:ring-amber-500 h-3 w-3">
               <span class="ml-2">{{ region.label }}</span>
@@ -70,8 +72,8 @@
       <!-- Filtro Proteínas -->
       <div class="relative flex-1 min-w-[120px]" ref="proteinasRef">
         <button @click="toggleAccordion('proteinas')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
-          :class="{ 'bg-amber-100': activeAccordion === 'proteinas' }">
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-zinc-800 hover:bg-amber-100 dark:hover:bg-zinc-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          :class="{ 'bg-amber-100 dark:bg-zinc-700': activeAccordion === 'proteinas' }">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
@@ -86,56 +88,22 @@
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-amber-200 transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-zinc-800 rounded-md shadow-lg border border-amber-200 dark:border-zinc-700 transition-all duration-200 origin-top"
           :class="activeAccordion === 'proteinas' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 max-h-60 overflow-y-auto text-xs sm:text-sm">
             <label v-for="protein in proteins" :key="protein.value"
-              class="flex items-center px-2 py-1.5 hover:bg-amber-50 rounded cursor-pointer">
-              <input type="checkbox" :value="protein.value" v-model="proteinas"
-                class="text-amber-600 focus:ring-amber-500 rounded h-3 w-3">
+              class="flex items-center px-2 py-1.5 hover:bg-amber-50 dark:hover:bg-zinc-700 rounded cursor-pointer text-zinc-800 dark:text-zinc-100">
+              <input type="radio" name="proteinas" :value="protein.value" v-model="proteinas"
+                class="text-amber-600 focus:ring-amber-500 h-3 w-3">
               <span class="ml-2">{{ protein.label }}</span>
             </label>
           </div>
         </div>
       </div>
-
-      <!-- Filtro Tiempo -->
-      <div class="relative flex-1 min-w-[120px]" ref="tiempoRef">
-        <button @click="toggleAccordion('tiempo')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-all duration-200 text-xs sm:text-sm"
-          :class="{ 'bg-amber-100': activeAccordion === 'tiempo' }">
-          <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Tiempo</span>
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform transition-transform duration-200"
-            :class="{ 'rotate-180': activeAccordion === 'tiempo' }" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div
-          class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-amber-200 transition-all duration-200 origin-top"
-          :class="activeAccordion === 'tiempo' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
-          <div class="p-1 space-y-1 text-xs sm:text-sm">
-            <label v-for="time in prepTimes" :key="time.value"
-              class="flex items-center px-2 py-1.5 hover:bg-amber-50 rounded cursor-pointer">
-              <input type="radio" name="tiempo" :value="time.value" v-model="tiempo"
-                class="text-amber-600 focus:ring-amber-500 h-3 w-3">
-              <span class="ml-2">{{ time.label }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Botones de acción -->
       <div class="flex items-stretch gap-2 w-full sm:w-auto">
+        <!-- Limpiar Filtros -->
         <button @click="limpiarFiltros"
-          class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-amber-700 hover:text-amber-900 flex items-center justify-center text-xs sm:text-sm border border-amber-300 rounded-lg">
+          class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-amber-700 hover:text-amber-900 flex items-center justify-center text-xs sm:text-sm border border-amber-300 dark:border-zinc-700 dark:text-amber-200 dark:hover:text-amber-100 rounded-lg transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -143,8 +111,10 @@
           </svg>
           Limpiar
         </button>
+
+        <!-- Buscar Filtros -->
         <button @click="buscarFiltros"
-          class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center justify-center transition-colors text-xs sm:text-sm">
+          class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center justify-center transition-colors text-xs sm:text-sm dark:bg-zinc-700 dark:hover:bg-zinc-600">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -153,19 +123,20 @@
           Buscar
         </button>
       </div>
-    </div>
 
-    <!-- Filtros seleccionados (chips) -->
-    <div class="mt-3 flex flex-wrap gap-2" v-if="filtrosSeleccionados.length > 0">
-      <div v-for="(filtro, index) in filtrosSeleccionados" :key="index"
-        class="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs sm:text-sm">
-        {{ filtro.label }}: {{ filtro.value }}
-        <button @click="eliminarFiltro(filtro)" class="ml-2 text-amber-600 hover:text-amber-800">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      <!-- Filtros seleccionados (chips) -->
+      <div class="mt-3 flex flex-wrap gap-2" v-if="filtrosSeleccionados.length > 0">
+        <div v-for="(filtro, index) in filtrosSeleccionados" :key="index"
+          class="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 dark:bg-zinc-700 dark:text-amber-200 rounded-full text-xs sm:text-sm">
+          {{ filtro.label }}: {{ filtro.value }}
+          <button @click="eliminarFiltro(filtro)"
+            class="ml-2 text-amber-600 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -202,6 +173,7 @@ const tipoRef = ref(null);
 const ccaaRef = ref(null);
 const proteinasRef = ref(null);
 const tiempoRef = ref(null);
+const darkMode = ref(false);
 
 // Watch para tipoComida (filtro de tipo de comida)
 watch(() => props.type, (newType) => {
@@ -342,7 +314,7 @@ const eliminarFiltro = (filtro) => {
       proteinas.value = proteinas.value.filter(p => p !== prot.value);
     }
   }
-  if(filtrosSeleccionados.value.length == 0){
+  if (filtrosSeleccionados.value.length == 0) {
     limpiarFiltros()
   }
 };
@@ -409,12 +381,26 @@ const handleClickOutside = (event) => {
 };
 
 onMounted(() => {
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
+
   document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
+
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
 
 </script>
 

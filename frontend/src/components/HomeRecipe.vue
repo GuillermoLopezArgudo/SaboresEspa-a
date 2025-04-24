@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen bg-amber-50">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900">
     <!-- Header con imagen de fondo -->
-    <div class="bg-amber-900 py-8 px-4 sm:px-6 lg:px-8 relative">
+    <div class="bg-amber-900 py-8 px-4 sm:px-6 lg:px-8 relative dark:bg-gray-800">
       <div class="absolute inset-0 bg-black opacity-20"></div>
       <div class="relative max-w-7xl mx-auto text-center">
         <h1 class="text-4xl md:text-5xl font-bold text-white font-serif mb-2">
           <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-orange-300">Bienvenido a tu
             Recetario</span>
         </h1>
-        <p class="text-xl text-amber-100">Descubre, crea y comparte tus recetas favoritas</p>
+        <p class="text-xl text-amber-100 dark:text-amber-200">Descubre, crea y comparte tus recetas favoritas</p>
       </div>
     </div>
     <!-- Main content -->
@@ -18,16 +18,35 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ListRecipes from './ListRecipes.vue';
 
 const userToken = ref(localStorage.getItem("userToken"));
 const router = useRouter();
+const darkMode = ref(false);
 
 if (userToken.value == null) {
   router.push({ name: "login" });
+}
+
+onMounted(() => {
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode !== null) {
+        darkMode.value = JSON.parse(savedMode);
+        applyDarkMode();
+    }
+
+});
+
+function applyDarkMode() {
+    if (darkMode.value) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
 }
 
 </script>

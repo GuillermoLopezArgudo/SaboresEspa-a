@@ -330,8 +330,6 @@
           </div>
         </div>
 
-
-
         <button type="button" @click="addSubStep"
           class="flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -434,7 +432,7 @@ import { useRouter, useRoute } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const recipeId = route.query.id;
-
+const darkMode = ref(false);
 const title = ref('');
 const description = ref('');
 const video = ref('');
@@ -477,7 +475,13 @@ const addSubStep = () => {
 };
 
 onMounted(() => {
-  axios.post(`${process.env.VUE_APP_API_URL}/viewRecipe`, { idrecipe: recipeId, userToken: userToken})
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
+
+  axios.post(`${process.env.VUE_APP_API_URL}/viewRecipe`, { idrecipe: recipeId, userToken: userToken })
     .then(response => {
       title.value = response.data.recipe_list[0].title;
       description.value = response.data.recipe_list[0].description;
@@ -700,6 +704,15 @@ const removeStep = (index) => {
 const removeSubStep = (index) => {
   recipebook.substeps.splice(index, 1);
 };
+
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 </script>
 
 <style scoped>

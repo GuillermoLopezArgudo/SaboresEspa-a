@@ -1,40 +1,49 @@
 <template>
-  <!-- Navbar con sombra suave y fondo cálido - Mejorado para mobile -->
+  <!-- Navbar con soporte para modo oscuro -->
   <nav
-    class="bg-gradient-to-r from-amber-50 to-amber-100 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200">
+    class="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-900 shadow-sm sm:shadow-md sticky top-0 z-50 border-b border-amber-200 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-      <!-- Ajusté la altura a 24 para pantallas grandes -->
       <div class="flex justify-between items-center h-20 lg:h-24">
-        <!-- Logo con imagen y texto - Optimizado para mobile -->
+        <!-- Logo con imagen y texto -->
         <router-link to="/" class="flex items-center group">
           <div
-            class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 group-hover:bg-amber-200 transition duration-300">
+            class="p-1 rounded-md sm:p-1.5 sm:rounded-lg bg-amber-100 dark:bg-gray-700 group-hover:bg-amber-200 dark:group-hover:bg-gray-600 transition duration-300">
             <img src="@/assets/logo.png" alt="Logo" class="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 lg:h-20 lg:w-20" />
           </div>
           <span
-            class="ml-3 mr-4 sm:ml-3 sm:mr-2 text-xl sm:text-2xl lg:text-3xl font-bold text-amber-800 font-serif tracking-tight">
+            class="ml-3 mr-4 sm:ml-3 sm:mr-2 text-xl sm:text-2xl lg:text-3xl font-bold text-amber-800 dark:text-amber-200 font-serif tracking-tight">
             Sabores España
           </span>
         </router-link>
 
-        <!-- Mobile menu button - Mejorado accesibilidad -->
-        <div class="flex lg:hidden justify-end flex-1" ref="NavbarRef">
-          <button @click="toggleNavbar" aria-label="Menú principal"
-            class="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-md text-amber-700 hover:text-amber-900 hover:bg-amber-200 focus:outline-none transition duration-300"
+        <!-- Botón de menú móvil y toggle de modo oscuro -->
+        <div class="flex items-center space-x-2 lg:hidden">
+
+          <!-- Botón de menú móvil -->
+          <button @click="toggleNavbar" aria-label="Menú principal" ref="NavbarRef"
+            class="inline-flex items-center justify-center p-1.5 sm:p-2 rounded-md text-amber-700 dark:text-amber-200 hover:text-amber-900 dark:hover:text-amber-100 hover:bg-amber-200 dark:hover:bg-gray-700 focus:outline-none transition duration-300"
             :aria-expanded="navbarOpen">
             <svg class="h-5 w-5 sm:h-6 sm:w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
+          <!-- Toggle de modo oscuro para móvil -->
+          <button @click="toggleDarkMode"
+            class="p-1.5 rounded-full text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 transition duration-300">
+            <span v-if="darkMode">🌞</span>
+            <span v-else>🌙</span>
+          </button>
         </div>
 
-        <!-- Desktop Navigation - Espaciado mejorado -->
-        <div v-if="isLoggedIn">
-          <div class="hidden lg:flex lg:items-center lg:space-x-4 xl:space-x-6">
+        <!-- Desktop Navigation -->
+        <div class="hidden lg:flex lg:items-center lg:space-x-4 xl:space-x-6">
+
+          <!-- Elementos de navegación -->
+          <template v-if="isLoggedIn">
             <router-link v-for="item in navItems" :key="item.to" :to="item.to"
-              class="px-3 py-2 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center group"
-              active-class="bg-amber-200 text-amber-900 font-semibold">
+              class="px-3 py-2 rounded-lg text-sm font-medium text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 hover:text-amber-900 dark:hover:text-amber-100 transition duration-300 flex items-center group"
+              active-class="bg-amber-200 dark:bg-gray-700 text-amber-900 dark:text-amber-100 font-semibold">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1.5" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
@@ -43,7 +52,7 @@
             </router-link>
 
             <button @click="logout"
-              class="ml-1 px-3 py-2 rounded-lg text-sm font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 flex items-center group">
+              class="ml-1 px-3 py-2 rounded-lg text-sm font-medium text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 hover:text-amber-900 dark:hover:text-amber-100 flex items-center group">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1.5" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -51,13 +60,17 @@
               </svg>
               <span class="whitespace-nowrap">Cerrar Sesión</span>
             </button>
-          </div>
-        </div>
-        <div v-else>
-          <div class="hidden lg:flex lg:items-center lg:space-x-4 xl:space-x-6">
+            <!-- Toggle de modo oscuro para desktop -->
+            <button @click="toggleDarkMode"
+              class="p-1.5 rounded-full text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 transition duration-300">
+              <span v-if="darkMode">🌞</span>
+              <span v-else>🌙</span>
+            </button>
+          </template>
+          <template v-else>
             <router-link to="/login"
-              class="px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition duration-300 flex items-center whitespace-nowrap"
-              active-class="text-amber-900 font-semibold">
+              class="px-2.5 py-1.5 text-sm font-medium text-amber-700 dark:text-amber-200 hover:text-amber-900 dark:hover:text-amber-100 transition duration-300 flex items-center whitespace-nowrap"
+              active-class="text-amber-900 dark:text-amber-100 font-semibold">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path fill-rule="evenodd"
@@ -67,7 +80,7 @@
               Iniciar Sesión
             </router-link>
             <router-link to="/register"
-              class="px-3 py-2 rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 transition duration-300 flex items-center whitespace-nowrap">
+              class="px-3 py-2 rounded-lg text-sm font-medium bg-amber-500 dark:bg-amber-600 text-white hover:bg-amber-600 dark:hover:bg-amber-700 transition duration-300 flex items-center whitespace-nowrap">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path fill-rule="evenodd"
@@ -76,26 +89,29 @@
               </svg>
               Registrarse
             </router-link>
-          </div>
+            <button @click="toggleDarkMode"
+              class="p-1.5 rounded-full text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 transition duration-300">
+              <span v-if="darkMode">🌞</span>
+              <span v-else>🌙</span>
+            </button>
+          </template>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Navigation - Mejorado para touch -->
+    <!-- Mobile Navigation -->
     <transition enter-active-class="transition ease-out duration-200 transform"
       enter-from-class="opacity-0 -translate-y-4" enter-to-class="opacity-100 translate-y-0"
       leave-active-class="transition ease-in duration-150 transform" leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-4">
-
       <div v-show="navbarOpen"
-        class="absolute top-20 left-0 w-full bg-amber-50 shadow-xl border-t border-amber-200 z-40">
-
+        class="absolute top-20 left-0 w-full bg-amber-50 dark:bg-gray-800 shadow-xl border-t border-amber-200 dark:border-gray-700 z-40">
         <div class="px-2 pt-1 pb-2 space-y-1 sm:px-3">
-
           <div v-if="isLoggedIn">
             <router-link v-for="item in navItems" :key="item.to" :to="item.to"
-              class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
-              @click="navbarOpen = false" active-class="bg-amber-200 text-amber-900 font-semibold">
+              class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 hover:text-amber-900 dark:hover:text-amber-100 transition duration-300 flex items-center"
+              @click="navbarOpen = false"
+              active-class="bg-amber-200 dark:bg-gray-700 text-amber-900 dark:text-amber-100 font-semibold">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
@@ -104,7 +120,7 @@
             </router-link>
 
             <button @click="logout"
-              class="w-full text-left block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center">
+              class="w-full text-left block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 hover:text-amber-900 dark:hover:text-amber-100 transition duration-300 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -115,7 +131,7 @@
           </div>
           <div v-else class="space-y-1">
             <router-link to="/login"
-              class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 hover:bg-amber-200 hover:text-amber-900 transition duration-300 flex items-center"
+              class="block px-3 py-2.5 rounded-lg text-base font-medium text-amber-700 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-gray-700 hover:text-amber-900 dark:hover:text-amber-100 transition duration-300 flex items-center"
               @click="navbarOpen = false">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -126,7 +142,7 @@
               Iniciar Sesión
             </router-link>
             <router-link to="/register"
-              class="block px-3 py-2.5 rounded-lg text-base font-medium bg-amber-500 text-white hover:bg-amber-600 transition duration-300 flex items-center justify-center"
+              class="block px-3 py-2.5 rounded-lg text-base font-medium bg-amber-500 dark:bg-amber-600 text-white hover:bg-amber-600 dark:hover:bg-amber-700 transition duration-300 flex items-center justify-center"
               @click="navbarOpen = false">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -144,14 +160,39 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, refs } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const navbarOpen = ref(false);
 const isLoggedIn = ref(!!localStorage.getItem("userToken"));
 const NavbarRef = ref(null);
-const activeAccordion = ref(''); // Definir activeAccordion correctamente
+const darkMode = ref(false);
+
+// Función para alternar el modo oscuro
+const toggleDarkMode = () => {
+  darkMode.value = !darkMode.value;
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+    localStorage.theme = 'dark';
+  } else {
+    document.documentElement.classList.remove('dark');
+    localStorage.theme = 'light';
+  }
+};
+
+// Verificar el tema al cargar
+const checkDarkMode = () => {
+  if (localStorage.theme === 'dark' ||
+    (!('theme' in localStorage) &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+    darkMode.value = true;
+  } else {
+    document.documentElement.classList.remove('dark');
+    darkMode.value = false;
+  }
+};
 
 // Función para comprobar la autenticación
 const checkAuth = () => {
@@ -176,6 +217,7 @@ watch(
 );
 
 onMounted(() => {
+  checkDarkMode();
   window.addEventListener('storage', handleStorageChange);
 
   const authCheckInterval = setInterval(checkAuth, 1000);
@@ -237,13 +279,6 @@ const handleClickOutside = (event) => {
   if (NavbarRef.value && !NavbarRef.value.contains(event.target)) {
     navbarOpen.value = false;
   }
-
-  if (activeAccordion.value) {
-    const currentRef = refs[activeAccordion.value];
-    if (currentRef?.value && !currentRef.value.contains(event.target)) {
-      activeAccordion.value = '';
-    }
-  }
 };
 
 onMounted(() => {
@@ -254,7 +289,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
-
 
 <style scoped>
 /* Mejoras de animación */
@@ -281,7 +315,7 @@ onUnmounted(() => {
   }
 
   .router-link-exact-active {
-    @apply bg-amber-200;
+    @apply bg-amber-200 dark:bg-gray-700;
   }
 }
 
@@ -290,7 +324,15 @@ onUnmounted(() => {
   color: #b45309;
 }
 
+.dark .text-amber-200 {
+  color: #fde68a;
+}
+
 .hover\:text-amber-900:hover {
   color: #78350f;
+}
+
+.dark .hover\:text-amber-100:hover {
+  color: #fef3c7;
 }
 </style>

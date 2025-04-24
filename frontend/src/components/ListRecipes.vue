@@ -1,152 +1,153 @@
 <template>
-    <div class="min-h-screen bg-amber-50 flex flex-col">
-        <!-- Contenido principal -->
-        <div v-if="elementos.recetas.length > 0" class="flex-1 flex flex-col justify-between">
-            <!-- Grid de recetas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="item in paginatedRecipes" :key="item.id"
-                    class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col transition-colors">
+    <!-- Contenido principal -->
+    <div v-if="elementos.recetas.length > 0" class="flex-1 flex flex-col justify-between">
+      <!-- Grid de recetas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="item in paginatedRecipes" :key="item.id"
+          class="bg-white-0 dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 dark:border-gray-700 transform hover:-translate-y-1">
 
-                    <!-- Imagen con calificación y botón de favorito -->
-                    <div class="relative">
-                        <router-link :to="'/recipe?id=' + item.id">
-                            <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
-                                {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2) : "Sin calificación" }} ★
-                            </div>
-                            <img v-if="item.image" :src="`http://48.217.185.80/api/${item.image}`" class="w-full h-48 object-cover" alt="Imagen de receta">
-                            <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                            </div>
-                        </router-link>
+          <!-- Imagen con calificación y botón de favorito -->
+          <div class="relative">
+            <router-link :to="'/recipe?id=' + item.id">
+              <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1 text-sm">
+                {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2) : "Sin calificación" }} ★
+              </div>
+              <img v-if="item.image" :src="`http://48.217.185.80/api/${item.image}`" class="w-full h-48 object-cover" alt="Imagen de receta">
+              <div v-else class="h-48 bg-amber-200 dark:bg-gray-700 flex items-center justify-center text-amber-600 dark:text-gray-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
+            </router-link>
 
-                        <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
-                            class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-xl shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
-                            <i class="fa text-2xl" :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
-                        </button>
-                    </div>
+            <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
+              class="absolute top-3 right-3 p-2 bg-white dark:bg-gray-700 bg-opacity-80 dark:bg-opacity-70 rounded-xl shadow-md hover:bg-opacity-100 dark:hover:bg-opacity-90 transition-all duration-300 transform hover:scale-110">
+              <i class="fa text-2xl" :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600 dark:text-amber-300'"></i>
+            </button>
+          </div>
 
-                    <!-- Contenido -->
-                    <div class="p-5">
-                        <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
-                        <p class="text-amber-600 text-sm mt-2"
-                            :class="{ 'line-clamp-2': !expanded[item.id], 'line-clamp-none': expanded[item.id] }">
-                            {{ item.description }}
-                        </p>
-                        <button v-if="item.description.length > 100" @click="toggleExpand(item.id)"
-                            class="text-amber-800 text-sm font-medium mt-2 underline hover:text-amber-800 focus:outline-none">
-                            {{ expanded[item.id] ? 'Leer menos...' : 'Leer más...' }}
-                        </button>
+          <!-- Contenido -->
+          <div class="p-5">
+            <h3 class="text-xl font-bold text-amber-800 dark:text-amber-300 font-serif line-clamp-1">{{ item.title }}</h3>
+            <p class="text-amber-600 dark:text-gray-300 text-sm mt-2"
+              :class="{ 'line-clamp-2': !expanded[item.id], 'line-clamp-none': expanded[item.id] }">
+              {{ item.description }}
+            </p>
+            <button v-if="item.description.length > 100" @click="toggleExpand(item.id)"
+              class="text-amber-800 dark:text-amber-400 text-sm font-medium mt-2 underline focus:outline-none">
+              {{ expanded[item.id] ? 'Leer menos...' : 'Leer más...' }}
+            </button>
 
-                        <div class="mt-4 pt-4 border-t border-amber-100">
-                            <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
-                            <div v-if="ratings[item.id] === 0" class="text-amber-500 mt-2 text-sm">¡Sé el primero en calificar!</div>
-                        </div>
-
-                        <div class="my-4 border-t border-amber-200"></div>
-
-                        <router-link :to="'/recipe?id=' + item.id"
-                            class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            Ver Receta
-                        </router-link>
-
-                        <div class="text-sm text-amber-700 mt-4 p-3 rounded-lg">
-                            <template v-if="categorias.filter(c => c.recipe_id === item.id).length">
-                                <button @click="filter(cat)"
-                                    v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
-                                    :key="cat.type + cat.category"
-                                    class="inline-block bg-amber-200 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
-                                    {{ cat.type }}
-                                </button>
-                            </template>
-                            <span v-else class="text-amber-500 italic">No tiene categorías</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="mt-4 pt-4 border-t border-amber-100 dark:border-gray-700">
+              <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
+              <div v-if="ratings[item.id] === 0" class="text-amber-500 dark:text-amber-300 mt-2 text-sm">¡Sé el primero en calificar!</div>
             </div>
 
-            <!-- Paginador -->
-            <div class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm sm:text-base">
-                <button @click="currentPage--" :disabled="currentPage === 1"
-                    class="px-3 py-1 bg-amber-300 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400">
-                    Anterior
+            <div class="my-4 border-t border-amber-200 dark:border-gray-700"></div>
+
+            <router-link :to="'/recipe?id=' + item.id"
+              class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Ver Receta
+            </router-link>
+
+            <div class="text-sm text-amber-700 dark:text-amber-300 mt-4 p-3 rounded-lg">
+              <template v-if="categorias.filter(c => c.recipe_id === item.id).length">
+                <button @click="filter(cat)"
+                  v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
+                  :key="cat.type + cat.category"
+                  class="inline-block bg-amber-200 dark:bg-gray-700 text-amber-800 dark:text-amber-300 px-2 py-1 rounded-full text-xs mr-1 mb-1">
+                  {{ cat.type }}
                 </button>
-                <span class="px-4 py-1 bg-white text-amber-800 border border-amber-300 rounded shadow-sm">
-                    Página {{ currentPage }} de {{ totalPages }}
-                </span>
-                <button @click="currentPage++" :disabled="currentPage === totalPages"
-                    class="px-3 py-1 bg-amber-300 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400">
-                    Siguiente
-                </button>
+              </template>
+              <span v-else class="text-amber-500 dark:text-amber-300 italic">No tiene categorías</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginador -->
+      <div class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm sm:text-base">
+        <button @click="currentPage--" :disabled="currentPage === 1"
+          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400/80">
+          Anterior
+        </button>
+        <span class="px-4 py-1 bg-white/80 dark:bg-gray-700/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-gray-600 rounded shadow-sm">
+          Página {{ currentPage }} de {{ totalPages }}
+        </span>
+        <button @click="currentPage++" :disabled="currentPage === totalPages"
+          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400/80">
+          Siguiente
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensaje si no hay recetas -->
+<div v-else class="text-center py-12 dark:bg-gray-900">
+    <div class="max-w-md mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400 dark:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+
+        <div v-if="props.greeting === 'all'">
+            <h3 class="mt-4 text-lg font-medium text-amber-800 dark:text-amber-200">No hay recetas disponibles</h3>
+            <p class="mt-2 text-amber-600 dark:text-amber-400">Parece que aún no hay recetas. ¡Sé el primero en compartir una!</p>
+            <div class="mt-6">
+                <router-link to="/create"
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Crear nueva receta
+                </router-link>
             </div>
         </div>
 
-        <!-- Mensaje si no hay recetas -->
-        <div v-else class="text-center py-12">
-            <div class="max-w-md mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-
-                <div v-if="props.greeting === 'all'">
-                    <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas disponibles</h3>
-                    <p class="mt-2 text-amber-600">Parece que aún no hay recetas. ¡Sé el primero en compartir una!</p>
-                    <div class="mt-6">
-                        <router-link to="/create"
-                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Crear nueva receta
-                        </router-link>
-                    </div>
-                </div>
-
-                <div v-else-if="props.greeting === 'favs'">
-                    <h3 class="mt-4 text-lg font-medium text-amber-800">No tienes recetas favoritas</h3>
-                    <p class="mt-2 text-amber-600">Añade recetas a tus favoritos para encontrarlas fácilmente más tarde.</p>
-                    <div class="mt-6">
-                        <router-link to="/"
-                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            Explorar recetas
-                        </router-link>
-                    </div>
-                </div>
-
-                <div v-else-if="props.greeting === 'personal'">
-                    <h3 class="mt-4 text-lg font-medium text-amber-800">No has creado ninguna receta</h3>
-                    <p class="mt-2 text-amber-600">Comparte tus creaciones culinarias con la comunidad.</p>
-                    <div class="mt-6">
-                        <router-link to="/create"
-                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Crear mi primera receta
-                        </router-link>
-                    </div>
-                </div>
-
-                <div v-else>
-                    <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas que coincidan con tu filtro</h3>
-                    <p class="mt-2 text-amber-600">Intenta ajustar los filtros para encontrar lo que buscas.</p>
-                </div>
+        <div v-else-if="props.greeting === 'favs'">
+            <h3 class="mt-4 text-lg font-medium text-amber-800 dark:text-amber-200">No tienes recetas favoritas</h3>
+            <p class="mt-2 text-amber-600 dark:text-amber-400">Añade recetas a tus favoritos para encontrarlas fácilmente más tarde.</p>
+            <div class="mt-6">
+                <router-link to="/"
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Explorar recetas
+                </router-link>
             </div>
+        </div>
+
+        <div v-else-if="props.greeting === 'personal'">
+            <h3 class="mt-4 text-lg font-medium text-amber-800 dark:text-amber-200">No has creado ninguna receta</h3>
+            <p class="mt-2 text-amber-600 dark:text-amber-400">Comparte tus creaciones culinarias con la comunidad.</p>
+            <div class="mt-6">
+                <router-link to="/create"
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Crear mi primera receta
+                </router-link>
+            </div>
+        </div>
+
+        <div v-else>
+            <h3 class="mt-4 text-lg font-medium text-amber-800 dark:text-amber-200">No hay recetas que coincidan con tu filtro</h3>
+            <p class="mt-2 text-amber-600 dark:text-amber-400">Intenta ajustar los filtros para encontrar lo que buscas.</p>
         </div>
     </div>
+</div>
+
+  </div>
 </template>
 
 <script setup>
@@ -185,6 +186,7 @@ const emit = defineEmits(['enviarFiltros'])
 const expanded = reactive({});
 const currentPage = ref(1);
 const itemsPerPage = ref(6)
+const darkMode = ref(false);
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
@@ -209,6 +211,11 @@ function selectReviews(reviews_list) {
 }
 
 onMounted(() => {
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode !== null) {
+        darkMode.value = JSON.parse(savedMode);
+        applyDarkMode();
+    }
     if (props.greeting === "all") {
         allRecipes()
     } else if (props.greeting === "favs") {
@@ -429,6 +436,14 @@ const paginatedRecipes = computed(() => {
 const totalPages = computed(() => {
     return Math.ceil(elementos.recetas.length / itemsPerPage.value);
 });
+
+function applyDarkMode() {
+    if (darkMode.value) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+}
 
 </script>
 

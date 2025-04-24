@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
+  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white/80 dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
       <!-- Header con imagen -->
-      <div class="bg-amber-700 py-6 px-8 text-center">
-        <h1 class="text-3xl font-bold text-white font-serif">Bienvenido</h1>
-        <p class="text-amber-100 mt-1">Inicia sesión en tu Recetario</p>
+      <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6 textcenter dark:from-gray-700 dark:to-gray-800">
+        <h1 class="text-3xl font-bold text-white font-serif dark:text-white">Bienvenido</h1>
+        <p class="text-amber-100 mt-1 dark:text-amber-300">Inicia sesión en tu Recetario</p>
       </div>
       
       <!-- Formulario -->
       <form @submit.prevent="OnSubmit" class="p-8">
         <!-- Mensaje de error -->
-        <div v-if="error" class="mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg flex items-center">
+        <div v-if="error" class="mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg flex items-center dark:bg-red-900 dark:border-red-700 dark:text-red-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
           </svg>
@@ -19,7 +19,7 @@
 
         <!-- Campo Email -->
         <div class="mb-6">
-          <label for="email" class="block text-amber-800 font-medium mb-2 flex items-center">
+          <label for="email" class="block text-amber-800 font-medium mb-2 flex items-center dark:text-amber-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -29,7 +29,7 @@
             type="email" 
             id="email" 
             v-model="email" 
-            class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm" 
+            class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" 
             placeholder="tucorreo@ejemplo.com"
             required
           />
@@ -37,7 +37,7 @@
 
         <!-- Campo Contraseña -->
         <div class="mb-6">
-          <label for="password" class="block text-amber-800 font-medium mb-2 flex items-center">
+          <label for="password" class="block text-amber-800 font-medium mb-2 flex items-center dark:text-amber-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -47,7 +47,7 @@
             type="password" 
             id="password" 
             v-model="password" 
-            class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm" 
+            class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" 
             placeholder="••••••••"
             required
           />
@@ -56,7 +56,7 @@
         <!-- Botón de envío -->
         <button 
           type="submit" 
-          class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-800 transition duration-300 flex items-center justify-center"
+          class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-800 transition duration-300 flex items-center justify-center dark:bg-amber-500 dark:hover:bg-amber-600"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -68,7 +68,7 @@
         <div class="mt-6 text-center">
           <router-link 
             to="/register" 
-            class="text-amber-600 hover:text-amber-800 font-medium transition duration-300 inline-flex items-center"
+            class="text-amber-600 hover:text-amber-800 font-medium transition duration-300 inline-flex items-center dark:text-amber-400 dark:hover:text-amber-500"
           >
             ¿No tienes cuenta? 
             <span class="ml-1 underline">Regístrate aquí</span>
@@ -82,8 +82,9 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -91,6 +92,7 @@ const router = useRouter();
 const email = ref('');
 const password = ref('');
 const error = ref('')
+const darkMode = ref(false);
 
 function OnSubmit() {
   const payload = {
@@ -118,6 +120,24 @@ function OnSubmit() {
       }, 3000);
     });
 }
+
+onMounted(() => {
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
+
+});
+
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 </script>
 
 <style scoped>

@@ -615,6 +615,7 @@ const menuRefs = ref({});
 const subMenuRefs = ref({});
 const reportModalRef = ref(null);
 const commentReportModalRef = ref(null);
+const darkMode = ref(false);
 
 const payload = {
   idrecipe: parseInt(recipeId),
@@ -670,6 +671,13 @@ function fetchRecipe() {
 }
 
 onMounted(() => {
+
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
+
   axios
     .post(`${process.env.VUE_APP_API_URL}/viewRecipe`, payload)
     .then(response => {
@@ -727,6 +735,10 @@ onMounted(() => {
     .catch(error => {
       console.error("Error en la solicitud:", error);
     });
+    document.addEventListener('click', handleClickOutsideRecipeMenu);
+    document.addEventListener('click', handleClickOutsideCommentMenu);
+    document.addEventListener('click', handleClickOutsideSubCommentMenu);
+    document.addEventListener('click', handleClickOutsideModals);
 });
 
 function deleteRecipe() {
@@ -1017,12 +1029,12 @@ const handleClickOutsideRecipeMenu = (event) => {
   }
 };
 
-onMounted(() => {
-  document.addEventListener('click', handleClickOutsideRecipeMenu);
-});
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutsideRecipeMenu);
+  document.removeEventListener('click', handleClickOutsideCommentMenu);
+  document.removeEventListener('click', handleClickOutsideSubCommentMenu);
+  document.removeEventListener('click', handleClickOutsideModals);
 });
 
 const handleClickOutsideCommentMenu = (event) => {
@@ -1033,13 +1045,6 @@ const handleClickOutsideCommentMenu = (event) => {
   });
 };
 
-onMounted(() => {
-  document.addEventListener('click', handleClickOutsideCommentMenu);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutsideCommentMenu);
-});
 
 const handleClickOutsideSubCommentMenu = (event) => {
   Object.keys(subMenuRefs.value).forEach(subCommentId => {
@@ -1049,13 +1054,6 @@ const handleClickOutsideSubCommentMenu = (event) => {
   });
 };
 
-onMounted(() => {
-  document.addEventListener('click', handleClickOutsideSubCommentMenu);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutsideSubCommentMenu);
-});
 
 const handleClickOutsideModals = (event) => {
   if (reportModalRef.value && !reportModalRef.value.contains(event.target)) {
@@ -1067,13 +1065,15 @@ const handleClickOutsideModals = (event) => {
   }
 };
 
-onMounted(() => {
-  document.addEventListener('click', handleClickOutsideModals);
-});
 
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutsideModals);
-})
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 </script>
 
 <style scoped>

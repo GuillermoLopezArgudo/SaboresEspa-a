@@ -15,7 +15,7 @@
           class="h-8 w-8"
           :class="{
             'text-yellow-500 fill-current': star <= effectiveRating,
-            'text-gray-300 fill-current': star > effectiveRating
+            'text-gray-300 fill-current dark:text-gray-600': star > effectiveRating
           }"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -26,19 +26,20 @@
         </svg>
       </button>
     </div>
-    
+
     <!-- Mostrar calificación o el mensaje para calificar -->
-    <span v-if="effectiveRating > 0" class="ml-2 text-sm text-gray-600">
+    <span v-if="effectiveRating > 0" class="ml-2 text-sm text-gray-600 dark:text-gray-300">
       {{ effectiveRating }} de 5
     </span>
-    <span v-else class="ml-2 text-sm text-gray-600">
+    <span v-else class="ml-2 text-sm text-gray-600 dark:text-gray-300">
       ¡Sé el primero en calificar!
     </span>
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed, defineProps } from 'vue';
+import { ref, computed, defineProps, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
@@ -63,6 +64,7 @@ const props = defineProps({
 
 const hoverRating = ref(0);
 const router = useRouter();
+const darkMode = ref(false);
 
 const effectiveRating = computed(() => {
   return hoverRating.value || props.rating;
@@ -78,6 +80,24 @@ const setRating = (star) => {
     router.push({ name: "login" });
   }
 };
+
+onMounted(() => {
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
+
+});
+
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 </script>
 
 <style scoped>

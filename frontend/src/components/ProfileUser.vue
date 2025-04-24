@@ -1,10 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8">
+  <div
+    class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:text-white">
     <div class="max-w-3xl mx-auto space-y-6 sm:space-y-8">
       <!-- Tarjeta principal de perfil -->
-      <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden transition-all duration-300 hover:shadow-lg sm:hover:shadow-xl">
-        <!-- Encabezado con gradiente mejorado -->
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6">
+      <div
+      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden transition-all duration-300 hover:shadow-lg sm:hover:shadow-xl dark:shadow-lg dark:hover:shadow-xl">        <!-- Encabezado con gradiente mejorado -->
+        <div
+          class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6 dark:from-gray-700 dark:to-gray-800">
           <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide">MI PERFIL</h2>
         </div>
 
@@ -30,16 +32,18 @@
           </div>
 
           <!-- Sección de nombre -->
-          <div class="mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100">
+          <div
+            class="mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100 dark:bg-gray-700 dark:border-gray-600">
             <div v-if="!boolChangeName" class="space-y-3 sm:space-y-4">
-              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3">Nombre</h3>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3 dark:text-amber-100">Nombre</h3>
               <input type="text" v-model="name"
-                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
 
               <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changeName"
-                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20"
+                    fill="currentColor">
                     <path fill-rule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                       clip-rule="evenodd" />
@@ -47,18 +51,18 @@
                   Guardar
                 </button>
                 <button @click="handleNameChange"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
-              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1">Nombre</h3>
-              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">{{ name }}</p>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1 dark:text-amber-100">Nombre</h3>
+              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base dark:text-gray-400">{{ name }}</p>
               <button @click="handleNameChange"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
@@ -68,16 +72,18 @@
           </div>
 
           <!-- Sección de email -->
-          <div class="mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100">
+          <div
+            class="mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100 dark:bg-gray-700 dark:border-gray-600">
             <div v-if="!boolChangeEmail" class="space-y-3 sm:space-y-4">
-              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3">Email</h3>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3 dark:text-amber-100">Email</h3>
               <input type="email" v-model="email"
-                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
 
               <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changeEmail"
-                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20"
+                    fill="currentColor">
                     <path fill-rule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                       clip-rule="evenodd" />
@@ -85,18 +91,18 @@
                   Guardar
                 </button>
                 <button @click="handleChangeEmail"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
-              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1">Email</h3>
-              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">{{ email }}</p>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1 dark:text-amber-100">Email</h3>
+              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base dark:text-gray-400">{{ email }}</p>
               <button @click="handleChangeEmail"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
@@ -106,21 +112,25 @@
           </div>
 
           <!-- Sección de contraseña -->
-          <div class="mb-6 sm:mb-8 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100">
+          <div
+            class="mb-6 sm:mb-8 p-4 sm:p-5 bg-amber-50 rounded-lg sm:rounded-xl border border-amber-100 dark:bg-gray-700 dark:border-gray-600">
             <div v-if="!boolChangePassword" class="space-y-3 sm:space-y-4">
-              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3">Cambiar Contraseña</h3>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3 dark:text-amber-100">Cambiar
+                Contraseña</h3>
 
               <div class="space-y-2 sm:space-y-3">
                 <div>
-                  <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1">Nueva Contraseña</label>
+                  <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1 dark:text-amber-400">Nueva
+                    Contraseña</label>
                   <input type="password" v-model="newPassword"
-                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                 </div>
 
                 <div>
-                  <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1">Confirmar Contraseña</label>
+                  <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1 dark:text-amber-400">Confirmar
+                    Contraseña</label>
                   <input type="password" v-model="confirmPassword"
-                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                 </div>
               </div>
 
@@ -128,37 +138,45 @@
 
               <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changePassword"
-                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20"
+                    fill="currentColor">
                     <path fill-rule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                       clip-rule="evenodd" />
                   </svg>
-                  Guardar
+                  Guardar Contraseña
                 </button>
                 <button @click="handleChangePassword"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
             </div>
             <div v-else>
+              <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1 dark:text-amber-100">Contraseña</h3>
+              <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base dark:text-gray-400">**********</p>
               <button @click="handleChangePassword"
-                class="w-full py-2 sm:py-2.5 text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center transition duration-200 text-sm sm:text-base">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Cambiar contraseña
+                Cambiar Contraseña
               </button>
             </div>
           </div>
 
+
+
+
+
+
           <!-- Botón para eliminar perfil -->
           <div class="mt-4 sm:mt-6 text-center">
             <button @click="deleteProfile"
-              class="w-full max-w-xs mx-auto py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
+              class="w-full max-w-xs mx-auto py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition duration-300 shadow-md hover:shadow-lg text-sm sm:text-base dark:bg-gradient-to-r dark:from-red-700 dark:to-red-800 dark:hover:from-red-800 dark:hover:to-red-900">
               Eliminar perfil
             </button>
           </div>
@@ -166,20 +184,23 @@
       </div>
 
       <!-- Sección de administración (solo para admin) -->
-      <div v-if="type === 'admin'" class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6">
-          <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide">ADMINISTRACIÓN DE USUARIOS</h2>
+      <div v-if="type === 'admin'"
+        class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden">
+        <div
+          class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6 dark:from-gray-700 dark:to-gray-800">
+          <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide ">ADMINISTRACIÓN DE
+            USUARIOS</h2>
         </div>
 
         <div class="p-4 sm:p-6">
           <div v-for="(item, index) in users" :key="index"
-            class="mb-3 sm:mb-4 p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-100 flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-200 hover:bg-amber-100">
+            class="mb-3 sm:mb-4 p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-100 flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-200 hover:bg-amber-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
             <div class="mb-2 sm:mb-0">
-              <p class="text-base sm:text-lg font-semibold text-amber-800">{{ item.name }}</p>
-              <p class="text-xs sm:text-sm text-amber-600">{{ item.email }}</p>
+              <p class="text-base sm:text-lg font-semibold text-amber-800 dark:text-amber-200">{{ item.name }}</p>
+              <p class="text-xs sm:text-sm text-amber-600 dark:text-amber-400">{{ item.email }}</p>
             </div>
             <button @click="deleteUser(index)"
-              class="ml-0 sm:ml-4 py-1.5 px-3 sm:py-2 sm:px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 flex items-center shadow hover:shadow-md text-xs sm:text-sm">
+              class="ml-0 sm:ml-4 py-1.5 px-3 sm:py-2 sm:px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 flex items-center shadow hover:shadow-md text-xs sm:text-sm dark:bg-red-700 dark:hover:bg-red-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -216,6 +237,7 @@ const confirmPassword = ref('');
 const boolChangeName = ref(true);
 const boolChangeEmail = ref(true);
 const boolChangePassword = ref(true)
+const darkMode = ref(false);
 const router = useRouter();
 const type = ref("")
 const users = ref([])
@@ -277,7 +299,7 @@ function changeImage(imageData) {
     })
     .then(response => {
       console.log(response.data);
-      imageUrl.value =  `${process.env.VUE_APP_API_URL}/${response.data.newImage}`;
+      imageUrl.value = `${process.env.VUE_APP_API_URL}/${response.data.newImage}`;
     })
     .catch(error => {
       console.log(error);
@@ -313,12 +335,19 @@ function changeEmail() {
 }
 
 onMounted(() => {
+
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
+
   axios
     .post(`${process.env.VUE_APP_API_URL}/viewProfile`, payload.value)
     .then(response => {
       name.value = response.data.message[0].name;
       email.value = response.data.message[0].email;
-      imageUrl.value = `${process.env.VUE_APP_API_URL}/${response.data.message[0].image}` ;
+      imageUrl.value = `${process.env.VUE_APP_API_URL}/${response.data.message[0].image}`;
       type.value = response.data.type
       allusers(response.data.type)
     })
@@ -359,18 +388,27 @@ function deleteUser(index) {
   }
 }
 
-function allusers(type){
+function allusers(type) {
   if (type == "admin") {
-      axios
-        .post(`${process.env.VUE_APP_API_URL}/allUsers`, payload.value)
-        .then(response => {
-          users.value.push(...response.data.users_list)
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
+    axios
+      .post(`${process.env.VUE_APP_API_URL}/allUsers`, payload.value)
+      .then(response => {
+        users.value.push(...response.data.users_list)
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 }
+
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 </script>
 
 <style scoped>
@@ -410,7 +448,8 @@ input:focus {
   .flex-col-on-mobile {
     flex-direction: column;
   }
-  .space-y-2-on-mobile > * + * {
+
+  .space-y-2-on-mobile>*+* {
     margin-top: 0.5rem;
   }
 }
