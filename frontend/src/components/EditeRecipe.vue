@@ -9,19 +9,6 @@
       <p class="text-lg text-amber-700 dark:text-amber-300">Actualiza los detalles de tu creación culinaria</p>
     </div>
 
-    <!-- Botón de regreso -->
-    <div class="max-w-4xl mx-auto mb-6">
-      <router-link to="/home"
-        class="inline-flex items-center px-6 py-3 bg-amber-800 dark:bg-amber-700 hover:bg-amber-900 dark:hover:bg-amber-800 text-white rounded-xl shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-            clip-rule="evenodd" />
-        </svg>
-        Volver al inicio
-      </router-link>
-    </div>
-
     <!-- Formulario -->
     <form @submit.prevent="submitEditeRecipe"
       class="max-w-4xl mx-auto bg-white/80 dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-amber-200 dark:border-gray-700">
