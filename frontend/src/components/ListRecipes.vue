@@ -73,7 +73,7 @@
       <!-- Paginador -->
       <div class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm sm:text-base">
         <button @click="currentPage--" :disabled="currentPage === 1"
-          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400/80">
+          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400">
           Anterior
         </button>
         <span class="px-4 py-1 bg-white/80 dark:bg-gray-700/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-gray-600 rounded shadow-sm">
