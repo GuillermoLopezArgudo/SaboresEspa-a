@@ -4,7 +4,7 @@
     <div class="max-w-3xl mx-auto space-y-6 sm:space-y-8">
       <!-- Tarjeta principal de perfil -->
       <div
-      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden transition-all duration-300 hover:shadow-lg sm:hover:shadow-xl dark:shadow-lg dark:hover:shadow-xl">        <!-- Encabezado con gradiente mejorado -->
+      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden hover:shadow-lg sm:hover:shadow-xl dark:shadow-lg dark:hover:shadow-xl">        <!-- Encabezado con gradiente mejorado -->
         <div
           class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6 dark:from-gray-700 dark:to-gray-800">
           <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide">MI PERFIL</h2>
@@ -16,9 +16,9 @@
           <div class="text-center mb-6 sm:mb-8">
             <div class="relative inline-block group">
               <img :src="imageUrl" alt="Imagen de perfil"
-                class="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full mx-auto object-cover border-4 border-white shadow-md transition-all duration-300 group-hover:border-amber-200 group-hover:shadow-lg">
+                class="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full mx-auto object-cover border-4 border-white shadow-md group-hover:border-amber-200 group-hover:shadow-lg">
               <label for="imageRecipe"
-                class="absolute bottom-0 sm:bottom-2 right-0 sm:right-2 bg-amber-500 text-white p-1.5 sm:p-2 rounded-full cursor-pointer hover:bg-amber-600 transition duration-300 shadow-md">
+                class="absolute bottom-0 sm:bottom-2 right-0 sm:right-2 bg-amber-500 text-white p-1.5 sm:p-2 rounded-full cursor-pointer hover:bg-amber-600 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -37,11 +37,11 @@
             <div v-if="!boolChangeName" class="space-y-3 sm:space-y-4">
               <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3 dark:text-amber-100">Nombre</h3>
               <input type="text" v-model="name"
-                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
 
               <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changeName"
-                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20"
                     fill="currentColor">
                     <path fill-rule="evenodd"
@@ -51,7 +51,7 @@
                   Guardar
                 </button>
                 <button @click="handleNameChange"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
@@ -60,7 +60,7 @@
               <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1 dark:text-amber-100">Nombre</h3>
               <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base dark:text-gray-400">{{ name }}</p>
               <button @click="handleNameChange"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none"
                   viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -77,11 +77,11 @@
             <div v-if="!boolChangeEmail" class="space-y-3 sm:space-y-4">
               <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-2 sm:mb-3 dark:text-amber-100">Email</h3>
               <input type="email" v-model="email"
-                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
 
               <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changeEmail"
-                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20"
                     fill="currentColor">
                     <path fill-rule="evenodd"
@@ -91,7 +91,7 @@
                   Guardar
                 </button>
                 <button @click="handleChangeEmail"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
@@ -100,7 +100,7 @@
               <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1 dark:text-amber-100">Email</h3>
               <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base dark:text-gray-400">{{ email }}</p>
               <button @click="handleChangeEmail"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none"
                   viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -123,14 +123,14 @@
                   <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1 dark:text-amber-400">Nueva
                     Contraseña</label>
                   <input type="password" v-model="newPassword"
-                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                 </div>
 
                 <div>
                   <label class="block text-xs sm:text-sm font-medium text-amber-700 mb-1 dark:text-amber-400">Confirmar
                     Contraseña</label>
                   <input type="password" v-model="confirmPassword"
-                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                 </div>
               </div>
 
@@ -138,7 +138,7 @@
 
               <div class="flex space-x-2 sm:space-x-3 pt-1 sm:pt-2">
                 <button @click="changePassword"
-                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
+                  class="flex-1 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center font-medium text-sm sm:text-base shadow hover:shadow-md dark:bg-gray-600 dark:hover:bg-gray-500">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" viewBox="0 0 20 20"
                     fill="currentColor">
                     <path fill-rule="evenodd"
@@ -148,7 +148,7 @@
                   Guardar Contraseña
                 </button>
                 <button @click="handleChangePassword"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 transition duration-300 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
@@ -157,7 +157,7 @@
               <h3 class="text-base sm:text-lg font-semibold text-amber-800 mb-1 dark:text-amber-100">Contraseña</h3>
               <p class="text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base dark:text-gray-400">**********</p>
               <button @click="handleChangePassword"
-                class="text-amber-600 hover:text-amber-700 font-medium flex items-center transition duration-200 text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
+                class="text-amber-600 hover:text-amber-700 font-medium flex items-center text-sm sm:text-base dark:text-amber-400 dark:hover:text-amber-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none"
                   viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -176,7 +176,7 @@
           <!-- Botón para eliminar perfil -->
           <div class="mt-4 sm:mt-6 text-center">
             <button @click="deleteProfile"
-              class="w-full max-w-xs mx-auto py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition duration-300 shadow-md hover:shadow-lg text-sm sm:text-base dark:bg-gradient-to-r dark:from-red-700 dark:to-red-800 dark:hover:from-red-800 dark:hover:to-red-900">
+              class="w-full max-w-xs mx-auto py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg text-sm sm:text-base dark:bg-gradient-to-r dark:from-red-700 dark:to-red-800 dark:hover:from-red-800 dark:hover:to-red-900">
               Eliminar perfil
             </button>
           </div>
@@ -194,13 +194,13 @@
 
         <div class="p-4 sm:p-6">
           <div v-for="(item, index) in users" :key="index"
-            class="mb-3 sm:mb-4 p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-100 flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-200 hover:bg-amber-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+            class="mb-3 sm:mb-4 p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-100 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:bg-amber-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
             <div class="mb-2 sm:mb-0">
               <p class="text-base sm:text-lg font-semibold text-amber-800 dark:text-amber-200">{{ item.name }}</p>
               <p class="text-xs sm:text-sm text-amber-600 dark:text-amber-400">{{ item.email }}</p>
             </div>
             <button @click="deleteUser(index)"
-              class="ml-0 sm:ml-4 py-1.5 px-3 sm:py-2 sm:px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 flex items-center shadow hover:shadow-md text-xs sm:text-sm dark:bg-red-700 dark:hover:bg-red-800">
+              class="ml-0 sm:ml-4 py-1.5 px-3 sm:py-2 sm:px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center shadow hover:shadow-md text-xs sm:text-sm dark:bg-red-700 dark:hover:bg-red-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

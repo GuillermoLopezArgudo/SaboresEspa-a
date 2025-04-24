@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 py-4 px-2 sm:px-4 lg:px-8 transition-colors duration-300">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 py-4 px-2 sm:px-4 lg:px-8 ">
     <!-- Encabezado -->
     <div class="max-w-7xl mx-auto text-center mb-4 sm:mb-6">
       <h1
@@ -11,7 +11,7 @@
     <!-- Botón de regreso -->
     <div class="max-w-7xl mx-auto mb-4 sm:mb-6">
       <router-link to="/"
-        class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg transition duration-300 shadow-md">
+        class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg shadow-md">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" viewBox="0 0 20 20"
           fill="currentColor">
           <path fill-rule="evenodd"
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Contenido principal -->
-    <div v-if="receta" class="max-w-7xl mx-auto bg-white/80 dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden border border-amber-200 dark:border-gray-700">
+    <div v-if="receta" class="max-w-7xl mx-auto bg-white/80 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-amber-200 dark:border-gray-700">
       <!-- Sección superior -->
       <div class="p-4 sm:p-6 md:p-8 border-b border-amber-100 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-white dark:from-gray-800 dark:to-gray-700">
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -36,7 +36,7 @@
               <div class="relative" ref="menuRecipeRef">
                 <!-- Botón tres puntitos -->
                 <button @click="toggleMenuRecipe"
-                  class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm transition duration-300 flex items-center">
+                  class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm flex items-center">
                   <i class="fa fa-ellipsis-h text-sm mr-1"></i>
                 </button>
 
@@ -47,7 +47,7 @@
                   <!-- Botón de reporte -->
                   <template v-if="userToken != 'notoken'">
                     <button v-if="userToken" @click="showReportDialog"
-                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-600 dark:text-red-200 rounded-lg transition duration-200">
+                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-600 dark:text-red-200 rounded-lg ">
                       <i class="fa fa-flag text-sm"></i>
                       Reportar
                     </button>
@@ -56,7 +56,7 @@
                   <!-- Editar / Eliminar -->
                   <template v-if="userToken == receta.userToken || type == 'admin'">
                     <button @click="editeRecipe"
-                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 rounded-lg transition duration-200">
+                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 rounded-lg">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -66,7 +66,7 @@
                     </button>
 
                     <button @click="deleteRecipe"
-                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg transition duration-200">
+                      class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg ">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -84,7 +84,7 @@
               <span class="text-xs sm:text-sm text-amber-800 dark:text-amber-200 font-semibold">{{ receta.user_name }}</span>
             </div>
             <button @click="toggleFavorite"
-              class="mt-2 sm:mt-3 flex items-center text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition duration-300 text-sm sm:text-base">
+              class="mt-2 sm:mt-3 flex items-center text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300  text-sm sm:text-base">
               <i class="fa text-xl sm:text-2xl mr-1 sm:mr-2" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i>
               <span class="font-medium">{{ isFavorite ? 'En favoritos' : 'Añadir a favoritos' }}</span>
             </button>
@@ -112,7 +112,7 @@
         </h3>
         <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           <li v-for="(ingrediente, idx) in ingredients" :key="idx"
-            class="bg-amber-50 dark:bg-gray-700 p-2 sm:p-3 rounded-lg border border-amber-200 dark:border-gray-600 hover:bg-amber-100 dark:hover:bg-gray-600 transition duration-200">
+            class="bg-amber-50 dark:bg-gray-700 p-2 sm:p-3 rounded-lg border border-amber-200 dark:border-gray-600 hover:bg-amber-100 dark:hover:bg-gray-600 ">
             <span class="font-medium text-amber-800 dark:text-amber-200 text-sm sm:text-base">{{ ingrediente }}</span>
             <span class="block text-amber-600 dark:text-amber-300 text-xs sm:text-sm">{{ quantity[idx] || 'Cantidad no disponible' }}</span>
           </li>
@@ -131,7 +131,7 @@
         </h3>
         <div class="space-y-3 sm:space-y-4 md:space-y-6">
           <div v-for="(step, idx) in steps" :key="idx"
-            class="bg-white/80 dark:bg-gray-700 p-3 sm:p-4 md:p-5 rounded-xl border border-amber-200 dark:border-gray-600 shadow-sm hover:shadow-md transition duration-300">
+            class="bg-white/80 dark:bg-gray-700 p-3 sm:p-4 md:p-5 rounded-xl border border-amber-200 dark:border-gray-600 shadow-sm hover:shadow-md ">
             <div class="flex items-start">
               <span
                 class="bg-amber-600 text-white font-bold rounded-full w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center mr-2 sm:mr-3 md:mr-4 flex-shrink-0 text-xs sm:text-sm md:text-base">
@@ -161,7 +161,7 @@
         </h3>
         <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           <li v-for="(ingrediente, idx) in subingredients" :key="idx"
-            class="bg-amber-50 dark:bg-gray-700 p-2 sm:p-3 rounded-lg border border-amber-200 dark:border-gray-600 hover:bg-amber-100 dark:hover:bg-gray-600 transition duration-200">
+            class="bg-amber-50 dark:bg-gray-700 p-2 sm:p-3 rounded-lg border border-amber-200 dark:border-gray-600 hover:bg-amber-100 dark:hover:bg-gray-600 ">
             <span class="font-medium text-amber-800 dark:text-amber-200 text-sm sm:text-base">{{ ingrediente }}</span>
             <span class="block text-amber-600 dark:text-amber-300 text-xs sm:text-sm">{{ quantity[idx] || 'Cantidad no disponible' }}</span>
           </li>
@@ -180,7 +180,7 @@
         </h3>
         <div class="space-y-3 sm:space-y-4 md:space-y-6">
           <div v-for="(step, idx) in substeps" :key="idx"
-            class="bg-white/80 dark:bg-gray-700 p-3 sm:p-4 md:p-5 rounded-xl border border-amber-200 dark:border-gray-600 shadow-sm hover:shadow-md transition duration-300">
+            class="bg-white/80 dark:bg-gray-700 p-3 sm:p-4 md:p-5 rounded-xl border border-amber-200 dark:border-gray-600 shadow-sm hover:shadow-md ">
             <div class="flex items-start">
               <span
                 class="bg-amber-600 text-white font-bold rounded-full w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center mr-2 sm:mr-3 md:mr-4 flex-shrink-0 text-xs sm:text-sm md:text-base">
@@ -228,15 +228,15 @@
         <!-- Lista de comentarios -->
         <div v-if="comments.length > 0" class="space-y-3 sm:space-y-4 md:space-y-6 mb-4 sm:mb-6">
           <div v-for="comment in commentsWithSubcomments" :key="comment.id"
-            class="bg-white/80 dark:bg-gray-700 p-3 sm:p-4 rounded-lg border border-amber-200 dark:border-gray-600 shadow-sm hover:shadow-md transition duration-300">
+            class="bg-white/80 dark:bg-gray-700 p-3 sm:p-4 rounded-lg border border-amber-200 dark:border-gray-600 shadow-sm hover:shadow-md ">
             <!-- Comentario principal -->
             <div class="mb-3 sm:mb-4">
               <div v-if="editingCommentId === comment.id" class="mb-2 sm:mb-3">
                 <textarea v-model="editedComment" rows="3"
-                  class="resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-800 text-gray-900 dark:text-gray-100"></textarea>
+                  class="resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500  bg-white/80 dark:bg-gray-800 text-gray-900 dark:text-gray-100"></textarea>
                 <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
                   <button @click="updateComment(comment.id)"
-                    class="px-2 py-1 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
+                    class="px-2 py-1 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg  flex items-center text-xs sm:text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1"
                       viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd"
@@ -246,7 +246,7 @@
                     Guardar
                   </button>
                   <button @click="cancelEdit"
-                    class="px-2 py-1 sm:px-4 sm:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
+                    class="px-2 py-1 sm:px-4 sm:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg  flex items-center text-xs sm:text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1"
                       viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd"
@@ -263,7 +263,7 @@
                   <div class="relative" :ref="el => menuRefs[comment.id] = el">
                     <!-- Botón tres puntitos -->
                     <button @click="toggleMenu(comment.id)"
-                      class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                      class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-xs sm:text-sm  flex items-center">
                       <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
                     </button>
 
@@ -273,21 +273,21 @@
 
                       <!-- BOTÓN: Reportar -->
                       <button v-if="userToken" @click="showCommentReportDialog(comment.id)"
-                        class="w-full flex items-center px-2 py-1 text-red-600 dark:text-red-300 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 rounded text-xs sm:text-sm transition">
+                        class="w-full flex items-center px-2 py-1 text-red-600 dark:text-red-300 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 rounded text-xs sm:text-sm ">
                         <i class="fa fa-flag mr-1"></i> Reportar
                       </button>
 
                       <!-- BOTÓN: Editar -->
                       <button v-if="userToken == comment.userToken || type == 'admin'"
                         @click="startEditComment(comment)"
-                        class="w-full flex items-center px-2 py-1 text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 rounded text-xs sm:text-sm transition">
+                        class="w-full flex items-center px-2 py-1 text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 rounded text-xs sm:text-sm">
                         <i class="fa fa-pencil mr-1"></i> Editar
                       </button>
 
                       <!-- BOTÓN: Eliminar -->
                       <button v-if="userToken == comment.userToken || type == 'admin'"
                         @click="deleteComment(comment.id)"
-                        class="w-full flex items-center px-2 py-1 text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded text-xs sm:text-sm transition">
+                        class="w-full flex items-center px-2 py-1 text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded text-xs sm:text-sm ">
                         <i class="fa fa-trash mr-1"></i> Eliminar
                       </button>
                     </div>
@@ -303,7 +303,7 @@
                     <!-- LIKE -->
                     <button @click="toggleLike(comment.id)"
                       class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
-                      <svg class="w-4 h-4 sm:w-5 sm:h-5 transition text-green-800 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-800 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
                         :fill="likedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -314,7 +314,7 @@
                     <!-- DISLIKE -->
                     <button @click="toggleDislike(comment.id)"
                       class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
-                      <svg class="w-4 h-4 sm:w-5 sm:h-5 transition text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         :fill="dislikedComments[comment.id] ? 'currentColor' : 'none'"
                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -326,7 +326,7 @@
                   <!-- BOTON DE RESPUESTA -->
                   <div class="ml-auto">
                     <button @click="toggleReply(comment.id)"
-                      class="px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-300 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                      class="px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-300 rounded-lg text-xs sm:text-sm  flex items-center">
                       <i class="fa fa-reply text-xs sm:text-sm mr-0.5 sm:mr-1"></i> Responder
                     </button>
                   </div>
@@ -341,7 +341,7 @@
                 class="bg-amber-50 dark:bg-gray-800 p-2 sm:p-3 rounded-lg">
                 <div v-if="editingSubcommentId === subcomment.id">
                   <textarea v-model="editedSubcomment" rows="2"
-                    class="resize-none w-full px-2 py-1 sm:px-3 sm:py-1 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+                    class="resize-none w-full px-2 py-1 sm:px-3 sm:py-1 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500  bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
                   <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
                     <button @click="updateSubcomment(subcomment.id)"
                       class="px-2 py-0.5 sm:px-3 sm:py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs sm:text-sm">
@@ -358,7 +358,7 @@
                   <div class="flex justify-end">
                     <div class="relative" :ref="el => subMenuRefs[subcomment.id] = el">
                       <button @click="toggleSubMenu(subcomment.id)"
-                        class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-xs sm:text-sm transition duration-300 flex items-center">
+                        class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-xs sm:text-sm  flex items-center">
                         <i class="fa fa-ellipsis-h text-xs sm:text-sm mr-1"></i>
                       </button>
 
@@ -368,21 +368,21 @@
 
                         <!-- BOTÓN: Reportar -->
                         <button v-if="userToken" @click="showCommentReportDialog(subcomment.id)"
-                          class="w-full flex items-center px-2 py-1 text-red-600 dark:text-red-300 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 rounded text-xs sm:text-sm transition">
+                          class="w-full flex items-center px-2 py-1 text-red-600 dark:text-red-300 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 rounded text-xs sm:text-sm ">
                           <i class="fa fa-flag mr-1"></i> Reportar
                         </button>
 
                         <!-- BOTÓN: Editar -->
                         <button v-if="userToken == subcomment.userToken || type == 'admin'"
                           @click="startEditSubcomment(subcomment)"
-                          class="w-full flex items-center px-2 py-1 text-white bg-amber-400 hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600 rounded text-xs sm:text-sm transition">
+                          class="w-full flex items-center px-2 py-1 text-white bg-amber-400 hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600 rounded text-xs sm:text-sm ">
                           <i class="fa fa-pencil mr-1"></i> Editar
                         </button>
 
                         <!-- BOTÓN: Eliminar -->
                         <button v-if="userToken == subcomment.userToken || type == 'admin'"
                           @click="deleteSubcomment(subcomment.id)"
-                          class="w-full flex items-center px-2 py-1 text-white bg-red-400 hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-600 rounded text-xs sm:text-sm transition">
+                          class="w-full flex items-center px-2 py-1 text-white bg-red-400 hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-600 rounded text-xs sm:text-sm ">
                           <i class="fa fa-trash mr-1"></i> Eliminar
                         </button>
                       </div>
@@ -401,14 +401,14 @@
             <!-- Formulario de respuesta (subcomentario) -->
             <div v-if="replyingTo === comment.id" class="mt-2 sm:mt-3 ml-4 sm:ml-6 md:ml-8">
               <textarea v-model="replyComment" rows="2" placeholder="Escribe tu respuesta..."
-                class="resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-800 text-gray-900 dark:text-gray-100"></textarea>
+                class="resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500  bg-white/80 dark:bg-gray-800 text-gray-900 dark:text-gray-100"></textarea>
               <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
                 <button @click="createSubcomment(comment.id)"
-                  class="px-2 py-1 sm:px-4 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition duration-300 text-xs sm:text-sm">
+                  class="px-2 py-1 sm:px-4 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg  text-xs sm:text-sm">
                   Enviar respuesta
                 </button>
                 <button @click="cancelReply"
-                  class="px-2 py-1 sm:px-4 sm:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300 text-xs sm:text-sm">
+                  class="px-2 py-1 sm:px-4 sm:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg  text-xs sm:text-sm">
                   Cancelar
                 </button>
               </div>
@@ -424,9 +424,9 @@
         <!-- Formulario de comentario principal -->
         <div v-if="userToken !== 'notoken'" class="mt-3 sm:mt-4">
           <textarea v-model="newComment" rows="3" placeholder="Escribe tu comentario..."
-            class="resize-none resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-800 text-gray-900 dark:text-gray-100"></textarea>
+            class="resize-none resize-none w-full px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg border-2 border-amber-300 dark:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500  bg-white/80 dark:bg-gray-800 text-gray-900 dark:text-gray-100"></textarea>
           <button @click="createComment"
-            class="mt-1 sm:mt-2 w-full py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition duration-300 flex items-center justify-center text-sm sm:text-base">
+            class="mt-1 sm:mt-2 w-full py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg  flex items-center justify-center text-sm sm:text-base">
             <i class="fa fa-paper-plane text-xs sm:text-sm mr-1 sm:mr-2"></i> Enviar Comentario
           </button>
         </div>
@@ -460,7 +460,7 @@
           <div class="mb-3 sm:mb-5">
             <label class="block text-amber-800 dark:text-amber-200 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Motivo del reporte</label>
             <select v-model="reportReason"
-              class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500  bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
               <option value="" disabled selected>Selecciona un motivo</option>
               <option value="Contenido inapropiado">Contenido inapropiado</option>
               <option value="Información incorrecta">Información incorrecta</option>
@@ -474,12 +474,12 @@
             <label class="block text-amber-800 dark:text-amber-200 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Explica el
               problema</label>
             <textarea v-model="customReason" rows="3" placeholder="Por favor, describe el problema en detalle..."
-              class="resize-none resize-none w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+              class="resize-none resize-none w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
           </div>
 
           <div class="flex justify-end space-x-2 sm:space-x-3 pt-1 sm:pt-2">
             <button @click="cancelReport"
-              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
+              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg flex items-center text-xs sm:text-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
                 fill="currentColor">
                 <path fill-rule="evenodd"
@@ -489,7 +489,7 @@
               Cancelar
             </button>
             <button @click="submitReportRecipe"
-              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300 flex items-center shadow-md text-xs sm:text-sm">
+              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg flex items-center shadow-md text-xs sm:text-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
                 fill="currentColor">
                 <path fill-rule="evenodd"
@@ -517,7 +517,7 @@
           <div class="mb-3 sm:mb-5">
             <label class="block text-amber-800 dark:text-amber-200 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Motivo del reporte</label>
             <select v-model="commentReportReason"
-              class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              class="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
               <option value="" disabled selected>Selecciona un motivo</option>
               <option value="Contenido inapropiado">Contenido inapropiado</option>
               <option value="Lenguaje ofensivo">Lenguaje ofensivo</option>
@@ -531,12 +531,12 @@
             <label class="block text-amber-800 dark:text-amber-200 font-medium mb-1 sm:mb-2 text-sm sm:text-base">Explica el
               problema</label>
             <textarea v-model="commentCustomReason" rows="3" placeholder="Por favor, describe el problema en detalle..."
-              class="resize-none w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-300 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+              class="resize-none w-full px-3 py-2 text-sm sm:text-base border-2 border-amber-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
           </div>
 
           <div class="flex justify-end space-x-2 sm:space-x-3 pt-1 sm:pt-2">
             <button @click="cancelCommentReport"
-              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition duration-300 flex items-center text-xs sm:text-sm">
+              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg flex items-center text-xs sm:text-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
                 fill="currentColor">
                 <path fill-rule="evenodd"
@@ -546,7 +546,7 @@
               Cancelar
             </button>
             <button @click="submitCommentReport"
-              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300 flex items-center shadow-md text-xs sm:text-sm">
+              class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg  flex items-center shadow-md text-xs sm:text-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-0.5 sm:mr-1" viewBox="0 0 20 20"
                 fill="currentColor">
                 <path fill-rule="evenodd"

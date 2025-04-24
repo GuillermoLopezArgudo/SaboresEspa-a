@@ -5,7 +5,7 @@
       <!-- Filtro Tipo de Comida -->
       <div class="relative flex-1 min-w-[120px]" ref="tipoRef">
         <button @click="toggleAccordion('tipoComida')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg text-xs sm:text-sm"
           :class="{ 'bg-amber-100 dark:bg-neutral-700': activeAccordion === 'tipoComida' }">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -14,13 +14,13 @@
             </svg>
             <span>Tipo</span>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform transition-transform duration-200"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform"
             :class="{ 'rotate-180': activeAccordion === 'tipoComida' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700 transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700  origin-top"
           :class="activeAccordion === 'tipoComida' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 max-h-60 overflow-y-auto text-xs sm:text-sm text-neutral-800 dark:text-neutral-100">
             <label v-for="type in foodTypes" :key="type.value"
@@ -36,7 +36,7 @@
       <!-- Filtro CCAA -->
       <div class="relative flex-1 min-w-[120px]" ref="ccaaRef">
         <button @click="toggleAccordion('ccaa')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg  text-xs sm:text-sm"
           :class="{ 'bg-amber-100 dark:bg-neutral-700': activeAccordion === 'ccaa' }">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
@@ -46,13 +46,13 @@
             </svg>
             <span>Región</span>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform transition-transform duration-200"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform "
             :class="{ 'rotate-180': activeAccordion === 'ccaa' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700 max-h-60 sm:max-h-96 overflow-y-auto transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700 max-h-60 sm:max-h-96 overflow-y-auto  origin-top"
           :class="activeAccordion === 'ccaa' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 text-xs sm:text-sm text-neutral-800 dark:text-neutral-100">
             <label v-for="region in regions" :key="region.value"
@@ -68,7 +68,7 @@
       <!-- Filtro Proteínas -->
       <div class="relative flex-1 min-w-[120px]" ref="proteinasRef">
         <button @click="toggleAccordion('proteinas')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg  text-xs sm:text-sm"
           :class="{ 'bg-amber-100 dark:bg-neutral-700': activeAccordion === 'proteinas' }">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
@@ -77,14 +77,14 @@
             </svg>
             <span>Proteínas</span>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform transition-transform duration-200"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform "
             :class="{ 'rotate-180': activeAccordion === 'proteinas' }" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700 transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700  origin-top"
           :class="activeAccordion === 'proteinas' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 max-h-60 overflow-y-auto text-xs sm:text-sm text-neutral-800 dark:text-neutral-100">
             <label v-for="protein in proteins" :key="protein.value"
@@ -100,7 +100,7 @@
       <!-- Filtro Tiempo -->
       <div class="relative flex-1 min-w-[120px]" ref="tiempoRef">
         <button @click="toggleAccordion('tiempo')"
-          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+          class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg  text-xs sm:text-sm"
           :class="{ 'bg-amber-100 dark:bg-neutral-700': activeAccordion === 'tiempo' }">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
@@ -110,14 +110,14 @@
             </svg>
             <span>Tiempo</span>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform transition-transform duration-200"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform "
             :class="{ 'rotate-180': activeAccordion === 'tiempo' }" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         <div
-          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700 transition-all duration-200 origin-top"
+          class="absolute z-10 mt-1 w-full bg-white/80 dark:bg-neutral-800 rounded-md shadow-lg border border-amber-200 dark:border-neutral-700 duration-200 origin-top"
           :class="activeAccordion === 'tiempo' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
           <div class="p-1 space-y-1 text-xs sm:text-sm text-neutral-800 dark:text-neutral-100">
             <label v-for="time in prepTimes" :key="time.value"
@@ -142,7 +142,7 @@
           Limpiar
         </button>
         <button @click="buscarFiltros"
-          class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center justify-center transition-colors text-xs sm:text-sm">
+          class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center justify-center  text-xs sm:text-sm">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

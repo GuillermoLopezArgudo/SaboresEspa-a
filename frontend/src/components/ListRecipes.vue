@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col transition-colors">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
     <!-- Contenido principal -->
     <div v-if="elementos.recetas.length > 0" class="flex-1 flex flex-col justify-between">
       <!-- Grid de recetas -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="item in paginatedRecipes" :key="item.id"
-          class="bg-white-0 dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 dark:border-gray-700 transform hover:-translate-y-1">
+          class="bg-white-0 dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl  duration-300 border border-amber-100 dark:border-gray-700 transform hover:-translate-y-1">
 
           <!-- Imagen con calificación y botón de favorito -->
           <div class="relative">
@@ -22,7 +22,7 @@
             </router-link>
 
             <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
-              class="absolute top-3 right-3 p-2 bg-white dark:bg-gray-700 bg-opacity-80 dark:bg-opacity-70 rounded-xl shadow-md hover:bg-opacity-100 dark:hover:bg-opacity-90 transition-all duration-300 transform hover:scale-110">
+              class="absolute top-3 right-3 p-2 bg-white dark:bg-gray-700 bg-opacity-80 dark:bg-opacity-70 rounded-xl shadow-md hover:bg-opacity-100 dark:hover:bg-opacity-90  duration-300 transform hover:scale-110">
               <i class="fa text-2xl" :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600 dark:text-amber-300'"></i>
             </button>
           </div>
@@ -47,7 +47,7 @@
             <div class="my-4 border-t border-amber-200 dark:border-gray-700"></div>
 
             <router-link :to="'/recipe?id=' + item.id"
-              class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
+              class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -73,14 +73,14 @@
       <!-- Paginador -->
       <div class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm sm:text-base">
         <button @click="currentPage--" :disabled="currentPage === 1"
-          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400">
+          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-400">
           Anterior
         </button>
         <span class="px-4 py-1 bg-white/80 dark:bg-gray-700/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-gray-600 rounded shadow-sm">
           Página {{ currentPage }} de {{ totalPages }}
         </span>
         <button @click="currentPage++" :disabled="currentPage === totalPages"
-          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition hover:bg-amber-400/80">
+          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-400/80">
           Siguiente
         </button>
       </div>

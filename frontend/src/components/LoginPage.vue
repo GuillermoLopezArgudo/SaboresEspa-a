@@ -56,7 +56,7 @@
         <!-- Botón de envío -->
         <button 
           type="submit" 
-          class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-800 transition duration-300 flex items-center justify-center dark:bg-amber-500 dark:hover:bg-amber-600"
+          class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-800 flex items-center justify-center dark:bg-amber-500 dark:hover:bg-amber-600"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -68,7 +68,7 @@
         <div class="mt-6 text-center">
           <router-link 
             to="/register" 
-            class="text-amber-600 hover:text-amber-800 font-medium transition duration-300 inline-flex items-center dark:text-amber-400 dark:hover:text-amber-500"
+            class="text-amber-600 hover:text-amber-800 font-medium  inline-flex items-center dark:text-amber-400 dark:hover:text-amber-500"
           >
             ¿No tienes cuenta? 
             <span class="ml-1 underline">Regístrate aquí</span>

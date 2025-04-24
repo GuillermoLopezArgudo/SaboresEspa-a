@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-amber-100 dark:bg-neutral-900 text-gray-900 dark:text-neutral-200 flex items-center justify-center px-4 transition-colors duration-300">
-    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg dark:shadow-md p-8 max-w-2xl w-full transition-all duration-300">
+  <div class="min-h-screen bg-amber-100 dark:bg-neutral-900 text-gray-900 dark:text-neutral-200 flex items-center justify-center px-4 ">
+    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg dark:shadow-md p-8 max-w-2xl w-full ">
       <h1 class="text-4xl font-bold text-amber-600 dark:text-amber-400 mb-6 text-center">Contáctanos</h1>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
@@ -20,7 +20,7 @@
             required></textarea>
         </div>
         <button type="submit"
-          class="w-full py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition duration-300">
+          class="w-full py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg ">
           Enviar mensaje
         </button>
       </form>

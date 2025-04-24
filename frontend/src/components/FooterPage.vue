@@ -5,9 +5,9 @@
         <span>© 2025 Recetario Español</span>
       </div>
       <div class="flex flex-wrap justify-center gap-x-4 gap-y-1">
-        <a href="/" class="hover:text-amber-300 transition dark:hover:text-amber-400">Recetas</a>
-        <a href="/sobre-nosotros" class="hover:text-amber-300 transition dark:hover:text-amber-400">Sobre Nosotros</a>
-        <a href="/contacto" class="hover:text-amber-300 transition dark:hover:text-amber-400">Contacto</a>
+        <a href="/" class="hover:text-amber-300 dark:hover:text-amber-400">Recetas</a>
+        <a href="/sobre-nosotros" class="hover:text-amber-300 dark:hover:text-amber-400">Sobre Nosotros</a>
+        <a href="/contacto" class="hover:text-amber-300 dark:hover:text-amber-400">Contacto</a>
       </div>
     </div>
   </footer>

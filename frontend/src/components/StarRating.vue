@@ -4,7 +4,7 @@
       <button
         v-for="star in 5"
         :key="star"
-        class="focus:outline-none transition-all duration-200 transform hover:scale-125"
+        class="focus:outline-none  transform hover:scale-125"
         @click="setRating(star)"
         @mouseover="hoverRating = star"
         @mouseleave="hoverRating = 0"

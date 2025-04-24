@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-amber-50 dark:bg-neutral-900 text-gray-900 dark:text-neutral-200 flex items-center justify-center transition-colors duration-300">
+  <div class="min-h-screen bg-amber-50 dark:bg-neutral-900 text-gray-900 dark:text-neutral-200 flex items-center justify-center">
     <div class="max-w-4xl w-full p-8">
-      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg dark:shadow-md rounded-2xl p-6 transition-all duration-300">
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg dark:shadow-md rounded-2xl p-6 ">
         <h1 class="text-4xl font-bold text-amber-600 dark:text-amber-400 mb-4">Sobre Nosotros</h1>
         <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
           Bienvenido a nuestra plataforma. Somos un equipo apasionado por la cocina y la tecnología,

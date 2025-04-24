@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
     <!-- Encabezado -->
     <div class="max-w-4xl mx-auto text-center mb-8">
       <h1
@@ -12,7 +12,7 @@
     <!-- Botón de regreso -->
     <div class="max-w-4xl mx-auto mb-6">
       <router-link to="/home"
-        class="inline-flex items-center px-6 py-3 bg-amber-800 dark:bg-amber-700 hover:bg-amber-900 dark:hover:bg-amber-800 text-white rounded-xl transition duration-300 shadow-lg">
+        class="inline-flex items-center px-6 py-3 bg-amber-800 dark:bg-amber-700 hover:bg-amber-900 dark:hover:bg-amber-800 text-white rounded-xl shadow-lg">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd"
             d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
@@ -67,7 +67,7 @@
             <label for="imageRecipe" class="block text-lg font-medium text-amber-700 dark:text-amber-300 mb-2">Imagen
               principal</label>
             <div
-              class="relative border-2 border-dashed border-amber-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-amber-400 dark:hover:border-amber-500 transition duration-300 bg-amber-50 dark:bg-gray-700">
+              class="relative border-2 border-dashed border-amber-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-amber-400 dark:hover:border-amber-500 bg-amber-50 dark:bg-gray-700">
               <input type="file" id="imageRecipe" @change="handleImageChange"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-amber-500 dark:text-amber-400"
@@ -86,7 +86,7 @@
             <label for="videoRecipe" class="block text-lg font-medium text-amber-700 dark:text-amber-300 mb-2">Video
               (Opcional)</label>
             <div
-              class="relative border-2 border-dashed border-amber-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-amber-400 dark:hover:border-amber-500 transition duration-300 bg-amber-50 dark:bg-gray-700">
+              class="relative border-2 border-dashed border-amber-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-amber-400 dark:hover:border-amber-500  bg-amber-50 dark:bg-gray-700">
               <input type="file" id="videoRecipe" @change="handleVideoChange"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-amber-500 dark:text-amber-400"
@@ -129,7 +129,7 @@
                 class="w-full px-4 py-2 rounded-l-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
                 placeholder="Ej: Arroz bomba">
               <button @click.prevent="removeIngredient(index)"
-                class="px-3 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 rounded-r-lg border border-l-0 border-amber-300 dark:border-gray-600 hover:bg-red-200 dark:hover:bg-red-800 transition duration-200">
+                class="px-3 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 rounded-r-lg border border-l-0 border-amber-300 dark:border-gray-600 hover:bg-red-200 dark:hover:bg-red-800 ">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -151,7 +151,7 @@
 
 
         <button type="button" @click="addIngredient"
-        class="mt-4 flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition duration-300">
+        class="mt-4 flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -223,7 +223,7 @@
 
 
         <button type="button" @click="addStep"
-          class="flex items-center text-sm text-amber-600 hover:text-amber-800 transition duration-300">
+          class="flex items-center text-sm text-amber-600 hover:text-amber-800 ">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -251,7 +251,7 @@
                 class="w-full px-4 py-2 rounded-l-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
                 placeholder="Ej: Arroz bomba">
               <button @click.prevent="removeSubIngredient(index)"
-                class="px-3 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 rounded-r-lg border border-l-0 border-amber-300 dark:border-gray-600 hover:bg-red-200 dark:hover:bg-red-800 transition duration-200">
+                class="px-3 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 rounded-r-lg border border-l-0 border-amber-300 dark:border-gray-600 hover:bg-red-200 dark:hover:bg-red-800 ">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -272,7 +272,7 @@
         </div>
 
         <button type="button" @click.prevent="addSubIngredient"
-          class="mt-4 flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition duration-300">
+          class="mt-4 flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -342,7 +342,7 @@
         </div>
 
         <button type="button" @click="addSubStep"
-        class="flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition duration-300">
+        class="flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -373,7 +373,7 @@
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Tipo de comida</span>
               <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform transition-transform duration-200"
+                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'foodType' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -398,7 +398,7 @@
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Comunidad Autónoma</span>
               <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform transition-transform duration-200"
+                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'region' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -423,7 +423,7 @@
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Tipo de proteína</span>
               <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform transition-transform duration-200"
+                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'protein' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -448,7 +448,7 @@
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Tiempo de preparación</span>
               <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform transition-transform duration-200"
+                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'time' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -474,7 +474,7 @@
       <!-- Botón de enviar -->
       <div class="px-6 sm:px-8 pb-6 sm:pb-8">
         <button type="submit"
-        class="w-full py-4 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold rounded-lg shadow-lg transition duration-300 transform hover:scale-[1.02] flex items-center justify-center">
+        class="w-full py-4 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold rounded-lg shadow-lg  transform hover:scale-[1.02] flex items-center justify-center">
         Guardar Cambios
         </button>
       </div>
