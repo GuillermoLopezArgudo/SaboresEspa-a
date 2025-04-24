@@ -1,10 +1,12 @@
 <template>
   <div
-    class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:text-white">
-    <div class="max-w-3xl mx-auto space-y-6 sm:space-y-8">
+    class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:text-white"
+    >
+    <div class="max-w-3xl mx-auto space-y-6 sm:space-y-8 hidden" ref="profile">
       <!-- Tarjeta principal de perfil -->
       <div
-      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden hover:shadow-lg sm:hover:shadow-xl dark:shadow-lg dark:hover:shadow-xl">        <!-- Encabezado con gradiente mejorado -->
+        class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden hover:shadow-lg sm:hover:shadow-xl dark:shadow-lg dark:hover:shadow-xl">
+        <!-- Encabezado con gradiente mejorado -->
         <div
           class="bg-gradient-to-r from-amber-500 to-amber-600 py-4 sm:py-5 px-4 sm:px-6 dark:from-gray-700 dark:to-gray-800">
           <h2 class="text-xl sm:text-2xl font-bold text-white text-center font-serif tracking-wide">MI PERFIL</h2>
@@ -212,7 +214,15 @@
         </div>
       </div>
     </div>
+    <div ref="loading" class="flex flex-col items-center min-h-screen px-4">
+      <div
+        class="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 border-t-2 border-b-2 border-amber-600 dark:border-amber-400">
+      </div>
+      <p class="mt-3 sm:mt-4 text-amber-700 dark:text-amber-300 text-sm sm:text-base md:text-lg text-center">Cargando
+        perfil...</p>
+    </div>
   </div>
+
 </template>
 
 <script setup>
@@ -222,7 +232,7 @@ import { useRouter } from 'vue-router';
 
 const image = ref("");
 const imageUrl = ref("");
-const name = ref("");
+const name = ref(null);
 const email = ref("");
 const error = ref('');
 const payload = ref({
@@ -241,6 +251,8 @@ const darkMode = ref(false);
 const router = useRouter();
 const type = ref("")
 const users = ref([])
+const loading = ref("")
+const profile = ref("")
 
 function handleImageChange(event) {
   const file = event.target.files[0];
@@ -354,6 +366,11 @@ onMounted(() => {
     .catch(error => {
       console.log(error);
     });
+
+  setTimeout(() => {
+    loading.value.classList.add("hidden")
+    profile.value.classList.remove("hidden")
+  }, 1000);
 
 });
 
