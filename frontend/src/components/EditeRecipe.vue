@@ -678,6 +678,7 @@ function submitEditeRecipe() {
     })
     .catch(error => {
       console.error(error);
+      router.push({ name: '/' });
     });
 }
 
