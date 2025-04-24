@@ -101,9 +101,7 @@
             class="w-full px-4 py-3 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
             placeholder="Describe tu receta, su origen, características especiales..."></textarea>
         </div>
-      </div>
-
-      <!-- Sección de ingredientes -->
+              <!-- Sección de ingredientes -->
       <div class="p-8 border-b border-amber-100 dark:border-gray-700">
         <h2 class="text-2xl font-bold text-amber-800 dark:text-amber-200 mb-6 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
@@ -349,7 +347,7 @@
         </h2>
 
         <!-- Filtros en acordeón -->
-        <div class="space-y-4">
+        <div class="space-y-4 " >
           <!-- Tipo de comida -->
           <div class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
             <button type="button" @click="toggleAccordion('foodType')"
@@ -454,6 +452,10 @@
           </div>
         </div>
       </div>
+      </div>
+
+
+
 
       <!-- Botón de enviar -->
       <div class="px-8 pb-8">
@@ -727,10 +729,6 @@ function applyDarkMode() {
 
 <style scoped>
 /* Efectos adicionales */
-form {
-  transition: all 0.3s ease;
-}
-
 form:hover {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
