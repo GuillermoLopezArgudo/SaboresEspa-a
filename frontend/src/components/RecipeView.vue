@@ -450,9 +450,9 @@
     </div>
 
     <!-- Diálogo de reporte de receta -->
-    <div v-if="showReportModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md" ref="reportModalRef">
+    <div v-if="showReportModal" @click.self="showReportModal = false"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4" >
+      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md" >
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-3 sm:p-4">
           <h3 class="text-lg sm:text-xl font-bold text-white font-serif">Reportar Receta</h3>
@@ -507,9 +507,9 @@
     </div>
 
     <!-- Diálogo de reporte de comentario -->
-    <div v-if="showCommentReportModal"
+    <div v-if="showCommentReportModal" @click.self="showCommentReportModal = false"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md" ref="commentReportModalRef">
+      <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-xs sm:max-w-md">
         <!-- Encabezado con degradado -->
         <div class="bg-gradient-to-r from-amber-600 to-amber-800 p-3 sm:p-4">
           <h3 class="text-lg sm:text-xl font-bold text-white font-serif">Reportar Comentario</h3>
@@ -1058,7 +1058,6 @@ onBeforeUnmount(() => {
 });
 
 const handleClickOutsideModals = (event) => {
-  console.log(reportModalRef.value)
   if (reportModalRef.value && !reportModalRef.value.contains(event.target)) {
     showReportModal.value = false;
   }
