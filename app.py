@@ -569,10 +569,12 @@ def editeRecipe():
     visibility = data.get("visibility")
     
     user = Users.get_or_none(Users.user_token == token)
+
     if not user:
         return jsonify(message="Usuario no autenticado"), 401
-
     recipe = Recipe.get_or_none((Recipe.id == recipe_id) & (Recipe.id_user_id == user.id))
+    if user.user_type == "admin":
+        recipe = Recipe.get_or_none(Recipe.id == recipe_id)
     if not recipe:
         return jsonify(message="Receta no encontrada"), 404
 
