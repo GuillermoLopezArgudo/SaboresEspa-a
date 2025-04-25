@@ -1,7 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:text-white"
-    >
+    class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:text-white">
     <div class="max-w-3xl mx-auto space-y-6 sm:space-y-8 hidden" ref="profile">
       <!-- Tarjeta principal de perfil -->
       <div
@@ -170,11 +169,6 @@
             </div>
           </div>
 
-
-
-
-
-
           <!-- Botón para eliminar perfil -->
           <div class="mt-4 sm:mt-6 text-center">
             <button @click="deleteProfile"
@@ -253,6 +247,9 @@ const type = ref("")
 const users = ref([])
 const loading = ref("")
 const profile = ref("")
+const timeStart = ref(0)
+const timeEnd = ref(0)
+const timeTotal = ref(0)
 
 function handleImageChange(event) {
   const file = event.target.files[0];
@@ -347,6 +344,7 @@ function changeEmail() {
 }
 
 onMounted(() => {
+  timeStart.value = performance.now();
 
   const savedMode = localStorage.getItem('darkMode');
   if (savedMode !== null) {
@@ -362,15 +360,12 @@ onMounted(() => {
       imageUrl.value = `${process.env.VUE_APP_API_URL}/${response.data.message[0].image}`;
       type.value = response.data.type
       allusers(response.data.type)
+      timeCharge()
+
     })
     .catch(error => {
       console.log(error);
     });
-
-  setTimeout(() => {
-    loading.value.classList.add("hidden")
-    profile.value.classList.remove("hidden")
-  }, 1000);
 
 });
 
@@ -424,6 +419,20 @@ function applyDarkMode() {
   } else {
     document.documentElement.classList.remove('dark');
   }
+}
+
+const timeCharge = () => {
+    if (image.value.length > 0) {
+        timeEnd.value = performance.now();
+        timeTotal.value = timeEnd.value - timeStart.value;
+        setTimeout(() => {
+            loading.value.classList.add("hidden");
+            profile.value.classList.remove("hidden");
+        }, timeTotal.value)
+    }else{
+        loading.value.classList.add("hidden");
+        profile.value.classList.remove("hidden");
+    }
 }
 
 </script>

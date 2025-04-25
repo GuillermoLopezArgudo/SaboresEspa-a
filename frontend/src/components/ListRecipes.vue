@@ -222,6 +222,10 @@ const itemsPerPage = ref(6)
 const darkMode = ref(false);
 const loading = ref("")
 const list = ref("")
+const timeStart = ref(0)
+const timeEnd = ref(0)
+const timeTotal = ref(0)
+
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
@@ -246,6 +250,7 @@ function selectReviews(reviews_list) {
 }
 
 onMounted(() => {
+    timeStart.value = performance.now();
     const savedMode = localStorage.getItem('darkMode');
     if (savedMode !== null) {
         darkMode.value = JSON.parse(savedMode);
@@ -259,11 +264,6 @@ onMounted(() => {
         personalRecipes()
     }
     averageStars();
-
-    setTimeout(() => {
-        loading.value.classList.add("hidden")
-        list.value.classList.remove("hidden")
-    }, 1000);
 });
 
 
@@ -282,6 +282,7 @@ function allRecipes() {
                 categorias.push(element)
 
             });
+            timeCharge()
             if (response.data.user_id) {
                 selectFavorites(response.data.favorites_list)
                 selectReviews(response.data.reviews_list)
@@ -306,6 +307,7 @@ function favoritesRecipes() {
             response.data.categories_list.forEach(element => {
                 categorias.push(element)
             });
+            timeCharge()
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -327,7 +329,9 @@ function personalRecipes() {
                     response.data.categories_list.forEach(element => {
                         categorias.push(element)
                     });
+                    timeCharge()
                 }
+                
             })
             .catch(error => {
                 console.error("Error al obtener las recetas:", error);
@@ -482,6 +486,20 @@ function applyDarkMode() {
         document.documentElement.classList.add('dark');
     } else {
         document.documentElement.classList.remove('dark');
+    }
+}
+
+const timeCharge = () => {
+    if (elementos.recetas.length > 0) {
+        timeEnd.value = performance.now();
+        timeTotal.value = timeEnd.value - timeStart.value;
+        setTimeout(() => {
+            loading.value.classList.add("hidden");
+            list.value.classList.remove("hidden");
+        }, timeTotal.value)
+    }else{
+        loading.value.classList.add("hidden");
+        list.value.classList.remove("hidden");
     }
 }
 
