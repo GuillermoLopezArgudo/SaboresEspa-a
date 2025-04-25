@@ -364,7 +364,11 @@ onMounted(() => {
 
     })
     .catch(error => {
-      console.log(error);
+      console.error("Error en la solicitud:", error);
+      if (error.status == 500) {
+        router.push({ name: 'login' });
+        localStorage.removeItem('userToken')
+      }
     });
 
 });
@@ -422,17 +426,17 @@ function applyDarkMode() {
 }
 
 const timeCharge = () => {
-    if (image.value.length > 0) {
-        timeEnd.value = performance.now();
-        timeTotal.value = timeEnd.value - timeStart.value;
-        setTimeout(() => {
-            loading.value.classList.add("hidden");
-            profile.value.classList.remove("hidden");
-        }, timeTotal.value)
-    }else{
-        loading.value.classList.add("hidden");
-        profile.value.classList.remove("hidden");
-    }
+  if (image.value.length > 0) {
+    timeEnd.value = performance.now();
+    timeTotal.value = timeEnd.value - timeStart.value;
+    setTimeout(() => {
+      loading.value.classList.add("hidden");
+      profile.value.classList.remove("hidden");
+    }, timeTotal.value)
+  } else {
+    loading.value.classList.add("hidden");
+    profile.value.classList.remove("hidden");
+  }
 }
 
 </script>

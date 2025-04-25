@@ -311,6 +311,10 @@ function favoritesRecipes() {
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
+            if (error.status == 500) {
+                router.push({ name: 'login' });
+                localStorage.removeItem('userToken')
+            }
         });
 }
 
@@ -331,10 +335,15 @@ function personalRecipes() {
                     });
                     timeCharge()
                 }
-                
+
             })
             .catch(error => {
                 console.error("Error al obtener las recetas:", error);
+                if (error.status == 500) {
+                    router.push({ name: 'login' });
+                    localStorage.removeItem('userToken')
+                }
+
             });
     }
 }
@@ -497,7 +506,7 @@ const timeCharge = () => {
             loading.value.classList.add("hidden");
             list.value.classList.remove("hidden");
         }, timeTotal.value)
-    }else{
+    } else {
         loading.value.classList.add("hidden");
         list.value.classList.remove("hidden");
     }
