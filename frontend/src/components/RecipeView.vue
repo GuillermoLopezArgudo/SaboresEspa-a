@@ -46,7 +46,7 @@
 
                   <!-- Botón de reporte -->
                   <template v-if="userToken != 'notoken'">
-                    <button v-if="userToken" @click="showReportDialog"
+                    <button v-if="userToken" @click="callChildFunction(undefined)"
                       class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-600 dark:text-red-200 rounded-lg ">
                       <i class="fa fa-flag text-sm"></i>
                       Reportar
@@ -272,7 +272,7 @@
                       class="absolute right-0 mt-2 w-40 sm:w-44 bg-white/80 dark:bg-gray-700 shadow-lg rounded-lg z-50 flex flex-col gap-1 p-1 sm:p-2 border border-gray-200 dark:border-gray-600">
 
                       <!-- BOTÓN: Reportar -->
-                      <button v-if="userToken" @click="showReportDialog((comment.id))"
+                      <button v-if="userToken" @click="callChildFunction((comment.id))"
                         class="w-full flex items-center px-2 py-1 text-red-600 dark:text-red-300 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 rounded text-xs sm:text-sm ">
                         <i class="fa fa-flag mr-1"></i> Reportar
                       </button>
@@ -367,7 +367,7 @@
                         class="absolute right-0 mt-2 w-40 sm:w-44 bg-white/80 dark:bg-gray-700 shadow-lg rounded-lg z-50 flex flex-col gap-1 p-1 sm:p-2 border border-gray-200 dark:border-gray-600">
 
                         <!-- BOTÓN: Reportar -->
-                        <button v-if="userToken" @click="showReportDialog((comment.id))"
+                        <button v-if="userToken" @click="callChildFunction((comment.id))"
                           class="w-full flex items-center px-2 py-1 text-red-600 dark:text-red-300 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 rounded text-xs sm:text-sm ">
                           <i class="fa fa-flag mr-1"></i> Reportar
                         </button>
@@ -446,10 +446,9 @@
       <p class="mt-3 sm:mt-4 text-amber-700 dark:text-amber-300 text-sm sm:text-base">Cargando receta...</p>
     </div>
     
-    <div v-if="showCommentReportModal" @click.self="showCommentReportModal = false"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <ModalsReports :idrecipe="recipeId" :commentId="currentCommentId" @cerrar-modal="showCommentReportModal = false" />
-    </div>
+
+    <ModalsReports  ref="childComponent" :idrecipe="recipeId" />
+
   </div>
 </template>
 
@@ -482,7 +481,6 @@ const editingSubcommentId = ref(null);
 const editedComment = ref("");
 const editedSubcomment = ref("");
 const showReportModal = ref(false);
-const currentCommentId = ref(null);
 const type = ref("");
 const likedComments = ref({});
 const dislikedComments = ref({});
@@ -495,10 +493,10 @@ const istoggleMenuRecipe = ref(false)
 const menuRecipeRef = ref(null);
 const menuRefs = ref({});
 const subMenuRefs = ref({});
-const reportModalRef = ref(null);
-const commentReportModalRef = ref(null);
 const darkMode = ref(false);
-const showCommentReportModal = ref(false);
+
+
+
 
 const payload = {
   idrecipe: parseInt(recipeId),
@@ -759,12 +757,6 @@ function cancelReply() {
   replyComment.value = "";
 }
 
-const showReportDialog = (commentId) => {
-  currentCommentId.value = commentId;
-  showCommentReportModal.value = true;
-};
-
-
 const toggleLike = (commentId) => {
   if (!likedComments.value[commentId]) {
     likedComments.value[commentId] = !likedComments.value[commentId];
@@ -843,14 +835,6 @@ const handleClickOutsideRecipeMenu = (event) => {
   }
 };
 
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutsideRecipeMenu);
-  document.removeEventListener('click', handleClickOutsideCommentMenu);
-  document.removeEventListener('click', handleClickOutsideSubCommentMenu);
-  document.removeEventListener('click', handleClickOutsideModals);
-});
-
 const handleClickOutsideCommentMenu = (event) => {
   Object.keys(menuRefs.value).forEach(commentId => {
     if (menuRefs.value[commentId] && !menuRefs.value[commentId].contains(event.target)) {
@@ -868,6 +852,32 @@ const handleClickOutsideSubCommentMenu = (event) => {
   });
 };
 
+function applyDarkMode() {
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
+/* MODAL */
+const reportModalRef = ref(null);
+const commentReportModalRef = ref(null);
+const showCommentReportModal = ref(false);
+const childComponent = ref(null)
+
+function callChildFunction(commentId) {
+
+  childComponent.value?.showReportDialog(commentId)
+}
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutsideRecipeMenu);
+  document.removeEventListener('click', handleClickOutsideCommentMenu);
+  document.removeEventListener('click', handleClickOutsideSubCommentMenu);
+  document.removeEventListener('click', handleClickOutsideModals);
+});
+
 
 const handleClickOutsideModals = (event) => {
   if (reportModalRef.value && !reportModalRef.value.contains(event.target)) {
@@ -879,14 +889,6 @@ const handleClickOutsideModals = (event) => {
   }
 };
 
-
-function applyDarkMode() {
-  if (darkMode.value) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-}
 
 </script>
 
