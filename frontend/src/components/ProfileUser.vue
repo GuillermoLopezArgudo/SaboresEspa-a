@@ -52,7 +52,7 @@
                   Guardar
                 </button>
                 <button @click="handleNameChange"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  class="flex-1 py-2 sm:py-2.5 bg-white/80 text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
@@ -92,7 +92,7 @@
                   Guardar
                 </button>
                 <button @click="handleChangeEmail"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  class="flex-1 py-2 sm:py-2.5 bg-white/80 text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
@@ -149,7 +149,7 @@
                   Guardar Contraseña
                 </button>
                 <button @click="handleChangePassword"
-                  class="flex-1 py-2 sm:py-2.5 bg-white text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  class="flex-1 py-2 sm:py-2.5 bg-white/80 text-amber-500 border border-amber-300 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base dark:bg-gray-800 dark:text-white dark:border-gray-600">
                   Cancelar
                 </button>
               </div>
