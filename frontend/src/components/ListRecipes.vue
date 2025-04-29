@@ -325,11 +325,12 @@ function personalRecipes() {
         const payload = {
             userToken: localStorage.getItem('userToken')
         }
-
+        
         axios.post(`${process.env.VUE_APP_API_URL}/viewRecipes`, payload)
             .then(response => {
-                if (response.data.recipes_list && response.data.recipes_list.length > 0) {
+                if (response.data.recipes_list && response.data.recipes_list.length >= 0) {
                     elementos.recetas = response.data.recipes_list;
+                    
                     response.data.categories_list.forEach(element => {
                         categorias.push(element)
                     });
@@ -499,7 +500,7 @@ function applyDarkMode() {
 }
 
 const timeCharge = () => {
-    if (elementos.recetas.length > 0) {
+    if (elementos.recetas.length >= 0) {
         timeEnd.value = performance.now();
         timeTotal.value = timeEnd.value - timeStart.value;
         setTimeout(() => {

@@ -23,14 +23,17 @@
     </div>
 
     <!-- Contenido principal -->
-    <div v-if="receta" class="max-w-7xl mx-auto bg-white/80 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-amber-200 dark:border-gray-700">
+    <div v-if="receta"
+      class="max-w-7xl mx-auto bg-white/80 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-amber-200 dark:border-gray-700">
       <!-- Sección superior -->
-      <div class="p-4 sm:p-6 md:p-8 border-b border-amber-100 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-white dark:from-gray-800 dark:to-gray-700">
+      <div
+        class="p-4 sm:p-6 md:p-8 border-b border-amber-100 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-white dark:from-gray-800 dark:to-gray-700">
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div class="w-full">
             <div class="flex justify-between items-center">
               <!-- Título -->
-              <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800 dark:text-amber-200 font-serif">{{ receta.title }}</h2>
+              <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800 dark:text-amber-200 font-serif">{{
+                receta.title }}</h2>
 
               <!-- Contenedor del botón -->
               <div class="relative" ref="menuRecipeRef">
@@ -79,9 +82,11 @@
               </div>
             </div>
 
-            <div class="mt-1 sm:mt-2 inline-block bg-amber-100 dark:bg-amber-900 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
+            <div
+              class="mt-1 sm:mt-2 inline-block bg-amber-100 dark:bg-amber-900 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
               <span class="text-xs sm:text-sm text-amber-700 dark:text-amber-300 font-medium">Por </span>
-              <span class="text-xs sm:text-sm text-amber-800 dark:text-amber-200 font-semibold">{{ receta.user_name }}</span>
+              <span class="text-xs sm:text-sm text-amber-800 dark:text-amber-200 font-semibold">{{ receta.user_name
+                }}</span>
             </div>
             <button @click="toggleFavorite"
               class="mt-2 sm:mt-3 flex items-center text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300  text-sm sm:text-base">
@@ -90,7 +95,8 @@
             </button>
           </div>
         </div>
-        <p class="mt-2 sm:mt-4 text-amber-700 dark:text-amber-300 text-sm sm:text-base md:text-lg">{{ receta.description }}</p>
+        <p class="mt-2 sm:mt-4 text-amber-700 dark:text-amber-300 text-sm sm:text-base md:text-lg">{{ receta.description
+          }}</p>
       </div>
 
       <!-- Imagen de la receta -->
@@ -104,7 +110,8 @@
       <!-- Ingredientes -->
       <div v-if="ingredients.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100 dark:border-gray-700">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-200 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
@@ -122,7 +129,8 @@
       <!-- Pasos de la receta -->
       <div v-if="steps.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100 dark:border-gray-700">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-200 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -139,8 +147,10 @@
               </span>
               <div>
                 <h4 class="font-semibold text-amber-800 dark:text-amber-200 text-base sm:text-lg">{{ step.title }}</h4>
-                <p class="text-amber-700 dark:text-amber-300 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ step.description }}</p>
-                <div v-if="step.image" class="mt-2 sm:mt-3 rounded-lg overflow-hidden border border-amber-200 dark:border-gray-600">
+                <p class="text-amber-700 dark:text-amber-300 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ step.description }}
+                </p>
+                <div v-if="step.image"
+                  class="mt-2 sm:mt-3 rounded-lg overflow-hidden border border-amber-200 dark:border-gray-600">
                   <img :src="`http://48.217.185.80/api/${step.image}`" :alt="`Imagen del paso ${idx + 1}`"
                     class="w-full max-w-md">
                 </div>
@@ -153,7 +163,8 @@
       <!-- Ingredientes SubReceta -->
       <div v-if="subingredients.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100 dark:border-gray-700">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-200 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
@@ -171,7 +182,8 @@
       <!-- Pasos de la Subreceta -->
       <div v-if="substeps.length > 0" class="p-4 sm:p-6 md:p-8 border-t border-amber-100 dark:border-gray-700">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-200 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -188,8 +200,10 @@
               </span>
               <div>
                 <h4 class="font-semibold text-amber-800 dark:text-amber-200 text-base sm:text-lg">{{ step.title }}</h4>
-                <p class="text-amber-700 dark:text-amber-300 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ step.description }}</p>
-                <div v-if="step.image" class="mt-2 sm:mt-3 rounded-lg overflow-hidden border border-amber-200 dark:border-gray-600">
+                <p class="text-amber-700 dark:text-amber-300 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ step.description }}
+                </p>
+                <div v-if="step.image"
+                  class="mt-2 sm:mt-3 rounded-lg overflow-hidden border border-amber-200 dark:border-gray-600">
                   <img :src="`http://48.217.185.80/api/${step.image}`" :alt="`Imagen del paso ${idx + 1}`"
                     class="w-full max-w-md">
                 </div>
@@ -202,7 +216,8 @@
       <!-- Video de la receta -->
       <div v-if="receta.video" class="p-4 sm:p-6 md:p-8 pt-0">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-200 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -217,7 +232,8 @@
       <!-- Comentarios -->
       <div class="p-4 sm:p-6 md:p-8 border-t border-amber-100 dark:border-gray-700">
         <h3 class="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-200 mb-2 sm:mb-4 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 sm:h-6 sm:w-6 mr-1 sm:mr-2 text-amber-600 dark:text-amber-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -259,7 +275,7 @@
               </div>
               <div v-else>
                 <!-- Contenedor del botón -->
-                <div class="flex justify-end" >
+                <div class="flex justify-end">
                   <div class="relative" :ref="el => menuRefs[comment.id] = el">
                     <!-- Botón tres puntitos -->
                     <button @click="toggleMenu(comment.id)"
@@ -303,24 +319,29 @@
                     <!-- LIKE -->
                     <button @click="toggleLike(comment.id)"
                       class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
-                      <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-800 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
+                      <svg
+                        class="w-4 h-4 sm:w-5 sm:h-5 text-green-800 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
                         :fill="likedComments[comment.id] ? 'currentColor' : 'none'" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475" />
                       </svg>
-                      <span class="text-green-800 dark:text-green-500 text-xs sm:text-sm">{{ conteoLikes[comment.id] || 0 }}</span>
+                      <span class="text-green-800 dark:text-green-500 text-xs sm:text-sm">{{ conteoLikes[comment.id] ||
+                        0
+                        }}</span>
                     </button>
                     <!-- DISLIKE -->
                     <button @click="toggleDislike(comment.id)"
                       class="focus:outline-none flex items-center gap-0.5 sm:gap-1">
-                      <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      <svg
+                        class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         :fill="dislikedComments[comment.id] ? 'currentColor' : 'none'"
                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 13c-.889.086-1.416.543-2.156 1.057a22.322 22.322 0 0 0-3.958 5.084 1.6 1.6 0 0 1-.582.628 1.549 1.549 0 0 1-1.466.087 1.587 1.587 0 0 1-.537-.406 1.666 1.666 0 0 1-.384-1.279l1.389-4.114M17 13h3V6.5A1.5 1.5 0 0 0 18.5 5v0A1.5 1.5 0 0 0 17 6.5V13Zm-6.5 1H5.585c-.286 0-.372-.014-.626-.15a1.797 1.797 0 0 1-.637-.572 1.873 1.873 0 0 1-.215-1.673l2.098-6.4C6.462 4.48 6.632 4 7.88 4c2.302 0 4.79.943 6.67 1.475" />
                       </svg>
-                      <span class="text-red-600 dark:text-red-400 text-xs sm:text-sm">{{ conteoDisLikes[comment.id] || 0 }}</span>
+                      <span class="text-red-600 dark:text-red-400 text-xs sm:text-sm">{{ conteoDisLikes[comment.id] || 0
+                        }}</span>
                     </button>
                   </div>
                   <!-- BOTON DE RESPUESTA -->
@@ -392,7 +413,8 @@
                   <p
                     class="text-amber-700 dark:text-amber-300 text-sm sm:text-base break-words w-full max-w-[90%] sm:max-w-[90%] md:max-w-[90%] lg:max-w-[90%]">
                     {{ subcomment.comment }}</p>
-                  <p class="text-xs text-amber-500 dark:text-amber-400 mt-0.5 sm:mt-1">Por: {{ subcomment.username }}</p>
+                  <p class="text-xs text-amber-500 dark:text-amber-400 mt-0.5 sm:mt-1">Por: {{ subcomment.username }}
+                  </p>
 
                 </div>
               </div>
@@ -431,7 +453,8 @@
           </button>
         </div>
         <div v-else class="text-center py-2 sm:py-4 text-sm sm:text-base">
-          <router-link to="/login" class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 font-medium">
+          <router-link to="/login"
+            class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 font-medium">
             Inicia sesión para dejar un comentario
           </router-link>
         </div>
@@ -445,449 +468,446 @@
       </div>
       <p class="mt-3 sm:mt-4 text-amber-700 dark:text-amber-300 text-sm sm:text-base">Cargando receta...</p>
     </div>
-    
 
-    <ModalsReports  ref="childComponent" :idrecipe="recipeId" />
+
+    <ModalsReports ref="childComponent" :idrecipe="recipeId" />
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed,onBeforeUnmount  } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { useRoute } from 'vue-router';
-import 'font-awesome/css/font-awesome.min.css';
-import ModalsReports from './ModalsReports.vue';
+  import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+  import axios from 'axios';
+  import { useRouter } from 'vue-router';
+  import { useRoute } from 'vue-router';
+  import 'font-awesome/css/font-awesome.min.css';
+  import ModalsReports from './ModalsReports.vue';
 
-const route = useRoute();
-const router = useRouter();
-const recipeId = route.query.id;
-const receta = ref(null);
-const newComment = ref("");
-const replyComment = ref("");
-const userToken = ref(localStorage.getItem('userToken') || "notoken");
-const ingredients = ref([]);
-const quantity = ref([]);
-const steps = ref([]);
-const subingredients = ref([]);
-const subquantity = ref([]);
-const substeps = ref([]);
-const comments = ref([]);
-const subcomments = ref([]);
-const isFavorite = ref(false);
-const editingCommentId = ref(null);
-const editingSubcommentId = ref(null);
-const editedComment = ref("");
-const editedSubcomment = ref("");
-const showReportModal = ref(false);
-const type = ref("");
-const likedComments = ref({});
-const dislikedComments = ref({});
-const conteoLikes = ref({});
-const conteoDisLikes = ref({});
-const replyingTo = ref(null);
-const isMenuVisible = ref({});
-const isSubMenuVisible = ref({});
-const istoggleMenuRecipe = ref(false)
-const menuRecipeRef = ref(null);
-const menuRefs = ref({});
-const subMenuRefs = ref({});
-const darkMode = ref(false);
+  const route = useRoute();
+  const router = useRouter();
+  const recipeId = route.query.id;
+  const receta = ref(null);
+  const newComment = ref("");
+  const replyComment = ref("");
+  const userToken = ref(localStorage.getItem('userToken') || "notoken");
+  const ingredients = ref([]);
+  const quantity = ref([]);
+  const steps = ref([]);
+  const subingredients = ref([]);
+  const subquantity = ref([]);
+  const substeps = ref([]);
+  const comments = ref([]);
+  const subcomments = ref([]);
+  const isFavorite = ref(false);
+  const editingCommentId = ref(null);
+  const editingSubcommentId = ref(null);
+  const editedComment = ref("");
+  const editedSubcomment = ref("");
+  const showReportModal = ref(false);
+  const type = ref("");
+  const likedComments = ref({});
+  const dislikedComments = ref({});
+  const conteoLikes = ref({});
+  const conteoDisLikes = ref({});
+  const replyingTo = ref(null);
+  const isMenuVisible = ref({});
+  const isSubMenuVisible = ref({});
+  const istoggleMenuRecipe = ref(false)
+  const menuRecipeRef = ref(null);
+  const menuRefs = ref({});
+  const subMenuRefs = ref({});
+  const darkMode = ref(false);
 
+  const payload = {
+    idrecipe: parseInt(recipeId),
+    userToken: userToken.value,
+    comment: "",
+    idcomment: 0
+  };
 
-
-
-const payload = {
-  idrecipe: parseInt(recipeId),
-  userToken: userToken.value,
-  comment: "",
-  idcomment: 0
-};
-
-const commentsWithSubcomments = computed(() => {
-  return comments.value.map(comment => {
-    return {
-      ...comment,
-      subcomments: subcomments.value.filter(sub => sub.id_comment === comment.id)
-    };
-  });
-});
-
-const toggleFavorite = () => {
-  if (userToken.value) {
-    isFavorite.value = !isFavorite.value;
-    if (isFavorite.value) {
-      axios
-        .post(`${process.env.VUE_APP_API_URL}/updateFavs`, payload)
-        .then(response => {
-          console.log(response.data.message)
-        })
-        .catch(error => {
-          console.error("Error en la solicitud:", error);
-        });
-    } else {
-      axios
-        .post(`${process.env.VUE_APP_API_URL}/deleteFavs`, payload)
-        .then(response => {
-          console.log(response.data.message)
-        })
-        .catch(error => {
-          console.error("Error en la solicitud:", error);
-        });
-    }
-  } else {
-    router.push({ name: "login" });
-  }
-};
-
-function fetchRecipe() {
-  axios
-    .post(`${process.env.VUE_APP_API_URL}/viewComment`, payload)
-    .then(response => {
-      comments.value = response.data.comment_list;
-      subcomments.value = response.data.subcomments_list || [];
-    })
-    .catch(error => console.error("Error en la solicitud:", error));
-}
-
-onMounted(() => {
-
-  const savedMode = localStorage.getItem('darkMode');
-  if (savedMode !== null) {
-    darkMode.value = JSON.parse(savedMode);
-    applyDarkMode();
-  }
-
-  axios
-    .post(`${process.env.VUE_APP_API_URL}/viewRecipe`, payload)
-    .then(response => {
-      if (response.data.recipe_list[0].id_user == response.data.user_id) {
-        response.data.recipe_list[0].userToken = response.data.user_token;
-      }
-      response.data.recipe_list[0].user_name = response.data.user_name;
-      receta.value = response.data.recipe_list[0];
-
-      response.data.ingredient_list.forEach(element => {
-        ingredients.value.push(element.ingredients);
-        quantity.value.push(element.quantity);
-      });
-
-      steps.value = response.data.step_list;
-
-      response.data.subingredient_list.forEach(element => {
-        subingredients.value.push(element.ingredients);
-        subquantity.value.push(element.quantity);
-      });
-
-      substeps.value = response.data.substep_list;
-      type.value = response.data.user_type;
-
-      fetchRecipe();
-
-      conteoLikes.value = response.data.countLikes_list?.reduce((acc, item) => {
-        const id = item.id_comment;
-        acc[id] = (acc[id] || 0) + 1;
-        return acc;
-      }, {}) || {};
-
-      conteoDisLikes.value = response.data.countDisLikes_list?.reduce((acc, item) => {
-        const id = item.id_comment;
-        acc[id] = (acc[id] || 0) + 1;
-        return acc;
-      }, {}) || {};
-
-      if (response.data.user_token) {
-        response.data.favorites_list?.forEach(id => {
-          if (id.id_recipe === parseInt(recipeId)) {
-            isFavorite.value = true;
-          }
-        });
-
-        response.data.likes_list?.forEach(element => {
-          likedComments.value[element.id_recipe] = true;
-        });
-
-        response.data.dislikes_list?.forEach(element => {
-          dislikedComments.value[element.id_recipe] = true;
-        });
-      }
-    })
-    .catch(error => {
-      console.error("Error en la solicitud:", error);
+  const commentsWithSubcomments = computed(() => {
+    return comments.value.map(comment => {
+      return {
+        ...comment,
+        subcomments: subcomments.value.filter(sub => sub.id_comment === comment.id)
+      };
     });
-    document.addEventListener('click', handleClickOutsideRecipeMenu);
-    document.addEventListener('click', handleClickOutsideCommentMenu);
-    document.addEventListener('click', handleClickOutsideSubCommentMenu);
-    document.addEventListener('click', handleClickOutsideModals);
-});
+  });
 
-function deleteRecipe() {
-  if (confirm('¿Estás seguro de que quieres eliminar esta receta?')) {
+  const toggleFavorite = () => {
+    if (userToken.value) {
+      isFavorite.value = !isFavorite.value;
+      if (isFavorite.value) {
+        axios
+          .post(`${process.env.VUE_APP_API_URL}/updateFavs`, payload)
+          .then(response => {
+            console.log(response.data.message)
+          })
+          .catch(error => {
+            console.error("Error en la solicitud:", error);
+          });
+      } else {
+        axios
+          .post(`${process.env.VUE_APP_API_URL}/deleteFavs`, payload)
+          .then(response => {
+            console.log(response.data.message)
+          })
+          .catch(error => {
+            console.error("Error en la solicitud:", error);
+          });
+      }
+    } else {
+      router.push({ name: "login" });
+    }
+  };
+
+  function fetchRecipe() {
     axios
-      .post(`${process.env.VUE_APP_API_URL}/deleteRecipe`, payload)
+      .post(`${process.env.VUE_APP_API_URL}/viewComment`, payload)
       .then(response => {
-        console.log(response.data.message);
-        router.push({ name: "home" });
+        comments.value = response.data.comment_list;
+        subcomments.value = response.data.subcomments_list || [];
+      })
+      .catch(error => console.error("Error en la solicitud:", error));
+  }
+
+  onMounted(() => {
+
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode !== null) {
+      darkMode.value = JSON.parse(savedMode);
+      applyDarkMode();
+    }
+
+    axios
+      .post(`${process.env.VUE_APP_API_URL}/viewRecipe`, payload)
+      .then(response => {
+        if (response.data.recipe_list[0].id_user == response.data.user_id) {
+          response.data.recipe_list[0].userToken = response.data.user_token;
+        }
+        response.data.recipe_list[0].user_name = response.data.user_name;
+        receta.value = response.data.recipe_list[0];
+
+        response.data.ingredient_list.forEach(element => {
+          ingredients.value.push(element.ingredients);
+          quantity.value.push(element.quantity);
+        });
+
+        steps.value = response.data.step_list;
+
+        response.data.subingredient_list.forEach(element => {
+          subingredients.value.push(element.ingredients);
+          subquantity.value.push(element.quantity);
+        });
+
+        substeps.value = response.data.substep_list;
+        type.value = response.data.user_type;
+
+        fetchRecipe();
+
+        conteoLikes.value = response.data.countLikes_list?.reduce((acc, item) => {
+          const id = item.id_comment;
+          acc[id] = (acc[id] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
+        conteoDisLikes.value = response.data.countDisLikes_list?.reduce((acc, item) => {
+          const id = item.id_comment;
+          acc[id] = (acc[id] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
+        if (response.data.user_token) {
+          response.data.favorites_list?.forEach(id => {
+            if (id.id_recipe === parseInt(recipeId)) {
+              isFavorite.value = true;
+            }
+          });
+
+          response.data.likes_list?.forEach(element => {
+            likedComments.value[element.id_recipe] = true;
+          });
+
+          response.data.dislikes_list?.forEach(element => {
+            dislikedComments.value[element.id_recipe] = true;
+          });
+        }
       })
       .catch(error => {
         console.error("Error en la solicitud:", error);
       });
+    document.addEventListener('click', handleClickOutsideRecipeMenu);
+    document.addEventListener('click', handleClickOutsideCommentMenu);
+    document.addEventListener('click', handleClickOutsideSubCommentMenu);
+    document.addEventListener('click', handleClickOutsideModals);
+  });
+
+  function deleteRecipe() {
+    if (confirm('¿Estás seguro de que quieres eliminar esta receta?')) {
+      axios
+        .post(`${process.env.VUE_APP_API_URL}/deleteRecipe`, payload)
+        .then(response => {
+          console.log(response.data.message);
+          router.push({ name: "home" });
+        })
+        .catch(error => {
+          console.error("Error en la solicitud:", error);
+        });
+    }
   }
-}
 
-function editeRecipe() {
-  router.push({ name: "edite", query: { id: recipeId } });
-}
+  function editeRecipe() {
+    router.push({ name: "edite", query: { id: recipeId } });
+  }
 
-function createComment() {
-  if (!newComment.value.trim()) return;
+  function createComment() {
+    if (!newComment.value.trim()) return;
 
-  payload.comment = newComment.value;
-  payload.idcomment = 0; // Reset para comentario principal
+    payload.comment = newComment.value;
+    payload.idcomment = 0; // Reset para comentario principal
 
-  axios.post(`${process.env.VUE_APP_API_URL}/createComment`, payload)
-    .then(() => {
-      fetchRecipe();
-      newComment.value = "";
-    })
-    .catch(error => {
-      console.error("Error en la solicitud:", error);
-      if (error.response?.status === 401) {
-        router.push({ name: "login" });
-      }
-    });
-}
+    axios.post(`${process.env.VUE_APP_API_URL}/createComment`, payload)
+      .then(() => {
+        fetchRecipe();
+        newComment.value = "";
+      })
+      .catch(error => {
+        console.error("Error en la solicitud:", error);
+        if (error.response?.status === 401) {
+          router.push({ name: "login" });
+        }
+      });
+  }
 
-function createSubcomment(commentId) {
-  if (!replyComment.value.trim()) return;
+  function createSubcomment(commentId) {
+    if (!replyComment.value.trim()) return;
 
-  payload.comment = replyComment.value;
-  payload.idcomment = commentId;
+    payload.comment = replyComment.value;
+    payload.idcomment = commentId;
 
-  axios.post(`${process.env.VUE_APP_API_URL}/createSubComment`, payload)
-    .then(() => {
-      fetchRecipe();
+    axios.post(`${process.env.VUE_APP_API_URL}/createSubComment`, payload)
+      .then(() => {
+        fetchRecipe();
+        replyComment.value = "";
+        replyingTo.value = null;
+      })
+      .catch(error => {
+        console.error("Error en la solicitud:", error);
+        if (error.response?.status === 401) {
+          router.push({ name: "login" });
+        }
+      });
+
+  }
+
+  function deleteComment(idcomment) {
+    if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
+      payload.idcomment = idcomment;
+      axios.post(`${process.env.VUE_APP_API_URL}/deleteComment`, payload)
+        .then(() => {
+          fetchRecipe();
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
+    }
+  }
+
+  function deleteSubcomment(idcomment) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta respuesta?')) {
+      payload.idcomment = idcomment;
+      axios.post(`${process.env.VUE_APP_API_URL}/deleteSubComment`, payload)
+        .then(() => {
+          fetchRecipe();
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
+    }
+  }
+
+  function updateComment(idcomment) {
+    payload.idcomment = idcomment;
+    payload.comment = editedComment.value;
+    axios.post(`${process.env.VUE_APP_API_URL}/editeComment`, payload)
+      .then(() => {
+        fetchRecipe();
+        cancelEdit();
+      })
+      .catch(error => console.error("Error en la solicitud:", error));
+  }
+
+  function updateSubcomment(idcomment) {
+    payload.idcomment = idcomment;
+    payload.comment = editedSubcomment.value;
+    axios.post(`${process.env.VUE_APP_API_URL}/editeSubComment`, payload)
+      .then(response => {
+        console.log(response.data.message)
+        fetchRecipe();
+        cancelEditSubcomment();
+      })
+      .catch(error => console.error("Error en la solicitud:", error));
+  }
+
+  function startEditComment(comment) {
+    editingCommentId.value = comment.id;
+    editedComment.value = comment.comment;
+  }
+
+  function startEditSubcomment(subcomment) {
+    editingSubcommentId.value = subcomment.id;
+    editedSubcomment.value = subcomment.comment;
+  }
+
+  function cancelEdit() {
+    editingCommentId.value = null;
+    editedComment.value = "";
+  }
+
+  function cancelEditSubcomment() {
+    editingSubcommentId.value = null;
+    editedSubcomment.value = "";
+  }
+
+  function toggleReply(commentId) {
+    replyingTo.value = replyingTo.value === commentId ? null : commentId;
+    if (replyingTo.value === commentId) {
       replyComment.value = "";
-      replyingTo.value = null;
-    })
-    .catch(error => {
-      console.error("Error en la solicitud:", error);
-      if (error.response?.status === 401) {
-        router.push({ name: "login" });
-      }
-    });
-
-}
-
-function deleteComment(idcomment) {
-  if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
-    payload.idcomment = idcomment;
-    axios.post(`${process.env.VUE_APP_API_URL}/deleteComment`, payload)
-      .then(() => {
-        fetchRecipe();
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
+    }
   }
-}
 
-function deleteSubcomment(idcomment) {
-  if (confirm('¿Estás seguro de que quieres eliminar esta respuesta?')) {
-    payload.idcomment = idcomment;
-    axios.post(`${process.env.VUE_APP_API_URL}/deleteSubComment`, payload)
-      .then(() => {
-        fetchRecipe();
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
-  }
-}
-
-function updateComment(idcomment) {
-  payload.idcomment = idcomment;
-  payload.comment = editedComment.value;
-  axios.post(`${process.env.VUE_APP_API_URL}/editeComment`, payload)
-    .then(() => {
-      fetchRecipe();
-      cancelEdit();
-    })
-    .catch(error => console.error("Error en la solicitud:", error));
-}
-
-function updateSubcomment(idcomment) {
-  payload.idcomment = idcomment;
-  payload.comment = editedSubcomment.value;
-  axios.post(`${process.env.VUE_APP_API_URL}/editeSubComment`, payload)
-    .then(response => {
-      console.log(response.data.message)
-      fetchRecipe();
-      cancelEditSubcomment();
-    })
-    .catch(error => console.error("Error en la solicitud:", error));
-}
-
-function startEditComment(comment) {
-  editingCommentId.value = comment.id;
-  editedComment.value = comment.comment;
-}
-
-function startEditSubcomment(subcomment) {
-  editingSubcommentId.value = subcomment.id;
-  editedSubcomment.value = subcomment.comment;
-}
-
-function cancelEdit() {
-  editingCommentId.value = null;
-  editedComment.value = "";
-}
-
-function cancelEditSubcomment() {
-  editingSubcommentId.value = null;
-  editedSubcomment.value = "";
-}
-
-function toggleReply(commentId) {
-  replyingTo.value = replyingTo.value === commentId ? null : commentId;
-  if (replyingTo.value === commentId) {
+  function cancelReply() {
+    replyingTo.value = null;
     replyComment.value = "";
   }
-}
 
-function cancelReply() {
-  replyingTo.value = null;
-  replyComment.value = "";
-}
+  const toggleLike = (commentId) => {
+    if (!likedComments.value[commentId]) {
+      likedComments.value[commentId] = !likedComments.value[commentId];
 
-const toggleLike = (commentId) => {
-  if (!likedComments.value[commentId]) {
-    likedComments.value[commentId] = !likedComments.value[commentId];
+      if (likedComments.value[commentId]) {
+        dislikedComments.value[commentId] = false;
+      }
 
-    if (likedComments.value[commentId]) {
-      dislikedComments.value[commentId] = false;
-    }
-
-    payload.idcomment = commentId;
-    axios.post(`${process.env.VUE_APP_API_URL}/likeComment`, payload)
-      .then(() => {
-        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) + 1;
-        if (conteoDisLikes.value[commentId] > 0) {
-          conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
-        }
-        fetchRecipe();
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
-  } else {
-    likedComments.value[commentId] = !likedComments.value[commentId];
-    payload.idcomment = commentId;
-    axios.post(`${process.env.VUE_APP_API_URL}/deleteLike`, payload)
-      .then(() => {
-        conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1;
-        fetchRecipe();
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
-  }
-};
-
-const toggleDislike = (commentId) => {
-  if (!dislikedComments.value[commentId]) {
-    dislikedComments.value[commentId] = !dislikedComments.value[commentId];
-
-    if (dislikedComments.value[commentId]) {
-      likedComments.value[commentId] = false;
-    }
-
-    payload.idcomment = commentId;
-    axios.post(`${process.env.VUE_APP_API_URL}/disLikeComment`, payload)
-      .then(() => {
-        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) + 1;
-        if (conteoLikes.value[commentId] > 0) {
+      payload.idcomment = commentId;
+      axios.post(`${process.env.VUE_APP_API_URL}/likeComment`, payload)
+        .then(() => {
+          conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) + 1;
+          if (conteoDisLikes.value[commentId] > 0) {
+            conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
+          }
+          fetchRecipe();
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
+    } else {
+      likedComments.value[commentId] = !likedComments.value[commentId];
+      payload.idcomment = commentId;
+      axios.post(`${process.env.VUE_APP_API_URL}/deleteLike`, payload)
+        .then(() => {
           conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1;
-        }
-        fetchRecipe();
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
-  } else {
-    dislikedComments.value[commentId] = !dislikedComments.value[commentId];
-    payload.idcomment = commentId;
-    axios.post(`${process.env.VUE_APP_API_URL}/deleteDisLike`, payload)
-      .then(() => {
-        conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
-        fetchRecipe();
-      })
-      .catch(error => console.error("Error en la solicitud:", error));
-  }
-};
-
-const toggleMenu = (commentId) => {
-  isMenuVisible.value[commentId] = !isMenuVisible.value[commentId];
-};
-
-const toggleSubMenu = (subCommentId) => {
-  isSubMenuVisible.value[subCommentId] = !isSubMenuVisible.value[subCommentId];
-};
-
-const toggleMenuRecipe = () => {
-  istoggleMenuRecipe.value = !istoggleMenuRecipe.value;
-};
-
-const handleClickOutsideRecipeMenu = (event) => {
-  if (menuRecipeRef.value && !menuRecipeRef.value.contains(event.target)) {
-    istoggleMenuRecipe.value = false;
-  }
-};
-
-const handleClickOutsideCommentMenu = (event) => {
-  Object.keys(menuRefs.value).forEach(commentId => {
-    if (menuRefs.value[commentId] && !menuRefs.value[commentId].contains(event.target)) {
-      isMenuVisible.value[commentId] = false;
+          fetchRecipe();
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
     }
-  });
-};
+  };
 
+  const toggleDislike = (commentId) => {
+    if (!dislikedComments.value[commentId]) {
+      dislikedComments.value[commentId] = !dislikedComments.value[commentId];
 
-const handleClickOutsideSubCommentMenu = (event) => {
-  Object.keys(subMenuRefs.value).forEach(subCommentId => {
-    if (subMenuRefs.value[subCommentId] && !subMenuRefs.value[subCommentId].contains(event.target)) {
-      isSubMenuVisible.value[subCommentId] = false;
+      if (dislikedComments.value[commentId]) {
+        likedComments.value[commentId] = false;
+      }
+
+      payload.idcomment = commentId;
+      axios.post(`${process.env.VUE_APP_API_URL}/disLikeComment`, payload)
+        .then(() => {
+          conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) + 1;
+          if (conteoLikes.value[commentId] > 0) {
+            conteoLikes.value[commentId] = (conteoLikes.value[commentId] || 0) - 1;
+          }
+          fetchRecipe();
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
+    } else {
+      dislikedComments.value[commentId] = !dislikedComments.value[commentId];
+      payload.idcomment = commentId;
+      axios.post(`${process.env.VUE_APP_API_URL}/deleteDisLike`, payload)
+        .then(() => {
+          conteoDisLikes.value[commentId] = (conteoDisLikes.value[commentId] || 0) - 1;
+          fetchRecipe();
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
     }
+  };
+
+  const toggleMenu = (commentId) => {
+    isMenuVisible.value[commentId] = !isMenuVisible.value[commentId];
+  };
+
+  const toggleSubMenu = (subCommentId) => {
+    isSubMenuVisible.value[subCommentId] = !isSubMenuVisible.value[subCommentId];
+  };
+
+  const toggleMenuRecipe = () => {
+    istoggleMenuRecipe.value = !istoggleMenuRecipe.value;
+  };
+
+  const handleClickOutsideRecipeMenu = (event) => {
+    if (menuRecipeRef.value && !menuRecipeRef.value.contains(event.target)) {
+      istoggleMenuRecipe.value = false;
+    }
+  };
+
+  const handleClickOutsideCommentMenu = (event) => {
+    Object.keys(menuRefs.value).forEach(commentId => {
+      if (menuRefs.value[commentId] && !menuRefs.value[commentId].contains(event.target)) {
+        isMenuVisible.value[commentId] = false;
+      }
+    });
+  };
+
+
+  const handleClickOutsideSubCommentMenu = (event) => {
+    Object.keys(subMenuRefs.value).forEach(subCommentId => {
+      if (subMenuRefs.value[subCommentId] && !subMenuRefs.value[subCommentId].contains(event.target)) {
+        isSubMenuVisible.value[subCommentId] = false;
+      }
+    });
+  };
+
+  function applyDarkMode() {
+    if (darkMode.value) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  /* MODAL */
+  const reportModalRef = ref(null);
+  const commentReportModalRef = ref(null);
+  const showCommentReportModal = ref(false);
+  const childComponent = ref(null)
+
+  function callChildFunction(commentId) {
+
+    childComponent.value?.showReportDialog(commentId)
+  }
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutsideRecipeMenu);
+    document.removeEventListener('click', handleClickOutsideCommentMenu);
+    document.removeEventListener('click', handleClickOutsideSubCommentMenu);
+    document.removeEventListener('click', handleClickOutsideModals);
   });
-};
-
-function applyDarkMode() {
-  if (darkMode.value) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-}
-
-/* MODAL */
-const reportModalRef = ref(null);
-const commentReportModalRef = ref(null);
-const showCommentReportModal = ref(false);
-const childComponent = ref(null)
-
-function callChildFunction(commentId) {
-
-  childComponent.value?.showReportDialog(commentId)
-}
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutsideRecipeMenu);
-  document.removeEventListener('click', handleClickOutsideCommentMenu);
-  document.removeEventListener('click', handleClickOutsideSubCommentMenu);
-  document.removeEventListener('click', handleClickOutsideModals);
-});
 
 
-const handleClickOutsideModals = (event) => {
-  if (reportModalRef.value && !reportModalRef.value.contains(event.target)) {
-    showReportModal.value = false;
-  }
-  
-  if (commentReportModalRef.value && !commentReportModalRef.value.contains(event.target)) {
-    showCommentReportModal.value = false;
-  }
-};
+  const handleClickOutsideModals = (event) => {
+    if (reportModalRef.value && !reportModalRef.value.contains(event.target)) {
+      showReportModal.value = false;
+    }
+
+    if (commentReportModalRef.value && !commentReportModalRef.value.contains(event.target)) {
+      showCommentReportModal.value = false;
+    }
+  };
 
 
 </script>

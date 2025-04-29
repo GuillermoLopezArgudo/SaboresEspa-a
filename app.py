@@ -74,7 +74,7 @@ def register():
     token = create_access_token(identity=email)
     type = data.get("type")
     if Users.select().where(Users.user_email == email).exists():
-        return jsonify(message="ERROR")
+        return jsonify(message="Correo ya existente")
     user = Users(user_name = name,user_email = email, user_password = hashlib.sha256(password.encode('utf-8')).hexdigest(), user_type = type,user_token = token, user_image= "/static/images/NonPerfil.webp", created_at = date.today(), modified_at = date.today())
     user.save()
     return jsonify(userToken = token)
@@ -85,11 +85,15 @@ def login():
     email = data.get("email")
     password = data.get("password")
     token = create_access_token(identity=email)
-    if Users.select().where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).exists():
-        user = Users.select(Users.id,Users.user_type).where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).get()       
-        Users.update(user_token=token).where(Users.id == user.id).execute()
-        return jsonify(userToken=token)
-    return jsonify(message="ERROR User NOT LOGGED")
+    if Users.select().where((Users.user_email == email)):
+        if Users.select().where((Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).exists():
+            if Users.select().where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).exists():
+                user = Users.select(Users.id,Users.user_type).where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).get()       
+                Users.update(user_token=token).where(Users.id == user.id).execute()
+                return jsonify(userToken=token)
+            return jsonify(message="ERROR Usuario no registrado")
+        return jsonify(message="ERROR Contraseña incorrecta")
+    return jsonify(message= "ERROR Email no encontrado")
 
 @app.route('/create', methods=['POST'])
 def createRecipe():
