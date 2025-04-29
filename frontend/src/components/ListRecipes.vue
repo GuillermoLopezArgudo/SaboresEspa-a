@@ -455,8 +455,7 @@ const ratingChanged = (recipeId) => {
                 userToken
             };
             axios.post(`${process.env.VUE_APP_API_URL}/updateRating`, payload)
-                .then(response => {
-                    console.log(response.data.message);
+                .then(() => {
                     averageStars()
                 })
                 .catch(error => {

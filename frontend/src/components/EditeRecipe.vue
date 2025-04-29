@@ -678,8 +678,8 @@ function submitEditeRecipe() {
   };
 
   axios.post(`${process.env.VUE_APP_API_URL}/editeRecipe`, payload)
-    .then(response => {
-      console.log(response.data.message);
+    .then( () => {
+
       router.push({ name: 'home' });
     })
     .catch(error => {

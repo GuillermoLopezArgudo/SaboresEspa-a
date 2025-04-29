@@ -590,8 +590,7 @@ function submitRecipe() {
     visibility: showBasicInfo.value
   };
   axios.post(`${process.env.VUE_APP_API_URL}/create`, payload)
-    .then(response => {
-      console.log(response.data.message);
+    .then(() => {
       router.push({ name: "home" });
     })
     .catch(error => {
