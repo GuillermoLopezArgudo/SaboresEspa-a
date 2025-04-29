@@ -236,6 +236,9 @@ def viewPersonalRecipes():
         recipes = Recipe.select().join(Users).where(Users.id == user_id)
         recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]
         categories_list = []
+        reviews = RecipeReview.select().where(RecipeReview.id_user_id ==user_id)
+        reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
+
         for recipe in recipes:
             categories = RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id)
             for categorie in categories:
@@ -244,7 +247,7 @@ def viewPersonalRecipes():
                     "type": categorie.type,
                     "category": categorie.category
                 })    
-        return jsonify(recipes_list=recipes_list,categories_list=categories_list)
+        return jsonify(recipes_list=recipes_list,categories_list=categories_list,reviews_list=reviews_list)
     return jsonify(recipes_list="",categories_list="")
     
 @app.route('/viewAll', methods=['POST'])

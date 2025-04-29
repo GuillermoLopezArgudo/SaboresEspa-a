@@ -325,15 +325,16 @@ function personalRecipes() {
         const payload = {
             userToken: localStorage.getItem('userToken')
         }
-        
+
         axios.post(`${process.env.VUE_APP_API_URL}/viewRecipes`, payload)
             .then(response => {
                 if (response.data.recipes_list && response.data.recipes_list.length >= 0) {
                     elementos.recetas = response.data.recipes_list;
-                    
+
                     response.data.categories_list.forEach(element => {
                         categorias.push(element)
                     });
+                    selectReviews(response.data.reviews_list);
                     timeCharge()
                 }
 
