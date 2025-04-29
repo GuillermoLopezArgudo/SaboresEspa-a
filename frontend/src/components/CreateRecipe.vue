@@ -88,7 +88,7 @@
             class="w-full px-4 py-3 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
             placeholder="Describe tu receta, su origen, características especiales..."></textarea>
         </div>
-              <!-- Sección de ingredientes -->
+      <!-- Sección de ingredientes -->
       <div class="p-8 border-b border-amber-100 dark:border-gray-700">
         <h2 class="text-2xl font-bold text-amber-800 dark:text-amber-200 mb-6 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
@@ -349,7 +349,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'foodType' }">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label v-for="(type, index) in foodTypes" :key="index"
                   class="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer">
                   <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida"
@@ -374,7 +374,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'region' }">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label v-for="(region, index) in regions" :key="index"
                   class="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer">
                   <input type="radio" name="ccaa" :value="region.value" v-model="ccaa"
@@ -399,7 +399,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'protein' }">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label v-for="(protein, index) in proteins" :key="index"
                   class="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer">
                   <input type="checkbox" :value="protein.value" v-model="proteinas"
@@ -424,7 +424,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'time' }">
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label v-for="(time, index) in prepTimes" :key="index"
                   class="flex items-center p-3 bg-amber-50 dark:bg-gray-600 rounded-lg border border-amber-200 dark:border-gray-500 cursor-pointer">
                   <input type="radio" name="tiempo" :value="time.value" v-model="tiempo"

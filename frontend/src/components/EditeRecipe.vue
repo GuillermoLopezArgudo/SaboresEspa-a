@@ -381,7 +381,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'foodType' }">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label v-for="(type, index) in foodTypes" :key="index"
                   class="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer">
                   <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida"
@@ -406,7 +406,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'region' }">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label v-for="(region, index) in regions" :key="index"
                   class="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer">
                   <input type="radio" name="ccaa" :value="region.value" v-model="ccaa"
@@ -431,7 +431,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'protein' }">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label v-for="(protein, index) in proteins" :key="index"
                   class="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer">
                   <input type="checkbox" :value="protein.value" v-model="proteinas"
@@ -456,7 +456,7 @@
               </svg>
             </button>
             <div class="px-6 pb-4" :class="{ 'hidden': activeAccordion !== 'time' }">
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label v-for="(time, index) in prepTimes" :key="index"
                   class="flex items-center p-3 bg-amber-50 dark:bg-gray-600 rounded-lg border border-amber-200 dark:border-gray-500 cursor-pointer">
                   <input type="radio" name="tiempo" :value="time.value" v-model="tiempo"
