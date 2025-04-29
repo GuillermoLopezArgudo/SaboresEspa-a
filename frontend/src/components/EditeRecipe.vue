@@ -110,7 +110,9 @@
 
         <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-12 gap-4 mb-4">
           <div class="md:col-span-5">
-            <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Ingrediente {{ index + 1 }}</label>
+            <label :for="'ingredient' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Ingrediente {{ index + 1
+              }}</label>
             <div class="flex">
               <input :id="'ingredient' + index" v-model="recipebook.ingredients[index]" required
                 class="w-full px-4 py-2 rounded-l-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
@@ -126,7 +128,8 @@
             </div>
           </div>
           <div class="md:col-span-5">
-            <label :for="'quantity' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Cantidad</label>
+            <label :for="'quantity' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Cantidad</label>
             <input :id="'quantity' + index" v-model="recipebook.quantities[index]" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
               placeholder="Ej: 300 gramos">
@@ -138,7 +141,7 @@
 
 
         <button type="button" @click="addIngredient"
-        class="mt-4 flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
+          class="mt-4 flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -160,10 +163,10 @@
         </h2>
 
         <div v-for="(step, index) in recipebook.steps" :key="index"
-        class="mb-8 p-6 bg-amber-50 dark:bg-gray-700 rounded-lg border border-amber-200 dark:border-gray-600 relative">
-        <button @click="removeStep(index)" type="button"
-        class="absolute top-2 right-2 p-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+          class="mb-8 p-6 bg-amber-50 dark:bg-gray-700 rounded-lg border border-amber-200 dark:border-gray-600 relative">
+          <button @click="removeStep(index)" type="button"
+            class="absolute top-2 right-2 p-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -172,33 +175,36 @@
           <h3 class="text-lg font-semibold text-amber-700 dark:text-amber-300 mb-3">Paso {{ index + 1 }}</h3>
 
           <div class="mb-3">
-            <label :for="'stepTitle' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Título del
+            <label :for="'stepTitle' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Título del
               paso</label>
             <input :id="'stepTitle' + index" v-model="step.title" required
-            class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
-            placeholder="Título breve">
+              class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
+              placeholder="Título breve">
           </div>
 
           <div class="mb-3">
-            <label :for="'stepDesc' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Descripción</label>
+            <label :for="'stepDesc' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Descripción</label>
             <textarea :id="'stepDesc' + index" v-model="step.description" rows="2" required
-            class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
-            placeholder="Describe este paso..."></textarea>
+              class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
+              placeholder="Describe este paso..."></textarea>
           </div>
 
           <div>
-            <label :for="'stepImage' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Imagen
+            <label :for="'stepImage' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Imagen
               (Opcional)</label>
             <div class="relative">
               <input type="file" :id="'stepImage' + index" @change="handleStepImageChange($event, index)"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
               <div
-              class="flex items-center justify-between px-4 py-2 bg-white/80 dark:bg-gray-800 rounded-lg border border-amber-300 dark:border-gray-600 shadow-sm">
-              <span class="text-sm text-amber-600 dark:text-amber-400 truncate">
+                class="flex items-center justify-between px-4 py-2 bg-white/80 dark:bg-gray-800 rounded-lg border border-amber-300 dark:border-gray-600 shadow-sm">
+                <span class="text-sm text-amber-600 dark:text-amber-400 truncate">
                   {{ step.image ? (typeof step.image === 'object' ? step.image.name : 'Imagen existente') : 'Seleccionar imagen...' }}
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -209,8 +215,7 @@
 
 
 
-        <button type="button" @click="addStep"
-          class="flex items-center text-sm text-amber-600 hover:text-amber-800 ">
+        <button type="button" @click="addStep" class="flex items-center text-sm text-amber-600 hover:text-amber-800 ">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -230,9 +235,12 @@
           Ingredientes SubReceta
         </h2>
 
-        <div v-for="(ingredient, index) in recipebook.subingredients" :key="index" class="grid md:grid-cols-12 gap-4 mb-4">
+        <div v-for="(ingredient, index) in recipebook.subingredients" :key="index"
+          class="grid md:grid-cols-12 gap-4 mb-4">
           <div class="md:col-span-5">
-            <label :for="'subingredient' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">SubIngrediente {{ index + 1 }}</label>
+            <label :for="'subingredient' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">SubIngrediente {{ index + 1
+              }}</label>
             <div class="flex">
               <input :id="'subingredient' + index" v-model="recipebook.subingredients[index]" required
                 class="w-full px-4 py-2 rounded-l-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
@@ -248,7 +256,8 @@
             </div>
           </div>
           <div class="md:col-span-5">
-            <label :for="'subquantity' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">SubCantidad</label>
+            <label :for="'subquantity' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">SubCantidad</label>
             <input :id="'subquantity' + index" v-model="recipebook.subquantities[index]" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-700 dark:text-white"
               placeholder="Ej: 300 gramos">
@@ -281,10 +290,10 @@
         </h2>
 
         <div v-for="(step, index) in recipebook.substeps" :key="index"
-        class="mb-8 p-6 bg-amber-50 dark:bg-gray-700 rounded-lg border border-amber-200 dark:border-gray-600 relative">
-        <button @click="removeSubStep(index)" type="button"
-        class="absolute top-2 right-2 p-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+          class="mb-8 p-6 bg-amber-50 dark:bg-gray-700 rounded-lg border border-amber-200 dark:border-gray-600 relative">
+          <button @click="removeSubStep(index)" type="button"
+            class="absolute top-2 right-2 p-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -293,22 +302,25 @@
           <h3 class="text-lg font-semibold text-amber-700 dark:text-amber-300 mb-3">SubPaso {{ index + 1 }}</h3>
 
           <div class="mb-3">
-            <label :for="'stepTitle' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Título del
+            <label :for="'stepTitle' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Título del
               subpaso</label>
             <input :id="'stepTitle' + index" v-model="step.title" required
-            class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
-            placeholder="Título breve">
+              class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
+              placeholder="Título breve">
           </div>
 
           <div class="mb-3">
-            <label :for="'stepDesc' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Descripción</label>
+            <label :for="'stepDesc' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Descripción</label>
             <textarea :id="'stepDesc' + index" v-model="step.description" rows="2" required
-            class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
-            placeholder="Describe este paso..."></textarea>
+              class="w-full px-4 py-2 rounded-lg border border-amber-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 dark:placeholder-gray-500 shadow-sm dark:bg-gray-800 dark:text-white"
+              placeholder="Describe este paso..."></textarea>
           </div>
 
           <div>
-            <label :for="'stepImage' + index" class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Imagen
+            <label :for="'stepImage' + index"
+              class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Imagen
               (Opcional)</label>
             <div class="relative">
               <input type="file" :id="'stepImage' + index" @change="handleSubStepImageChange($event, index)"
@@ -318,8 +330,8 @@
                 <span class="text-sm text-amber-600 dark:text-amber-400 truncate">
                   {{ step.image ? (typeof step.image === 'object' ? step.image.name : 'Imagen existente') : 'Seleccionar imagen...' }}
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400"   fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -329,8 +341,8 @@
         </div>
 
         <button type="button" @click="addSubStep"
-        class="flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          class="flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 ">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
               clip-rule="evenodd" />
@@ -342,7 +354,8 @@
       <!-- Filtros -->
 
       <!-- Sección de Filtros -->
-      <div class="p-8 border-b border-amber-100 dark:border-gray-700 bg-gradient-to-br from-amber-50 dark:from-gray-700 to-amber-100 dark:to-gray-800">
+      <div
+        class="p-8 border-b border-amber-100 dark:border-gray-700 bg-gradient-to-br from-amber-50 dark:from-gray-700 to-amber-100 dark:to-gray-800">
         <h2 class="text-2xl font-bold text-amber-800 dark:text-amber-200 mb-6 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -355,12 +368,12 @@
         <!-- Filtros en acordeón -->
         <div class="space-y-4">
           <!-- Tipo de comida -->
-          <div class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
+          <div
+            class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
             <button type="button" @click="toggleAccordion('foodType')"
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Tipo de comida</span>
-              <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'foodType' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -380,12 +393,12 @@
           </div>
 
           <!-- Comunidad Autónoma -->
-          <div class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
+          <div
+            class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
             <button type="button" @click="toggleAccordion('region')"
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Comunidad Autónoma</span>
-              <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'region' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -405,12 +418,12 @@
           </div>
 
           <!-- Tipo de proteína -->
-          <div class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
+          <div
+            class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
             <button type="button" @click="toggleAccordion('protein')"
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Tipo de proteína</span>
-              <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'protein' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -430,12 +443,12 @@
           </div>
 
           <!-- Tiempo de preparación -->
-          <div class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
+          <div
+            class="bg-white/80 dark:bg-gray-700 rounded-xl shadow-sm border border-amber-200 dark:border-gray-600 overflow-hidden">
             <button type="button" @click="toggleAccordion('time')"
               class="w-full px-6 py-4 flex justify-between items-center text-left">
               <span class="font-medium text-amber-700 dark:text-amber-300">Tiempo de preparación</span>
-              <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 dark:text-amber-400 transform "
                 :class="{ 'rotate-180': activeAccordion === 'time' }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -461,8 +474,8 @@
       <!-- Botón de enviar -->
       <div class="px-6 sm:px-8 pb-6 sm:pb-8">
         <button type="submit"
-        class="w-full py-4 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold rounded-lg shadow-lg  transform hover:scale-[1.02] flex items-center justify-center">
-        Guardar Cambios
+          class="w-full py-4 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold rounded-lg shadow-lg  transform hover:scale-[1.02] flex items-center justify-center">
+          Guardar Cambios
         </button>
       </div>
     </form>
@@ -488,7 +501,7 @@ const tiempo = ref('')
 const proteinas = ref([]);
 const showBasicInfo = ref();
 const activeAccordion = ref(null);
-const userToken = localStorage.getItem('userToken');
+const userToken =localStorage.getItem('userToken');
 const recipebook = reactive({
   ingredients: [],
   quantities: [],
@@ -529,44 +542,50 @@ onMounted(() => {
 
   axios.post(`${process.env.VUE_APP_API_URL}/viewRecipe`, { idrecipe: recipeId, userToken: userToken })
     .then(response => {
-      title.value = response.data.recipe_list[0].title;
-      description.value = response.data.recipe_list[0].description;
-      showBasicInfo.value = Boolean(response.data.recipe_list[0].visibility)
-      image.value = response.data.recipe_list[0].image;
-      video.value = response.data.recipe_list[0].video;
 
-      response.data.ingredient_list.forEach(element => {
-        recipebook.ingredients.push(element.ingredients);
-        recipebook.quantities.push(element.quantity);
-      });
+      if (response.data.recipe_list[0].id_user == response.data.user_id) {
 
-      response.data.step_list.forEach(element => {
-        recipebook.steps.push(element);
-      });
+        title.value = response.data.recipe_list[0].title;
+        description.value = response.data.recipe_list[0].description;
+        showBasicInfo.value = Boolean(response.data.recipe_list[0].visibility)
+        image.value = response.data.recipe_list[0].image;
+        video.value = response.data.recipe_list[0].video;
 
-      response.data.subingredient_list.forEach(element => {
-        recipebook.subingredients.push(element.ingredients);
-        recipebook.subquantities.push(element.quantity);
-      });
+        response.data.ingredient_list.forEach(element => {
+          recipebook.ingredients.push(element.ingredients);
+          recipebook.quantities.push(element.quantity);
+        });
 
-      response.data.substep_list.forEach(element => {
-        recipebook.substeps.push(element);
-      });
+        response.data.step_list.forEach(element => {
+          recipebook.steps.push(element);
+        });
 
-      response.data.filters_list.forEach(element => {
-        if (element.category === 'typeeat') {
-          tipoComida.value = element.type;
-        }
-        if (element.category === 'ccaa') {
-          ccaa.value = element.type;
-        }
-        if (element.category === 'time') {
-          tiempo.value = element.type;
-        }
-        if (element.category === 'protein') {
-          proteinas.value.push(element.type);
-        }
-      });
+        response.data.subingredient_list.forEach(element => {
+          recipebook.subingredients.push(element.ingredients);
+          recipebook.subquantities.push(element.quantity);
+        });
+
+        response.data.substep_list.forEach(element => {
+          recipebook.substeps.push(element);
+        });
+
+        response.data.filters_list.forEach(element => {
+          if (element.category === 'typeeat') {
+            tipoComida.value = element.type;
+          }
+          if (element.category === 'ccaa') {
+            ccaa.value = element.type;
+          }
+          if (element.category === 'time') {
+            tiempo.value = element.type;
+          }
+          if (element.category === 'protein') {
+            proteinas.value.push(element.type);
+          }
+        });
+      }else{
+        router.push({ name: '/' });
+      }
     })
     .catch(error => {
       console.error("Error en la solicitud:", error);
