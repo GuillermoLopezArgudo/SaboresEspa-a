@@ -1,21 +1,24 @@
 <template>
-  <div class="w-full bg-white/80 dark:bg-neutral-900 rounded-xl shadow-sm border border-amber-200 dark:border-neutral-700 p-3 sm:p-4">
+  <div
+    class="w-full bg-white/80 dark:bg-neutral-900 rounded-xl shadow-sm border border-amber-200 dark:border-neutral-700 p-3 sm:p-4">
     <div class="flex flex-wrap items-stretch gap-2 sm:gap-3 md:gap-4">
-      
+
       <!-- Filtro Tipo de Comida -->
       <div class="relative flex-1 min-w-[120px]" ref="tipoRef">
         <button @click="toggleAccordion('tipoComida')"
           class="flex items-center justify-between w-full px-2 py-1.5 sm:px-3 sm:py-2 bg-amber-50 dark:bg-neutral-800 hover:bg-amber-100 dark:hover:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-lg text-xs sm:text-sm"
           :class="{ 'bg-amber-100 dark:bg-neutral-700': activeAccordion === 'tipoComida' }">
           <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
             </svg>
             <span>Tipo</span>
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 transform"
-            :class="{ 'rotate-180': activeAccordion === 'tipoComida' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            :class="{ 'rotate-180': activeAccordion === 'tipoComida' }" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -158,7 +161,8 @@
       <div v-for="(filtro, index) in filtrosSeleccionados" :key="index"
         class="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-neutral-700 text-amber-800 dark:text-amber-200 rounded-full text-xs sm:text-sm">
         {{ filtro.label }}: {{ filtro.value }}
-        <button @click="eliminarFiltro(filtro)" class="ml-2 text-amber-600 hover:text-amber-800 dark:hover:text-amber-100">
+        <button @click="eliminarFiltro(filtro)"
+          class="ml-2 text-amber-600 hover:text-amber-800 dark:hover:text-amber-100">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -333,16 +337,17 @@ const filtrosSeleccionados = computed(() => {
 });
 
 const eliminarFiltro = (filtro) => {
-  if (filtro.label === 'Tipo') tipoComida.value = '';
-  else if (filtro.label === 'Región') ccaa.value = '';
-  else if (filtro.label === 'Tiempo') tiempo.value = '';
+  if (filtro.label === 'Tipo') { tipoComida.value = ''; buscarFiltros(); }
+  else if (filtro.label === 'Región') { ccaa.value = ''; buscarFiltros(); }
+  else if (filtro.label === 'Tiempo') { tiempo.value = ''; buscarFiltros(); }
   else if (filtro.label === 'Proteína') {
     const prot = proteins.find(p => p.label === filtro.value);
     if (prot) {
       proteinas.value = proteinas.value.filter(p => p !== prot.value);
     }
+    buscarFiltros()
   }
-  if(filtrosSeleccionados.value.length == 0){
+  if (filtrosSeleccionados.value.length == 0) {
     limpiarFiltros()
   }
 };
@@ -410,10 +415,10 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
   const savedMode = localStorage.getItem('darkMode');
-    if (savedMode !== null) {
-        darkMode.value = JSON.parse(savedMode);
-        applyDarkMode();
-    }
+  if (savedMode !== null) {
+    darkMode.value = JSON.parse(savedMode);
+    applyDarkMode();
+  }
 
   document.addEventListener('click', handleClickOutside);
 });
@@ -423,11 +428,11 @@ onUnmounted(() => {
 });
 
 function applyDarkMode() {
-    if (darkMode.value) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
 }
 
 </script>
