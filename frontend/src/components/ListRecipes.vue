@@ -209,6 +209,10 @@ const props = defineProps({
     idRecipe: {
         type: String,
         required: true
+    },
+    contentTop: {
+        type: undefined,
+        required: true
     }
 });
 const tipoComida = ref('');
@@ -226,7 +230,6 @@ const timeStart = ref(0)
 const timeEnd = ref(0)
 const timeTotal = ref(0)
 
-
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
         filterRecipe()
@@ -234,6 +237,12 @@ watch(() => props.greeting, (newGreeting) => {
         allRecipes()
     }
 })
+
+watch(currentPage, () => {
+  if (props.contentTop) {
+    props.contentTop.scrollIntoView({ behavior: 'smooth' });
+  }
+});
 
 function selectFavorites(favorites_list) {
 

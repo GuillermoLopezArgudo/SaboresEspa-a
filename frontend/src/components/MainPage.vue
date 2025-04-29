@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-amber-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900" ref="contentTop">
     <!-- Header con imagen de fondo -->
     <div class="relative bg-amber-900 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-800">
       <div class="absolute inset-0 bg-black opacity-20"></div>
@@ -16,7 +16,7 @@
     <!-- Contenido principal -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Barra de navegación actualizada -->
-      <ListRecipes :greeting="greeting" :idRecipe="idRecipe" @enviarFiltros="recibirFiltros" />
+      <ListRecipes :contentTop="contentTop" :greeting="greeting" :idRecipe="idRecipe" @enviarFiltros="recibirFiltros" />
     </div>
   </div>
 </template>
@@ -34,6 +34,7 @@ const greeting = ref("all")
 const type = ref("")
 const category = ref('')
 const darkMode = ref(false);
+const contentTop = ref(null);
 
 function recibirFiltros(datos) {
   idRecipe.value = datos.idRecipe;
