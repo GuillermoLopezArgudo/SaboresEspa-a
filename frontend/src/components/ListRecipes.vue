@@ -10,7 +10,7 @@
 
                     <!-- Imagen con calificación y botón de favorito -->
                     <div class="relative">
-                        <router-link :to="'/recipe?id=' + item.id">
+                        <router-link :to="'/recipe?id=' + item.id"  @click="idRecipe = item.id">
                             <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1 text-sm">
                                 {{ average[item.id] !== undefined && average[item.id] !== null ?
                                     Number(average[item.id]).toFixed(2) : "Sin calificación" }} ★
@@ -55,7 +55,7 @@
 
                         <div class="my-4 border-t border-amber-200 dark:border-gray-700"></div>
 
-                        <router-link :to="'/recipe?id=' + item.id"
+                        <router-link :to="'/recipe?id=' + item.id"  @click="idRecipe = item.id"
                             class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -229,6 +229,7 @@ const list = ref("")
 const timeStart = ref(0)
 const timeEnd = ref(0)
 const timeTotal = ref(0)
+const idRecipe = ref(0)
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
@@ -239,6 +240,12 @@ watch(() => props.greeting, (newGreeting) => {
 })
 
 watch(currentPage, () => {
+  if (props.contentTop) {
+    props.contentTop.scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+watch(idRecipe, () => {
   if (props.contentTop) {
     props.contentTop.scrollIntoView({ behavior: 'smooth' });
   }
