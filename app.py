@@ -248,11 +248,9 @@ def viewPersonalRecipes():
                     "category": categorie.category
                 })    
         return jsonify(recipes_list=recipes_list,categories_list=categories_list,reviews_list=reviews_list)
-    return jsonify(recipes_list="",categories_list="")
     
 @app.route('/viewAll', methods=['POST'])
 def viewAllRecipes():
-
     data = request.get_json()
     recipes = Recipe.select().where(Recipe.recipe_visibility == 1)
     recipes_list = [{"id": recipe.id, "title": recipe.recipe_title,"image":recipe.recipe_image, "description":recipe.recipe_description, "video":recipe.recipe_video} for recipe in recipes]

@@ -195,6 +195,7 @@ const activeAccordion = ref('');
 
 const toggleAccordion = (section) => {
   activeAccordion.value = activeAccordion.value === section ? '' : section;
+
 };
 
 const tipoComida = ref('');
@@ -302,9 +303,9 @@ const prepTimes = [
 // Computed para mostrar los filtros seleccionados
 const filtrosSeleccionados = computed(() => {
   const seleccionados = [];
-
   if (tipoComida.value) {
     const tipo = foodTypes.find(t => t.value === tipoComida.value);
+    closeAllAccordions()
     if (tipo) {
       seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
     }
@@ -312,6 +313,7 @@ const filtrosSeleccionados = computed(() => {
 
   if (ccaa.value) {
     const region = regions.find(r => r.value === ccaa.value);
+    closeAllAccordions()
     if (region) {
       seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
     }
@@ -319,6 +321,7 @@ const filtrosSeleccionados = computed(() => {
 
   if (tiempo.value) {
     const tiempoSel = prepTimes.find(t => t.value === tiempo.value);
+    closeAllAccordions()
     if (tiempoSel) {
       seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
     }
@@ -424,6 +427,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  
   document.removeEventListener('click', handleClickOutside);
 });
 

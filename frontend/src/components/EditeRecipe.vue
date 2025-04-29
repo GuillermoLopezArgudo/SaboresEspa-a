@@ -542,8 +542,7 @@ onMounted(() => {
 
   axios.post(`${process.env.VUE_APP_API_URL}/viewRecipe`, { idrecipe: recipeId, userToken: userToken })
     .then(response => {
-
-      if (response.data.recipe_list[0].id_user == response.data.user_id) {
+      if (response.data.recipe_list[0].id_user == response.data.user_id || response.data.user_type == "admin") {
 
         title.value = response.data.recipe_list[0].title;
         description.value = response.data.recipe_list[0].description;
