@@ -16,6 +16,7 @@ import base64
 from models import db, BaseModel
 from flask_mail import Mail, Message
 from datetime import timedelta
+import requests
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
@@ -31,7 +32,10 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+if os.getenv('FLASK_ENV') == 'production':
+    CORS(app, resources={r"/api/*": {"origins": "http://48.217.185.80:8000"}})
+else:
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:8080"}})
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
 jwt = JWTManager(app)
@@ -1179,6 +1183,31 @@ def contact():
         return jsonify({"message": "Correo enviado correctamente"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/categories')
+def get_categories():
+    try:
+        response = requests.get('https://tienda.mercadona.es/api/categories/')
+        response.raise_for_status()
+        return jsonify(response.json())
+    except requests.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/productos', methods=['POST'])
+def get_productos():
+    data = request.get_json()
+    id = data.get("id")
+
+    if not id:
+        return jsonify({'error': 'Missing "id" parameter'}), 400
+
+    try:
+        url = f'https://tienda.mercadona.es/api/categories/{id}'
+        response = requests.get(url)
+        response.raise_for_status()
+        return jsonify(response.json())
+    except requests.RequestException as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

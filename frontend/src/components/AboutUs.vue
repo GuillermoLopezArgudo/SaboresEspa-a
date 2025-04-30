@@ -21,7 +21,7 @@
 </template>
   
   
-  <script setup>
+<script setup>
   import { ref, onMounted } from 'vue';
 
 const darkMode = ref(false);
@@ -42,8 +42,8 @@ function applyDarkMode() {
     document.documentElement.classList.remove('dark');
   }
 }
-  </script>
+</script>
   
-  <style scoped>
-  </style>
+<style scoped>
+</style>
   
