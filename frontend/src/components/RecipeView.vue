@@ -178,8 +178,10 @@
         <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           <li v-for="(ingrediente, idx) in subingredients" :key="idx"
             class="bg-amber-50 dark:bg-gray-700 p-2 sm:p-3 rounded-lg border border-amber-200 dark:border-gray-600 hover:bg-amber-100 dark:hover:bg-gray-600 ">
+            <router-link :to="'/ingredients?ingredients=' + ingrediente">
             <span class="font-medium text-amber-800 dark:text-amber-200 text-sm sm:text-base">{{ ingrediente }}</span>
             <span class="block text-amber-600 dark:text-amber-300 text-xs sm:text-sm">{{ quantity[idx] || 'Cantidad no disponible' }}</span>
+          </router-link>
           </li>
         </ul>
       </div>
