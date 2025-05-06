@@ -10,7 +10,7 @@
               <img :src="producto.thumbnail" alt="Imagen del producto" className="rounded-lg" class="object-cover">
             </div>
             <p class="text-amber-600 dark:text-gray-300 text-sm mt-2">{{ producto.display_name }}</p>
-            <p class="text-amber-600 dark:text-gray-300 text-sm mt-2">{{ producto.price_instructions?.bulk_price }} €
+            <p class="text-amber-600 dark:text-gray-300 text-sm mt-2">{{ producto.price_instructions?.unit_price }} €
             </p>
           </div>
         </div>
@@ -92,8 +92,7 @@ if (palabra && typeof palabra === 'string' && palabra.length > 0) {
   const producto = async () => {
     try {
       const response = await axios.post(`${process.env.VUE_APP_API_URL}/productos`, { id: id.value });
-      console.log("Categorias:")
-      console.log(response.data)
+      timeCharge();
       const searchTerms = palabra.toLowerCase().split(' ');
       const searchVariants = palabrasVariantes.map(v => v.toLowerCase());
 
@@ -122,11 +121,6 @@ if (palabra && typeof palabra === 'string' && palabra.length > 0) {
 
       productos.value = Array.from(uniqueProducts.values());
 
-
-
-      console.log('Productos encontrados:', productos.value.length);
-      console.log('Términos buscados:', searchTerms, 'Variantes:', searchVariants);
-
     } catch (err) {
       console.error("Error fetching products:", err);
     }
@@ -135,9 +129,8 @@ if (palabra && typeof palabra === 'string' && palabra.length > 0) {
   const cargarCategorias = async () => {
     try {
       const response = await fetch(`${process.env.VUE_APP_API_URL}/categories`)
-      const data = await response.json()
-
       timeCharge();
+      const data = await response.json()
       const categoriasBuscadasRaw = ingredientes[palabrasVariantes[0]];
       const categoriasBuscadas = Array.isArray(categoriasBuscadasRaw)
         ? categoriasBuscadasRaw
@@ -187,4 +180,6 @@ const paginatedRecipes = computed(() => {
 const totalPages = computed(() => {
   return Math.ceil(productos.value.length / itemsPerPage.value);
 });
+
+
 </script>
