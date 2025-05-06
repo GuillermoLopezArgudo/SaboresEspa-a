@@ -1,65 +1,96 @@
 <template>
-  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col hidden"
-    ref="list">
-    <div class="flex-1 flex flex-col justify-between" v-if="productos.length > 0">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="producto in paginatedRecipes" :key="producto.id"
-          class="bg-amber-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl  border border-amber-100 dark:border-gray-700 transform hover:-translate-y-1">
-          <div class="p-5">
-            <div class="relative">
-              <img :src="producto.thumbnail" alt="Imagen del producto" className="rounded-lg" class="object-cover">
+  <div class="min-h-screen bg-amber-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
+    <!-- Contenido cuando hay productos -->
+    <div v-if="productos.length > 0" class="flex-1 flex flex-col justify-between p-4 hiden" ref="list">
+      <!-- Grid de productos -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        <div 
+          v-for="producto in paginatedRecipes" 
+          :key="producto.id"
+          class="bg-white/80 dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-amber-100 dark:border-gray-700 hover:-translate-y-1 transition-transform"
+        >
+          <div class="p-4 space-y-3">
+            <div class="relative aspect-square overflow-hidden rounded-md">
+              <img 
+                :src="producto.thumbnail" 
+                :alt="producto.display_name" 
+                class="w-full h-full object-cover hover:scale-105 transition-transform"
+              >
             </div>
-            <p class="text-amber-600 dark:text-gray-300 text-sm mt-2">{{ producto.display_name }}</p>
-            <p class="text-amber-600 dark:text-gray-300 text-sm mt-2">{{ producto.price_instructions?.unit_price }} €
+            <h3 class="text-lg font-medium text-amber-800 dark:text-amber-200 line-clamp-2">
+              {{ producto.display_name }}
+            </h3>
+            <p class="text-amber-600 dark:text-amber-400 font-semibold">
+              {{ producto.price_instructions?.unit_price }} €
             </p>
           </div>
         </div>
       </div>
-      <div class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm sm:text-base">
-        <button @click="currentPage--" :disabled="currentPage === 1"
-          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-400">
+
+      <!-- Paginación -->
+      <div class="flex justify-center items-center mt-8 gap-2">
+        <button 
+          @click="currentPage--" 
+          :disabled="currentPage === 1"
+          class="px-4 py-2 bg-amber-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-600 transition-colors flex items-center gap-1"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
           Anterior
         </button>
-        <span
-          class="px-4 py-1 bg-white/80 dark:bg-gray-700/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-gray-600 rounded shadow-sm">
+        
+        <span class="px-4 py-2 bg-white dark:bg-gray-700 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-gray-600 rounded-lg shadow-sm">
           Página {{ currentPage }} de {{ totalPages }}
         </span>
-        <button @click="currentPage++" :disabled="currentPage === totalPages"
-          class="px-3 py-1 bg-amber-300/80 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-400/80">
+        
+        <button 
+          @click="currentPage++" 
+          :disabled="currentPage === totalPages"
+          class="px-4 py-2 bg-amber-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-600 transition-colors flex items-center gap-1"
+        >
           Siguiente
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
         </button>
       </div>
     </div>
-    <div v-else class="text-center py-12 dark:bg-gray-900 m-4">
-      <div class="max-w-md mx-auto">
-        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400 dark:text-amber-500" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 class="mt-4 text-lg font-medium text-amber-800 dark:text-amber-200">No existe/encuentra el producto
-        </h3>
-        <p class="mt-2 text-amber-600 dark:text-amber-400">Prueba con otro o informe al administrador!</p>
-        <div class="mt-6">
-          <router-link to="/contacto"
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Reporte el error
-          </router-link>
+
+    <!-- Estado vacío -->
+    <div v-else class="flex-1 flex items-center justify-center p-8">
+      <div class="max-w-md text-center space-y-4">
+        <div class="mx-auto w-16 h-16 text-amber-400 dark:text-amber-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
+        <h3 class="text-xl font-medium text-amber-800 dark:text-amber-200">
+          No se encontraron productos
+        </h3>
+        <p class="text-amber-600 dark:text-amber-400">
+          Intenta con otro término o contacta al administrador
+        </p>
+        <router-link 
+          to="/contacto"
+          class="inline-flex items-center px-4 py-2 mt-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Reportar problema
+        </router-link>
       </div>
     </div>
-  </div>
 
-  <div ref="loading" class="flex flex-col items-center min-h-screen px-4 m-4">
-    <div
-      class="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 border-t-2 border-b-2 border-amber-600 dark:border-amber-400">
+    <!-- Estado de carga -->
+    <div 
+      v-show="loading" 
+      class="fixed inset-0 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50"
+      ref="loading">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 dark:border-amber-400" ></div>
+      <p class="mt-4 text-amber-700 dark:text-amber-300">Cargando productos...</p>
     </div>
-    <p class="mt-3 sm:mt-4 text-amber-700 dark:text-amber-300 text-sm sm:text-base md:text-lg text-center">Cargando
-      recetas...</p>
   </div>
 </template>
 
@@ -71,15 +102,15 @@ import { useRoute } from 'vue-router'
 
 const id = ref(0)
 const productos = ref([])
-const loading = ref("")
-const list = ref("")
+const loading = ref(null)
+const list = ref(null)
 const timeStart = ref(0)
 const timeEnd = ref(0)
 const timeTotal = ref(0)
 const route = useRoute()
 const palabra = route.query.ingredients
 const currentPage = ref(1);
-const itemsPerPage = ref(6)
+const itemsPerPage = ref(8)
 
 if (palabra && typeof palabra === 'string' && palabra.length > 0) {
   const palabrasVariantes = [
