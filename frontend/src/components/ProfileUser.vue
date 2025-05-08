@@ -282,7 +282,12 @@ function handleChangePassword() {
 }
 
 function changePassword() {
-  if (newPassword.value !== confirmPassword.value) {
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/;
+  if (!regex.test(newPassword.value)) {
+    error.value = "La contraseña debe tener entre 8 y 15 caracteres, al menos una mayúscula, una minúscula, un número y un carácter especial.";
+    setTimeout(() => { error.value = ''; }, 3000);
+    return;
+  } else if (newPassword.value !== confirmPassword.value) {
     error.value = "Las contraseñas no coinciden";
     setTimeout(() => { error.value = ''; }, 3000);
     return;
