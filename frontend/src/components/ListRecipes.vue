@@ -327,7 +327,7 @@ function favoritesRecipes() {
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
-            if (error.status == 500) {
+            if (error.status == 500 || error.status == 401) {
                 router.push({ name: 'login' });
                 localStorage.removeItem('userToken')
             }
@@ -357,7 +357,7 @@ function personalRecipes() {
             })
             .catch(error => {
                 console.error("Error al obtener las recetas:", error);
-                if (error.status == 500) {
+                if (error.status == 500 || error.status == 401) {
                     router.push({ name: 'login' });
                     localStorage.removeItem('userToken')
                 }

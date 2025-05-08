@@ -78,10 +78,10 @@ def register():
     token = create_access_token(identity=email)
     type = data.get("type")
     if Users.select().where(Users.user_email == email).exists():
-        return jsonify(message="Correo ya existente")
+        return jsonify(message="Correo ya existente"),500
     user = Users(user_name = name,user_email = email, user_password = hashlib.sha256(password.encode('utf-8')).hexdigest(), user_type = type,user_token = token, user_image= "/static/images/NonPerfil.webp", created_at = date.today(), modified_at = date.today())
     user.save()
-    return jsonify(userToken = token)
+    return jsonify(userToken = token),201
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -94,10 +94,10 @@ def login():
             if Users.select().where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).exists():
                 user = Users.select(Users.id,Users.user_type).where((Users.user_email == email) & (Users.user_password == hashlib.sha256(password.encode('utf-8')).hexdigest())).get()       
                 Users.update(user_token=token).where(Users.id == user.id).execute()
-                return jsonify(userToken=token)
-            return jsonify(message="ERROR Usuario no registrado")
-        return jsonify(message="ERROR Contraseña incorrecta")
-    return jsonify(message= "ERROR Email no encontrado")
+                return jsonify(userToken=token),201
+            return jsonify(message="ERROR Usuario no registrado"),401
+        return jsonify(message="ERROR Contraseña incorrecta"),401
+    return jsonify(message= "ERROR Email no encontrado"),401
 
 @app.route('/create', methods=['POST'])
 def createRecipe():
@@ -228,7 +228,8 @@ def createRecipe():
         for protein in proteins:
             filters = RecipeFilter(id_recipe_id=recipe.id,type=protein,category="protein",created_at = date.today(), modified_at = date.today())
             filters.save()
-        return jsonify(message= "RECETA SUBIDA")
+        return jsonify(message= "RECETA SUBIDA"),201
+    return jsonify(error="Error token no encontrado"),401
 
 @app.route('/viewRecipes', methods=['POST'])
 def viewPersonalRecipes():
@@ -251,7 +252,8 @@ def viewPersonalRecipes():
                     "type": categorie.type,
                     "category": categorie.category
                 })    
-        return jsonify(recipes_list=recipes_list,categories_list=categories_list,reviews_list=reviews_list)
+        return jsonify(recipes_list=recipes_list,categories_list=categories_list,reviews_list=reviews_list),201
+    return jsonify("Error token no encontrado"),401
     
 @app.route('/viewAll', methods=['POST'])
 def viewAllRecipes():
@@ -293,9 +295,9 @@ def viewAllRecipes():
             reviews = RecipeReview.select().where(RecipeReview.id_user_id ==user_id)
             reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
 
-            return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list,user_id=user_id)
-        return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list,user_id=user_id)
-    return jsonify(recipes_list=recipes_list,categories_list=categories_list)
+            return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list,user_id=user_id),200
+        return jsonify(recipes_list=recipes_list, favorites_list=favorites_list, reviews_list=reviews_list,categories_list=categories_list,user_id=user_id),200
+    return jsonify(recipes_list=recipes_list,categories_list=categories_list),200
 
 @app.route('/updateFavs', methods=['POST'])
 def updateFavs():
@@ -307,14 +309,15 @@ def updateFavs():
         user_id = user.id
         favorite = UserFavorite(id_recipe_id= idrecipe, id_user_id = user_id, created_at = date.today(), modified_at = date.today())
         favorite.save()
-        return jsonify(message="Favorite save")
+        return jsonify(message="Favorite save"),200
+    return jsonify("Error token no encontrado"),401
 
 @app.route('/deleteFavs', methods=['POST'])
 def deleteFavs():
     data = request.get_json()
     idrecipe = data.get("idrecipe")
     UserFavorite.delete().where(UserFavorite.id_recipe_id == idrecipe).execute()
-    return jsonify(message="Favorite delete")
+    return jsonify(message="Favorite delete"),200
 
 @app.route('/updateRating', methods=['POST'])
 def updateRating():
@@ -328,10 +331,11 @@ def updateRating():
         if RecipeReview.select().where((RecipeReview.id_recipe_id == idrecipe) & (RecipeReview.id_user_id==user_id)).exists():
             review=RecipeReview.select(RecipeReview.id).where((RecipeReview.id_recipe_id == idrecipe) & (RecipeReview.id_user_id==user_id)).get()
             RecipeReview.update(recipe_review_item_value=rating).where(RecipeReview.id == review.id).execute()
-            return jsonify(message="Review update")
+            return jsonify(message="Review update"),200
         review = RecipeReview(id_recipe_id= idrecipe, id_user_id = user_id, recipe_review_item_value= rating,created_at = date.today(), modified_at = date.today())
         review.save()
-        return jsonify(message="Review save")
+        return jsonify(message="Review save"),200
+    return jsonify("Error token no encontrado"),401
 
 @app.route('/viewRecipe', methods=['POST'])
 def viewRecipe():
@@ -375,9 +379,9 @@ def viewRecipe():
             likes_list = [{"id_recipe":like.id_comment_id } for like in likes]
             dislikes = DislikeComment.select().where(DislikeComment.id_user == user.id)
             dislikes_list = [{"id_recipe":like.id_comment_id } for like in dislikes]
-            return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
-        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
-    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list)
+            return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list),200
+        return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, favorites_list=favorites_list, step_list=step_list, filters_list=filters_list, subingredient_list=subingredient_list,substep_list=substep_list,user_id=user_id,user_token=user_token,user_name=user_name,user_type=user_type, likes_list= likes_list,dislikes_list=dislikes_list,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list),200
+    return jsonify(recipe_list=recipe_list, ingredient_list=ingredient_list, step_list=step_list, filters_list=filters_list,subingredient_list=subingredient_list,substep_list=substep_list,user_name=user_name,countLikes_list=countLikes_list,countDisLikes_list=countDisLikes_list),200
 
 @app.route('/viewComment', methods=['POST'])
 def viewComment(): 
@@ -416,7 +420,7 @@ def viewComment():
             "type": viewer_type
         })
 
-    return jsonify(comment_list=comment_list, subcomments_list=subcomments_list)
+    return jsonify(comment_list=comment_list, subcomments_list=subcomments_list),200
     
 @app.route('/createComment', methods=['POST'])
 def createComment():
@@ -430,7 +434,8 @@ def createComment():
         user = Users.select(Users.user_name).where(Users.id == user_id).execute()
         commentRecipe = RecipeComment(comment_text= comment,id_recipe_id= idrecipe, id_user_id= user_id,created_at = date.today(), modified_at = date.today())
         commentRecipe.save() 
-        return jsonify(message ="Comment Update",username=user[0].user_name)
+        return jsonify(message ="Comment Update",username=user[0].user_name),201
+    return jsonify("Error token no encontrado"),401
 
 @app.route('/createSubComment', methods=['POST'])
 def createSubComment():
@@ -445,7 +450,8 @@ def createSubComment():
         user = Users.select(Users.user_name).where(Users.id == user_id).execute()
         commentRecipe = RecipeSubComment(id_comment_id = idcomment, comment_text= comment,id_recipe_id= idrecipe, id_user_id= user_id,created_at = date.today(), modified_at = date.today())
         commentRecipe.save() 
-        return jsonify(message ="Comment Update",username=user[0].user_name)
+        return jsonify(message ="Comment Update",username=user[0].user_name),201
+    return jsonify("Error token no encontrado"),401
 
 @app.route('/deleteRecipe', methods=['POST'])
 def deleteRecipe():
@@ -475,7 +481,7 @@ def deleteRecipe():
             SubStepImage.delete().where(SubStepImage.id == step_image.id_image).execute()
     SubRecipeStep.delete().where(SubRecipeStep.id_recipe == idrecipe).execute()
     Recipe.delete().where(Recipe.id == idrecipe).execute()
-    return jsonify(message="Recipe deleted")
+    return jsonify(message="Recipe deleted"),200
 
 @app.route('/deleteComment', methods=['POST'])
 def deleteComment():
@@ -485,14 +491,14 @@ def deleteComment():
     LikesComment.delete().where(LikesComment.id_comment== idcomment).execute()
     RecipeSubComment.delete().where(RecipeSubComment.id_comment == idcomment).execute()
     RecipeComment.delete().where(RecipeComment.id == idcomment).execute()
-    return jsonify(message="Recipe deleted")
+    return jsonify(message="Recipe deleted"),200
 
 @app.route('/deleteSubComment', methods=['POST'])
 def deleteSubComment():
     data = request.get_json()
     idcomment = data.get('idcomment')
     RecipeSubComment.delete().where(RecipeSubComment.id == idcomment).execute()
-    return jsonify(message="Recipe deleted")
+    return jsonify(message="Recipe deleted"),200
 
 @app.route('/editeComment', methods=['POST'])
 def editeComment():
@@ -500,7 +506,7 @@ def editeComment():
     comment = data.get('comment')
     idcomment = data.get('idcomment')
     RecipeComment.update(comment_text=comment,modified_at=date.today()).where(RecipeComment.id == idcomment).execute()
-    return jsonify(message="Change Comment")
+    return jsonify(message="Change Comment"),200
 
 @app.route('/editeSubComment', methods=['POST'])
 def editeSubComment():
@@ -508,7 +514,7 @@ def editeSubComment():
     comment = data.get('comment')
     idcomment = data.get('idcomment')
     RecipeSubComment.update(comment_text=comment,modified_at=date.today()).where(RecipeSubComment.id == idcomment).execute()
-    return jsonify(message="Change Comment")
+    return jsonify(message="Change Comment"),200
 
 @app.route('/viewFavs', methods=['POST'])
 def viewFavs():
@@ -543,7 +549,8 @@ def viewFavs():
                     "type": categorie.type,
                     "category": categorie.category
                 })
-        return jsonify(favorites_list=recipes_list, reviews_list=reviews_list,categories_list=categories_list)
+        return jsonify(favorites_list=recipes_list, reviews_list=reviews_list,categories_list=categories_list),200
+    return jsonify(error="Error token no encontrado"),401
 
 @app.route('/viewProfile',methods=['POST'])
 def viewProfile():
@@ -554,7 +561,8 @@ def viewProfile():
         user_id = user.id
         users = Users.select(Users.user_name,Users.user_email, Users.user_image ).where(Users.id == user_id).execute()
         users_list = [{"name":user.user_name, "email":user.user_email, "image":user.user_image} for user in users]
-        return jsonify(message=users_list,type=user.user_type)
+        return jsonify(message=users_list,type=user.user_type),200
+    return jsonify("Error token no encontrado"),401
 
 @app.route('/editeRecipe', methods=['POST'])
 def editeRecipe():
@@ -731,7 +739,7 @@ def editeRecipe():
     for protein in proteins:
         filters = RecipeFilter(id_recipe_id=recipe.id,type=protein,category="protein",created_at = date.today(), modified_at = date.today())
         filters.save()
-    return jsonify(message="Receta actualizada correctamente")
+    return jsonify(message="Receta actualizada correctamente"),200
 
 @app.route('/changeImage',methods=['POST'])
 def changeImage():
@@ -750,13 +758,13 @@ def changeImage():
                 image_url = save_base64_file(image_base64, image_name, app.config['UPLOAD_FOLDER_IMAGES'])
                 if image_url:
                     Users.update(user_image=image_url,modified_at=date.today()).where(Users.id == user_id).execute()
-                    return jsonify(message="Image Changed", newImage=image_url)
+                    return jsonify(message="Image Changed", newImage=image_url),200
                 else:
-                    return jsonify(message="Failed to save image")
+                    return jsonify(message="Failed to save image"),401
             else:
-                return jsonify(message="No base64 data found")
+                return jsonify(message="No base64 data found"),404
 
-        return jsonify(message="Image data not valid")
+        return jsonify(message="Image data not valid"),406
 
 @app.route('/changeName',methods=['POST'])
 def changeName():
@@ -767,7 +775,8 @@ def changeName():
     if user:
         user_id = user.id
         Users.update(user_name=name,modified_at=date.today()).where(Users.id == user_id).execute()
-        return jsonify(message=name)
+        return jsonify(message=name),200
+    return jsonify("Error token no encontrado"),401
     
 @app.route('/changeEmail',methods=['POST'])
 def changeEmail():
@@ -781,7 +790,8 @@ def changeEmail():
         token = create_access_token(identity=email)
         user = Users.select(Users.id).where((Users.user_email == email)).get() 
         Users.update(user_token=token,modified_at=date.today()).where(Users.id == user.id).execute()
-        return jsonify(message=email,userToken=token)
+        return jsonify(message=email,userToken=token),200
+    return jsonify("Error token no encontrado"),401
 
 @app.route('/filterRecipe', methods=['POST'])
 def filterRecipe():
@@ -834,7 +844,7 @@ def filterRecipe():
 
     recipe_ids = [r.id_recipe_id for r in query.distinct()]
     
-    return jsonify(message=[{"idrecipe": id_} for id_ in recipe_ids])
+    return jsonify(message=[{"idrecipe": id_} for id_ in recipe_ids]),200
 
 @app.route('/recipeFilter', methods=['POST'])
 def recipeFilter():
@@ -852,8 +862,8 @@ def recipeFilter():
         favorites_list = [{"id_recipe": favorite.id_recipe_id} for favorite in favorites]
         reviews = RecipeReview.select().where(RecipeReview.id_user_id ==user_id)
         reviews_list = [{"id_recipe": review.id_recipe_id, "review": review.recipe_review_item_value} for review in reviews]
-        return jsonify(filtered_recipes=filtered_recipes, favorites_list=favorites_list, reviews_list=reviews_list)
-    return jsonify(filtered_recipes=filtered_recipes)
+        return jsonify(filtered_recipes=filtered_recipes, favorites_list=favorites_list, reviews_list=reviews_list),200
+    return jsonify(filtered_recipes=filtered_recipes),200
 
 @app.route('/changePassword', methods=['POST'])
 def changePassword():
@@ -864,7 +874,8 @@ def changePassword():
     if user:
         user_id = user.id
         Users.update(user_password=hashlib.sha256(newPassword.encode('utf-8')).hexdigest(),modified_at=date.today()).where(Users.id == user_id).execute()
-        return jsonify(message="Contraseña Actualizada")
+        return jsonify(message="Contraseña Actualizada"),200
+    return jsonify("Error No Econtrado"),404
 
 @app.route('/deleteProfile', methods=['POST'])
 def deleteProfile():
@@ -914,7 +925,7 @@ def deleteProfile():
     Recipe.delete().where(Recipe.id_user == user_id).execute()
     Users.delete().where(Users.id == user_id).execute()
 
-    return jsonify(message="Perfil eliminado correctamente")
+    return jsonify(message="Perfil eliminado correctamente"),200
 
 @app.route('/allUsers', methods=['POST'])
 def allUsers():
@@ -926,8 +937,9 @@ def allUsers():
         if Users.select().where((Users.user_token == token) & (Users.user_type == "admin")):
             users = Users.select().where(Users.user_type != type)
             users_list = [{"iduser":user.id,"name":user.user_name,"email":user.user_email}for user in users]
-            return jsonify(users_list=users_list)
-        return jsonify(users_list=[])
+            return jsonify(users_list=users_list),200
+        return jsonify(users_list=[]),200
+    return jsonify("Error No econtrado"),404
 
 @app.route('/deleteUser', methods=['POST'])
 def deleteUser():
@@ -955,7 +967,8 @@ def deleteUser():
 
         Recipe.delete().where(Recipe.id_user == iduser).execute()
         Users.delete().where(Users.id == iduser).execute()    
-        return jsonify(message="Perfil eliminado")
+        return jsonify(message="Perfil eliminado"),200
+    return jsonify("Error No Encontrado"),404
 
 @app.route('/averageStars', methods=["POST"])
 def averageStars():
@@ -972,7 +985,7 @@ def averageStars():
                 'average_rating': round(average_rating, 2) 
             })
 
-        return jsonify(media=result)
+        return jsonify(media=result),200
 
     except Exception as e:
         return jsonify(message="Error: " + str(e)), 500
