@@ -302,6 +302,7 @@ export const ingredientes = {
   "Yemas de huevo": "Huevos",
 
   // Verdura
+  "Judía verde":"Verdura",
   "Patata": "Verdura",
   "Patatas": ["Verdura", "Fruta y verdura", "Patatas", "Tubérculos"],
   "Patatas medianas": ["Verdura", "Patatas"],
