@@ -6,7 +6,7 @@
             <!-- Grid de recetas -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div v-for="item in paginatedRecipes" :key="item.id"
-                    class="bg-white-0 dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl  border border-amber-100 dark:border-gray-700 transform hover:-translate-y-1">
+                    class="bg-white-0 dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-amber-100 dark:border-gray-700 transform hover:-translate-y-1">
 
                     <!-- Imagen con calificación y botón de favorito -->
                     <div class="relative">
@@ -574,4 +574,5 @@ const timeCharge = () => {
 .line-clamp-none {
     -webkit-line-clamp: unset;
 }
+
 </style>

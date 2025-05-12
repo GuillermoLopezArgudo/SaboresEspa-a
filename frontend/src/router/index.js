@@ -9,8 +9,9 @@ import MainPage from '@/components/MainPage.vue';
 import HomeRecipe from '@/components/HomeRecipe.vue';
 import PersonalRecipes from '@/components/PersonalRecipes.vue';
 import AboutUs from '@/components/AboutUs.vue';
-import ContactPage from '@/components/ContactPage.vue';
 import IngredientsPrice from '@/components/IngredientsPrice.vue';
+import IngredientsList from '@/components/IngredientsList.vue';
+import ContactPage from '@/components/ContactPage.vue';
 
 
 const routes = [
@@ -26,6 +27,8 @@ const routes = [
   { path: '/sobre-nosotros', name: 'SobreNosotros', component: AboutUs },
   { path: '/contacto', name: 'Contacto', component: ContactPage},
   { path: '/ingredients', name: 'Ingredients', component: IngredientsPrice ,meta: {title: "Ingredientes"}, props: route=> ({ ingredients: route.query.ingredients }) },
+  { path: '/ingredientList', name: 'IngredientsList', component: IngredientsList},
+
 ];
 
 const router = createRouter({

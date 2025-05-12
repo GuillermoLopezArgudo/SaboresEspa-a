@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full bg-white/80 dark:bg-neutral-900 rounded-xl shadow-sm border border-amber-200 dark:border-neutral-700 p-3 sm:p-4">
+    class="w-full bg-white/80 dark:bg-neutral-900 rounded-b-xl shadow-sm  p-3 sm:p-4">
     <div class="flex flex-wrap items-stretch gap-2 sm:gap-3 md:gap-4">
 
       <!-- Filtro Tipo de Comida -->

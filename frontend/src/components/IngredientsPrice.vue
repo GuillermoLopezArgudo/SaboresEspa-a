@@ -63,15 +63,15 @@
           No se encontraron productos
         </h3>
         <p class="text-amber-600 dark:text-amber-400">
-          Intenta con otro término o contacta al administrador
+          Culta mas ingredientes en:
         </p>
-        <router-link to="/contacto"
+        <router-link to="/ingredientList"
           class="inline-flex items-center px-4 py-2 mt-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Reportar problema
+          Mas ingredientes
         </router-link>
       </div>
     </div>
