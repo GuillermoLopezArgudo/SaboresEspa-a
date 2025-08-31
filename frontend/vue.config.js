@@ -5,12 +5,18 @@ module.exports = defineConfig({
 
 module.exports = {
   devServer: {
-    host: '0.0.0.0',  // Permite acceso desde Docker
-    port: 8080,       // Usa el puerto expuesto
-    hot: true,        // Activa Hot Module Replacement
-    liveReload: true, // Permite la recarga automática
-    watchFiles: ['src/**/*'], // Activa la observación de archivos
-  }
+    host: '0.0.0.0',
+    port: 8080,
+    hot: true,
+    liveReload: true,
+    watchFiles: ['src/**/*'],
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+    allowedHosts: 'all', // 👈 Reemplaza disableHostCheck con esto
+  },
 };
+
+
 
 
