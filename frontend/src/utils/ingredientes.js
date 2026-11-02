@@ -172,24 +172,65 @@
   "Caldo casero de verduras": "Caldo y puré"
 };
 
-/** Resuelve la categoría Mercadona a partir del texto del ingrediente. */
+/** Quita acentos/diacríticos para comparar con nombres de Mercadona. */
+export function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Alias de categorías locales → nombre real en la API de Mercadona. */
+const CATEGORY_ALIASES = {
+  'caldo y pure': 'Sopa y caldo',
+  'queso untable y fresco': 'Queso untable, fresco y especialidades',
+  'pan rallado': 'Pan tostado y rallado',
+}
+
 export function resolveMercadonaCategory(ingredientText) {
   if (!ingredientText) return null
   const raw = String(ingredientText).trim()
   if (!raw) return null
-  if (ingredientes[raw]) return ingredientes[raw]
+  if (ingredientes[raw]) return mapCategoryName(ingredientes[raw])
 
-  const lower = raw.toLowerCase()
-  // match exacto case-insensitive
+  const needle = normalizeText(raw)
+  // match exacto sin acentos
   for (const [key, cat] of Object.entries(ingredientes)) {
-    if (key.toLowerCase() === lower) return cat
+    if (normalizeText(key) === needle) return mapCategoryName(cat)
   }
   // match por inclusión (más largo primero)
   const keys = Object.keys(ingredientes).sort((a, b) => b.length - a.length)
   for (const key of keys) {
-    if (lower.includes(key.toLowerCase()) || key.toLowerCase().includes(lower)) {
-      return ingredientes[key]
+    const k = normalizeText(key)
+    if (needle.includes(k) || k.includes(needle)) {
+      return mapCategoryName(ingredientes[key])
     }
   }
   return null
+}
+
+function mapCategoryName(category) {
+  if (!category) return category
+  const alias = CATEGORY_ALIASES[normalizeText(category)]
+  return alias || category
+}
+
+export function textMatchesIngredient(productName, ingredient) {
+  const hay = normalizeText(productName)
+  if (!hay) return false
+  const variants = ingredientVariants(ingredient)
+  return variants.some((v) => v && hay.includes(v))
+}
+
+export function ingredientVariants(word) {
+  if (!word) return []
+  const base = normalizeText(word)
+  const tokens = base.split(/[\s,/()-]+/).filter((t) => t.length > 2)
+  const out = new Set([base, ...tokens])
+  // singular/plural simple
+  if (base.endsWith('es') && base.length > 4) out.add(base.slice(0, -2))
+  else if (base.endsWith('s') && base.length > 3) out.add(base.slice(0, -1))
+  return [...out]
 }
