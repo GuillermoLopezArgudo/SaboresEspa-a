@@ -10,6 +10,9 @@ from app.models import Users
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 MAX_COMMENT_LEN = 2000
+MAX_NAME_LEN = 255
+MAX_QUANTITY_LEN = 50
+MAX_STEP_TITLE_LEN = 255
 
 
 def hash_password(password: str) -> str:
@@ -38,28 +41,36 @@ def _bearer_token() -> str:
     return ""
 
 
-def get_current_user() -> Users | None:
-    """Usuario autenticado vía JWT; el token debe coincidir con user_token (revocación)."""
-    verify_jwt_in_request()
+def resolve_user_from_jwt(*, optional: bool = False) -> Users | None:
+    """Resuelve usuario por JWT (identity = id numérico) + user_token (revocación).
+
+    Identidades email legacy se rechazan (forzar re-login).
+    """
+    verify_jwt_in_request(optional=optional)
     identity = get_jwt_identity()
     if identity is None:
         return None
     try:
         user_id = int(identity)
     except (TypeError, ValueError):
-        return Users.get_or_none(Users.user_email == identity)
+        # No aceptar identity email: saltaba la revocación por user_token
+        return None
 
     user = Users.get_or_none(Users.id == user_id)
     if not user:
         return None
 
     token = _bearer_token()
-    # Si hay token de sesión guardado, debe coincidir (logout / login nuevo lo invalidan)
-    if user.user_token and token and user.user_token != token:
-        return None
     if not user.user_token:
         return None
+    if token and user.user_token != token:
+        return None
     return user
+
+
+def get_current_user() -> Users | None:
+    """Usuario autenticado vía JWT; el token debe coincidir con user_token (revocación)."""
+    return resolve_user_from_jwt(optional=False)
 
 
 def login_required(fn):

@@ -17,7 +17,12 @@ from app.models import (
     UserFavorite,
     Users,
 )
-from app.security import MAX_COMMENT_LEN, login_required
+from app.security import (
+    MAX_COMMENT_LEN,
+    MAX_QUANTITY_LEN,
+    MAX_STEP_TITLE_LEN,
+    login_required,
+)
 from app.services.files import save_base64_file
 
 recipes_bp = Blueprint("recipes", __name__)
@@ -126,21 +131,9 @@ def _require_upload(file_dict, folder, kind, label, allowed_existing=None):
 
 def _optional_user():
     try:
-        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+        from app.security import resolve_user_from_jwt
 
-        from app.security import _bearer_token
-
-        verify_jwt_in_request(optional=True)
-        identity = get_jwt_identity()
-        if identity is None:
-            return None
-        user = Users.get_or_none(Users.id == int(identity))
-        if not user or not user.user_token:
-            return None
-        token = _bearer_token()
-        if token and user.user_token != token:
-            return None
-        return user
+        return resolve_user_from_jwt(optional=True)
     except Exception:
         return None
 
@@ -181,6 +174,8 @@ def create_recipe(current_user):
     title = (data.get("title") or "").strip()
     if not title:
         return jsonify(message="Título obligatorio"), 400
+    if len(title) > 255:
+        return jsonify(message="Título demasiado largo (máx. 255)"), 400
 
     # Subir TODA la media antes de tocar la BD (evita recetas huérfanas)
     image = data.get("image")
@@ -211,6 +206,11 @@ def create_recipe(current_user):
     steps = data.get("steps") or []
     prepared_steps = []
     for step in steps:
+        step_title = (step.get("title") or "").strip()
+        if not step_title:
+            return jsonify(message="Cada paso necesita título"), 400
+        if len(step_title) > MAX_STEP_TITLE_LEN:
+            return jsonify(message=f"Título de paso demasiado largo (máx. {MAX_STEP_TITLE_LEN})"), 400
         step_image = step.get("image")
         step_image_url = None
         if step_image and isinstance(step_image, dict) and step_image.get("base64"):
@@ -222,7 +222,12 @@ def create_recipe(current_user):
             )
             if isinstance(step_image_url, tuple):
                 return step_image_url
-        prepared_steps.append((step, step_image_url))
+        prepared_steps.append((step, step_title, step_image_url))
+
+    for i, _ingredient in enumerate(ingredients):
+        qty = quantities[i] if i < len(quantities) else ""
+        if qty is not None and len(str(qty)) > MAX_QUANTITY_LEN:
+            return jsonify(message=f"Cantidad demasiado larga (máx. {MAX_QUANTITY_LEN})"), 400
 
     with db.atomic():
         recipe = Recipe.create(
@@ -237,20 +242,21 @@ def create_recipe(current_user):
         )
 
         for i, ingredient in enumerate(ingredients):
+            qty = quantities[i] if i < len(quantities) else ""
             RecipeIngredient.create(
                 id_recipe=recipe.id,
                 id_user=current_user.id,
                 ingredients_text=ingredient,
-                quantity_unit=quantities[i] if i < len(quantities) else "",
+                quantity_unit=str(qty or "")[:MAX_QUANTITY_LEN],
                 created_at=date.today(),
                 modified_at=date.today(),
             )
 
-        for step, step_image_url in prepared_steps:
+        for step, step_title, step_image_url in prepared_steps:
             recipe_step = RecipeStep.create(
                 id_recipe=recipe.id,
                 id_user=current_user.id,
-                step_title=step.get("title"),
+                step_title=step_title,
                 step_description=_step_description(step),
                 created_at=date.today(),
                 modified_at=date.today(),
@@ -625,6 +631,8 @@ def edit_recipe(current_user):
         new_title = (data.get("title") or "").strip()
         if not new_title:
             return jsonify(message="Título obligatorio"), 400
+        if len(new_title) > 255:
+            return jsonify(message="Título demasiado largo (máx. 255)"), 400
 
     # Media ya asociada a esta receta (única permitida sin nuevo base64)
     existing_images = set()
@@ -669,6 +677,11 @@ def edit_recipe(current_user):
     quantities = data.get("quantities") or []
     prepared_steps = []
     for step in data.get("steps") or []:
+        step_title = (step.get("title") or "").strip()
+        if not step_title:
+            return jsonify(message="Cada paso necesita título"), 400
+        if len(step_title) > MAX_STEP_TITLE_LEN:
+            return jsonify(message=f"Título de paso demasiado largo (máx. {MAX_STEP_TITLE_LEN})"), 400
         step_image = step.get("image")
         step_image_url = None
         if step_image and isinstance(step_image, dict):
@@ -682,7 +695,12 @@ def edit_recipe(current_user):
             if isinstance(uploaded, tuple):
                 return uploaded
             step_image_url = uploaded
-        prepared_steps.append((step, step_image_url))
+        prepared_steps.append((step, step_title, step_image_url))
+
+    for i, _ingredient in enumerate(ingredients):
+        qty = quantities[i] if i < len(quantities) else ""
+        if qty is not None and len(str(qty)) > MAX_QUANTITY_LEN:
+            return jsonify(message=f"Cantidad demasiado larga (máx. {MAX_QUANTITY_LEN})"), 400
 
     with db.atomic():
         if new_title is not None:
@@ -721,20 +739,21 @@ def edit_recipe(current_user):
         owner_id = recipe.id_user_id
 
         for i, ingredient in enumerate(ingredients):
+            qty = quantities[i] if i < len(quantities) else ""
             RecipeIngredient.create(
                 id_recipe=recipe.id,
                 id_user=owner_id,
                 ingredients_text=ingredient,
-                quantity_unit=quantities[i] if i < len(quantities) else "",
+                quantity_unit=str(qty or "")[:MAX_QUANTITY_LEN],
                 created_at=date.today(),
                 modified_at=date.today(),
             )
 
-        for step, step_image_url in prepared_steps:
+        for step, step_title, step_image_url in prepared_steps:
             recipe_step = RecipeStep.create(
                 id_recipe=recipe.id,
                 id_user=owner_id,
-                step_title=step.get("title"),
+                step_title=step_title,
                 step_description=_step_description(step),
                 created_at=date.today(),
                 modified_at=date.today(),

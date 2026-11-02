@@ -134,8 +134,9 @@ function recibirIdRecipe(mensaje) {
 }
 
 const limpiarFiltros = () => {
-  idRecipe.value = []
+  // Primero all: así el watch de idRecipe no dispara filter vacío
   greeting.value = "all";
+  idRecipe.value = []
 }
 
 async function closeSession() {
