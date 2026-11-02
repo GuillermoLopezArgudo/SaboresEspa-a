@@ -56,17 +56,17 @@ def _save_filters(recipe_id, typeeat=None, ccaa=None, time=None, proteins=None):
 
 
 def _categories_for_recipes(recipes):
-    categories_list = []
-    for recipe in recipes:
-        for categorie in RecipeFilter.select().where(RecipeFilter.id_recipe == recipe.id):
-            categories_list.append(
-                {
-                    "recipe_id": recipe.id,
-                    "type": categorie.type,
-                    "category": categorie.category,
-                }
-            )
-    return categories_list
+    if not recipes:
+        return []
+    recipe_ids = [recipe.id for recipe in recipes]
+    return [
+        {
+            "recipe_id": categorie.id_recipe_id,
+            "type": categorie.type,
+            "category": categorie.category,
+        }
+        for categorie in RecipeFilter.select().where(RecipeFilter.id_recipe.in_(recipe_ids))
+    ]
 
 
 def _recipe_dict(r):
@@ -777,10 +777,7 @@ def edit_recipe(current_user):
     return jsonify(message="Receta actualizada correctamente")
 
 
-@recipes_bp.post("/filterRecipe")
-def filter_recipe():
-    """Devuelve ids que cumplen TODAS las categorías enviadas (AND entre categorías)."""
-    data = request.get_json() or {}
+def _filter_conditions_from_payload(data):
     conditions = []
     if data.get("typeeat"):
         conditions.append(("typeeat", data["typeeat"]))
@@ -791,34 +788,64 @@ def filter_recipe():
     for protein in data.get("proteins") or []:
         if protein:
             conditions.append(("protein", protein))
+    return conditions
 
+
+def _recipe_ids_matching_filters(conditions):
+    """AND entre condiciones: intersección progresiva solo de IDs."""
     if not conditions:
-        return jsonify(message=[])
+        return []
 
-    # Intersección de recipe ids
-    id_sets = []
+    matched = None
     for category, value in conditions:
         ids = {
-            f.id_recipe_id
-            for f in RecipeFilter.select().where(
+            row.id_recipe_id
+            for row in RecipeFilter.select(RecipeFilter.id_recipe).where(
                 (RecipeFilter.category == category) & (RecipeFilter.type == value)
             )
         }
-        id_sets.append(ids)
+        matched = ids if matched is None else (matched & ids)
+        if not matched:
+            return []
+    return list(matched)
 
-    result_ids = set.intersection(*id_sets) if id_sets else set()
-    if not result_ids:
-        return jsonify(message=[])
 
-    # Solo IDs de recetas públicas (no filtrar privadas por categoría)
-    visible = {
-        r.id
-        for r in Recipe.select(Recipe.id).where(
-            (Recipe.id.in_(list(result_ids)))
-            & (Recipe.recipe_visibility == True)  # noqa: E712
+@recipes_bp.post("/filterRecipe")
+def filter_recipe():
+    """Devuelve ids (y opcionalmente recetas) que cumplen TODAS las categorías (AND)."""
+    data = request.get_json() or {}
+    conditions = _filter_conditions_from_payload(data)
+    if not conditions:
+        return jsonify(message=[], filtered_recipes=[], categories_list=[])
+
+    matched_ids = _recipe_ids_matching_filters(conditions)
+    if not matched_ids:
+        return jsonify(message=[], filtered_recipes=[], categories_list=[])
+
+    recipes = list(
+        Recipe.select().where(
+            (Recipe.id.in_(matched_ids)) & (Recipe.recipe_visibility == True)  # noqa: E712
         )
+    )
+    message = [{"idrecipe": r.id} for r in recipes]
+    payload = {
+        "message": message,
+        "filtered_recipes": [_recipe_dict(r) for r in recipes],
+        "categories_list": _categories_for_recipes(recipes),
+        "favorites_list": [],
+        "reviews_list": [],
     }
-    return jsonify(message=[{"idrecipe": rid} for rid in visible])
+    viewer = _optional_user()
+    if viewer:
+        payload["favorites_list"] = [
+            {"id_recipe": f.id_recipe_id}
+            for f in UserFavorite.select().where(UserFavorite.id_user == viewer.id)
+        ]
+        payload["reviews_list"] = [
+            {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
+            for r in RecipeReview.select().where(RecipeReview.id_user == viewer.id)
+        ]
+    return jsonify(**payload)
 
 
 @recipes_bp.post("/recipeFilter")

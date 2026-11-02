@@ -4,9 +4,9 @@
       title="Recetario"
       subtitle="Descubre y comparte recetas de la cocina española"
     />
-    <RecipeFilter @enviarIdRecipe="recibirIdRecipe" @limpiarFiltros="limpiarFiltros" />
+    <RecipeFilter @aplicarFiltros="aplicarFiltros" @limpiarFiltros="limpiarFiltros" />
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <ListRecipes :greeting="greeting" :idRecipe="idRecipe" />
+      <ListRecipes :greeting="greeting" :filterCriteria="filterCriteria" />
     </div>
   </div>
 </template>
@@ -19,16 +19,16 @@ import RecipeFilter from './FilterRecipe.vue'
 import ListRecipes from './ListRecipes.vue'
 import { ref } from 'vue'
 
-const idRecipe = ref([])
 const greeting = ref('all')
+const filterCriteria = ref(null)
 
-function recibirIdRecipe(mensaje) {
-  idRecipe.value = Array.isArray(mensaje) ? mensaje : []
+function aplicarFiltros(criteria) {
+  filterCriteria.value = criteria
   greeting.value = 'filtred'
 }
 
-const limpiarFiltros = () => {
+function limpiarFiltros() {
+  filterCriteria.value = null
   greeting.value = 'all'
-  idRecipe.value = []
 }
 </script>

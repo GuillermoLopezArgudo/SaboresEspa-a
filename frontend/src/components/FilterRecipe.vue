@@ -97,14 +97,6 @@
         </button>
 
         <div class="ml-auto flex items-center gap-2 shrink-0">
-          <span
-            v-if="searching"
-            class="inline-flex items-center gap-1.5 text-xs text-amber-800/80"
-            aria-live="polite"
-          >
-            <span class="h-3.5 w-3.5 rounded-full border-2 border-amber-700 border-t-transparent animate-spin" />
-            Filtrando…
-          </span>
           <button
             v-if="filtrosSeleccionados.length"
             type="button"
@@ -213,15 +205,11 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import axios from 'axios';
-import { apiUrl } from '../api';
 
-const emit = defineEmits(['enviarIdRecipe', 'limpiarFiltros']);
+const emit = defineEmits(['aplicarFiltros', 'limpiarFiltros']);
 
 const activeAccordion = ref('');
 const mobileOpen = ref(false);
-const searching = ref(false);
-let searchGen = 0;
 let debounceTimer = null;
 
 const tipoComida = ref('');
@@ -377,8 +365,8 @@ function toggleCheck(panel, value) {
   if (idx >= 0) list.splice(idx, 1);
   else list.push(value);
   panel.model.value = list;
-  // Breve debounce para marcar varias proteínas seguidas
-  scheduleSearch(220);
+  // Agrupa clicks rápidos en proteínas
+  scheduleSearch(60);
 }
 
 function eliminarFiltro(filtro) {
@@ -404,8 +392,6 @@ function limpiarFiltros() {
     clearTimeout(debounceTimer);
     debounceTimer = null;
   }
-  searchGen += 1;
-  searching.value = false;
   tipoComida.value = '';
   ccaa.value = '';
   tiempo.value = '';
@@ -418,37 +404,21 @@ function scheduleSearch(delayMs = 0) {
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     debounceTimer = null;
-    aplicarFiltros();
+    emitirFiltros();
   }, delayMs);
 }
 
-function aplicarFiltros() {
+function emitirFiltros() {
   if (!hasActiveFilters()) {
     limpiarFiltros();
     return;
   }
-
-  const payload = {
+  emit('aplicarFiltros', {
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
     time: tiempo.value,
-    proteins: proteinas.value,
-  };
-  const gen = ++searchGen;
-  searching.value = true;
-  axios
-    .post(apiUrl('/filterRecipe'), payload)
-    .then((response) => {
-      if (gen !== searchGen) return;
-      emit('enviarIdRecipe', response.data.message || []);
-    })
-    .catch((error) => {
-      if (gen !== searchGen) return;
-      alert(error.response?.data?.message || 'No se pudieron aplicar los filtros');
-    })
-    .finally(() => {
-      if (gen === searchGen) searching.value = false;
-    });
+    proteins: [...proteinas.value],
+  });
 }
 </script>
 
