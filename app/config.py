@@ -21,11 +21,8 @@ def parse_database_url(url: str) -> dict:
         "password": unquote(parsed.password) if parsed.password else None,
         "host": host,
         "port": parsed.port or 5432,
-        "sslmode": (
-            "require"
-            if "sslmode=require" in (parsed.query or "") or "neon.tech" in host
-            else None
-        ),
+        # Neon / Render / managed Postgres: SSL casi siempre obligatorio
+        "sslmode": "require",
     }
 
 

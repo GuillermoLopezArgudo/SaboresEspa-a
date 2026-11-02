@@ -21,15 +21,22 @@ def build_database():
     """
     if Config.DATABASE_URL:
         info = parse_database_url(Config.DATABASE_URL)
-        kwargs = {}
-        if info.get("sslmode"):
-            kwargs["sslmode"] = info["sslmode"]
+        kwargs = {
+            # Neon / Render Postgres: SSL obligatorio en la práctica
+            "sslmode": info.get("sslmode") or "require",
+            # Evita conexiones zombi tras sleep de Neon
+            "keepalives": 1,
+            "keepalives_idle": 30,
+            "keepalives_interval": 10,
+            "keepalives_count": 5,
+        }
         return PostgresqlDatabase(
             info["name"],
             user=info["user"],
             password=info["password"],
             host=info["host"],
             port=info["port"],
+            autorollback=True,
             **kwargs,
         )
 

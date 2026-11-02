@@ -46,6 +46,26 @@ def create_app() -> Flask:
     JWTManager(app)
     register_blueprints(app)
 
+    @app.before_request
+    def _ensure_db_connection():
+        # Neon free duerme / Render reusa workers: reconectar si hace falta
+        from flask import request as flask_request
+
+        if flask_request.method == "OPTIONS":
+            return None
+        from app.db import db
+
+        try:
+            if db.is_closed():
+                db.connect(reuse_if_open=True)
+        except Exception as exc:
+            print(f"[warn] db connect: {exc}")
+            try:
+                db.close()
+                db.connect()
+            except Exception as exc2:
+                print(f"[error] db reconnect failed: {exc2}")
+
     @app.after_request
     def _ensure_cors(response):
         # Refuerzo por si un 4xx/5xx de proxy pierde cabeceras en preflight
