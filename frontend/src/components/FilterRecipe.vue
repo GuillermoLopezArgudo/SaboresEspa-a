@@ -1,9 +1,9 @@
 <template>
-  <div class="sticky top-14 sm:top-16 z-40 border-b border-amber-200/80 bg-amber-50/95 backdrop-blur-md">
+  <div class="filter-bar sticky top-14 sm:top-16 z-40 border-b border-amber-200/80 bg-amber-50/95 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
       <!-- Barra principal -->
       <div class="flex items-center gap-2 min-w-0">
-        <div class="hidden sm:flex items-center gap-1.5 text-amber-900/70 shrink-0 pr-2 border-r border-amber-200">
+        <div class="filter-label hidden sm:flex items-center gap-1.5 text-amber-900/70 shrink-0 pr-2 border-r border-amber-200">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
@@ -39,10 +39,10 @@
 
             <div
               v-show="activeAccordion === panel.id"
-              class="absolute left-0 top-full mt-2 z-50 w-64 rounded-2xl border border-amber-200 bg-white shadow-xl shadow-amber-900/10 overflow-hidden"
+              class="filter-dropdown absolute left-0 top-full mt-2 z-50 w-64 rounded-2xl border border-amber-200 bg-white shadow-xl shadow-amber-900/10 overflow-hidden"
               @click.stop
             >
-              <div class="px-3 py-2 border-b border-amber-100 bg-amber-50/80">
+              <div class="filter-dropdown-head px-3 py-2 border-b border-amber-100 bg-amber-50/80">
                 <p class="text-xs font-semibold uppercase tracking-wide text-amber-800/80">{{ panel.title }}</p>
               </div>
               <div class="max-h-72 overflow-y-auto p-2 filter-scroll">
@@ -87,7 +87,7 @@
         <!-- Botón móvil: abre sheet -->
         <button
           type="button"
-          class="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-full border border-amber-300 bg-white text-amber-900 text-sm font-medium shadow-sm"
+          class="filter-mobile-btn md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-full border border-amber-300 bg-white text-amber-900 text-sm font-medium shadow-sm"
           @click="mobileOpen = true"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,7 +120,7 @@
           v-for="(filtro, index) in filtrosSeleccionados"
           :key="index"
           type="button"
-          class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-white border border-amber-200 text-amber-900 text-xs font-medium shadow-sm hover:border-amber-400 transition"
+          class="filter-chip inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-white border border-amber-200 text-amber-900 text-xs font-medium shadow-sm hover:border-amber-400 transition"
           @click="eliminarFiltro(filtro)"
           :title="'Quitar ' + filtro.value"
         >
@@ -135,17 +135,17 @@
     <Teleport to="body">
       <div v-if="mobileOpen" class="md:hidden fixed inset-0 z-[60]">
         <div class="absolute inset-0 bg-stone-900/40" @click="mobileOpen = false" />
-        <div class="absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-3xl bg-amber-50 shadow-2xl flex flex-col overflow-hidden animate-sheet">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-amber-200">
+        <div class="filter-sheet absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-3xl bg-amber-50 shadow-2xl flex flex-col overflow-hidden animate-sheet">
+          <div class="filter-sheet-head flex items-center justify-between px-5 py-4 border-b border-amber-200">
             <div>
               <p class="text-lg font-semibold text-amber-950 font-serif">Filtros</p>
               <p class="text-xs text-amber-800/70">Afiná el recetario a tu gusto</p>
             </div>
-            <button type="button" class="h-9 w-9 rounded-full bg-white border border-amber-200 text-amber-900" @click="mobileOpen = false">×</button>
+            <button type="button" class="filter-sheet-close h-9 w-9 rounded-full bg-white border border-amber-200 text-amber-900" @click="mobileOpen = false">×</button>
           </div>
 
           <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4 filter-scroll">
-            <section v-for="panel in panels" :key="'m-' + panel.id" class="rounded-2xl bg-white border border-amber-100 p-3">
+            <section v-for="panel in panels" :key="'m-' + panel.id" class="filter-sheet-panel rounded-2xl bg-white border border-amber-100 p-3">
               <h3 class="text-xs font-semibold uppercase tracking-wide text-amber-800/70 mb-2">{{ panel.title }}</h3>
               <div class="flex flex-wrap gap-2">
                 <template v-if="panel.mode === 'radio'">
@@ -180,7 +180,7 @@
             </section>
           </div>
 
-          <div class="flex gap-2 p-4 border-t border-amber-200 bg-white">
+          <div class="filter-sheet-foot flex gap-2 p-4 border-t border-amber-200 bg-white">
             <button
               type="button"
               class="flex-1 py-3 rounded-xl border border-amber-300 text-amber-900 font-medium"
@@ -323,12 +323,12 @@ function triggerClass(panel) {
     panel.mode === 'radio' ? Boolean(panel.model.value) : panel.model.value.length > 0;
   const open = activeAccordion.value === panel.id;
   if (active) {
-    return 'bg-amber-800 text-white border-amber-800 shadow-sm';
+    return 'filter-trigger filter-trigger-active bg-amber-800 text-white border-amber-800 shadow-sm';
   }
   if (open) {
-    return 'bg-white text-amber-900 border-amber-400 shadow-sm';
+    return 'filter-trigger filter-trigger-open bg-white text-amber-900 border-amber-400 shadow-sm';
   }
-  return 'bg-white/80 text-amber-900 border-amber-200 hover:border-amber-400';
+  return 'filter-trigger bg-white/80 text-amber-900 border-amber-200 hover:border-amber-400';
 }
 
 function toggleAccordion(section) {
@@ -436,5 +436,69 @@ function emitirFiltros() {
 }
 .animate-sheet {
   animation: sheet-up 0.28s ease-out;
+}
+
+:global(html.dark) .filter-bar {
+  background-color: rgb(28 20 16 / 0.94) !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .filter-label {
+  color: rgb(253 230 138 / 0.75) !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .filter-trigger {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .filter-trigger:hover {
+  border-color: #b45309 !important;
+  background-color: #3d2e24 !important;
+}
+:global(html.dark) .filter-trigger-open {
+  border-color: #d97706 !important;
+  background-color: #3d2e24 !important;
+}
+:global(html.dark) .filter-trigger-active {
+  background-color: #d97706 !important;
+  border-color: #d97706 !important;
+  color: #1c1410 !important;
+}
+:global(html.dark) .filter-dropdown {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+}
+:global(html.dark) .filter-dropdown-head {
+  background-color: #1c1410 !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .filter-mobile-btn {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .filter-chip {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .filter-sheet {
+  background-color: #1c1410 !important;
+}
+:global(html.dark) .filter-sheet-head {
+  border-color: #4a372c !important;
+}
+:global(html.dark) .filter-sheet-close {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .filter-sheet-panel {
+  background-color: #2a211c !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .filter-sheet-foot {
+  background-color: #2a211c !important;
+  border-color: #4a372c !important;
 }
 </style>

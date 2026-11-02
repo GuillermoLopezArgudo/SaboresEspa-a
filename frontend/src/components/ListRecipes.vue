@@ -19,7 +19,7 @@
           v-model="searchQuery"
           type="search"
           placeholder="Buscar por título, autor o descripción…"
-          class="w-full rounded-full border border-amber-200 bg-white pl-10 pr-4 py-2.5 text-sm text-amber-950 placeholder:text-amber-700/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+          class="list-search w-full rounded-full border border-amber-200 bg-white pl-10 pr-4 py-2.5 text-sm text-amber-950 placeholder:text-amber-700/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
         />
       </div>
 
@@ -34,7 +34,7 @@
           <span class="text-amber-800/70 hidden sm:inline">Ordenar</span>
           <select
             v-model="sortBy"
-            class="rounded-full border border-amber-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            class="list-sort rounded-full border border-amber-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
             <option value="rating-desc">Mejor valoradas</option>
             <option value="title-asc">Título A–Z</option>
@@ -708,5 +708,25 @@ function averageStars({ force = false } = {}) {
 }
 .pager-btn-active {
   @apply bg-amber-800 text-white border-amber-800 hover:bg-amber-900 hover:text-white;
+}
+
+:global(html.dark) .list-search,
+:global(html.dark) .list-sort {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .pager-btn {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .pager-btn:hover:not(:disabled) {
+  background-color: #3d2e24 !important;
+}
+:global(html.dark) .pager-btn-active {
+  background-color: #d97706 !important;
+  border-color: #d97706 !important;
+  color: #1c1410 !important;
 }
 </style>
