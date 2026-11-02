@@ -3,6 +3,7 @@ from datetime import date
 from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import create_access_token
 
+from app.db import db
 from app.models import (
     Recipe,
     RecipeComment,
@@ -15,6 +16,8 @@ from app.models import (
     UserFavorite,
     Users,
 )
+from app.config import Config
+from app.rate_limit import rate_limit
 from app.security import admin_required, hash_password, is_valid_email, login_required
 from app.services.files import save_base64_file
 
@@ -22,22 +25,27 @@ users_bp = Blueprint("users", __name__)
 
 
 def _delete_user_cascade(iduser):
-    for recipe in Recipe.select().where(Recipe.id_user == iduser):
-        for step in RecipeStep.select().where(RecipeStep.id_recipe == recipe.id):
-            RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
-        RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
-        RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
-        RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
-        RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
-        RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
-        UserFavorite.delete().where(UserFavorite.id_recipe == recipe.id).execute()
+    with db.atomic():
+        for recipe in Recipe.select().where(Recipe.id_user == iduser):
+            for step in RecipeStep.select().where(RecipeStep.id_recipe == recipe.id):
+                RecipeStepImage.delete().where(
+                    RecipeStepImage.id_step == step.id
+                ).execute()
+            RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
+            RecipeIngredient.delete().where(
+                RecipeIngredient.id_recipe == recipe.id
+            ).execute()
+            RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
+            RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+            RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
+            UserFavorite.delete().where(UserFavorite.id_recipe == recipe.id).execute()
 
-    StepImage.delete().where(StepImage.id_user == iduser).execute()
-    UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
-    RecipeComment.delete().where(RecipeComment.id_user == iduser).execute()
-    RecipeReview.delete().where(RecipeReview.id_user == iduser).execute()
-    Recipe.delete().where(Recipe.id_user == iduser).execute()
-    Users.delete().where(Users.id == iduser).execute()
+        StepImage.delete().where(StepImage.id_user == iduser).execute()
+        UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
+        RecipeComment.delete().where(RecipeComment.id_user == iduser).execute()
+        RecipeReview.delete().where(RecipeReview.id_user == iduser).execute()
+        Recipe.delete().where(Recipe.id_user == iduser).execute()
+        Users.delete().where(Users.id == iduser).execute()
 
 
 @users_bp.post("/viewProfile")
@@ -128,6 +136,7 @@ def change_email(current_user):
 
 @users_bp.post("/changePassword")
 @login_required
+@rate_limit(Config.AUTH_RATE_LIMIT, Config.AUTH_RATE_WINDOW, prefix="change_password")
 def change_password(current_user):
     data = request.get_json() or {}
     current_password = data.get("currentPassword") or data.get("oldPassword") or ""
@@ -146,7 +155,8 @@ def change_password(current_user):
         # Mejor: exigir currentPassword siempre
         if not current_password:
             return jsonify(message="Debes indicar la contraseña actual"), 400
-        return jsonify(message="Contraseña actual incorrecta"), 401
+        # 400 (no 401): el interceptor del front no debe cerrar sesión por typo
+        return jsonify(message="Contraseña actual incorrecta"), 400
 
     token = create_access_token(identity=str(current_user.id))
     Users.update(

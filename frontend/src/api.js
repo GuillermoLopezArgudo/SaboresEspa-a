@@ -27,6 +27,11 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      const reqUrl = String(error.config?.url || '')
+      // Fallos de validación de credenciales ≠ sesión inválida
+      if (/\/changePassword(\/|$|\?)/i.test(reqUrl)) {
+        return Promise.reject(error)
+      }
       const path = window.location.pathname
       if (path !== '/login' && path !== '/register' && path !== '/') {
         clearSession()

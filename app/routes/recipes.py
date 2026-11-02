@@ -1,7 +1,8 @@
+import os
 from datetime import date
 
 from flask import Blueprint, current_app, jsonify, request
-from peewee import fn
+from peewee import IntegrityError, fn
 
 from app.db import db
 from app.models import (
@@ -84,13 +85,34 @@ def _step_description(step: dict) -> str:
     return (step.get("description") or step.get("text") or "").strip()
 
 
-def _require_upload(file_dict, folder, kind, label):
-    """Sube media si viene base64; falla la petición si el cliente envió archivo inválido."""
+def _media_refs_equal(a, b) -> bool:
+    if not a or not b:
+        return False
+    a, b = str(a).strip(), str(b).strip()
+    if a == b:
+        return True
+    # Comparar por basename por si el front manda solo el nombre
+    return os.path.basename(a) == os.path.basename(b) and bool(os.path.basename(a))
+
+
+def _require_upload(file_dict, folder, kind, label, allowed_existing=None):
+    """Sube media si viene base64; falla la petición si el cliente envió archivo inválido.
+
+    Sin base64 solo se acepta name/URL si está en allowed_existing (anti-hijack de media ajena).
+    """
     if not file_dict or not isinstance(file_dict, dict):
         return None
     if not file_dict.get("base64"):
-        # Solo nombre/URL previa (edición sin cambiar fichero)
-        return file_dict.get("name") or None
+        name = file_dict.get("name") or None
+        if not name:
+            return None
+        if allowed_existing is None:
+            # Create u contexto sin lista: ignorar name suelto (no es un upload real)
+            return None
+        for allowed in allowed_existing:
+            if _media_refs_equal(name, allowed):
+                return allowed  # canonical stored value
+        return jsonify(message=f"Referencia de {label} no válida"), 400
     url = save_base64_file(
         file_dict.get("base64"),
         file_dict.get("name") or ("file.jpg" if kind == "image" else "file.mp4"),
@@ -98,8 +120,6 @@ def _require_upload(file_dict, folder, kind, label):
         kind=kind,
     )
     if not url:
-        from flask import jsonify
-
         return jsonify(message=f"No se pudo guardar {label}"), 400
     return url
 
@@ -134,21 +154,24 @@ def _can_view_recipe(user, recipe) -> bool:
 
 
 def _delete_recipe_cascade(idrecipe):
-    RecipeFilter.delete().where(RecipeFilter.id_recipe == idrecipe).execute()
-    RecipeIngredient.delete().where(RecipeIngredient.id_recipe == idrecipe).execute()
-    RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
-    UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
-    RecipeReview.delete().where(RecipeReview.id_recipe == idrecipe).execute()
+    with db.atomic():
+        RecipeFilter.delete().where(RecipeFilter.id_recipe == idrecipe).execute()
+        RecipeIngredient.delete().where(RecipeIngredient.id_recipe == idrecipe).execute()
+        RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
+        UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
+        RecipeReview.delete().where(RecipeReview.id_recipe == idrecipe).execute()
 
-    for step in RecipeStep.select().where(RecipeStep.id_recipe == idrecipe):
-        links = list(RecipeStepImage.select().where(RecipeStepImage.id_step == step.id))
-        image_ids = [link.id_image_id for link in links]
-        RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
-        if image_ids:
-            StepImage.delete().where(StepImage.id.in_(image_ids)).execute()
+        for step in RecipeStep.select().where(RecipeStep.id_recipe == idrecipe):
+            links = list(
+                RecipeStepImage.select().where(RecipeStepImage.id_step == step.id)
+            )
+            image_ids = [link.id_image_id for link in links]
+            RecipeStepImage.delete().where(RecipeStepImage.id_step == step.id).execute()
+            if image_ids:
+                StepImage.delete().where(StepImage.id.in_(image_ids)).execute()
 
-    RecipeStep.delete().where(RecipeStep.id_recipe == idrecipe).execute()
-    Recipe.delete().where(Recipe.id == idrecipe).execute()
+        RecipeStep.delete().where(RecipeStep.id_recipe == idrecipe).execute()
+        Recipe.delete().where(Recipe.id == idrecipe).execute()
 
 
 @recipes_bp.post("/create")
@@ -292,17 +315,23 @@ def update_favs(current_user):
         idrecipe = int(data.get("idrecipe"))
     except (TypeError, ValueError):
         return jsonify(message="Receta inválida"), 400
-    if not Recipe.get_or_none(Recipe.id == idrecipe):
+    recipe = Recipe.get_or_none(Recipe.id == idrecipe)
+    if not recipe:
         return jsonify(message="Receta no encontrada"), 404
+    if not _can_view_recipe(current_user, recipe):
+        return jsonify(message="No autorizado"), 403
     if not UserFavorite.select().where(
         (UserFavorite.id_recipe == idrecipe) & (UserFavorite.id_user == current_user.id)
     ).exists():
-        UserFavorite.create(
-            id_recipe=idrecipe,
-            id_user=current_user.id,
-            created_at=date.today(),
-            modified_at=date.today(),
-        )
+        try:
+            UserFavorite.create(
+                id_recipe=idrecipe,
+                id_user=current_user.id,
+                created_at=date.today(),
+                modified_at=date.today(),
+            )
+        except IntegrityError:
+            pass  # carrera concurrente; índice único ya lo cubre
     return jsonify(message="Favorite save")
 
 
@@ -332,6 +361,12 @@ def update_rating(current_user):
     if rating < 1 or rating > 5:
         return jsonify(message="Rating fuera de rango"), 400
 
+    recipe = Recipe.get_or_none(Recipe.id == idrecipe)
+    if not recipe:
+        return jsonify(message="Receta no encontrada"), 404
+    if not _can_view_recipe(current_user, recipe):
+        return jsonify(message="No autorizado"), 403
+
     existing = RecipeReview.get_or_none(
         (RecipeReview.id_recipe == idrecipe) & (RecipeReview.id_user == current_user.id)
     )
@@ -340,13 +375,20 @@ def update_rating(current_user):
             RecipeReview.id == existing.id
         ).execute()
         return jsonify(message="Review update")
-    RecipeReview.create(
-        id_recipe=idrecipe,
-        id_user=current_user.id,
-        recipe_review_item_value=rating,
-        created_at=date.today(),
-        modified_at=date.today(),
-    )
+    try:
+        RecipeReview.create(
+            id_recipe=idrecipe,
+            id_user=current_user.id,
+            recipe_review_item_value=rating,
+            created_at=date.today(),
+            modified_at=date.today(),
+        )
+    except IntegrityError:
+        RecipeReview.update(recipe_review_item_value=rating).where(
+            (RecipeReview.id_recipe == idrecipe)
+            & (RecipeReview.id_user == current_user.id)
+        ).execute()
+        return jsonify(message="Review update")
     return jsonify(message="Review save")
 
 
@@ -542,19 +584,20 @@ def view_favs(current_user):
     if not favorites_list_ids:
         return jsonify(favorites_list=[], reviews_list=[], categories_list=[])
 
-    recipes = list(
-        Recipe.select().where(
-            (Recipe.id.in_(favorites_list_ids))
-            & (Recipe.recipe_visibility == True)  # noqa: E712
-        )
-    )
+    # Incluir privadas que el usuario puede ver (p.ej. las suyas en favoritos)
+    recipes = [
+        r
+        for r in Recipe.select().where(Recipe.id.in_(favorites_list_ids))
+        if _can_view_recipe(current_user, r)
+    ]
+    visible_ids = [r.id for r in recipes]
     return jsonify(
         favorites_list=[_recipe_dict(r) for r in recipes],
         reviews_list=[
             {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
             for r in RecipeReview.select().where(
                 (RecipeReview.id_user == current_user.id)
-                & (RecipeReview.id_recipe.in_(favorites_list_ids))
+                & (RecipeReview.id_recipe.in_(visible_ids or [0]))
             )
         ],
         categories_list=_categories_for_recipes(recipes),
@@ -577,6 +620,23 @@ def edit_recipe(current_user):
     if not _can_manage_recipe(current_user, recipe):
         return jsonify(message="No autorizado"), 403
 
+    new_title = None
+    if "title" in data:
+        new_title = (data.get("title") or "").strip()
+        if not new_title:
+            return jsonify(message="Título obligatorio"), 400
+
+    # Media ya asociada a esta receta (única permitida sin nuevo base64)
+    existing_images = set()
+    if recipe.recipe_image:
+        existing_images.add(recipe.recipe_image)
+    for step in RecipeStep.select().where(RecipeStep.id_recipe == recipe.id):
+        for link in RecipeStepImage.select().where(RecipeStepImage.id_step == step.id):
+            img = StepImage.get_or_none(StepImage.id == link.id_image_id)
+            if img and img.step_image:
+                existing_images.add(img.step_image)
+    existing_videos = {recipe.recipe_video} if recipe.recipe_video else set()
+
     # Subir media ANTES de borrar/recrear hijos (evita pérdida de datos a mitad)
     image = data.get("image")
     video = data.get("video")
@@ -588,6 +648,7 @@ def edit_recipe(current_user):
             current_app.config["UPLOAD_FOLDER_IMAGES"],
             "image",
             "la imagen de la receta",
+            allowed_existing=existing_images,
         )
         if isinstance(uploaded, tuple):
             return uploaded
@@ -598,6 +659,7 @@ def edit_recipe(current_user):
             current_app.config["UPLOAD_FOLDER_VIDEOS"],
             "video",
             "el vídeo de la receta",
+            allowed_existing=existing_videos,
         )
         if isinstance(uploaded, tuple):
             return uploaded
@@ -615,6 +677,7 @@ def edit_recipe(current_user):
                 current_app.config["UPLOAD_FOLDER_IMAGES"],
                 "image",
                 "una imagen de paso",
+                allowed_existing=existing_images,
             )
             if isinstance(uploaded, tuple):
                 return uploaded
@@ -622,9 +685,12 @@ def edit_recipe(current_user):
         prepared_steps.append((step, step_image_url))
 
     with db.atomic():
-        recipe.recipe_title = (data.get("title") or recipe.recipe_title).strip()
-        recipe.recipe_description = data.get("description")
-        recipe.recipe_visibility = bool(data.get("visibility"))
+        if new_title is not None:
+            recipe.recipe_title = new_title
+        if "description" in data:
+            recipe.recipe_description = data.get("description")
+        if "visibility" in data:
+            recipe.recipe_visibility = bool(data.get("visibility"))
         if image_url:
             recipe.recipe_image = image_url
         if video_url:

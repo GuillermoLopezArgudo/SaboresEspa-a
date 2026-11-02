@@ -121,6 +121,7 @@ import RecipeFilter from './FilterRecipe.vue';
 import ListRecipes from './ListRecipes.vue';
 import FooterPage from './FooterPage.vue';
 import { ref } from 'vue';
+import { logoutRequest } from '../api';
 
 const navbarOpen = ref(false);
 const idRecipe = ref('')
@@ -139,9 +140,8 @@ const limpiarFiltros = () => {
   greeting.value = "all";
 }
 
-// Función para cerrar sesión
-function closeSession() {
-  localStorage.clear();
+async function closeSession() {
+  await logoutRequest();
 }
 
 // Función para manejar el toggle del navbar en pantallas pequeñas
