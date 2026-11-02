@@ -101,7 +101,9 @@ def _save_local(file_data: bytes, folder: str, ext: str) -> str | None:
         file_path = os.path.join(folder, safe_name)
         with open(file_path, "wb") as file:
             file.write(file_data)
-        return file_path.replace("\\", "/")
+        # URL pública servida por app/routes/media.py
+        kind_folder = "images" if "images" in folder.replace("\\", "/") else "videos"
+        return f"/uploads/{kind_folder}/{safe_name}"
     except Exception as exc:
         print(f"Error al guardar archivo local: {exc}")
         return None
