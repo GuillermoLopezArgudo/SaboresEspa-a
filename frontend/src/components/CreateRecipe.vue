@@ -13,36 +13,28 @@
     </PageHero>
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <form @submit.prevent="submitRecipe"
-      class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
+    <form @submit.prevent="submitRecipe" class="space-y-5">
       <!-- Sección de información básica -->
-      <div class="p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
-        <h2 class="text-2xl font-bold text-amber-800 mb-6 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Información Básica
-        </h2>
-
-        <!--Ocultar o Mostrar-->
-        <label for="descriptionRecipe" class="block text-base font-medium text-amber-700 mb-1">Mostrar / Ocultar
-          Receta</label>
-        <button @click.prevent="showBasicInfo = !showBasicInfo" class="text-amber-600 hover:text-amber-800">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path v-if="showBasicInfo" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-        </button>
-
+      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50 flex items-center justify-between gap-3">
+          <h2 class="font-serif text-xl font-bold text-amber-950">Información básica</h2>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+            :class="showBasicInfo
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+              : 'border-amber-300 bg-amber-50 text-amber-800'"
+            @click.prevent="showBasicInfo = !showBasicInfo"
+          >
+            {{ showBasicInfo ? 'Pública' : 'Oculta' }}
+          </button>
+        </div>
+        <div class="p-6 sm:p-8">
         <!-- Título de la receta -->
         <div class="mb-6">
-          <label for="titleRecipe" class="block text-lg font-medium text-amber-700 mb-2">Nombre de la receta*</label>
+          <label for="titleRecipe" class="block text-sm font-medium text-amber-900 mb-1.5">Nombre de la receta*</label>
           <input type="text" id="titleRecipe" v-model="title" required
-            class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+            class="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400"
             placeholder="Ej: Paella Valenciana">
         </div>
 
@@ -89,22 +81,20 @@
 
         <!-- Descripción de la receta -->
         <div class="mt-6">
-          <label for="descriptionRecipe" class="block text-lg font-medium text-amber-700 mb-2">Descripción*</label>
+          <label for="descriptionRecipe" class="block text-sm font-medium text-amber-900 mb-1.5">Descripción*</label>
           <textarea id="descriptionRecipe" rows="4" v-model="description" required
-            class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
+            class="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400"
             placeholder="Describe tu receta, su origen, características especiales..."></textarea>
         </div>
-      </div>
+        </div>
+      </section>
 
       <!-- Sección de ingredientes -->
-      <div class="p-8 border-b border-amber-100">
-        <h2 class="text-2xl font-bold text-amber-800 mb-6 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Ingredientes
-        </h2>
+      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="font-serif text-xl font-bold text-amber-950">Ingredientes</h2>
+        </div>
+        <div class="p-6 sm:p-8">
 
         <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-12 gap-4 mb-4">
           <div class="md:col-span-5">
@@ -136,29 +126,20 @@
         </div>
 
         <button type="button" @click.prevent="moreIngredients"
-          class="mt-4 flex items-center text-amber-600 hover:text-amber-800 transition duration-300">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-              clip-rule="evenodd" />
-          </svg>
-          Añadir otro ingrediente
+          class="mt-4 inline-flex items-center rounded-full border border-amber-300 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-50 transition">
+          + Añadir ingrediente
         </button>
-      </div>
+        </div>
+      </section>
 
       <!-- Sección de pasos -->
-      <div class="p-8">
-        <h2 class="text-2xl font-bold text-amber-800 mb-6 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-          Pasos de Preparación
-        </h2>
-
+      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="font-serif text-xl font-bold text-amber-950">Pasos de preparación</h2>
+        </div>
+        <div class="p-6 sm:p-8">
         <div v-for="(step, index) in recipebook.steps" :key="index"
-          class="mb-8 p-6 bg-amber-50 rounded-lg border border-amber-200 relative">
+          class="mb-5 p-5 bg-amber-50/60 rounded-xl border border-amber-200 relative">
           <button @click.prevent="removeStep(index)"
             class="absolute top-2 right-2 p-1 text-red-600 hover:text-red-800 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -207,29 +188,19 @@
         </div>
 
         <button type="button" @click.prevent="moreSteps"
-          class="flex items-center text-amber-600 hover:text-amber-800 transition duration-300">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-              clip-rule="evenodd" />
-          </svg>
-          Añadir otro paso
+          class="inline-flex items-center rounded-full border border-amber-300 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-50 transition">
+          + Añadir paso
         </button>
-      </div>
+        </div>
+      </section>
 
-      <!-- Sección de Filtros - Diseño Alternativo -->
-      <div class="p-8 border-b border-amber-100 bg-gradient-to-br from-amber-50 to-amber-100">
-        <h2 class="text-2xl font-bold text-amber-800 mb-6 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-          </svg>
-          Filtros de Receta
-        </h2>
-
-        <!-- Filtros en acordeón -->
-        <div class="space-y-4">
+      <!-- Sección de Filtros -->
+      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="font-serif text-xl font-bold text-amber-950">Categorías</h2>
+          <p class="text-sm text-amber-800/70 mt-0.5">Ayudan a encontrar tu receta en el recetario</p>
+        </div>
+        <div class="p-6 sm:p-8 space-y-4">
           <!-- Tipo de comida -->
           <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
             <button type="button" @click="toggleAccordion('foodType')"
@@ -333,19 +304,14 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Botón de enviar -->
-      <div class="px-8 pb-8">
-        <button type="submit"
-          class="w-full py-4 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold rounded-lg shadow-lg transition duration-300 transform hover:scale-[1.02] flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Publicar Receta
-        </button>
-      </div>
+      <button
+        type="submit"
+        class="w-full rounded-full bg-amber-800 hover:bg-amber-900 text-white font-semibold py-3.5 shadow-sm transition"
+      >
+        Publicar receta
+      </button>
     </form>
     </div>
   </div>
