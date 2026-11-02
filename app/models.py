@@ -55,12 +55,18 @@ class RecipeReview(BaseModel):
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
 
+    class Meta:
+        indexes = ((("id_user", "id_recipe"), True),)
+
 
 class UserFavorite(BaseModel):
     id_recipe = ForeignKeyField(Recipe, backref="favorites")
     id_user = ForeignKeyField(Users, backref="favorites")
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
+
+    class Meta:
+        indexes = ((("id_user", "id_recipe"), True),)
 
 
 class RecipeIngredient(BaseModel):
@@ -139,7 +145,40 @@ def _widen_url_columns():
             pass
 
 
+def _dedupe_user_recipe_rows(model):
+    """Elimina duplicados (user, recipe) dejando el id más bajo."""
+    seen = set()
+    for row in model.select().order_by(model.id):
+        key = (row.id_user_id, row.id_recipe_id)
+        if key in seen:
+            row.delete_instance()
+        else:
+            seen.add(key)
+
+
+def _ensure_unique_fav_review_indexes():
+    """Dedupe + índice único en favoritos y reviews (SQLite/Postgres)."""
+    try:
+        _dedupe_user_recipe_rows(UserFavorite)
+        _dedupe_user_recipe_rows(RecipeReview)
+    except Exception as exc:
+        print(f"[warn] dedupe fav/review: {exc}")
+
+    statements = [
+        'CREATE UNIQUE INDEX IF NOT EXISTS "uq_userfavorite_user_recipe" '
+        'ON "userfavorite" ("id_user_id", "id_recipe_id")',
+        'CREATE UNIQUE INDEX IF NOT EXISTS "uq_recipereview_user_recipe" '
+        'ON "recipereview" ("id_user_id", "id_recipe_id")',
+    ]
+    for sql in statements:
+        try:
+            db.execute_sql(sql)
+        except Exception:
+            pass
+
+
 def create_tables():
     with db:
         db.create_tables(ALL_MODELS)
         _widen_url_columns()
+        _ensure_unique_fav_review_indexes()

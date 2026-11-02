@@ -2,6 +2,7 @@ from datetime import date
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token
+from peewee import IntegrityError
 
 from app.config import Config
 from app.models import Users
@@ -39,7 +40,10 @@ def register():
         created_at=date.today(),
         modified_at=date.today(),
     )
-    user.save()
+    try:
+        user.save()
+    except IntegrityError:
+        return jsonify(message="El email ya está registrado"), 409
 
     token = create_access_token(identity=str(user.id))
     Users.update(user_token=token).where(Users.id == user.id).execute()
