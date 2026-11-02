@@ -12,7 +12,7 @@ idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
-packaging>=24.0
+packaging>=26.3
 peewee==3.17.0
 psycopg2-binary==2.9.10
 PyMySQL==1.1.1
