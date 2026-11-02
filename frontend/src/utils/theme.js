@@ -33,7 +33,7 @@ export function initTheme() {
   const stored = readStoredTheme()
   if (stored === 'light') applyTheme(false)
   else if (stored === 'dark') applyTheme(true)
-  else applyTheme(true) // modo noche por defecto
+  else applyTheme(false) // modo día por defecto; la noche se activa con el botón
 
   watch(isDark, (value) => applyTheme(value))
   return isDark

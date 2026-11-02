@@ -365,9 +365,9 @@ const logout = async () => {
 
 /* Modo noche: estilos propios (el @apply no hereda overrides globales) */
 :global(html.dark) .site-nav {
-  background-color: rgb(28 20 16 / 0.92) !important;
-  border-color: #5a4638 !important;
-  box-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+  background-color: rgb(63 50 40 / 0.96) !important;
+  border-color: #8a735c !important;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.25);
 }
 :global(html.dark) .nav-tagline {
   color: rgb(251 191 36 / 0.65) !important;

@@ -73,15 +73,15 @@ const { isDark } = useTheme()
   color: rgba(69, 26, 3, 0.8);
 }
 
-/* ── Noche: tipografía CLARA forzada ── */
+/* ── Noche: cálida e iluminada (no apagón) ── */
 .page-hero--night .page-hero__bg {
-  background: linear-gradient(145deg, #7c3f18 0%, #c2410c 48%, #431407 100%);
+  background: linear-gradient(145deg, #ea580c 0%, #f59e0b 42%, #9a3412 100%);
 }
 .page-hero--night .page-hero__glow--a {
-  background: radial-gradient(circle, rgba(253, 224, 71, 0.55) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(254, 243, 199, 0.55) 0%, transparent 68%);
 }
 .page-hero--night .page-hero__glow--b {
-  background: radial-gradient(circle, rgba(251, 146, 60, 0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, transparent 70%);
 }
 .page-hero--night .page-hero__edge {
   background: linear-gradient(to right, transparent, rgba(254, 243, 199, 0.45), transparent);
