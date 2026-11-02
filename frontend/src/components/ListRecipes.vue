@@ -1,20 +1,29 @@
 <template>
+    <!-- Skeleton mientras carga la primera vez -->
+    <div v-if="loading && !elementos.recetas.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="n in 6" :key="'sk-' + n" class="bg-white rounded-xl overflow-hidden border border-amber-100 animate-pulse">
+            <div class="h-48 bg-amber-100" />
+            <div class="p-5 space-y-3">
+                <div class="h-5 bg-amber-100 rounded w-3/4" />
+                <div class="h-4 bg-amber-50 rounded w-full" />
+                <div class="h-4 bg-amber-50 rounded w-2/3" />
+                <div class="h-10 bg-amber-100 rounded" />
+            </div>
+        </div>
+    </div>
+
     <!-- Listado de recetas -->
-    <div v-if="elementos.recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="elementos.recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="(item) in elementos.recetas" :key="item.id"
             class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
-            <!-- Imagen con corazón superpuesto -->
             <div class="relative">
-                <!-- Mostrar la media a la izquierda de la imagen -->
-                <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1">
-                    {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2) 
+                <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1 text-sm z-[1]">
+                    {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2)
                         : "Sin calificación" }} ★
                 </div>
 
-                <!-- Imagen de la receta -->
                 <img v-if="item.image" :src="mediaUrl(item.image)" class="w-full h-48 object-cover"
-                    alt="Imagen de receta">
-                <!-- Placeholder si no hay imagen -->
+                    alt="" loading="lazy" decoding="async">
                 <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -23,7 +32,6 @@
                     </svg>
                 </div>
 
-                <!-- Corazón de favorito (posición absoluta) -->
                 <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
                     class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
                     <i class="fa text-2xl"
@@ -31,16 +39,13 @@
                 </button>
             </div>
 
-            <!-- Contenido de la tarjeta -->
             <div class="p-5">
                 <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
                 <p class="text-amber-600 text-sm mt-2 line-clamp-2">{{ item.description }}</p>
-                <!-- Valoración con estrellas -->
                 <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'">
                     <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
                 </div>
 
-                <!-- Botón para ver receta -->
                 <router-link :to="'/recipe?id=' + item.id"
                     class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
@@ -53,11 +58,10 @@
                     Ver Receta
                 </router-link>
 
-                <!--Zona de Categorias-->
                 <div class="text-sm text-amber-700 mt-2">
                     <span class="font-semibold">Categorías:</span>
-                    <template v-if="categorias.filter(c => c.recipe_id === item.id).length > 0">
-                        <span v-for="cat in categorias.filter(c => c.recipe_id === item.id)"
+                    <template v-if="(catsByRecipe[item.id] || []).length">
+                        <span v-for="cat in catsByRecipe[item.id]"
                             :key="cat.type + cat.category"
                             class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
                             {{ cat.type }}
@@ -70,7 +74,7 @@
     </div>
 
     <!-- Mensaje si no hay recetas -->
-    <div v-else class="text-center py-12">
+    <div v-else-if="!loading" class="text-center py-12">
         <div class="max-w-md mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
@@ -138,28 +142,44 @@
 </template>
 
 <script setup>
-
-import { reactive, defineProps, watch, onMounted } from 'vue';
+import { computed, reactive, ref, watch, onMounted } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { apiUrl, mediaUrl } from '../api';
-
+import {
+    getAverageStarsCache,
+    getViewAllCache,
+    invalidateRecipeCaches,
+    setAverageStarsCache,
+    setViewAllCache,
+} from '../utils/recipeCache';
 
 const favoritos = reactive({});
 const ratings = reactive({});
-const average = reactive({})
+const average = reactive({});
 const userToken = localStorage.getItem('userToken');
 const iduser = localStorage.getItem('iduser');
 const router = useRouter();
 const elementos = reactive({
     recetas: []
 });
-const categorias = reactive([])
+const categorias = reactive([]);
+const loading = ref(false);
 
 function setCategories(list) {
     categorias.splice(0, categorias.length, ...(list || []))
 }
+
+const catsByRecipe = computed(() => {
+    const map = Object.create(null);
+    for (const cat of categorias) {
+        const id = cat.recipe_id;
+        if (!map[id]) map[id] = [];
+        map[id].push(cat);
+    }
+    return map;
+});
 
 /** Ignora respuestas obsoletas si el usuario cambió de modo / re-filtró. */
 let loadGen = 0
@@ -183,7 +203,6 @@ watch(() => props.greeting, (newGreeting) => {
     }
 })
 
-// Re-aplicar filtro si ya estamos en filtred y cambian los ids (sin tocar all)
 watch(
     () => props.idRecipe,
     () => {
@@ -209,6 +228,19 @@ function selectReviews(reviews_list) {
     });
 }
 
+function applyViewAllPayload(data) {
+    elementos.recetas = data.recipes_list || [];
+    selectFavorites(data.favorites_list || [])
+    selectReviews(data.reviews_list || [])
+    setCategories(data.categories_list)
+}
+
+function applyAverages(media) {
+    ;(media || []).forEach(rating => {
+        average[rating.recipe_id] = rating.average_rating
+    });
+}
+
 onMounted(() => {
     if (props.greeting === "all") {
         allRecipes()
@@ -221,20 +253,32 @@ onMounted(() => {
 });
 
 
-function allRecipes() {
+function allRecipes({ force = false } = {}) {
+    const cached = !force ? getViewAllCache() : null
+    if (cached) {
+        applyViewAllPayload(cached)
+        loading.value = false
+    } else if (!elementos.recetas.length) {
+        loading.value = true
+    }
+
     const gen = ++loadGen
     axios.post(apiUrl('/viewAll'), {})
         .then(response => {
             if (gen !== loadGen) return
-            elementos.recetas = response.data.recipes_list || [];
-            selectFavorites(response.data.favorites_list || [])
-            selectReviews(response.data.reviews_list || [])
-            setCategories(response.data.categories_list)
+            const data = response.data || {}
+            setViewAllCache(data)
+            applyViewAllPayload(data)
         })
         .catch(error => {
             if (gen !== loadGen) return
-            console.error("Error en la solicitud:", error);
-            alert(error.response?.data?.message || 'No se pudieron cargar las recetas');
+            if (!elementos.recetas.length) {
+                console.error("Error en la solicitud:", error);
+                alert(error.response?.data?.message || 'No se pudieron cargar las recetas');
+            }
+        })
+        .finally(() => {
+            if (gen === loadGen) loading.value = false
         });
 }
 
@@ -243,6 +287,7 @@ function favoritesRecipes() {
         router.push({ name: "login" });
         return;
     }
+    if (!elementos.recetas.length) loading.value = true
     const gen = ++loadGen
     axios
         .post(apiUrl('/viewFavs'), {})
@@ -257,6 +302,9 @@ function favoritesRecipes() {
             if (gen !== loadGen) return
             console.error("Error en la solicitud:", error);
             alert(error.response?.data?.message || 'No se pudieron cargar favoritos');
+        })
+        .finally(() => {
+            if (gen === loadGen) loading.value = false
         });
 }
 
@@ -265,6 +313,7 @@ function personalRecipes() {
         router.push({ name: "login" });
         return;
     }
+    if (!elementos.recetas.length) loading.value = true
     const gen = ++loadGen
     axios.post(apiUrl('/viewRecipes'), {})
         .then(response => {
@@ -276,6 +325,9 @@ function personalRecipes() {
             if (gen !== loadGen) return
             console.error("Error al obtener las recetas:", error);
             alert(error.response?.data?.message || 'No se pudieron cargar tus recetas');
+        })
+        .finally(() => {
+            if (gen === loadGen) loading.value = false
         });
 }
 
@@ -291,6 +343,7 @@ function filterRecipe() {
             filtered.push(element);
         }
     });
+    loading.value = true
     const gen = ++loadGen
     axios.post(apiUrl('/recipeFilter'), { filtered, iduser })
         .then(response => {
@@ -304,6 +357,9 @@ function filterRecipe() {
             if (gen !== loadGen) return
             console.error("Error en la solicitud:", error);
             alert(error.response?.data?.message || 'No se pudieron filtrar las recetas');
+        })
+        .finally(() => {
+            if (gen === loadGen) loading.value = false
         });
 }
 
@@ -316,12 +372,14 @@ const toggleFavorite = (id) => {
     const payload = { idrecipe: id };
     if (favoritos[id]) {
         favoritos[id] = false;
+        invalidateRecipeCaches();
         axios.post(apiUrl('/deleteFavs'), payload).catch((error) => {
             favoritos[id] = true;
             alert(error.response?.data?.message || 'No se pudo quitar de favoritos');
         });
     } else {
         favoritos[id] = true;
+        invalidateRecipeCaches();
         axios.post(apiUrl('/updateFavs'), payload).catch((error) => {
             favoritos[id] = false;
             alert(error.response?.data?.message || 'No se pudo añadir a favoritos');
@@ -346,19 +404,26 @@ const ratingChanged = (recipeId) => {
             idrecipe: recipeId,
             rating: newRating,
         })
-            .then(() => averageStars())
+            .then(() => {
+                invalidateRecipeCaches();
+                averageStars({ force: true });
+            })
             .catch((error) => {
                 alert(error.response?.data?.message || 'No se pudo guardar la valoración');
             });
     };
 };
 
-function averageStars() {
+function averageStars({ force = false } = {}) {
+    const cached = !force ? getAverageStarsCache() : null
+    if (cached) {
+        applyAverages(cached)
+    }
     axios.post(apiUrl('/averageStars'))
         .then(response => {
-            ;(response.data.media || []).forEach(rating => {
-                average[rating.recipe_id] = rating.average_rating
-            });
+            const media = response.data.media || []
+            setAverageStarsCache(media)
+            applyAverages(media)
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -368,30 +433,6 @@ function averageStars() {
 </script>
 
 <style scoped>
-/* Animación para el corazón de favoritos */
-@keyframes pulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-}
-
-.fa-heart {
-    animation: pulse 1.5s infinite;
-}
-
-/* Efecto para el hover de la tarjeta */
-.transform:hover\:-translate-y-1:hover {
-    transform: translateY(-4px);
-    transition: transform 0.3s ease;
-}
-
-/* Limitar líneas de texto */
 .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;
