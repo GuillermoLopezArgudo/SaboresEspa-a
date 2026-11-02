@@ -88,6 +88,41 @@ def get_productos():
     return jsonify(data), status
 
 
+def _normalize(text: str) -> str:
+    import unicodedata
+
+    raw = (text or "").lower().strip()
+    decomposed = unicodedata.normalize("NFD", raw)
+    return "".join(ch for ch in decomposed if unicodedata.category(ch) != "Mn")
+
+
+def _variants(query: str) -> set[str]:
+    base = _normalize(query)
+    out = {base}
+    for token in base.replace("/", " ").replace("-", " ").split():
+        if len(token) > 2:
+            out.add(token)
+    if base.endswith("es") and len(base) > 4:
+        out.add(base[:-2])
+    elif base.endswith("s") and len(base) > 3:
+        out.add(base[:-1])
+    return {v for v in out if v}
+
+
+def _product_payload(product: dict) -> dict:
+    price_info = product.get("price_instructions") or {}
+    return {
+        "id": product.get("id"),
+        "display_name": product.get("display_name"),
+        "thumbnail": product.get("thumbnail"),
+        "price": price_info.get("unit_price") or price_info.get("bulk_price"),
+        "bulk_price": price_info.get("bulk_price"),
+        "unit_size": price_info.get("unit_size"),
+        "size_format": price_info.get("size_format"),
+        "packaging": product.get("packaging"),
+    }
+
+
 @mercadona_bp.post("/searchIngredient")
 @rate_limit(max_calls=60, window_seconds=60, prefix="mercadona")
 def search_ingredient():
@@ -108,36 +143,16 @@ def search_ingredient():
     if status != 200 or not isinstance(data, dict):
         return jsonify(data), status
 
-    q = query.lower()
-    variants = {
-        q,
-        q[:-1] if len(q) > 3 else q,
-        query[:1].upper() + query[1:].lower(),
-    }
+    variants = _variants(query)
     products = []
+    seen = set()
     for category in data.get("categories") or []:
         for product in category.get("products") or []:
-            name = (product.get("display_name") or "").lower()
-            if any(v and v.lower() in name for v in variants):
-                products.append(
-                    {
-                        "id": product.get("id"),
-                        "display_name": product.get("display_name"),
-                        "thumbnail": product.get("thumbnail"),
-                        "price": (product.get("price_instructions") or {}).get(
-                            "unit_price"
-                        )
-                        or (product.get("price_instructions") or {}).get("bulk_price"),
-                        "bulk_price": (product.get("price_instructions") or {}).get(
-                            "bulk_price"
-                        ),
-                        "unit_size": (product.get("price_instructions") or {}).get(
-                            "unit_size"
-                        ),
-                        "size_format": (product.get("price_instructions") or {}).get(
-                            "size_format"
-                        ),
-                        "packaging": product.get("packaging"),
-                    }
-                )
+            name = _normalize(product.get("display_name") or "")
+            if any(v in name for v in variants):
+                pid = product.get("id") or product.get("display_name")
+                if pid in seen:
+                    continue
+                seen.add(pid)
+                products.append(_product_payload(product))
     return jsonify(ingredient=query, products=products, count=len(products))

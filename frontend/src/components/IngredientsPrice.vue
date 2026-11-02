@@ -2,14 +2,15 @@
   <div>
     <PageHero
       title="Precios Mercadona"
-      :subtitle="ingredientLabel ? `Buscando productos para: ${ingredientLabel}` : 'Consulta precios de ingredientes'"
+      :subtitle="ingredientLabel ? `Productos para: ${ingredientLabel}` : 'Consulta precios de ingredientes'"
     >
-      <router-link
-        to="/"
+      <button
+        type="button"
         class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+        @click="goBack"
       >
-        ← Volver al recetario
-      </router-link>
+        ← Volver
+      </button>
     </PageHero>
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -28,45 +29,56 @@
         </p>
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <article
-          v-for="p in productos"
-          :key="p.id || p.display_name"
-          class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden hover:shadow-md transition"
-        >
-          <div class="h-40 bg-amber-50 flex items-center justify-center overflow-hidden">
-            <img
-              v-if="p.thumbnail"
-              :src="p.thumbnail"
-              :alt="p.display_name"
-              class="max-h-full object-contain"
-            />
-            <span v-else class="text-amber-400 text-sm">Sin imagen</span>
-          </div>
-          <div class="p-4">
-            <h2 class="font-semibold text-amber-900 text-sm leading-snug">
-              {{ p.display_name }}
-            </h2>
-            <p v-if="p.packaging" class="text-xs text-amber-600 mt-1">{{ p.packaging }}</p>
-            <p class="mt-3 text-lg font-bold text-amber-700">
-              {{ formatPrice(p) }}
-            </p>
-          </div>
-        </article>
+      <div v-else>
+        <p class="text-sm text-amber-800/80 mb-4">
+          {{ productos.length }} producto{{ productos.length === 1 ? '' : 's' }}
+          <span v-if="categoryName"> · {{ categoryName }}</span>
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <article
+            v-for="p in productos"
+            :key="p.id || p.display_name"
+            class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden hover:shadow-md transition"
+          >
+            <div class="h-40 bg-amber-50 flex items-center justify-center overflow-hidden">
+              <img
+                v-if="p.thumbnail"
+                :src="p.thumbnail"
+                :alt="p.display_name"
+                class="max-h-full object-contain"
+              />
+              <span v-else class="text-amber-400 text-sm">Sin imagen</span>
+            </div>
+            <div class="p-4">
+              <h2 class="font-semibold text-amber-900 text-sm leading-snug">
+                {{ p.display_name }}
+              </h2>
+              <p v-if="p.packaging" class="text-xs text-amber-600 mt-1">{{ p.packaging }}</p>
+              <p class="mt-3 text-lg font-bold text-amber-700">
+                {{ formatPrice(p) }}
+              </p>
+            </div>
+          </article>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { apiUrl } from '../api'
-import { resolveMercadonaCategory } from '../utils/ingredientes'
+import {
+  normalizeText,
+  resolveMercadonaCategory,
+  textMatchesIngredient,
+} from '../utils/ingredientes'
 import PageHero from './PageHero.vue'
 
 const route = useRoute()
+const router = useRouter()
 const productos = ref([])
 const loading = ref(true)
 const error = ref('')
@@ -76,6 +88,11 @@ const ingredientLabel = computed(() => {
   const q = route.query.ingredients
   return typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
 })
+
+function goBack() {
+  if (window.history.length > 1) router.back()
+  else router.push({ name: 'landing' })
+}
 
 function formatPrice(p) {
   const price =
@@ -89,19 +106,41 @@ function formatPrice(p) {
   return `${n.toFixed(2)} €`
 }
 
-function variantsFor(word) {
-  if (!word) return []
-  const base = word.trim()
-  const lower = base.toLowerCase()
-  const capitalized = lower.charAt(0).toUpperCase() + lower.slice(1)
-  const singular = lower.endsWith('s') ? lower.slice(0, -1) : lower
-  return [...new Set([base, lower, capitalized, singular, singular + 's'])]
+function findCategoryId(results, categoria) {
+  const target = normalizeText(categoria)
+  let fuzzy = null
+  for (const group of results || []) {
+    for (const cat of group.categories || []) {
+      const name = normalizeText(cat.name)
+      if (name === target) return cat.id
+      if (!fuzzy && (name.includes(target) || target.includes(name))) {
+        fuzzy = cat.id
+      }
+    }
+  }
+  return fuzzy
+}
+
+function collectProducts(payload, palabra) {
+  const found = []
+  const seen = new Set()
+  for (const category of payload?.categories || []) {
+    for (const product of category.products || []) {
+      if (!textMatchesIngredient(product.display_name, palabra)) continue
+      const key = product.id || product.display_name
+      if (seen.has(key)) continue
+      seen.add(key)
+      found.push(product)
+    }
+  }
+  return found
 }
 
 async function load() {
   loading.value = true
   error.value = ''
   productos.value = []
+  categoryName.value = ''
   const palabra = ingredientLabel.value
   if (!palabra) {
     error.value = 'No se ha indicado un ingrediente.'
@@ -120,16 +159,7 @@ async function load() {
     categoryName.value = categoria
 
     const cats = await axios.get(apiUrl('/categories'), { skipAuth: true })
-    let categoryId = null
-    for (const group of cats.data.results || []) {
-      for (const cat of group.categories || []) {
-        if ((cat.name || '').includes(categoria) || categoria.includes(cat.name || '')) {
-          categoryId = cat.id
-          break
-        }
-      }
-      if (categoryId) break
-    }
+    const categoryId = findCategoryId(cats.data.results, categoria)
 
     if (!categoryId) {
       error.value = `No se encontró la categoría "${categoria}" en Mercadona.`
@@ -137,7 +167,6 @@ async function load() {
       return
     }
 
-    // Preferimos el endpoint optimizado del backend
     try {
       const search = await axios.post(
         apiUrl('/searchIngredient'),
@@ -150,7 +179,7 @@ async function load() {
         return
       }
     } catch {
-      // fallback al endpoint legacy
+      // fallback
     }
 
     const response = await axios.post(
@@ -158,17 +187,7 @@ async function load() {
       { id: categoryId },
       { skipAuth: true }
     )
-    const palabrasVariantes = variantsFor(palabra)
-    const found = []
-    for (const category of response.data.categories || []) {
-      for (const product of category.products || []) {
-        const name = (product.display_name || '').toLowerCase()
-        if (palabrasVariantes.some((v) => name.includes(String(v).toLowerCase()))) {
-          found.push(product)
-        }
-      }
-    }
-    productos.value = found
+    productos.value = collectProducts(response.data, palabra)
   } catch (err) {
     console.error(err)
     error.value =
@@ -180,4 +199,5 @@ async function load() {
 }
 
 onMounted(load)
+watch(() => route.query.ingredients, load)
 </script>
