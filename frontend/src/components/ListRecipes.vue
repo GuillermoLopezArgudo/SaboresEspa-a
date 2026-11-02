@@ -189,25 +189,19 @@ const props = defineProps({
         type: String,
         required: true
     },
-    idRecipe: {
-        type: [Array, String],
-        default: () => [],
-    }
+    filterCriteria: {
+        type: Object,
+        default: null,
+    },
 });
 
-watch(() => props.greeting, (newGreeting) => {
-    if (newGreeting === "filtred") {
-        filterRecipe()
-    } else if (newGreeting === "all") {
-        allRecipes()
-    }
-})
-
 watch(
-    () => props.idRecipe,
+    () => [props.greeting, props.filterCriteria],
     () => {
-        if (props.greeting === "filtred") {
-            filterRecipe()
+        if (props.greeting === 'filtred') {
+            applyLocalFilter()
+        } else if (props.greeting === 'all') {
+            allRecipes()
         }
     },
     { deep: true }
@@ -331,36 +325,74 @@ function personalRecipes() {
         });
 }
 
-function filterRecipe() {
-    const seen = new Set();
-    const filtered = [];
-    const source = Array.isArray(props.idRecipe) ? props.idRecipe : [];
+function recipeMatchesCriteria(recipeId, catsById, criteria) {
+    if (!criteria) return true
+    const cats = catsById.get(recipeId) || []
+    const has = (category, type) =>
+        cats.some((c) => c.category === category && c.type === type)
 
-    source.forEach(element => {
-        const id = element["idrecipe"];
-        if (!seen.has(id)) {
-            seen.add(id);
-            filtered.push(element);
-        }
-    });
+    if (criteria.typeeat && !has('typeeat', criteria.typeeat)) return false
+    if (criteria.ccaa && !has('ccaa', criteria.ccaa)) return false
+    if (criteria.time && !has('time', criteria.time)) return false
+
+    const proteins = Array.isArray(criteria.proteins) ? criteria.proteins : []
+    for (const protein of proteins) {
+        if (protein && !has('protein', protein)) return false
+    }
+    return true
+}
+
+function filterPayload(data, criteria) {
+    const recipes = data.recipes_list || []
+    const categories = data.categories_list || []
+    const catsById = new Map()
+    for (const cat of categories) {
+        const id = cat.recipe_id
+        if (!catsById.has(id)) catsById.set(id, [])
+        catsById.get(id).push(cat)
+    }
+
+    const matched = recipes.filter((r) => recipeMatchesCriteria(r.id, catsById, criteria))
+    const matchedIds = new Set(matched.map((r) => r.id))
+
+    elementos.recetas = matched
+    selectFavorites(data.favorites_list || [])
+    selectReviews(data.reviews_list || [])
+    setCategories(categories.filter((c) => matchedIds.has(c.recipe_id)))
+}
+
+function applyLocalFilter() {
+    const criteria = props.filterCriteria
+    if (!criteria) {
+        allRecipes()
+        return
+    }
+
+    const cached = getViewAllCache()
+    if (cached) {
+        loadGen += 1
+        filterPayload(cached, criteria)
+        loading.value = false
+        return
+    }
+
     loading.value = true
     const gen = ++loadGen
-    axios.post(apiUrl('/recipeFilter'), { filtered, iduser })
-        .then(response => {
+    axios.post(apiUrl('/viewAll'), {})
+        .then((response) => {
             if (gen !== loadGen) return
-            elementos.recetas = response.data.filtered_recipes || []
-            selectFavorites(response.data.favorites_list || [])
-            selectReviews(response.data.reviews_list || [])
-            setCategories(response.data.categories_list)
+            const data = response.data || {}
+            setViewAllCache(data)
+            filterPayload(data, criteria)
         })
-        .catch(error => {
+        .catch((error) => {
             if (gen !== loadGen) return
-            console.error("Error en la solicitud:", error);
-            alert(error.response?.data?.message || 'No se pudieron filtrar las recetas');
+            console.error('Error en la solicitud:', error)
+            alert(error.response?.data?.message || 'No se pudieron filtrar las recetas')
         })
         .finally(() => {
             if (gen === loadGen) loading.value = false
-        });
+        })
 }
 
 // Cambiar el estado de favoritos
