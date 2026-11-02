@@ -27,8 +27,8 @@
         <span
           class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-900 text-amber-50 text-sm font-medium"
         >
-          {{ visibleRecipes.length }}
-          receta{{ visibleRecipes.length === 1 ? '' : 's' }}
+          {{ pagination.total }}
+          receta{{ pagination.total === 1 ? '' : 's' }}
         </span>
         <label class="inline-flex items-center gap-2 text-sm text-amber-900">
           <span class="text-amber-800/70 hidden sm:inline">Ordenar</span>
@@ -176,38 +176,33 @@
       </article>
     </div>
 
-    <!-- Sin resultados de búsqueda (hay recetas base) -->
-    <div
-      v-else-if="!loading && elementos.recetas.length && !visibleRecipes.length"
-      class="rounded-2xl border border-amber-200 bg-white px-6 py-12 text-center"
-    >
-      <p class="font-serif text-xl font-bold text-amber-950">Sin coincidencias</p>
-      <p class="mt-2 text-amber-800/80">
-        No hay recetas para “{{ searchQuery }}”. Prueba otro término.
-      </p>
-      <button
-        type="button"
-        class="mt-5 inline-flex px-4 py-2 rounded-full border border-amber-300 text-amber-900 text-sm font-medium hover:bg-amber-50"
-        @click="searchQuery = ''"
-      >
-        Limpiar búsqueda
-      </button>
-    </div>
-
-    <!-- Vacío real -->
+    <!-- Vacío / sin coincidencias -->
     <div
       v-else-if="!loading"
       class="rounded-2xl border border-amber-200 bg-white px-6 py-14 text-center"
     >
       <p class="font-serif text-2xl font-bold text-amber-950">
-        {{ emptyTitle }}
+        {{ searchQuery.trim() ? 'Sin coincidencias' : emptyTitle }}
       </p>
       <p class="mt-2 text-amber-800/80 max-w-md mx-auto">
-        {{ emptySubtitle }}
+        <template v-if="searchQuery.trim()">
+          No hay recetas para “{{ searchQuery }}”. Prueba otro término.
+        </template>
+        <template v-else>
+          {{ emptySubtitle }}
+        </template>
       </p>
-      <div class="mt-6">
+      <div class="mt-6 flex flex-wrap justify-center gap-2">
+        <button
+          v-if="searchQuery.trim()"
+          type="button"
+          class="inline-flex px-4 py-2 rounded-full border border-amber-300 text-amber-900 text-sm font-medium hover:bg-amber-50"
+          @click="searchQuery = ''"
+        >
+          Limpiar búsqueda
+        </button>
         <router-link
-          v-if="emptyLink"
+          v-else-if="emptyLink"
           :to="emptyLink.to"
           class="inline-flex items-center px-5 py-2.5 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-sm font-semibold transition"
         >
@@ -215,25 +210,65 @@
         </router-link>
       </div>
     </div>
+
+    <!-- Paginador -->
+    <nav
+      v-if="pagination.total_pages > 1"
+      class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2"
+      aria-label="Paginación"
+    >
+      <p class="text-sm text-amber-800/80 order-2 sm:order-1">
+        Página {{ pagination.page }} de {{ pagination.total_pages }}
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-1.5 order-1 sm:order-2">
+        <button
+          type="button"
+          class="pager-btn"
+          :disabled="!pagination.has_prev || loading"
+          @click="goToPage(pagination.page - 1)"
+        >
+          Anterior
+        </button>
+        <button
+          v-for="p in pageButtons"
+          :key="'p-' + p"
+          type="button"
+          class="pager-btn min-w-[2.5rem]"
+          :class="{ 'pager-btn-active': p === pagination.page }"
+          :disabled="loading || p === '…'"
+          @click="p !== '…' && goToPage(p)"
+        >
+          {{ p }}
+        </button>
+        <button
+          type="button"
+          class="pager-btn"
+          :disabled="!pagination.has_next || loading"
+          @click="goToPage(pagination.page + 1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </nav>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch, onMounted } from 'vue'
+import { computed, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import StarRating from './StarRating.vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { apiUrl, mediaUrl } from '../api'
 import {
   getAverageStarsCache,
-  getViewAllCache,
   invalidateRecipeCaches,
   setAverageStarsCache,
-  setViewAllCache,
 } from '../utils/recipeCache'
 import { labelForFilter } from '../utils/filterOptions'
 
 const emit = defineEmits(['seleccionarCategoria'])
+
+const PAGE_SIZE = 12
 
 const favoritos = reactive({})
 const ratings = reactive({})
@@ -245,9 +280,19 @@ const categorias = reactive([])
 const loading = ref(false)
 const searchQuery = ref('')
 const sortBy = ref('rating-desc')
+const currentPage = ref(1)
+const pagination = reactive({
+  page: 1,
+  page_size: PAGE_SIZE,
+  total: 0,
+  total_pages: 1,
+  has_next: false,
+  has_prev: false,
+})
 
 const MAX_CATS = 3
 const expandedCats = reactive({})
+let searchDebounce = null
 
 function setCategories(list) {
   categorias.splice(0, categorias.length, ...(list || []))
@@ -277,36 +322,31 @@ const props = defineProps({
 })
 
 const showToolbar = computed(
-  () => loading.value || elementos.recetas.length > 0 || searchQuery.value
+  () =>
+    loading.value ||
+    elementos.recetas.length > 0 ||
+    searchQuery.value ||
+    pagination.total > 0
 )
 
-const visibleRecipes = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase()
-  let list = [...elementos.recetas]
-  if (q) {
-    list = list.filter((r) => {
-      const hay = `${r.title || ''} ${r.author || ''} ${r.description || ''}`.toLowerCase()
-      return hay.includes(q)
-    })
+const visibleRecipes = computed(() => elementos.recetas)
+
+const pageButtons = computed(() => {
+  const total = pagination.total_pages || 1
+  const current = pagination.page || 1
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
   }
-  if (sortBy.value === 'title-asc') {
-    return list.sort((a, b) =>
-      String(a.title || '').localeCompare(String(b.title || ''), 'es')
-    )
+  const pages = new Set([1, total, current, current - 1, current + 1, current - 2, current + 2])
+  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b)
+  const out = []
+  let prev = 0
+  for (const p of sorted) {
+    if (prev && p - prev > 1) out.push('…')
+    out.push(p)
+    prev = p
   }
-  if (sortBy.value === 'author-asc') {
-    return list.sort((a, b) =>
-      String(a.author || '').localeCompare(String(b.author || ''), 'es')
-    )
-  }
-  // rating-desc
-  return list.sort((a, b) => {
-    const ra = Number(average[a.id])
-    const rb = Number(average[b.id])
-    const na = Number.isFinite(ra) ? ra : -1
-    const nb = Number.isFinite(rb) ? rb : -1
-    return nb - na
-  })
+  return out
 })
 
 const emptyTitle = computed(() => {
@@ -340,11 +380,28 @@ const emptyLink = computed(() => {
 watch(
   () => [props.greeting, props.filterCriteria],
   () => {
-    if (props.greeting === 'filtred') applyLocalFilter()
-    else if (props.greeting === 'all') allRecipes()
+    currentPage.value = 1
+    reloadList()
   },
   { deep: true }
 )
+
+watch(sortBy, () => {
+  currentPage.value = 1
+  reloadList()
+})
+
+watch(searchQuery, () => {
+  if (searchDebounce) clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => {
+    currentPage.value = 1
+    reloadList()
+  }, 350)
+})
+
+onBeforeUnmount(() => {
+  if (searchDebounce) clearTimeout(searchDebounce)
+})
 
 function selectFavorites(favorites_list) {
   Object.keys(favoritos).forEach((k) => {
@@ -365,11 +422,23 @@ function selectReviews(reviews_list) {
   })
 }
 
-function applyViewAllPayload(data) {
-  elementos.recetas = data.recipes_list || []
+function applyPagination(meta) {
+  const m = meta || {}
+  pagination.page = m.page || currentPage.value || 1
+  pagination.page_size = m.page_size || PAGE_SIZE
+  pagination.total = m.total || 0
+  pagination.total_pages = m.total_pages || 1
+  pagination.has_next = !!m.has_next
+  pagination.has_prev = !!m.has_prev
+  currentPage.value = pagination.page
+}
+
+function applyListPayload(recipes, data = {}) {
+  elementos.recetas = recipes || []
   selectFavorites(data.favorites_list || [])
   selectReviews(data.reviews_list || [])
   setCategories(data.categories_list)
+  applyPagination(data.pagination)
 }
 
 function applyAverages(media) {
@@ -378,11 +447,33 @@ function applyAverages(media) {
   })
 }
 
-onMounted(() => {
-  if (props.greeting === 'all') allRecipes()
-  else if (props.greeting === 'favs') favoritesRecipes()
+function listQuery() {
+  return {
+    page: currentPage.value,
+    page_size: PAGE_SIZE,
+    q: searchQuery.value.trim(),
+    sort: sortBy.value,
+  }
+}
+
+function reloadList() {
+  if (props.greeting === 'favs') favoritesRecipes()
   else if (props.greeting === 'personal') personalRecipes()
-  else if (props.greeting === 'filtred') applyLocalFilter()
+  else if (props.greeting === 'filtred') filteredRecipes()
+  else allRecipes()
+}
+
+function goToPage(page) {
+  const next = Number(page)
+  if (!Number.isFinite(next) || next < 1 || next > pagination.total_pages) return
+  if (next === currentPage.value) return
+  currentPage.value = next
+  reloadList()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  reloadList()
   averageStars()
 })
 
@@ -432,30 +523,20 @@ function ratingLabel(id) {
   return Number(v).toFixed(1)
 }
 
-function allRecipes({ force = false } = {}) {
-  const cached = !force ? getViewAllCache() : null
-  if (cached) {
-    applyViewAllPayload(cached)
-    loading.value = false
-  } else if (!elementos.recetas.length) {
-    loading.value = true
-  }
-
+function allRecipes() {
+  loading.value = true
   const gen = ++loadGen
   axios
-    .post(apiUrl('/viewAll'), {})
+    .post(apiUrl('/viewAll'), listQuery())
     .then((response) => {
       if (gen !== loadGen) return
       const data = response.data || {}
-      setViewAllCache(data)
-      applyViewAllPayload(data)
+      applyListPayload(data.recipes_list || [], data)
     })
     .catch((error) => {
       if (gen !== loadGen) return
-      if (!elementos.recetas.length) {
-        console.error('Error en la solicitud:', error)
-        alert(error.response?.data?.message || 'No se pudieron cargar las recetas')
-      }
+      console.error('Error en la solicitud:', error)
+      alert(error.response?.data?.message || 'No se pudieron cargar las recetas')
     })
     .finally(() => {
       if (gen === loadGen) loading.value = false
@@ -467,16 +548,18 @@ function favoritesRecipes() {
     router.push({ name: 'login' })
     return
   }
-  if (!elementos.recetas.length) loading.value = true
+  loading.value = true
   const gen = ++loadGen
   axios
-    .post(apiUrl('/viewFavs'), {})
+    .post(apiUrl('/viewFavs'), listQuery())
     .then((response) => {
       if (gen !== loadGen) return
-      elementos.recetas = response.data.favorites_list || []
-      selectFavorites(response.data.favorites_list || [])
-      selectReviews(response.data.reviews_list || [])
-      setCategories(response.data.categories_list)
+      const data = response.data || {}
+      const recipes = data.favorites_list || []
+      applyListPayload(recipes, {
+        ...data,
+        favorites_list: recipes.map((r) => ({ id_recipe: r.id })),
+      })
     })
     .catch((error) => {
       if (gen !== loadGen) return
@@ -493,14 +576,14 @@ function personalRecipes() {
     router.push({ name: 'login' })
     return
   }
-  if (!elementos.recetas.length) loading.value = true
+  loading.value = true
   const gen = ++loadGen
   axios
-    .post(apiUrl('/viewRecipes'), {})
+    .post(apiUrl('/viewRecipes'), listQuery())
     .then((response) => {
       if (gen !== loadGen) return
-      elementos.recetas = response.data.message || []
-      setCategories(response.data.categories_list)
+      const data = response.data || {}
+      applyListPayload(data.message || [], data)
     })
     .catch((error) => {
       if (gen !== loadGen) return
@@ -512,68 +595,27 @@ function personalRecipes() {
     })
 }
 
-function recipeMatchesCriteria(recipeId, catsById, criteria) {
-  if (!criteria) return true
-  const cats = catsById.get(recipeId) || []
-  const has = (category, type) =>
-    cats.some((c) => c.category === category && c.type === type)
-
-  if (criteria.typeeat && !has('typeeat', criteria.typeeat)) return false
-  if (criteria.ccaa && !has('ccaa', criteria.ccaa)) return false
-  if (criteria.time && !has('time', criteria.time)) return false
-
-  const proteins = Array.isArray(criteria.proteins) ? criteria.proteins : []
-  for (const protein of proteins) {
-    if (protein && !has('protein', protein)) return false
-  }
-  return true
-}
-
-function filterPayload(data, criteria) {
-  const recipes = data.recipes_list || []
-  const categories = data.categories_list || []
-  const catsById = new Map()
-  for (const cat of categories) {
-    const id = cat.recipe_id
-    if (!catsById.has(id)) catsById.set(id, [])
-    catsById.get(id).push(cat)
-  }
-
-  const matched = recipes.filter((r) =>
-    recipeMatchesCriteria(r.id, catsById, criteria)
-  )
-  const matchedIds = new Set(matched.map((r) => r.id))
-
-  elementos.recetas = matched
-  selectFavorites(data.favorites_list || [])
-  selectReviews(data.reviews_list || [])
-  setCategories(categories.filter((c) => matchedIds.has(c.recipe_id)))
-}
-
-function applyLocalFilter() {
+function filteredRecipes() {
   const criteria = props.filterCriteria
   if (!criteria) {
     allRecipes()
     return
   }
 
-  const cached = getViewAllCache()
-  if (cached) {
-    loadGen += 1
-    filterPayload(cached, criteria)
-    loading.value = false
-    return
-  }
-
   loading.value = true
   const gen = ++loadGen
   axios
-    .post(apiUrl('/viewAll'), {})
+    .post(apiUrl('/filterRecipe'), {
+      ...listQuery(),
+      typeeat: criteria.typeeat || '',
+      ccaa: criteria.ccaa || '',
+      time: criteria.time || '',
+      proteins: Array.isArray(criteria.proteins) ? criteria.proteins : [],
+    })
     .then((response) => {
       if (gen !== loadGen) return
       const data = response.data || {}
-      setViewAllCache(data)
-      filterPayload(data, criteria)
+      applyListPayload(data.filtered_recipes || [], data)
     })
     .catch((error) => {
       if (gen !== loadGen) return
@@ -660,5 +702,11 @@ function averageStars({ force = false } = {}) {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+.pager-btn {
+  @apply inline-flex items-center justify-center px-3 py-2 rounded-full border border-amber-300 bg-white text-amber-900 text-sm font-medium hover:bg-amber-50 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white;
+}
+.pager-btn-active {
+  @apply bg-amber-800 text-white border-amber-800 hover:bg-amber-900 hover:text-white;
 }
 </style>

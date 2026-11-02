@@ -2,7 +2,7 @@ import os
 from datetime import date
 
 from flask import Blueprint, current_app, jsonify, request
-from peewee import IntegrityError, fn
+from peewee import IntegrityError, JOIN, fn
 
 from app.db import db
 from app.models import (
@@ -17,6 +17,9 @@ from app.models import (
     UserFavorite,
     Users,
 )
+
+DEFAULT_PAGE_SIZE = 12
+MAX_PAGE_SIZE = 48
 from app.security import (
     MAX_COMMENT_LEN,
     MAX_QUANTITY_LEN,
@@ -152,6 +155,119 @@ def _optional_user():
         return resolve_user_from_jwt(optional=True)
     except Exception:
         return None
+
+
+def _parse_pagination(data):
+    data = data or {}
+    fetch_all = bool(data.get("all"))
+    try:
+        page = max(1, int(data.get("page") or 1))
+    except (TypeError, ValueError):
+        page = 1
+    try:
+        page_size = int(data.get("page_size") or DEFAULT_PAGE_SIZE)
+    except (TypeError, ValueError):
+        page_size = DEFAULT_PAGE_SIZE
+    page_size = min(max(1, page_size), MAX_PAGE_SIZE)
+    q = (data.get("q") or data.get("search") or "").strip()
+    sort = (data.get("sort") or "rating-desc").strip()
+    if sort not in ("rating-desc", "title-asc", "author-asc"):
+        sort = "rating-desc"
+    return page, page_size, q, sort, fetch_all
+
+
+def _pagination_meta(page, page_size, total):
+    total_pages = max(1, (total + page_size - 1) // page_size) if total else 1
+    page = min(page, total_pages) if total else 1
+    return {
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "total_pages": total_pages,
+        "has_next": bool(total) and page < total_pages,
+        "has_prev": page > 1,
+    }
+
+
+def _avg_reviews_alias():
+    return (
+        RecipeReview.select(
+            RecipeReview.id_recipe.alias("recipe_id"),
+            fn.AVG(RecipeReview.recipe_review_item_value).alias("avg_rating"),
+        )
+        .group_by(RecipeReview.id_recipe)
+        .alias("recipe_avg")
+    )
+
+
+def _apply_search_sort(query, q, sort, *, joined_users=False):
+    """Aplica búsqueda y orden. Asume Recipe en el SELECT; une Users si hace falta."""
+    if not joined_users:
+        query = query.join(Users, on=(Recipe.id_user == Users.id))
+
+    if q:
+        like = f"%{q}%"
+        query = query.where(
+            Recipe.recipe_title.ilike(like)
+            | Recipe.recipe_description.ilike(like)
+            | Users.user_name.ilike(like)
+        )
+
+    avg = _avg_reviews_alias()
+    query = query.switch(Recipe).join(
+        avg, JOIN.LEFT_OUTER, on=(Recipe.id == avg.c.recipe_id)
+    )
+
+    if sort == "title-asc":
+        query = query.order_by(fn.Lower(Recipe.recipe_title).asc(), Recipe.id.desc())
+    elif sort == "author-asc":
+        query = query.order_by(fn.Lower(Users.user_name).asc(), Recipe.id.desc())
+    else:
+        query = query.order_by(
+            fn.COALESCE(avg.c.avg_rating, -1).desc(),
+            Recipe.id.desc(),
+        )
+    return query
+
+
+def _paginate_recipes(query, page, page_size, fetch_all=False):
+    total = query.count()
+    if fetch_all:
+        recipes = list(query)
+        meta = {
+            "page": 1,
+            "page_size": total or page_size,
+            "total": total,
+            "total_pages": 1,
+            "has_next": False,
+            "has_prev": False,
+        }
+        return recipes, meta
+    meta = _pagination_meta(page, page_size, total)
+    recipes = list(query.paginate(meta["page"], page_size))
+    return recipes, meta
+
+
+def _viewer_favs_reviews(viewer, recipe_ids=None):
+    """Favoritos y valoraciones del usuario (todos, para marcar corazones en UI)."""
+    favorites_list = []
+    reviews_list = []
+    if not viewer:
+        return favorites_list, reviews_list
+    favorites_list = [
+        {"id_recipe": f.id_recipe_id}
+        for f in UserFavorite.select().where(UserFavorite.id_user == viewer.id)
+    ]
+    review_q = RecipeReview.select().where(RecipeReview.id_user == viewer.id)
+    if recipe_ids is not None:
+        if not recipe_ids:
+            return favorites_list, []
+        review_q = review_q.where(RecipeReview.id_recipe.in_(recipe_ids))
+    reviews_list = [
+        {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
+        for r in review_q
+    ]
+    return favorites_list, reviews_list
 
 
 def _can_view_recipe(user, recipe) -> bool:
@@ -298,35 +414,41 @@ def create_recipe(current_user):
 @recipes_bp.post("/viewRecipes")
 @login_required
 def view_personal_recipes(current_user):
-    recipes = list(Recipe.select().where(Recipe.id_user == current_user.id))
+    data = request.get_json(silent=True) or {}
+    page, page_size, q, sort, fetch_all = _parse_pagination(data)
+
+    query = Recipe.select(Recipe).where(Recipe.id_user == current_user.id)
+    query = _apply_search_sort(query, q, sort)
+    recipes, pagination = _paginate_recipes(query, page, page_size, fetch_all)
     return jsonify(
         message=_recipes_as_dicts(recipes),
         categories_list=_categories_for_recipes(recipes),
+        pagination=pagination,
     )
 
 
 @recipes_bp.post("/viewAll")
 def view_all_recipes():
-    """Público: solo recetas visibles. Favoritos/reviews si hay JWT válido."""
+    """Público: solo recetas visibles. Favoritos/reviews si hay JWT válido.
+
+    Acepta page, page_size, q/search, sort (rating-desc|title-asc|author-asc).
+    """
+    data = request.get_json(silent=True) or {}
+    page, page_size, q, sort, fetch_all = _parse_pagination(data)
     current_user = _optional_user()
 
-    recipes = list(Recipe.select().where(Recipe.recipe_visibility == True))  # noqa: E712
-    payload = {
-        "recipes_list": _recipes_as_dicts(recipes),
-        "categories_list": _categories_for_recipes(recipes),
-        "favorites_list": [],
-        "reviews_list": [],
-    }
-    if current_user:
-        payload["favorites_list"] = [
-            {"id_recipe": f.id_recipe_id}
-            for f in UserFavorite.select().where(UserFavorite.id_user == current_user.id)
-        ]
-        payload["reviews_list"] = [
-            {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
-            for r in RecipeReview.select().where(RecipeReview.id_user == current_user.id)
-        ]
-    return jsonify(**payload)
+    query = Recipe.select(Recipe).where(Recipe.recipe_visibility == True)  # noqa: E712
+    query = _apply_search_sort(query, q, sort)
+    recipes, pagination = _paginate_recipes(query, page, page_size, fetch_all)
+
+    favorites_list, reviews_list = _viewer_favs_reviews(current_user)
+    return jsonify(
+        recipes_list=_recipes_as_dicts(recipes),
+        categories_list=_categories_for_recipes(recipes),
+        favorites_list=favorites_list,
+        reviews_list=reviews_list,
+        pagination=pagination,
+    )
 
 
 @recipes_bp.post("/updateFavs")
@@ -603,6 +725,9 @@ def edit_comment(current_user):
 @recipes_bp.post("/viewFavs")
 @login_required
 def view_favs(current_user):
+    data = request.get_json(silent=True) or {}
+    page, page_size, q, sort, fetch_all = _parse_pagination(data)
+
     favorites_list_ids = [
         f.id_recipe_id
         for f in UserFavorite.select(UserFavorite.id_recipe).where(
@@ -610,14 +735,23 @@ def view_favs(current_user):
         )
     ]
     if not favorites_list_ids:
-        return jsonify(favorites_list=[], reviews_list=[], categories_list=[])
+        return jsonify(
+            favorites_list=[],
+            reviews_list=[],
+            categories_list=[],
+            pagination=_pagination_meta(1, page_size, 0),
+        )
 
-    # Incluir privadas que el usuario puede ver (p.ej. las suyas en favoritos)
-    recipes = [
-        r
-        for r in Recipe.select().where(Recipe.id.in_(favorites_list_ids))
-        if _can_view_recipe(current_user, r)
-    ]
+    # Visibles para el usuario (públicas o suyas/privadas)
+    query = Recipe.select(Recipe).where(
+        (Recipe.id.in_(favorites_list_ids))
+        & (
+            (Recipe.recipe_visibility == True)  # noqa: E712
+            | (Recipe.id_user == current_user.id)
+        )
+    )
+    query = _apply_search_sort(query, q, sort)
+    recipes, pagination = _paginate_recipes(query, page, page_size, fetch_all)
     visible_ids = [r.id for r in recipes]
     return jsonify(
         favorites_list=_recipes_as_dicts(recipes),
@@ -629,6 +763,7 @@ def view_favs(current_user):
             )
         ],
         categories_list=_categories_for_recipes(recipes),
+        pagination=pagination,
     )
 
 
@@ -834,40 +969,51 @@ def _recipe_ids_matching_filters(conditions):
 
 @recipes_bp.post("/filterRecipe")
 def filter_recipe():
-    """Devuelve ids (y opcionalmente recetas) que cumplen TODAS las categorías (AND)."""
+    """Devuelve ids (y opcionalmente recetas) que cumplen TODAS las categorías (AND).
+
+    Acepta page, page_size, q/search, sort como viewAll.
+    """
     data = request.get_json() or {}
+    page, page_size, q, sort, fetch_all = _parse_pagination(data)
     conditions = _filter_conditions_from_payload(data)
+    empty_meta = _pagination_meta(1, page_size, 0)
     if not conditions:
-        return jsonify(message=[], filtered_recipes=[], categories_list=[])
+        return jsonify(
+            message=[],
+            filtered_recipes=[],
+            categories_list=[],
+            favorites_list=[],
+            reviews_list=[],
+            pagination=empty_meta,
+        )
 
     matched_ids = _recipe_ids_matching_filters(conditions)
     if not matched_ids:
-        return jsonify(message=[], filtered_recipes=[], categories_list=[])
-
-    recipes = list(
-        Recipe.select().where(
-            (Recipe.id.in_(matched_ids)) & (Recipe.recipe_visibility == True)  # noqa: E712
+        return jsonify(
+            message=[],
+            filtered_recipes=[],
+            categories_list=[],
+            favorites_list=[],
+            reviews_list=[],
+            pagination=empty_meta,
         )
+
+    query = Recipe.select(Recipe).where(
+        (Recipe.id.in_(matched_ids)) & (Recipe.recipe_visibility == True)  # noqa: E712
     )
+    query = _apply_search_sort(query, q, sort)
+    recipes, pagination = _paginate_recipes(query, page, page_size, fetch_all)
     message = [{"idrecipe": r.id} for r in recipes]
-    payload = {
-        "message": message,
-        "filtered_recipes": _recipes_as_dicts(recipes),
-        "categories_list": _categories_for_recipes(recipes),
-        "favorites_list": [],
-        "reviews_list": [],
-    }
     viewer = _optional_user()
-    if viewer:
-        payload["favorites_list"] = [
-            {"id_recipe": f.id_recipe_id}
-            for f in UserFavorite.select().where(UserFavorite.id_user == viewer.id)
-        ]
-        payload["reviews_list"] = [
-            {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
-            for r in RecipeReview.select().where(RecipeReview.id_user == viewer.id)
-        ]
-    return jsonify(**payload)
+    favorites_list, reviews_list = _viewer_favs_reviews(viewer)
+    return jsonify(
+        message=message,
+        filtered_recipes=_recipes_as_dicts(recipes),
+        categories_list=_categories_for_recipes(recipes),
+        favorites_list=favorites_list,
+        reviews_list=reviews_list,
+        pagination=pagination,
+    )
 
 
 @recipes_bp.post("/recipeFilter")

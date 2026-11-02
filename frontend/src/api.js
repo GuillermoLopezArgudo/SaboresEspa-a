@@ -71,6 +71,7 @@ export function clearSession() {
   localStorage.removeItem('iduser')
   localStorage.removeItem('type')
   localStorage.removeItem('token')
+  localStorage.removeItem('userName')
   localStorage.removeItem('sabores_profile')
 }
 

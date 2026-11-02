@@ -175,7 +175,7 @@ def main() -> int:
         for rid in ids:
             update_recipe(token, rid, video)
     # verificar
-    allr = requests.post(f"{API}/viewAll", json={}, timeout=90).json()
+    allr = requests.post(f"{API}/viewAll", json={"all": True}, timeout=90).json()
     for rec in allr.get("recipes_list") or []:
         img = rec.get("image") or ""
         print(f" - {rec['id']}: {rec['title']} | image={img[:80]}")
