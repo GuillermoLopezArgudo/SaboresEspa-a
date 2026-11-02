@@ -17,6 +17,6 @@ peewee==3.17.0
 psycopg2-binary==2.9.10
 PyMySQL==1.1.1
 pytest==8.3.5
-requests==2.33.0
+requests==2.34.2
 urllib3==2.8.0
 Werkzeug==3.1.6
