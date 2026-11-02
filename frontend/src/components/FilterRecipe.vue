@@ -204,79 +204,51 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import {
+  foodTypes,
+  regions,
+  proteins,
+  prepTimes,
+} from '../utils/filterOptions';
+
+const props = defineProps({
+  criteria: {
+    type: Object,
+    default: null,
+  },
+});
 
 const emit = defineEmits(['aplicarFiltros', 'limpiarFiltros']);
 
 const activeAccordion = ref('');
 const mobileOpen = ref(false);
 let debounceTimer = null;
+let syncingFromParent = false;
 
 const tipoComida = ref('');
 const ccaa = ref('');
 const tiempo = ref('');
 const proteinas = ref([]);
 
-const foodTypes = [
-  { value: 'starters', label: 'Entrantes' },
-  { value: 'maindishes', label: 'Platos principales' },
-  { value: 'accompaniments', label: 'Acompañamientos' },
-  { value: 'dessert', label: 'Postres' },
-  { value: 'soups', label: 'Sopas' },
-  { value: 'salads', label: 'Ensaladas' },
-  { value: 'sauces', label: 'Salsas' },
-  { value: 'breads', label: 'Panes y masas' },
-];
+function applyCriteriaFromParent(criteria) {
+  syncingFromParent = true;
+  tipoComida.value = criteria?.typeeat || '';
+  ccaa.value = criteria?.ccaa || '';
+  tiempo.value = criteria?.time || '';
+  proteinas.value = Array.isArray(criteria?.proteins) ? [...criteria.proteins] : [];
+  queueMicrotask(() => {
+    syncingFromParent = false;
+  });
+}
 
-const regions = [
-  { value: 'andalucia', label: 'Andalucía' },
-  { value: 'aragon', label: 'Aragón' },
-  { value: 'asturias', label: 'Asturias' },
-  { value: 'cantabria', label: 'Cantabria' },
-  { value: 'castillalamancha', label: 'Castilla-La Mancha' },
-  { value: 'castillaleon', label: 'Castilla y León' },
-  { value: 'catalunya', label: 'Cataluña' },
-  { value: 'valencia', label: 'Com. Valenciana' },
-  { value: 'extremadura', label: 'Extremadura' },
-  { value: 'galicia', label: 'Galicia' },
-  { value: 'baleares', label: 'Baleares' },
-  { value: 'canarias', label: 'Canarias' },
-  { value: 'larioja', label: 'La Rioja' },
-  { value: 'madrid', label: 'Madrid' },
-  { value: 'murcia', label: 'Murcia' },
-  { value: 'navarra', label: 'Navarra' },
-  { value: 'paisvasco', label: 'País Vasco' },
-];
-
-const proteins = [
-  { value: 'pollo', label: 'Pollo' },
-  { value: 'res', label: 'Res / Ternera' },
-  { value: 'cerdo', label: 'Cerdo / Ibérico' },
-  { value: 'cordero', label: 'Cordero' },
-  { value: 'conejo', label: 'Conejo' },
-  { value: 'pato', label: 'Pato' },
-  { value: 'pescado', label: 'Pescado blanco' },
-  { value: 'atun', label: 'Atún' },
-  { value: 'bacalao', label: 'Bacalao' },
-  { value: 'salmon', label: 'Salmón' },
-  { value: 'anguila', label: 'Anguila' },
-  { value: 'mariscos', label: 'Mariscos' },
-  { value: 'pulpo', label: 'Pulpo' },
-  { value: 'calamar', label: 'Calamar / Sepia' },
-  { value: 'huevo', label: 'Huevo' },
-  { value: 'queso', label: 'Queso' },
-  { value: 'legumbres', label: 'Legumbres' },
-  { value: 'setas', label: 'Setas' },
-  { value: 'vegetariana', label: 'Vegetariana' },
-  { value: 'vegana', label: 'Vegana' },
-];
-
-const prepTimes = [
-  { value: 'menos15', label: 'Rápida', description: '<15 min' },
-  { value: '15a30', label: 'Media', description: '15–30 min' },
-  { value: '30a60', label: 'Lenta', description: '30–60 min' },
-  { value: 'mas60', label: 'Muy lenta', description: '>1 h' },
-];
+watch(
+  () => props.criteria,
+  (criteria) => {
+    applyCriteriaFromParent(criteria);
+  },
+  { deep: true, immediate: true }
+);
 
 const panels = computed(() => [
   { id: 'tipoComida', title: 'Tipo de plato', mode: 'radio', model: tipoComida, options: foodTypes, placeholder: 'Tipo' },
@@ -409,6 +381,7 @@ function scheduleSearch(delayMs = 0) {
 }
 
 function emitirFiltros() {
+  if (syncingFromParent) return;
   if (!hasActiveFilters()) {
     limpiarFiltros();
     return;

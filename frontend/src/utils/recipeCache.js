@@ -12,7 +12,15 @@ function fresh(entry) {
 }
 
 export function getViewAllCache() {
-  return fresh(store.viewAll) ? store.viewAll.data : null
+  if (!fresh(store.viewAll)) return null
+  const data = store.viewAll.data
+  const list = data?.recipes_list || []
+  // Invalidar cache antiguo sin autor
+  if (list.length && !Object.prototype.hasOwnProperty.call(list[0], 'author')) {
+    store.viewAll = null
+    return null
+  }
+  return data
 }
 
 export function setViewAllCache(data) {

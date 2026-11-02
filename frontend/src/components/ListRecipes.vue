@@ -14,8 +14,15 @@
 
     <!-- Listado de recetas -->
     <div v-else-if="elementos.recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="(item) in elementos.recetas" :key="item.id"
-            class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
+        <article
+            v-for="(item) in elementos.recetas"
+            :key="item.id"
+            role="link"
+            tabindex="0"
+            class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500"
+            @click="openRecipe(item.id)"
+            @keydown.enter.prevent="openRecipe(item.id)"
+        >
             <div class="relative">
                 <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1 text-sm z-[1]">
                     {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2)
@@ -32,8 +39,12 @@
                     </svg>
                 </div>
 
-                <button v-if="props.greeting !== 'personal'" @click="toggleFavorite(item.id)"
-                    class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110">
+                <button
+                    v-if="props.greeting !== 'personal'"
+                    type="button"
+                    @click.stop="toggleFavorite(item.id)"
+                    class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110"
+                >
                     <i class="fa text-2xl"
                         :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
                 </button>
@@ -41,39 +52,32 @@
 
             <div class="p-5">
                 <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
-                <p v-if="item.author" class="mt-1 text-xs font-medium text-amber-800/70">
-                    Por {{ item.author }}
+                <p class="mt-1.5 text-sm font-medium text-amber-900/80">
+                    {{ item.author ? `Por ${item.author}` : 'Autor desconocido' }}
                 </p>
                 <p class="text-amber-600 text-sm mt-2 line-clamp-2">{{ item.description }}</p>
-                <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'">
+                <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'" @click.stop>
                     <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
                 </div>
 
-                <router-link :to="'/recipe?id=' + item.id"
-                    class="inline-flex items-center justify-center w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition duration-300 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Ver Receta
-                </router-link>
-
-                <div class="text-sm text-amber-700 mt-2">
-                    <span class="font-semibold">Categorías:</span>
+                <div class="text-sm text-amber-700 mt-3" @click.stop>
+                    <span class="font-semibold mr-1">Categorías:</span>
                     <template v-if="(catsByRecipe[item.id] || []).length">
-                        <span v-for="cat in catsByRecipe[item.id]"
+                        <button
+                            v-for="cat in catsByRecipe[item.id]"
                             :key="cat.type + cat.category"
-                            class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
-                            {{ cat.type }}
-                        </span>
+                            type="button"
+                            class="inline-block bg-amber-100 hover:bg-amber-700 hover:text-white text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1 transition"
+                            :title="'Filtrar por ' + categoryLabel(cat)"
+                            @click="onCategoryClick(cat)"
+                        >
+                            {{ categoryLabel(cat) }}
+                        </button>
                     </template>
                     <span v-else class="text-amber-500 italic">No tiene categorías</span>
                 </div>
             </div>
-        </div>
+        </article>
     </div>
 
     <!-- Mensaje si no hay recetas -->
@@ -157,6 +161,9 @@ import {
     setAverageStarsCache,
     setViewAllCache,
 } from '../utils/recipeCache';
+import { labelForFilter } from '../utils/filterOptions';
+
+const emit = defineEmits(['seleccionarCategoria']);
 
 const favoritos = reactive({});
 const ratings = reactive({});
@@ -245,9 +252,26 @@ onMounted(() => {
         favoritesRecipes()
     } else if (props.greeting === "personal") {
         personalRecipes()
+    } else if (props.greeting === 'filtred') {
+        applyLocalFilter()
     }
     averageStars();
 });
+
+function openRecipe(id) {
+    router.push({ path: '/recipe', query: { id } })
+}
+
+function categoryLabel(cat) {
+    return labelForFilter(cat.category, cat.type)
+}
+
+function onCategoryClick(cat) {
+    emit('seleccionarCategoria', {
+        category: cat.category,
+        type: cat.type,
+    })
+}
 
 
 function allRecipes({ force = false } = {}) {
