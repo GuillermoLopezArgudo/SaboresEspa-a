@@ -99,6 +99,7 @@
 import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
+import { apiUrl } from '../api';
 
 const name = ref('');
 const email = ref('');
@@ -122,7 +123,7 @@ function OnSubmit() {
     type: type.value,
   };
 
-  axios.post('http://localhost:5000/register', payload)
+  axios.post(apiUrl('/register'), payload)
     .then(response => {
       if (response.data.userToken) {
         localStorage.setItem("userToken", response.data.userToken);

@@ -86,6 +86,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { apiUrl } from '../api';
 
 const router = useRouter();
 const email = ref('');
@@ -99,7 +100,7 @@ function OnSubmit() {
   };
 
   axios
-    .post('http://localhost:5000/login', payload)
+    .post(apiUrl('/login'), payload)
     .then((response) => {
       if (response.data.userToken) {
         localStorage.setItem('userToken', response.data.userToken);

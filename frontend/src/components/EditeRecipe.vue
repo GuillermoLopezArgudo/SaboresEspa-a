@@ -289,6 +289,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
+import { apiUrl } from '../api';
 import { useRouter, useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -322,7 +323,7 @@ const addStep = () => {
 };
 
 onMounted(() => {
-  axios.post('http://localhost:5000/viewRecipe', { idrecipe: recipeId })
+  axios.post(apiUrl('/viewRecipe'), { idrecipe: recipeId })
     .then(response => {
       title.value = response.data.recipe_list[0].title;
       description.value = response.data.recipe_list[0].description;
@@ -424,7 +425,7 @@ function submitEditeRecipe() {
     token: localStorage.getItem("userToken")
   };
 
-  axios.post('http://localhost:5000/editeRecipe', payload)
+  axios.post(apiUrl('/editeRecipe'), payload)
     .then(response => {
       console.log(response.data.message);
       router.push({ name: 'home' });

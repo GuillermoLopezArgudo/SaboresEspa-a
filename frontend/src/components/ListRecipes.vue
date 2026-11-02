@@ -12,7 +12,7 @@
                 </div>
 
                 <!-- Imagen de la receta -->
-                <img v-if="item.image" :src="`http://localhost:5000/${item.image}`" class="w-full h-48 object-cover"
+                <img v-if="item.image" :src="mediaUrl(item.image)" class="w-full h-48 object-cover"
                     alt="Imagen de receta">
                 <!-- Placeholder si no hay imagen -->
                 <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
@@ -143,6 +143,7 @@ import { reactive, defineProps, watch, onMounted } from 'vue';
 import StarRating from './StarRating.vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { apiUrl, mediaUrl } from '../api';
 
 
 const favoritos = reactive({});
@@ -203,7 +204,7 @@ onMounted(() => {
 
 
 function allRecipes() {
-    axios.post('http://localhost:5000/viewAll', { iduser })
+    axios.post(apiUrl('/viewAll'), { iduser })
         .then(response => {
             elementos.recetas = response.data.recipes_list;
             if (iduser) {
@@ -226,7 +227,7 @@ function favoritesRecipes() {
     };
 
     axios
-        .post('http://localhost:5000/viewFavs', payload)
+        .post(apiUrl('/viewFavs'), payload)
         .then(response => {
             elementos.recetas = response.data.favorites_list;
             selectFavorites(response.data.favorites_list)
@@ -249,7 +250,7 @@ function personalRecipes() {
             userToken: userToken.value
         }
 
-        axios.post('http://localhost:5000/viewRecipes', payload)
+        axios.post(apiUrl('/viewRecipes'), payload)
             .then(response => {
                 if (response.data.message && response.data.message.length > 0) {
                     elementos.recetas = response.data.message;
@@ -275,7 +276,7 @@ function filterRecipe() {
             filtered.push(element);
         }
     });
-    axios.post('http://localhost:5000/recipeFilter', { filtered, iduser })
+    axios.post(apiUrl('/recipeFilter'), { filtered, iduser })
         .then(response => {
             elementos.recetas = response.data.filtered_recipes
             if (iduser) {
@@ -301,7 +302,7 @@ const toggleFavorite = (id) => {
 
         if (favoritos[id]) {
             favoritos[id] = false;
-            axios.post('http://localhost:5000/deleteFavs', payload)
+            axios.post(apiUrl('/deleteFavs'), payload)
                 .then(response => {
                     console.log(response.data.message);
                 })
@@ -310,7 +311,7 @@ const toggleFavorite = (id) => {
                 });
         } else {
             favoritos[id] = true;
-            axios.post('http://localhost:5000/updateFavs', payload)
+            axios.post(apiUrl('/updateFavs'), payload)
                 .then(response => {
                     console.log(response.data.message);
                 })
@@ -341,7 +342,7 @@ const ratingChanged = (recipeId) => {
             };
 
             localStorage.setItem('ratings', JSON.stringify(ratings));
-            axios.post('http://localhost:5000/updateRating', payload)
+            axios.post(apiUrl('/updateRating'), payload)
                 .then(response => {
                     console.log(response.data.message);
                     averageStars()
@@ -354,7 +355,7 @@ const ratingChanged = (recipeId) => {
 };
 
 function averageStars() {
-    axios.post('http://localhost:5000/averageStars')
+    axios.post(apiUrl('/averageStars'))
         .then(response => {
             response.data.media.forEach(rating => {
                 average[rating.recipe_id] = rating.average_rating

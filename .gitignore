@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+node_modules/
+frontend/node_modules/
+frontend/dist/
+static/images/*
+!static/images/NonPerfil.webp
+static/videos/*
+*.log
+.DS_Store

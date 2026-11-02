@@ -14,7 +14,7 @@
            class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1">
         <!-- Imagen de la receta -->
         <div class="relative h-56 overflow-hidden">
-          <img :src="`http://localhost:5000/${item.image}`" 
+          <img :src="mediaUrl(item.image)" 
                class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                alt="Imagen de receta">
           <div class="absolute top-3 right-3 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
@@ -64,6 +64,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { apiUrl, mediaUrl } from '../api';
 
 const userToken = localStorage.getItem('userToken');
 const iduser = localStorage.getItem('iduser');
@@ -78,7 +79,7 @@ onMounted(() => {
   };  
 
   axios
-    .post('http://localhost:5000/viewFavs', payload)
+    .post(apiUrl('/viewFavs'), payload)
     .then(response => {
       recetas.value = response.data.message;
     })

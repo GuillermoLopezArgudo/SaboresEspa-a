@@ -53,7 +53,7 @@
           <!-- Imagen con corazón superpuesto -->
           <div class="relative">
             <!-- Imagen de la receta -->
-            <img v-if="item.image" :src="`http://localhost:5000/${item.image}`" 
+            <img v-if="item.image" :src="mediaUrl(item.image)" 
                  class="w-full h-48 object-cover" alt="Imagen de receta">
             <!-- Placeholder si no hay imagen -->
             <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
@@ -106,6 +106,7 @@
 
 <script setup>
 import axios from 'axios';
+import { apiUrl, mediaUrl } from '../api';
 import { reactive } from 'vue';
 import StarRating from './StarRating.vue';
 import 'font-awesome/css/font-awesome.min.css';
@@ -122,7 +123,7 @@ const iduser = localStorage.getItem('iduser');
 const router = useRouter();
 
 // Solicitar todas las recetas y datos relacionados
-axios.post('http://localhost:5000/viewAll', { iduser })
+axios.post(apiUrl('/viewAll'), { iduser })
   .then(response => {
     elementos.recetas = response.data.recipes_list;
     if (iduser) {
@@ -151,7 +152,7 @@ const toggleFavorite = (id) => {
 
     if (favoritos[id]) {
       favoritos[id] = false;
-      axios.post('http://localhost:5000/deleteFavs', payload)
+      axios.post(apiUrl('/deleteFavs'), payload)
         .then(response => {
           console.log(response.data.message);
         })
@@ -160,7 +161,7 @@ const toggleFavorite = (id) => {
         });
     } else {
       favoritos[id] = true;
-      axios.post('http://localhost:5000/updateFavs', payload)
+      axios.post(apiUrl('/updateFavs'), payload)
         .then(response => {
           console.log(response.data.message);
         })
@@ -191,7 +192,7 @@ const ratingChanged = (recipeId) => {
       };
 
       localStorage.setItem('ratings', JSON.stringify(ratings));
-      axios.post('http://localhost:5000/updateRating', payload)
+      axios.post(apiUrl('/updateRating'), payload)
         .then(response => {
           console.log(response.data.message);
         })

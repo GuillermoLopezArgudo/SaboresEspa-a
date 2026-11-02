@@ -363,6 +363,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import axios from 'axios';
+import { apiUrl } from '../api';
 import { useRouter } from "vue-router";
 
 const title = ref('');
@@ -458,7 +459,7 @@ function submitRecipe() {
     proteins: proteinas.value,
     visibility: showBasicInfo.value
   };
-  axios.post('http://localhost:5000/create', payload)
+  axios.post(apiUrl('/create'), payload)
     .then(response => {
       console.log(response.data.message);
       router.push({ name: "home" });

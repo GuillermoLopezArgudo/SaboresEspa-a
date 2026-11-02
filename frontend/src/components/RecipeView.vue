@@ -54,14 +54,14 @@
         <!-- Imagen de la receta -->
         <div v-if="receta.image" class="p-6 sm:p-8">
           <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
-            <img :src="`http://localhost:5000/${receta.image}`" alt="Imagen de la receta" class="w-full h-auto object-cover">
+            <img :src="mediaUrl(receta.image)" alt="Imagen de la receta" class="w-full h-auto object-cover">
           </div>
         </div>
   
         <!-- Video de la receta -->
         <div v-if="receta.video" class="p-6 sm:p-8 pt-0">
           <div class="rounded-xl overflow-hidden shadow-md border border-amber-200">
-            <video controls :src="'http://localhost:5000/' + receta.video" class="w-full"></video>
+              <video controls :src="mediaUrl(receta.video)" class="w-full"></video>
           </div>
         </div>
   
@@ -99,7 +99,7 @@
                   <h4 class="font-semibold text-amber-800 text-lg">{{ step.title }}</h4>
                   <p class="text-amber-700 mt-1">{{ step.description }}</p>
                   <div v-if="step.image" class="mt-3 rounded-lg overflow-hidden border border-amber-200">
-                    <img :src="`http://localhost:5000/${step.image}`" :alt="`Imagen del paso ${idx + 1}`" class="w-full max-w-md">
+                    <img :src="mediaUrl(step.image)" :alt="`Imagen del paso ${idx + 1}`" class="w-full max-w-md">
                   </div>
                 </div>
               </div>
@@ -189,6 +189,7 @@
   <script setup>
   import { ref, onMounted } from 'vue';
   import axios from 'axios';
+import { apiUrl, mediaUrl } from '../api';
   import { useRouter } from 'vue-router';
   import { useRoute } from 'vue-router';
   import 'font-awesome/css/font-awesome.min.css';
@@ -220,7 +221,7 @@
           isFavorite.value = !isFavorite.value;
           if (isFavorite.value) {
               axios
-                  .post('http://localhost:5000/updateFavs', payload)
+                  .post(apiUrl('/updateFavs'), payload)
                   .then(response => {
                       console.log(response.data.message)
                   })
@@ -229,7 +230,7 @@
                   });
           } else {
               axios
-                  .post('http://localhost:5000/deleteFavs', payload)
+                  .post(apiUrl('/deleteFavs'), payload)
                   .then(response => {
                       console.log(response.data.message)
                   })
@@ -244,7 +245,7 @@
   
   function fetchRecipe() {
       axios
-          .post('http://localhost:5000/viewComment', payload)
+          .post(apiUrl('/viewComment'), payload)
           .then(response => {
               comments.value = response.data.comment_list;
           })
@@ -253,7 +254,7 @@
   
   onMounted(() => {
       axios
-          .post('http://localhost:5000/viewRecipe', payload)
+          .post(apiUrl('/viewRecipe'), payload)
           .then(response => {
               receta.value = response.data.recipe_list[0]
               response.data.ingredient_list.forEach(element => {
@@ -278,7 +279,7 @@
   function deleteRecipe() {
       if (confirm('¿Estás seguro de que quieres eliminar esta receta?')) {
           axios
-              .post('http://localhost:5000/deleteRecipe', payload)
+              .post(apiUrl('/deleteRecipe'), payload)
               .then(response => {
                   console.log(response.data.message);
                   router.push({ name: "home" });
@@ -296,7 +297,7 @@
   function createComment() {
       payload.comment = comment.value;
       if (userToken) {
-          axios.post('http://localhost:5000/createComment', payload)
+          axios.post(apiUrl('/createComment'), payload)
               .then(() => {
                   fetchRecipe();
                   comment.value = "";
@@ -310,7 +311,7 @@
   function deleteComment(idcomment) {
       if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
           payload.idcomment = idcomment;
-          axios.post('http://localhost:5000/deleteComment', payload)
+          axios.post(apiUrl('/deleteComment'), payload)
               .then(() => {
                   fetchRecipe();
               })
@@ -321,7 +322,7 @@
   function updateComment(idcomment) {
       payload.idcomment = idcomment;
       payload.comment = editedComment.value;
-      axios.post('http://localhost:5000/editeComment', payload)
+      axios.post(apiUrl('/editeComment'), payload)
           .then(() => {
               fetchRecipe();
               cancelEdit();

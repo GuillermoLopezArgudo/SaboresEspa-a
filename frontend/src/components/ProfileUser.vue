@@ -193,6 +193,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { apiUrl, mediaUrl } from '../api';
 import NavbarHome from './NavbarHome.vue';
 import { useRouter } from 'vue-router';
 import FooterPage from './FooterPage.vue';
@@ -258,7 +259,7 @@ function changePassword() {
   } else {
     payload.value.newPassword = newPassword.value;
     axios
-      .post('http://localhost:5000/changePassword', payload.value)
+      .post(apiUrl('/changePassword'), payload.value)
       .then(response => {
         console.log(response.data.message)
       })
@@ -271,14 +272,14 @@ function changePassword() {
 
 function changeImage(imageData) {
   axios
-    .post('http://localhost:5000/changeImage', {
+    .post(apiUrl('/changeImage'), {
       image: imageData,
       iduser: payload.value.iduser,
       userToken: payload.value.userToken
     })
     .then(response => {
       console.log(response.data);
-      imageUrl.value = `http://localhost:5000/${response.data.newImage}`;
+      imageUrl.value = mediaUrl(response.data.newImage);
     })
     .catch(error => {
       console.log(error);
@@ -288,7 +289,7 @@ function changeImage(imageData) {
 function changeName() {
   payload.value.name = name.value;
   axios
-    .post('http://localhost:5000/changeName', payload.value)
+    .post(apiUrl('/changeName'), payload.value)
     .then(response => {
       console.log(response.data.message);
       handleNameChange();
@@ -301,7 +302,7 @@ function changeName() {
 function changeEmail() {
   payload.value.email = email.value;
   axios
-    .post('http://localhost:5000/changeEmail', payload.value)
+    .post(apiUrl('/changeEmail'), payload.value)
     .then(response => {
       console.log(response.data.message);
       localStorage.setItem('userToken', response.data.userToken);
@@ -314,18 +315,18 @@ function changeEmail() {
 
 onMounted(() => {
   axios
-    .post('http://localhost:5000/viewProfile', payload.value)
+    .post(apiUrl('/viewProfile'), payload.value)
     .then(response => {
       name.value = response.data.message[0].name;
       email.value = response.data.message[0].email;
-      imageUrl.value = `http://localhost:5000/${response.data.message[0].image}`;
+      imageUrl.value = mediaUrl(response.data.message[0].image);
     })
     .catch(error => {
       console.log(error);
     });
   if (type == "admin") {
     axios
-      .post('http://localhost:5000/allUsers', payload.value)
+      .post(apiUrl('/allUsers'), payload.value)
       .then(response => {
         users.value.push(...response.data.users_list)
       })
@@ -337,7 +338,7 @@ onMounted(() => {
 
 function deleteProfile() {
   axios
-    .post('http://localhost:5000/deleteProfile', payload.value)
+    .post(apiUrl('/deleteProfile'), payload.value)
     .then(response => {
       console.log(response.data.message);
       localStorage.removeItem("iduser");
@@ -354,7 +355,7 @@ function deleteUser(index) {
   if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
     const userId = users.value[index].iduser;
     axios
-      .post('http://localhost:5000/deleteUser', {
+      .post(apiUrl('/deleteUser'), {
         iduser: userId,
         userToken: payload.value.userToken
       })

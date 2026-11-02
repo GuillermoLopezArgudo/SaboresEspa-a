@@ -3,7 +3,7 @@
       <!-- Imagen de la receta -->
       <div class="relative h-48 overflow-hidden"> 
         <img 
-          :src="`http://localhost:5000/${item.image}`" 
+          :src="mediaUrl(item.image)" 
           class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
           alt="Imagen de la receta"
           v-if="item.image"

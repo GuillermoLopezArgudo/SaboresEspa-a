@@ -144,6 +144,7 @@
 <script setup>
 import { ref, computed,defineEmits } from 'vue';
 import axios from 'axios';
+import { apiUrl } from '../api';
 
 const emit = defineEmits(['enviarIdRecipe'])
 
@@ -292,7 +293,7 @@ const buscarFiltros = () => {
     proteins: proteinas.value,
   }
   
-  axios.post('http://localhost:5000/filterRecipe', payload)
+  axios.post(apiUrl('/filterRecipe'), payload)
     .then(response => {
       emit('enviarIdRecipe', response.data.message)
     })
