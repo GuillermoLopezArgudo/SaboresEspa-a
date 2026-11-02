@@ -97,24 +97,21 @@
         </button>
 
         <div class="ml-auto flex items-center gap-2 shrink-0">
+          <span
+            v-if="searching"
+            class="inline-flex items-center gap-1.5 text-xs text-amber-800/80"
+            aria-live="polite"
+          >
+            <span class="h-3.5 w-3.5 rounded-full border-2 border-amber-700 border-t-transparent animate-spin" />
+            Filtrando…
+          </span>
           <button
             v-if="filtrosSeleccionados.length"
             type="button"
-            class="hidden sm:inline-flex px-3 py-2 text-sm text-amber-800/80 hover:text-amber-950"
+            class="inline-flex px-3 py-2 text-sm text-amber-800/80 hover:text-amber-950"
             @click="limpiarFiltros"
           >
             Limpiar
-          </button>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-sm font-semibold shadow-sm transition disabled:opacity-60"
-            :disabled="searching"
-            @click="buscarFiltros"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            {{ searching ? 'Buscando…' : 'Buscar' }}
           </button>
         </div>
       </div>
@@ -192,17 +189,20 @@
             </section>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 p-4 border-t border-amber-200 bg-white">
-            <button type="button" class="py-3 rounded-xl border border-amber-300 text-amber-900 font-medium" @click="limpiarFiltros">
+          <div class="flex gap-2 p-4 border-t border-amber-200 bg-white">
+            <button
+              type="button"
+              class="flex-1 py-3 rounded-xl border border-amber-300 text-amber-900 font-medium"
+              @click="limpiarFiltros"
+            >
               Limpiar
             </button>
             <button
               type="button"
-              class="py-3 rounded-xl bg-amber-800 text-white font-semibold disabled:opacity-60"
-              :disabled="searching"
-              @click="buscarYCerrarMovil"
+              class="flex-1 py-3 rounded-xl bg-amber-800 text-white font-semibold"
+              @click="mobileOpen = false"
             >
-              {{ searching ? 'Buscando…' : 'Aplicar' }}
+              Listo
             </button>
           </div>
         </div>
@@ -222,6 +222,7 @@ const activeAccordion = ref('');
 const mobileOpen = ref(false);
 const searching = ref(false);
 let searchGen = 0;
+let debounceTimer = null;
 
 const tipoComida = ref('');
 const ccaa = ref('');
@@ -355,9 +356,19 @@ function toggleAccordion(section) {
   activeAccordion.value = activeAccordion.value === section ? '' : section;
 }
 
+function hasActiveFilters() {
+  return Boolean(
+    tipoComida.value ||
+      ccaa.value ||
+      tiempo.value ||
+      (Array.isArray(proteinas.value) && proteinas.value.length)
+  );
+}
+
 function selectRadio(panel, value) {
   panel.model.value = panel.model.value === value ? '' : value;
   activeAccordion.value = '';
+  scheduleSearch(0);
 }
 
 function toggleCheck(panel, value) {
@@ -366,6 +377,8 @@ function toggleCheck(panel, value) {
   if (idx >= 0) list.splice(idx, 1);
   else list.push(value);
   panel.model.value = list;
+  // Breve debounce para marcar varias proteínas seguidas
+  scheduleSearch(220);
 }
 
 function eliminarFiltro(filtro) {
@@ -383,9 +396,14 @@ function eliminarFiltro(filtro) {
       proteinas.value = proteinas.value.filter((p) => p !== (filtro.key || filtro.value));
       break;
   }
+  scheduleSearch(0);
 }
 
 function limpiarFiltros() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
   searchGen += 1;
   searching.value = false;
   tipoComida.value = '';
@@ -396,7 +414,20 @@ function limpiarFiltros() {
   emit('limpiarFiltros');
 }
 
-function buscarFiltros() {
+function scheduleSearch(delayMs = 0) {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    aplicarFiltros();
+  }, delayMs);
+}
+
+function aplicarFiltros() {
+  if (!hasActiveFilters()) {
+    limpiarFiltros();
+    return;
+  }
+
   const payload = {
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
@@ -405,7 +436,6 @@ function buscarFiltros() {
   };
   const gen = ++searchGen;
   searching.value = true;
-  activeAccordion.value = '';
   axios
     .post(apiUrl('/filterRecipe'), payload)
     .then((response) => {
@@ -419,11 +449,6 @@ function buscarFiltros() {
     .finally(() => {
       if (gen === searchGen) searching.value = false;
     });
-}
-
-function buscarYCerrarMovil() {
-  buscarFiltros();
-  mobileOpen.value = false;
 }
 </script>
 
