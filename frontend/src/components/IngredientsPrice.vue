@@ -123,7 +123,7 @@ async function load() {
     }
     categoryName.value = categoria
 
-    const cats = await axios.get(apiUrl('/categories'))
+    const cats = await axios.get(apiUrl('/categories'), { skipAuth: true })
     let categoryId = null
     for (const group of cats.data.results || []) {
       for (const cat of group.categories || []) {
@@ -143,10 +143,11 @@ async function load() {
 
     // Preferimos el endpoint optimizado del backend
     try {
-      const search = await axios.post(apiUrl('/searchIngredient'), {
-        q: palabra,
-        category_id: categoryId,
-      })
+      const search = await axios.post(
+        apiUrl('/searchIngredient'),
+        { q: palabra, category_id: categoryId },
+        { skipAuth: true }
+      )
       if (search.data.products?.length) {
         productos.value = search.data.products
         loading.value = false
@@ -156,7 +157,11 @@ async function load() {
       // fallback al endpoint legacy
     }
 
-    const response = await axios.post(apiUrl('/productos'), { id: categoryId })
+    const response = await axios.post(
+      apiUrl('/productos'),
+      { id: categoryId },
+      { skipAuth: true }
+    )
     const palabrasVariantes = variantsFor(palabra)
     const found = []
     for (const category of response.data.categories || []) {

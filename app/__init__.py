@@ -28,12 +28,41 @@ def create_app() -> Flask:
         app,
         resources={r"/*": {"origins": Config.CORS_ORIGINS}},
         supports_credentials=False,
-        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+        ],
         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         expose_headers=["Content-Type"],
+        always_send=True,
     )
     JWTManager(app)
     register_blueprints(app)
+
+    @app.after_request
+    def _ensure_cors(response):
+        # Refuerzo por si un 4xx/5xx de proxy pierde cabeceras en preflight
+        origin = None
+        try:
+            from flask import request as flask_request
+
+            origin = flask_request.headers.get("Origin")
+        except Exception:
+            origin = None
+        if origin and origin.rstrip("/") in {o.rstrip("/") for o in Config.CORS_ORIGINS}:
+            response.headers.setdefault("Access-Control-Allow-Origin", origin)
+            response.headers.setdefault(
+                "Access-Control-Allow-Headers",
+                "Content-Type, Authorization, X-Requested-With, Accept, Origin",
+            )
+            response.headers.setdefault(
+                "Access-Control-Allow-Methods",
+                "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+            )
+        return response
 
     try:
         create_tables()
