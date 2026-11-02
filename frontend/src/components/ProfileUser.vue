@@ -2,7 +2,7 @@
   <div>
     <PageHero title="Ajustes" subtitle="Gestiona tu perfil y preferencias de cuenta" />
 
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+    <div class="max-w-3xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-4 sm:space-y-5">
       <div
         v-if="loading && !name && !email"
         class="rounded-2xl border border-amber-100 bg-white p-8 animate-pulse space-y-4"
@@ -178,6 +178,35 @@
           </div>
         </section>
 
+        <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+          <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
+            <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Apariencia</h2>
+            <p class="text-sm text-amber-800/70 mt-0.5">Elige modo día o noche</p>
+          </div>
+          <div class="p-4 sm:p-5 flex flex-col xs:flex-row gap-2">
+            <button
+              type="button"
+              class="flex-1 rounded-xl border px-4 py-3 text-sm font-semibold transition"
+              :class="!isDark
+                ? 'border-amber-700 bg-amber-800 text-white'
+                : 'border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100'"
+              @click="applyTheme(false)"
+            >
+              Modo día
+            </button>
+            <button
+              type="button"
+              class="flex-1 rounded-xl border px-4 py-3 text-sm font-semibold transition"
+              :class="isDark
+                ? 'border-amber-700 bg-amber-800 text-white'
+                : 'border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100'"
+              @click="applyTheme(true)"
+            >
+              Modo noche
+            </button>
+          </div>
+        </section>
+
         <section class="rounded-2xl border border-red-200 bg-white shadow-sm p-5 text-center">
           <p class="text-sm text-amber-900/80 mb-3">Esta acción no se puede deshacer.</p>
           <button
@@ -237,6 +266,9 @@ import {
   setCachedProfile,
   patchCachedProfile,
 } from '../utils/profileCache'
+import { useTheme } from '../utils/theme'
+
+const { isDark, applyTheme } = useTheme()
 
 const cached = getCachedProfile()
 const image = ref('')
