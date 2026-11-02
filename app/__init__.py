@@ -36,3 +36,8 @@ def create_app() -> Flask:
         print(f"[warn] create_tables: {exc}")
 
     return app
+
+
+# Compatibilidad con gunicorn "app:app" (comando antiguo en Render)
+app = create_app()
+
