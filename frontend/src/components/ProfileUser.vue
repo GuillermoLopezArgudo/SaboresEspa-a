@@ -282,7 +282,11 @@ function changePassword() {
       currentPassword: currentPassword.value,
       newPassword: newPassword.value,
     })
-    .then(() => {
+    .then((response) => {
+      if (response.data.userToken) {
+        localStorage.setItem('userToken', response.data.userToken);
+        payload.value.userToken = response.data.userToken;
+      }
       currentPassword.value = '';
       newPassword.value = '';
       confirmPassword.value = '';

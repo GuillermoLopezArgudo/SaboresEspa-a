@@ -188,6 +188,13 @@ def save_base64_file(base64_data, file_name, folder, kind="image"):
         url = _upload_cloudinary(file_data, kind, ext)
         if url:
             return url
+        # En producción no caemos a disco efímero (Render pierde /static al redeploy)
+        if Config.IS_PRODUCTION:
+            print(
+                "[error] Cloudinary falló en producción; no hay fallback local "
+                f"({LAST_CLOUDINARY_ERROR})"
+            )
+            return None
         print(
             "[warn] Cloudinary falló; fallback a disco local "
             f"({LAST_CLOUDINARY_ERROR})"
@@ -195,8 +202,9 @@ def save_base64_file(base64_data, file_name, folder, kind="image"):
 
     if Config.IS_PRODUCTION and not Config.USE_CLOUDINARY:
         print(
-            "[warn] Producción sin Cloudinary: los ficheros en disco se pierden al redeploy"
+            "[error] Producción sin Cloudinary: rechazando upload a disco efímero"
         )
+        return None
 
     return _save_local(file_data, folder, ext)
 

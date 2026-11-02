@@ -148,11 +148,13 @@ def change_password(current_user):
             return jsonify(message="Debes indicar la contraseña actual"), 400
         return jsonify(message="Contraseña actual incorrecta"), 401
 
+    token = create_access_token(identity=str(current_user.id))
     Users.update(
         user_password=hash_password(new_password),
+        user_token=token,
         modified_at=date.today(),
     ).where(Users.id == current_user.id).execute()
-    return jsonify(message="Contraseña Actualizada")
+    return jsonify(message="Contraseña Actualizada", userToken=token)
 
 
 @users_bp.post("/deleteProfile")

@@ -23,7 +23,7 @@ class Users(BaseModel):
     user_email = CharField(max_length=255, unique=True)
     user_password = CharField(max_length=255)
     user_type = CharField(max_length=50)
-    user_token = CharField(max_length=512)
+    user_token = TextField()  # JWT completo (puede superar 512)
     user_image = CharField(max_length=1024)  # Cloudinary URLs
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
@@ -127,6 +127,7 @@ def _widen_url_columns():
 
     alters = [
         'ALTER TABLE "users" ALTER COLUMN "user_image" TYPE VARCHAR(1024)',
+        'ALTER TABLE "users" ALTER COLUMN "user_token" TYPE TEXT',
         'ALTER TABLE "recipe" ALTER COLUMN "recipe_image" TYPE VARCHAR(1024)',
         'ALTER TABLE "recipe" ALTER COLUMN "recipe_video" TYPE VARCHAR(1024)',
         'ALTER TABLE "stepimage" ALTER COLUMN "step_image" TYPE VARCHAR(1024)',

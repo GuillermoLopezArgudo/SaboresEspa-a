@@ -44,7 +44,8 @@ const props = defineProps({
   },
   onRatingChanged: {
     type: Function,
-    required: true
+    required: false,
+    default: undefined,
   },
   showRatingText: {
     type: Boolean,
@@ -67,10 +68,12 @@ const setRating = (star) => {
   if (!props.interactive) return;
   
   const userToken = localStorage.getItem('userToken');
-  if (userToken) {
-    props.onRatingChanged(star);
-  } else {
+  if (!userToken) {
     router.push({ name: "login" });
+    return;
+  }
+  if (typeof props.onRatingChanged === 'function') {
+    props.onRatingChanged(star);
   }
 };
 </script>

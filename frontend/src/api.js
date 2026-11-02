@@ -7,13 +7,14 @@ const raw =
 // Trim espacios (Vercel a veces deja un trailing space → %20 y ERR_NAME_NOT_RESOLVED)
 const API_URL = String(raw).trim().replace(/\/$/, '')
 
-// Rutas públicas: no mandar Authorization (evita preflight CORS innecesario)
-const PUBLIC_PATH_RE =
-  /\/(categories|productos|searchIngredient|viewAll|viewRecipe|viewComment|filterRecipe|recipeFilter|averageStars|health)(\/|$|\?)/i
+// Solo Mercadona/health: no enviar Authorization (evita preflight innecesario).
+// viewAll/viewRecipe/etc. SÍ deben llevar JWT si existe (favoritos, privadas).
+const SKIP_AUTH_PATH_RE =
+  /\/(categories|productos|searchIngredient|health)(\/|$|\?)/i
 
 axios.interceptors.request.use((config) => {
   const url = String(config.url || '')
-  const skipAuth = config.skipAuth === true || PUBLIC_PATH_RE.test(url)
+  const skipAuth = config.skipAuth === true || SKIP_AUTH_PATH_RE.test(url)
   const token = localStorage.getItem('userToken')
   if (token && !skipAuth) {
     config.headers = config.headers || {}

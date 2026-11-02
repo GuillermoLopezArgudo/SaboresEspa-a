@@ -16,8 +16,9 @@ _hits: dict[str, deque] = defaultdict(deque)
 
 
 def _client_key(prefix: str) -> str:
-    forwarded = request.headers.get("X-Forwarded-For", "")
-    ip = forwarded.split(",")[0].strip() if forwarded else (request.remote_addr or "unknown")
+    # Usar remote_addr (ProxyFix en create_app confía 1 hop).
+    # No leer X-Forwarded-For crudo: es spoofable y bypassa el límite.
+    ip = request.remote_addr or "unknown"
     return f"{prefix}:{ip}"
 
 

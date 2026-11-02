@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.config import Config
 from app.models import create_tables
@@ -20,6 +21,9 @@ def create_app() -> Flask:
     app.config["UPLOAD_FOLDER_IMAGES"] = Config.UPLOAD_FOLDER_IMAGES
     app.config["UPLOAD_FOLDER_VIDEOS"] = Config.UPLOAD_FOLDER_VIDEOS
     app.config["ALLOWED_EXTENSIONS"] = Config.ALLOWED_EXTENSIONS
+
+    # Render/Vercel proxy: 1 hop de confianza → remote_addr = cliente real
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     os.makedirs(app.config["UPLOAD_FOLDER_IMAGES"], exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER_VIDEOS"], exist_ok=True)
