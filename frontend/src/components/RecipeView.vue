@@ -74,9 +74,12 @@
             Ingredientes
           </h3>
           <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <li v-for="(ingrediente, idx) in ingredients" :key="idx" class="bg-amber-50 p-3 rounded-lg border border-amber-200">
-              <span class="font-medium text-amber-800">{{ ingrediente }}</span>
-              <span class="block text-amber-600 text-sm">{{ quantity[idx] || 'Cantidad no disponible' }}</span>
+            <li v-for="(ingrediente, idx) in ingredients" :key="idx" class="bg-amber-50 p-3 rounded-lg border border-amber-200 hover:bg-amber-100 transition">
+              <router-link :to="{ path: '/ingredients', query: { ingredients: ingrediente } }" class="block">
+                <span class="font-medium text-amber-800">{{ ingrediente }}</span>
+                <span class="block text-amber-600 text-sm">{{ quantity[idx] || 'Cantidad no disponible' }}</span>
+                <span class="block text-xs text-amber-500 mt-1">Ver precios Mercadona →</span>
+              </router-link>
             </li>
           </ul>
         </div>

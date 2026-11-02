@@ -8,6 +8,7 @@ import Profile from '@/components/ProfileUser.vue';
 import MainPage from '@/components/MainPage.vue';
 import HomeRecipe from '@/components/HomeRecipe.vue';
 import PersonalRecipes from '@/components/PersonalRecipes.vue';
+import IngredientsPrice from '@/components/IngredientsPrice.vue';
 import { clearSession, isTokenValid } from '../api';
 
 const routes = [
@@ -40,6 +41,11 @@ const routes = [
     component: PersonalRecipes,
     name: 'recipes_personal',
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/ingredients',
+    name: 'ingredients',
+    component: IngredientsPrice,
   },
 ];
 
