@@ -385,6 +385,7 @@ function changeName() {
   axios
     .post(apiUrl('/changeName'), { name: name.value })
     .then(() => {
+      localStorage.setItem('userName', name.value)
       patchCachedProfile({ name: name.value })
       handleNameChange()
     })

@@ -144,6 +144,7 @@ function OnSubmit() {
         localStorage.setItem('userToken', response.data.userToken)
         localStorage.setItem('iduser', response.data.iduser)
         localStorage.setItem('type', response.data.type)
+        localStorage.setItem('userName', response.data.name || name.value)
         setCachedProfile({
           name: response.data.name || name.value,
           email: response.data.email || email.value,
