@@ -19,138 +19,171 @@
   }
 }
 
-/* ─── Night mode: paleta más luminosa (evitar “apagón”) ─── */
+/*
+  Modo noche: superficies elevadas + texto claro.
+  Importante: no dejar tipografía marrón oscura sobre fondos oscuros.
+*/
 html.dark {
   color-scheme: dark;
+  --se-bg: #352820;
+  --se-surface: #4a3c31;
+  --se-surface-2: #5a4a3d;
+  --se-border: #7a6552;
+  --se-text: #fff8e7;
+  --se-text-soft: #fde68a;
+  --se-accent: #fbbf24;
 }
 
 html.dark body,
 html.dark #app {
-  background-color: #2b211a;
-  color: #fff8e7;
+  background-color: var(--se-bg) !important;
+  color: var(--se-text) !important;
 }
 
-/* Fondos: superficies elevadas, no negro puro */
-html.dark .bg-white { background-color: #3d3128 !important; }
-html.dark .bg-white\/90 { background-color: rgb(61 49 40 / 0.94) !important; }
-html.dark .bg-white\/80 { background-color: rgb(61 49 40 / 0.88) !important; }
-html.dark .bg-white\/15 { background-color: rgb(255 255 255 / 0.12) !important; }
-html.dark .bg-white\/25 { background-color: rgb(255 255 255 / 0.2) !important; }
-html.dark .bg-amber-50 { background-color: #2b211a !important; }
-html.dark .bg-amber-50\/95 { background-color: rgb(43 33 26 / 0.96) !important; }
-html.dark .bg-amber-50\/90 { background-color: rgb(43 33 26 / 0.94) !important; }
-html.dark .bg-amber-50\/80 { background-color: rgb(43 33 26 / 0.85) !important; }
-html.dark .bg-amber-50\/50 { background-color: rgb(61 49 40 / 0.55) !important; }
-html.dark .bg-amber-50\/40 { background-color: rgb(61 49 40 / 0.45) !important; }
-html.dark .bg-amber-100 { background-color: #4a3a2f !important; }
-html.dark .bg-amber-200 { background-color: #5a4638 !important; }
-html.dark .bg-amber-700 { background-color: #d97706 !important; }
-html.dark .bg-amber-800 { background-color: #b45309 !important; }
-html.dark .bg-amber-900 { background-color: #92400e !important; }
-html.dark .bg-amber-950 { background-color: #2b211a !important; }
-html.dark .bg-amber-950\/85 { background-color: rgb(43 33 26 / 0.88) !important; }
+/* Fondos */
+html.dark .bg-white,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80 {
+  background-color: var(--se-surface) !important;
+}
+html.dark .bg-white\/15 { background-color: rgb(255 255 255 / 0.14) !important; }
+html.dark .bg-white\/25 { background-color: rgb(255 255 255 / 0.22) !important; }
 
-html.dark .hover\:bg-amber-50:hover { background-color: #4a3a2f !important; }
-html.dark .hover\:bg-amber-100:hover { background-color: #5a4638 !important; }
-html.dark .hover\:bg-amber-200:hover { background-color: #6b5342 !important; }
-html.dark .hover\:bg-amber-200\/80:hover { background-color: rgb(180 83 9 / 0.45) !important; }
-html.dark .hover\:bg-amber-200\/70:hover { background-color: rgb(180 83 9 / 0.4) !important; }
-html.dark .hover\:bg-white:hover { background-color: #4a3a2f !important; }
-html.dark .hover\:bg-amber-800:hover { background-color: #d97706 !important; }
-html.dark .hover\:bg-amber-900:hover { background-color: #b45309 !important; }
+html.dark .bg-amber-50,
+html.dark .bg-amber-50\/95,
+html.dark .bg-amber-50\/90,
+html.dark .bg-amber-50\/80 {
+  background-color: var(--se-bg) !important;
+}
+html.dark .bg-amber-50\/50,
+html.dark .bg-amber-50\/40 {
+  background-color: rgb(74 60 49 / 0.55) !important;
+}
+html.dark .bg-amber-100 { background-color: var(--se-surface-2) !important; }
+html.dark .bg-amber-200 { background-color: #6b5746 !important; }
+html.dark .bg-amber-700 { background-color: #f59e0b !important; }
+html.dark .bg-amber-800 { background-color: #d97706 !important; }
+html.dark .bg-amber-900 { background-color: #b45309 !important; }
+html.dark .bg-amber-950,
+html.dark .bg-amber-950\/85 {
+  background-color: #1f1712 !important;
+}
 
-html.dark .bg-gradient-to-r.from-amber-50 { --tw-gradient-from: #2b211a var(--tw-gradient-from-position) !important; }
-html.dark .bg-gradient-to-r.to-amber-100 { --tw-gradient-to: #3d3128 var(--tw-gradient-to-position) !important; }
-html.dark .from-amber-100 { --tw-gradient-from: #4a3a2f var(--tw-gradient-from-position) !important; }
-html.dark .to-amber-200 { --tw-gradient-to: #5a4638 var(--tw-gradient-to-position) !important; }
-html.dark .from-amber-50 { --tw-gradient-from: #3d3128 var(--tw-gradient-from-position) !important; }
-html.dark .to-white { --tw-gradient-to: #3d3128 var(--tw-gradient-to-position) !important; }
+html.dark .hover\:bg-amber-50:hover,
+html.dark .hover\:bg-white:hover { background-color: var(--se-surface-2) !important; }
+html.dark .hover\:bg-amber-100:hover { background-color: #6b5746 !important; }
+html.dark .hover\:bg-amber-200:hover,
+html.dark .hover\:bg-amber-200\/80:hover,
+html.dark .hover\:bg-amber-200\/70:hover { background-color: rgb(217 119 6 / 0.45) !important; }
+html.dark .hover\:bg-amber-800:hover { background-color: #f59e0b !important; }
+html.dark .hover\:bg-amber-900:hover { background-color: #d97706 !important; }
 
-/* Textos: claros y legibles */
-html.dark .text-amber-950 { color: #fff8e7 !important; }
-html.dark .text-amber-950\/75 { color: rgb(255 248 231 / 0.82) !important; }
-html.dark .text-amber-900 { color: #fde68a !important; }
-html.dark .text-amber-900\/70 { color: rgb(253 230 138 / 0.8) !important; }
-html.dark .text-amber-900\/80 { color: rgb(253 230 138 / 0.88) !important; }
-html.dark .text-amber-900\/85 { color: rgb(253 230 138 / 0.9) !important; }
-html.dark .text-amber-800 { color: #fcd34d !important; }
-html.dark .text-amber-800\/80 { color: rgb(252 211 77 / 0.85) !important; }
-html.dark .text-amber-800\/75 { color: rgb(252 211 77 / 0.8) !important; }
-html.dark .text-amber-800\/70 { color: rgb(252 211 77 / 0.75) !important; }
-html.dark .text-amber-700 { color: #fbbf24 !important; }
-html.dark .text-amber-700\/90 { color: rgb(251 191 36 / 0.92) !important; }
-html.dark .text-amber-700\/80 { color: rgb(251 191 36 / 0.85) !important; }
-html.dark .text-amber-700\/70 { color: rgb(251 191 36 / 0.75) !important; }
-html.dark .text-amber-700\/60 { color: rgb(251 191 36 / 0.65) !important; }
-html.dark .text-amber-600 { color: #f59e0b !important; }
-html.dark .text-amber-600\/80 { color: rgb(245 158 11 / 0.85) !important; }
-html.dark .text-amber-500 { color: #fbbf24 !important; }
-html.dark .text-amber-400 { color: #fcd34d !important; }
-html.dark .text-amber-200 { color: #fde68a !important; }
-html.dark .text-amber-200\/80 { color: rgb(253 230 138 / 0.85) !important; }
-html.dark .text-amber-100 { color: #fef3c7 !important; }
-html.dark .text-amber-100\/90 { color: rgb(254 243 199 / 0.92) !important; }
-html.dark .text-amber-50 { color: #fffbeb !important; }
-html.dark .hover\:text-amber-900:hover { color: #fff8e7 !important; }
-html.dark .hover\:text-amber-800:hover { color: #fde68a !important; }
-html.dark .hover\:text-amber-950:hover { color: #fff !important; }
-html.dark .group:hover .group-hover\:text-amber-800 { color: #fde68a !important; }
+html.dark .from-amber-50,
+html.dark .bg-gradient-to-r.from-amber-50 { --tw-gradient-from: var(--se-bg) var(--tw-gradient-from-position) !important; }
+html.dark .to-amber-100,
+html.dark .bg-gradient-to-r.to-amber-100 { --tw-gradient-to: var(--se-surface) var(--tw-gradient-to-position) !important; }
+html.dark .from-amber-100 { --tw-gradient-from: var(--se-surface-2) var(--tw-gradient-from-position) !important; }
+html.dark .to-amber-200 { --tw-gradient-to: #6b5746 var(--tw-gradient-to-position) !important; }
+html.dark .to-white { --tw-gradient-to: var(--se-surface) var(--tw-gradient-to-position) !important; }
 
-html.dark .placeholder-amber-400::placeholder { color: rgb(253 230 138 / 0.45) !important; }
-html.dark .placeholder\:text-amber-700\/50::placeholder { color: rgb(253 230 138 / 0.45) !important; }
-html.dark .placeholder\:text-amber-700\/40::placeholder { color: rgb(253 230 138 / 0.4) !important; }
+/* Textos: siempre claros en noche */
+html.dark .text-amber-950,
+html.dark .text-amber-950\/75,
+html.dark .text-amber-900,
+html.dark .text-amber-900\/85,
+html.dark .text-amber-900\/80,
+html.dark .text-amber-900\/70 {
+  color: var(--se-text) !important;
+}
+html.dark .text-amber-800,
+html.dark .text-amber-800\/80,
+html.dark .text-amber-800\/75,
+html.dark .text-amber-800\/70,
+html.dark .text-amber-700,
+html.dark .text-amber-700\/90,
+html.dark .text-amber-700\/80,
+html.dark .text-amber-700\/70,
+html.dark .text-amber-700\/60,
+html.dark .text-amber-600,
+html.dark .text-amber-600\/80 {
+  color: var(--se-text-soft) !important;
+}
+html.dark .text-amber-500,
+html.dark .text-amber-400,
+html.dark .text-amber-200,
+html.dark .text-amber-200\/80,
+html.dark .text-amber-100,
+html.dark .text-amber-100\/90,
+html.dark .text-amber-50 {
+  color: #fef3c7 !important;
+}
+html.dark .hover\:text-amber-900:hover,
+html.dark .hover\:text-amber-800:hover,
+html.dark .hover\:text-amber-950:hover,
+html.dark .group:hover .group-hover\:text-amber-800 {
+  color: #fff !important;
+}
+
+html.dark .placeholder-amber-400::placeholder,
+html.dark .placeholder\:text-amber-700\/50::placeholder,
+html.dark .placeholder\:text-amber-700\/40::placeholder {
+  color: rgb(253 230 138 / 0.5) !important;
+}
 
 /* Bordes */
-html.dark .border-amber-100 { border-color: #5a4638 !important; }
-html.dark .border-amber-200 { border-color: #6b5342 !important; }
-html.dark .border-amber-200\/80 { border-color: rgb(107 83 66 / 0.85) !important; }
-html.dark .border-amber-300 { border-color: #7a6250 !important; }
-html.dark .border-amber-400 { border-color: #b45309 !important; }
-html.dark .border-amber-800 { border-color: #d97706 !important; }
-html.dark .border-amber-900 { border-color: #b45309 !important; }
-html.dark .hover\:border-amber-400:hover { border-color: #f59e0b !important; }
+html.dark .border-amber-100,
+html.dark .border-amber-200,
+html.dark .border-amber-200\/80,
+html.dark .border-amber-300 {
+  border-color: var(--se-border) !important;
+}
+html.dark .border-amber-400,
+html.dark .border-amber-800,
+html.dark .border-amber-900,
+html.dark .hover\:border-amber-400:hover {
+  border-color: #f59e0b !important;
+}
 html.dark .divide-amber-100 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #5a4638 !important;
+  border-color: var(--se-border) !important;
 }
 
 /* Inputs */
 html.dark input:not([type='checkbox']):not([type='radio']),
 html.dark select,
 html.dark textarea {
-  background-color: #241a14;
-  color: #fff8e7;
-  border-color: #7a6250;
+  background-color: #2a2018 !important;
+  color: var(--se-text) !important;
+  border-color: var(--se-border) !important;
 }
-
-html.dark input:not([type='checkbox']):not([type='radio'])::placeholder,
+html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: rgb(253 230 138 / 0.45);
+  color: rgb(253 230 138 / 0.5) !important;
 }
 
 html.dark .shadow-sm,
 html.dark .shadow-md,
 html.dark .shadow-lg,
 html.dark .shadow-xl {
-  --tw-shadow-color: rgb(0 0 0 / 0.4);
+  --tw-shadow-color: rgb(0 0 0 / 0.35);
 }
 
-html.dark .bg-red-50 { background-color: rgb(127 29 29 / 0.4) !important; }
-html.dark .border-red-200 { border-color: rgb(248 113 113 / 0.45) !important; }
+html.dark .bg-red-50 { background-color: rgb(127 29 29 / 0.45) !important; }
+html.dark .border-red-200 { border-color: rgb(248 113 113 / 0.5) !important; }
 html.dark .text-red-800 { color: #fecaca !important; }
-html.dark .text-red-700\/90 { color: rgb(254 202 202 / 0.9) !important; }
-html.dark .hover\:bg-red-100:hover { background-color: rgb(127 29 29 / 0.5) !important; }
+html.dark .text-red-700\/90 { color: rgb(254 202 202 / 0.92) !important; }
+html.dark .hover\:bg-red-100:hover { background-color: rgb(127 29 29 / 0.55) !important; }
 
-html.dark .bg-emerald-50 { background-color: rgb(6 78 59 / 0.4) !important; }
-html.dark .border-emerald-200 { border-color: rgb(52 211 153 / 0.4) !important; }
-html.dark .border-emerald-300 { border-color: rgb(52 211 153 / 0.55) !important; }
+html.dark .bg-emerald-50 { background-color: rgb(6 78 59 / 0.45) !important; }
+html.dark .border-emerald-200 { border-color: rgb(52 211 153 / 0.45) !important; }
+html.dark .border-emerald-300 { border-color: rgb(52 211 153 / 0.6) !important; }
 html.dark .text-emerald-800 { color: #a7f3d0 !important; }
-html.dark .ring-emerald-200 { --tw-ring-color: rgb(52 211 153 / 0.4) !important; }
+html.dark .ring-emerald-200 { --tw-ring-color: rgb(52 211 153 / 0.45) !important; }
 
 html.dark .filter-scroll::-webkit-scrollbar-thumb {
-  background-color: #7a6250;
+  background-color: var(--se-border);
 }
 
-/* CTAs del PageHero — modo claro */
+/* CTAs hero — día */
 .hero-cta-primary {
   @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition;
   background-color: #78350f !important;
@@ -160,35 +193,66 @@ html.dark .filter-scroll::-webkit-scrollbar-thumb {
   background-color: #451a03 !important;
   color: #fff !important;
 }
-
 .hero-cta-ghost {
   @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-medium border transition;
-  background-color: rgb(255 255 255 / 0.5) !important;
-  border-color: rgb(120 53 15 / 0.3) !important;
+  background-color: rgb(255 255 255 / 0.55) !important;
+  border-color: rgb(120 53 15 / 0.35) !important;
   color: #451a03 !important;
 }
 .hero-cta-ghost:hover {
-  background-color: rgb(255 255 255 / 0.75) !important;
-  border-color: rgb(120 53 15 / 0.5) !important;
+  background-color: rgb(255 255 255 / 0.8) !important;
   color: #1c1410 !important;
 }
 
-/* CTAs del PageHero — modo noche */
+/* CTAs hero — noche */
 html.dark .hero-cta-primary {
   background-color: #fff8e7 !important;
-  color: #2b211a !important;
+  color: #1c1410 !important;
 }
 html.dark .hero-cta-primary:hover {
   background-color: #fde68a !important;
-  color: #1c1410 !important;
 }
 html.dark .hero-cta-ghost {
-  background-color: rgb(255 255 255 / 0.12) !important;
-  border-color: rgb(255 248 231 / 0.45) !important;
+  background-color: rgb(255 255 255 / 0.14) !important;
+  border-color: rgb(255 248 231 / 0.55) !important;
   color: #fff8e7 !important;
 }
 html.dark .hero-cta-ghost:hover {
-  background-color: rgb(255 255 255 / 0.22) !important;
-  border-color: rgb(255 248 231 / 0.65) !important;
+  background-color: rgb(255 255 255 / 0.24) !important;
   color: #fff !important;
+}
+
+/* Nav / filtros: forzar legibilidad en noche */
+html.dark .site-nav,
+html.dark .filter-bar {
+  background-color: rgb(53 40 32 / 0.96) !important;
+  border-color: var(--se-border) !important;
+}
+html.dark .nav-pill,
+html.dark .filter-trigger,
+html.dark .filter-label,
+html.dark .nav-icon-btn,
+html.dark .account-trigger {
+  color: var(--se-text) !important;
+}
+html.dark .nav-pill-active,
+html.dark .filter-trigger-active {
+  background-color: #f59e0b !important;
+  color: #1c1410 !important;
+  border-color: #f59e0b !important;
+}
+html.dark .filter-trigger,
+html.dark .filter-mobile-btn,
+html.dark .account-trigger,
+html.dark .list-search,
+html.dark .list-sort,
+html.dark .pager-btn {
+  background-color: var(--se-surface) !important;
+  border-color: var(--se-border) !important;
+  color: var(--se-text) !important;
+}
+html.dark .pager-btn-active {
+  background-color: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #1c1410 !important;
 }
