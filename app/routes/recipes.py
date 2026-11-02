@@ -1051,24 +1051,31 @@ def recipe_filter():
 
 @recipes_bp.post("/averageStars")
 def average_stars():
+    """Media de estrellas por receta visible (público)."""
     try:
-        query = (
+        visible = Recipe.select(Recipe.id).where(Recipe.recipe_visibility == True)  # noqa: E712
+        rows = (
             RecipeReview.select(
-                RecipeReview.id_recipe,
+                RecipeReview.id_recipe_id.alias("recipe_id"),
                 fn.AVG(RecipeReview.recipe_review_item_value).alias("average_rating"),
             )
-            .join(Recipe, on=(RecipeReview.id_recipe == Recipe.id))
-            .where(Recipe.recipe_visibility == True)  # noqa: E712
-            .group_by(RecipeReview.id_recipe)
+            .where(RecipeReview.id_recipe.in_(visible))
+            .group_by(RecipeReview.id_recipe_id)
+            .dicts()
         )
-        return jsonify(
-            media=[
+        media = []
+        for row in rows:
+            try:
+                avg = float(row.get("average_rating") or 0)
+            except (TypeError, ValueError):
+                avg = 0.0
+            media.append(
                 {
-                    "recipe_id": item.id_recipe_id,
-                    "average_rating": round(float(item.average_rating or 0), 2),
+                    "recipe_id": int(row["recipe_id"]),
+                    "average_rating": round(avg, 2),
                 }
-                for item in query
-            ]
-        )
-    except Exception:
+            )
+        return jsonify(media=media)
+    except Exception as exc:
+        print(f"[error] averageStars: {exc}")
         return jsonify(message="No se pudieron calcular las valoraciones"), 500
