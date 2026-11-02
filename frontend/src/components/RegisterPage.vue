@@ -1,168 +1,165 @@
 <template>
   <div>
-    <PageHero title="Crear cuenta" subtitle="Únete a la comunidad de Sabores España" />
+    <PageHero
+      title="Crear cuenta"
+      subtitle="Únete para publicar, guardar favoritos y comentar"
+    >
+      <router-link
+        to="/"
+        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+      >
+        ← Recetario
+      </router-link>
+    </PageHero>
+
     <div class="max-w-md mx-auto px-4 sm:px-6 py-10">
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
-      <form @submit.prevent="OnSubmit" class="p-8">
-        <!-- Mensaje de error -->
-        <div v-if="error" class="mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-          </svg>
-          {{ error }}
+      <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+          <p class="font-serif font-bold text-amber-950 text-lg">Registro</p>
+          <p class="text-sm text-amber-800/70">Solo te pedimos lo esencial</p>
         </div>
 
-        <!-- Nombre -->
-        <div class="mb-5">
-          <label for="name" class="block text-sm font-medium text-amber-700 mb-1">Nombre completo</label>
-          <div class="relative">
-            <input id="name" v-model="name" required
-                   class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
-                   placeholder="Tu nombre">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 absolute right-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+        <form class="p-6 sm:p-8 space-y-5" @submit.prevent="OnSubmit">
+          <div
+            v-if="error"
+            class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          >
+            {{ error }}
           </div>
-        </div>
 
-        <!-- Email -->
-        <div class="mb-5">
-          <label for="email" class="block text-sm font-medium text-amber-700 mb-1">Correo electrónico</label>
-          <div class="relative">
-            <input type="email" id="email" v-model="email" required
-                   class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
-                   placeholder="tucorreo@ejemplo.com">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 absolute right-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+          <div>
+            <label for="name" class="block text-sm font-medium text-amber-900 mb-1.5">
+              Nombre
+            </label>
+            <input
+              id="name"
+              v-model="name"
+              type="text"
+              required
+              autocomplete="name"
+              placeholder="Tu nombre"
+              class="w-full rounded-xl border border-amber-300 px-4 py-3 text-amber-950 placeholder:text-amber-700/40 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            />
           </div>
-        </div>
 
-        <!-- Contraseña -->
-        <div class="mb-5">
-          <label for="password" class="block text-sm font-medium text-amber-700 mb-1">Contraseña</label>
-          <div class="relative">
-            <input type="password" id="password" v-model="password" required pattern=".{8,}"
-                   class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
-                   placeholder="••••••••">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 absolute right-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+          <div>
+            <label for="email" class="block text-sm font-medium text-amber-900 mb-1.5">
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              required
+              autocomplete="email"
+              placeholder="tucorreo@ejemplo.com"
+              class="w-full rounded-xl border border-amber-300 px-4 py-3 text-amber-950 placeholder:text-amber-700/40 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            />
           </div>
-          <p class="text-xs text-amber-500 mt-1">Mínimo 8 caracteres</p>
-        </div>
 
-        <!-- Confirmar Contraseña -->
-        <div class="mb-5">
-          <label for="confirmPassword" class="block text-sm font-medium text-amber-700 mb-1">Confirmar contraseña</label>
-          <div class="relative">
-            <input type="password" id="confirmPassword" v-model="confirmPassword" required pattern=".{8,}"
-                   class="w-full px-4 py-3 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
-                   placeholder="••••••••">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 absolute right-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
+          <div>
+            <label for="password" class="block text-sm font-medium text-amber-900 mb-1.5">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              required
+              minlength="8"
+              autocomplete="new-password"
+              placeholder="Mínimo 8 caracteres"
+              class="w-full rounded-xl border border-amber-300 px-4 py-3 text-amber-950 placeholder:text-amber-700/40 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            />
           </div>
-        </div>
 
-        <!-- Botón de registro -->
-        <button type="submit" 
-                class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-800 transition duration-300 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-          </svg>
-          Registrarse
-        </button>
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-amber-900 mb-1.5">
+              Confirmar contraseña
+            </label>
+            <input
+              id="confirmPassword"
+              v-model="confirmPassword"
+              type="password"
+              required
+              minlength="8"
+              autocomplete="new-password"
+              placeholder="Repite la contraseña"
+              class="w-full rounded-xl border border-amber-300 px-4 py-3 text-amber-950 placeholder:text-amber-700/40 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            />
+          </div>
 
-        <!-- Enlace a login -->
-        <div class="mt-6 text-center">
-          <router-link to="/login" 
-                      class="text-amber-600 hover:text-amber-800 font-medium transition duration-300 inline-flex items-center">
-            ¿Ya tienes cuenta? 
-            <span class="ml-1 underline">Inicia sesión</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </router-link>
-        </div>
-      </form>
-    </div>
+          <button
+            type="submit"
+            class="w-full rounded-full bg-amber-800 hover:bg-amber-900 text-white font-semibold py-3 transition"
+            :disabled="submitting"
+          >
+            {{ submitting ? 'Creando cuenta…' : 'Crear cuenta' }}
+          </button>
+
+          <p class="text-center text-sm text-amber-800/80">
+            ¿Ya tienes cuenta?
+            <router-link to="/login" class="font-semibold text-amber-950 underline underline-offset-2">
+              Inicia sesión
+            </router-link>
+          </p>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from "vue-router";
-import axios from 'axios';
-import { apiUrl } from '../api';
-import PageHero from './PageHero.vue';
-import { setCachedProfile } from '../utils/profileCache';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { apiUrl } from '../api'
+import PageHero from './PageHero.vue'
+import { setCachedProfile } from '../utils/profileCache'
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const error = ref('');
-const router = useRouter();
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const error = ref('')
+const submitting = ref(false)
+const router = useRouter()
 
 function OnSubmit() {
   if (password.value !== confirmPassword.value) {
-    error.value = "Las contraseñas no coinciden";
-    setTimeout(() => { error.value = ''; }, 3000);
-    return;
+    error.value = 'Las contraseñas no coinciden'
+    return
   }
 
-  // El backend fuerza type=user; no enviar type del cliente
-  const payload = {
-    name: name.value,
-    email: email.value,
-    password: password.value,
-  };
-
-  axios.post(apiUrl('/register'), payload)
-    .then(response => {
+  submitting.value = true
+  error.value = ''
+  axios
+    .post(apiUrl('/register'), {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+    })
+    .then((response) => {
       if (response.data.userToken) {
-        localStorage.setItem("userToken", response.data.userToken);
-        localStorage.setItem("iduser", response.data.iduser);
-        localStorage.setItem("type", response.data.type);
+        localStorage.setItem('userToken', response.data.userToken)
+        localStorage.setItem('iduser', response.data.iduser)
+        localStorage.setItem('type', response.data.type)
         setCachedProfile({
           name: response.data.name || name.value,
           email: response.data.email || email.value,
           image: response.data.image || '',
         })
-        router.push({ name: "home" });
+        router.push({ name: 'landing' })
       } else {
-        error.value = response.data.message;
-        setTimeout(() => { error.value = ''; }, 3000);
+        error.value = response.data.message || 'No se pudo crear la cuenta'
       }
     })
-    .catch(err => {
-      error.value = err.response?.data?.message || "Error en el servidor. Intente más tarde.";
-      setTimeout(() => { error.value = ''; }, 3000);
-    });
+    .catch((err) => {
+      error.value =
+        err.response?.data?.message || 'Error en el servidor. Inténtalo más tarde.'
+    })
+    .finally(() => {
+      submitting.value = false
+    })
 }
 </script>
-
-<style scoped>
-/* Animación para el mensaje de error */
-.error-message {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Efecto para los inputs al enfocar */
-input:focus, select:focus {
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
-  transition: all 0.2s ease;
-}
-
-/* Efecto para el hover del botón */
-button:hover {
-  transform: translateY(-1px);
-}
-</style>

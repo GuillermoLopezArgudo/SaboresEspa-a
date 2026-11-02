@@ -1,9 +1,16 @@
 <template>
   <div>
     <PageHero
-      title="Tus favoritos"
-      subtitle="Las recetas que has marcado para volver a ellas"
-    />
+      title="Favoritos"
+      subtitle="Las recetas que has guardado para cocinarlas cuando quieras"
+    >
+      <router-link
+        to="/"
+        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+      >
+        Explorar recetario
+      </router-link>
+    </PageHero>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <ListRecipes :greeting="'favs'" />
     </div>
