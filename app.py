@@ -31,7 +31,14 @@ app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
 os.makedirs(app.config["UPLOAD_FOLDER_IMAGES"], exist_ok=True)
 os.makedirs(app.config["UPLOAD_FOLDER_VIDEOS"], exist_ok=True)
 
-CORS(app, resources={r"/*": {"origins": Config.CORS_ORIGINS}}, supports_credentials=True)
+CORS(
+    app,
+    resources={r"/*": {"origins": Config.CORS_ORIGINS}},
+    supports_credentials=False,
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    expose_headers=["Content-Type"],
+)
 jwt = JWTManager(app)
 
 try:

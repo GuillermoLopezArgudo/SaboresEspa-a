@@ -34,10 +34,10 @@ class Config:
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "cambia-este-secreto-en-produccion")
     CORS_ORIGINS = [
-        o.strip()
+        o.strip().rstrip("/")
         for o in os.getenv(
             "CORS_ORIGINS",
-            "http://localhost:8080,http://127.0.0.1:8080",
+            "http://localhost:8080,http://127.0.0.1:8080,https://sabores-espana-one.vercel.app",
         ).split(",")
         if o.strip()
     ]
