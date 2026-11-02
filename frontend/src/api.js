@@ -5,7 +5,8 @@ const raw =
   (typeof process !== 'undefined' && process.env && process.env.VUE_APP_API_URL) ||
   'http://localhost:5000'
 
-const API_URL = String(raw).replace(/\/$/, '')
+// Trim espacios (Vercel a veces deja un trailing space → %20 y ERR_NAME_NOT_RESOLVED)
+const API_URL = String(raw).trim().replace(/\/$/, '')
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('userToken')
