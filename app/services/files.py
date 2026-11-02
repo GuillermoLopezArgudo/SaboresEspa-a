@@ -147,9 +147,10 @@ def save_base64_file(base64_data, file_name, folder, kind="image"):
         url = _upload_cloudinary(file_data, kind, ext)
         if url:
             return url
-        print("Cloudinary falló; no se hace fallback a disco en producción")
-        if Config.IS_PRODUCTION:
-            return None
+        print(
+            "[warn] Cloudinary falló; fallback a disco local "
+            "(efímero en Render hasta corregir credenciales)"
+        )
 
     if Config.IS_PRODUCTION and not Config.USE_CLOUDINARY:
         print(
