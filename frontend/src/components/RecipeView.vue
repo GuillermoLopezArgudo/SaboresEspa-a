@@ -19,6 +19,9 @@
           <div class="flex justify-between items-start">
             <div>
               <h2 class="text-2xl md:text-3xl font-bold text-amber-800 font-serif">{{ receta.title }}</h2>
+              <p v-if="receta.author" class="mt-2 text-sm font-medium text-amber-800/70">
+                Por {{ receta.author }}
+              </p>
               <button @click="toggleFavorite" 
                       class="mt-3 flex items-center text-red-500 hover:text-red-600 transition duration-300">
                 <i class="fa text-2xl mr-2" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i>
