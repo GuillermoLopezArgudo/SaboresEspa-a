@@ -105,7 +105,6 @@ const name = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const type = ref('user');
 const error = ref('');
 const router = useRouter();
 
@@ -116,11 +115,11 @@ function OnSubmit() {
     return;
   }
 
+  // El backend fuerza type=user; no enviar type del cliente
   const payload = {
     name: name.value,
     email: email.value,
     password: password.value,
-    type: type.value,
   };
 
   axios.post(apiUrl('/register'), payload)

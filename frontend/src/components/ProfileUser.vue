@@ -110,14 +110,20 @@
               
               <div class="space-y-3">
                 <div>
+                  <label class="block text-sm font-medium text-amber-700 mb-1">Contraseña actual</label>
+                  <input type="password" v-model="currentPassword" autocomplete="current-password"
+                    class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
+                </div>
+
+                <div>
                   <label class="block text-sm font-medium text-amber-700 mb-1">Nueva Contraseña</label>
-                  <input type="password" v-model="newPassword"
+                  <input type="password" v-model="newPassword" autocomplete="new-password"
                     class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
                 </div>
                 
                 <div>
                   <label class="block text-sm font-medium text-amber-700 mb-1">Confirmar Contraseña</label>
-                  <input type="password" v-model="confirmPassword"
+                  <input type="password" v-model="confirmPassword" autocomplete="new-password"
                     class="w-full px-4 py-2 rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition duration-200">
                 </div>
               </div>
@@ -193,7 +199,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { apiUrl, mediaUrl } from '../api';
+import { apiUrl, mediaUrl, clearSession } from '../api';
 import NavbarHome from './NavbarHome.vue';
 import { useRouter } from 'vue-router';
 import FooterPage from './FooterPage.vue';
@@ -210,8 +216,10 @@ const payload = ref({
   email: "",
   newPassword: "",
   confirmPassword: "",
+  currentPassword: "",
   type: localStorage.getItem("type")
 });
+const currentPassword = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
 const boolChangeName = ref(true);
@@ -252,22 +260,36 @@ function handleChangePassword() {
 }
 
 function changePassword() {
+  if (!currentPassword.value) {
+    error.value = "Indica la contraseña actual";
+    setTimeout(() => { error.value = ''; }, 3000);
+    return;
+  }
+  if (newPassword.value.length < 8) {
+    error.value = "La nueva contraseña debe tener al menos 8 caracteres";
+    setTimeout(() => { error.value = ''; }, 3000);
+    return;
+  }
   if (newPassword.value !== confirmPassword.value) {
     error.value = "Las contraseñas no coinciden";
     setTimeout(() => { error.value = ''; }, 3000);
     return;
-  } else {
-    payload.value.newPassword = newPassword.value;
-    axios
-      .post(apiUrl('/changePassword'), payload.value)
-      .then(response => {
-        console.log(response.data.message)
-      })
-      .catch(error => {
-        console.log(error);
-      })
-    handleChangePassword();
   }
+  payload.value.currentPassword = currentPassword.value;
+  payload.value.newPassword = newPassword.value;
+  axios
+    .post(apiUrl('/changePassword'), payload.value)
+    .then(response => {
+      console.log(response.data.message);
+      currentPassword.value = '';
+      newPassword.value = '';
+      confirmPassword.value = '';
+      handleChangePassword();
+    })
+    .catch(err => {
+      error.value = err.response?.data?.message || "No se pudo cambiar la contraseña";
+      setTimeout(() => { error.value = ''; }, 3000);
+    });
 }
 
 function changeImage(imageData) {
@@ -337,13 +359,14 @@ onMounted(() => {
 });
 
 function deleteProfile() {
+  if (!confirm("¿Seguro que quieres eliminar tu perfil? Esta acción no se puede deshacer.")) {
+    return;
+  }
   axios
     .post(apiUrl('/deleteProfile'), payload.value)
     .then(response => {
       console.log(response.data.message);
-      localStorage.removeItem("iduser");
-      localStorage.removeItem("token");
-      localStorage.removeItem("type");
+      clearSession();
       router.push({ name: "register" });
     })
     .catch(error => {
