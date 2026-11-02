@@ -121,14 +121,28 @@ ALL_MODELS = [
 ]
 
 
+def _is_postgres() -> bool:
+    try:
+        return "postgres" in type(db).__name__.lower()
+    except Exception:
+        return False
+
+
+def _pg_exec(sql: str) -> None:
+    """Ejecuta SQL y hace rollback si falla (Postgres aborta toda la tx tras un error)."""
+    try:
+        db.execute_sql(sql)
+    except Exception as exc:
+        print(f"[warn] migration SQL failed: {exc}")
+        try:
+            db.rollback()
+        except Exception:
+            pass
+
+
 def _widen_url_columns():
     """Amplía columnas de media a 1024 en Postgres si venían de VARCHAR(255)."""
-    # Solo Postgres (Neon/Render). SQLite ignora o falla sin impacto.
-    try:
-        backend = type(db).__name__.lower()
-    except Exception:
-        return
-    if "postgres" not in backend and "postgresql" not in backend:
+    if not _is_postgres():
         return
 
     alters = [
@@ -139,10 +153,7 @@ def _widen_url_columns():
         'ALTER TABLE "stepimage" ALTER COLUMN "step_image" TYPE VARCHAR(1024)',
     ]
     for sql in alters:
-        try:
-            db.execute_sql(sql)
-        except Exception:
-            pass
+        _pg_exec(sql)
 
 
 def _dedupe_user_recipe_rows(model):
@@ -163,22 +174,53 @@ def _ensure_unique_fav_review_indexes():
         _dedupe_user_recipe_rows(RecipeReview)
     except Exception as exc:
         print(f"[warn] dedupe fav/review: {exc}")
-
-    statements = [
-        'CREATE UNIQUE INDEX IF NOT EXISTS "uq_userfavorite_user_recipe" '
-        'ON "userfavorite" ("id_user_id", "id_recipe_id")',
-        'CREATE UNIQUE INDEX IF NOT EXISTS "uq_recipereview_user_recipe" '
-        'ON "recipereview" ("id_user_id", "id_recipe_id")',
-    ]
-    for sql in statements:
         try:
-            db.execute_sql(sql)
+            db.rollback()
         except Exception:
             pass
 
+    fav = UserFavorite._meta.table_name
+    rev = RecipeReview._meta.table_name
+    statements = [
+        f'CREATE UNIQUE INDEX IF NOT EXISTS "uq_userfavorite_user_recipe" '
+        f'ON "{fav}" ("id_user_id", "id_recipe_id")',
+        f'CREATE UNIQUE INDEX IF NOT EXISTS "uq_recipereview_user_recipe" '
+        f'ON "{rev}" ("id_user_id", "id_recipe_id")',
+    ]
+    for sql in statements:
+        _pg_exec(sql)
+
 
 def create_tables():
-    with db:
+    # Cada paso aislado: un fallo de migración no debe dejar la conexión en estado aborted
+    db.connect(reuse_if_open=True)
+    try:
         db.create_tables(ALL_MODELS)
         _widen_url_columns()
         _ensure_unique_fav_review_indexes()
+    finally:
+        if not db.is_closed():
+            db.close()
+
+
+def ping_database() -> tuple[bool, str]:
+    """Comprueba SELECT 1. Devuelve (ok, motivo_corto)."""
+    try:
+        if db.is_closed():
+            db.connect(reuse_if_open=True)
+        db.execute_sql("SELECT 1")
+        return True, "ok"
+    except Exception as exc:
+        try:
+            db.close()
+        except Exception:
+            pass
+        try:
+            db.connect()
+            db.execute_sql("SELECT 1")
+            return True, "ok-reconnect"
+        except Exception as exc2:
+            msg = str(exc2 or exc)
+            # Sin secretos: solo tipo de error
+            short = msg.split("\n")[0][:160]
+            return False, short or "db-error"
