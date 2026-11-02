@@ -440,65 +440,65 @@ function emitirFiltros() {
 
 :global(html.dark) .filter-bar {
   background-color: rgb(28 20 16 / 0.94) !important;
-  border-color: #4a372c !important;
+  border-color: #5a4638 !important;
 }
 :global(html.dark) .filter-label {
   color: rgb(253 230 138 / 0.75) !important;
-  border-color: #4a372c !important;
+  border-color: #5a4638 !important;
 }
 :global(html.dark) .filter-trigger {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
   color: #fef3c7 !important;
 }
 :global(html.dark) .filter-trigger:hover {
   border-color: #b45309 !important;
-  background-color: #3d2e24 !important;
+  background-color: #4a3a2f !important;
 }
 :global(html.dark) .filter-trigger-open {
   border-color: #d97706 !important;
-  background-color: #3d2e24 !important;
+  background-color: #4a3a2f !important;
 }
 :global(html.dark) .filter-trigger-active {
   background-color: #d97706 !important;
   border-color: #d97706 !important;
-  color: #1c1410 !important;
+  color: #2b211a !important;
 }
 :global(html.dark) .filter-dropdown {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
 }
 :global(html.dark) .filter-dropdown-head {
-  background-color: #1c1410 !important;
-  border-color: #4a372c !important;
+  background-color: #2b211a !important;
+  border-color: #5a4638 !important;
 }
 :global(html.dark) .filter-mobile-btn {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
   color: #fef3c7 !important;
 }
 :global(html.dark) .filter-chip {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
   color: #fef3c7 !important;
 }
 :global(html.dark) .filter-sheet {
-  background-color: #1c1410 !important;
+  background-color: #2b211a !important;
 }
 :global(html.dark) .filter-sheet-head {
-  border-color: #4a372c !important;
+  border-color: #5a4638 !important;
 }
 :global(html.dark) .filter-sheet-close {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
   color: #fef3c7 !important;
 }
 :global(html.dark) .filter-sheet-panel {
-  background-color: #2a211c !important;
-  border-color: #4a372c !important;
+  background-color: #3d3128 !important;
+  border-color: #5a4638 !important;
 }
 :global(html.dark) .filter-sheet-foot {
-  background-color: #2a211c !important;
-  border-color: #4a372c !important;
+  background-color: #3d3128 !important;
+  border-color: #5a4638 !important;
 }
 </style>
