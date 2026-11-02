@@ -4,10 +4,7 @@
       title="Iniciar sesión"
       subtitle="Entra para guardar favoritos, valorar y compartir recetas"
     >
-      <router-link
-        to="/"
-        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
-      >
+      <router-link to="/" class="hero-cta-ghost">
         ← Recetario
       </router-link>
     </PageHero>

@@ -4,10 +4,7 @@
       title="Editar receta"
       subtitle="Actualiza los detalles de tu creación culinaria"
     >
-      <router-link
-        to="/"
-        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
-      >
+      <router-link to="/" class="hero-cta-ghost">
         ← Volver al recetario
       </router-link>
     </PageHero>
