@@ -84,7 +84,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { clearSession } from '../api';
+import { logoutRequest } from '../api';
 
 const router = useRouter();
 const navbarOpen = ref(false);
@@ -116,8 +116,8 @@ const toggleNavbar = () => {
   navbarOpen.value = !navbarOpen.value;
 };
 
-const logout = () => {
-  clearSession();
+const logout = async () => {
+  await logoutRequest();
   router.push('/login');
 };
 </script>

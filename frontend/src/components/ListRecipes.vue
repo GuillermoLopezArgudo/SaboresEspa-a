@@ -221,13 +221,8 @@ function allRecipes() {
 }
 
 function favoritesRecipes() {
-    const payload = {
-        userToken: userToken,
-        iduser: iduser
-    };
-
     axios
-        .post(apiUrl('/viewFavs'), payload)
+        .post(apiUrl('/viewFavs'), {})
         .then(response => {
             elementos.recetas = response.data.favorites_list;
             selectFavorites(response.data.favorites_list)
@@ -238,31 +233,28 @@ function favoritesRecipes() {
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
+            alert(error.response?.data?.message || 'No se pudieron cargar favoritos');
         });
 }
 
 function personalRecipes() {
-    if (localStorage.getItem('userToken') == null) {
+    if (!userToken) {
         router.push({ name: "login" });
-    } else {
-        const payload = {
-            id: localStorage.getItem("iduser"),
-            userToken: userToken.value
-        }
-
-        axios.post(apiUrl('/viewRecipes'), payload)
-            .then(response => {
-                if (response.data.message && response.data.message.length > 0) {
-                    elementos.recetas = response.data.message;
-                    response.data.categories_list.forEach(element => {
-                        categorias.push(element)
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Error al obtener las recetas:", error);
-            });
+        return;
     }
+    axios.post(apiUrl('/viewRecipes'), {})
+        .then(response => {
+            if (response.data.message && response.data.message.length > 0) {
+                elementos.recetas = response.data.message;
+                response.data.categories_list.forEach(element => {
+                    categorias.push(element)
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error al obtener las recetas:", error);
+            alert(error.response?.data?.message || 'No se pudieron cargar tus recetas');
+        });
 }
 
 function filterRecipe() {
@@ -291,36 +283,23 @@ function filterRecipe() {
 
 // Cambiar el estado de favoritos
 const toggleFavorite = (id) => {
-    if (userToken) {
-        const payload = {
-            idrecipe: id,
-            userToken,
-            comment: "",
-            iduser,
-            idcomment: 0
-        };
-
-        if (favoritos[id]) {
-            favoritos[id] = false;
-            axios.post(apiUrl('/deleteFavs'), payload)
-                .then(response => {
-                    console.log(response.data.message);
-                })
-                .catch(error => {
-                    console.error("Error en la solicitud:", error);
-                });
-        } else {
-            favoritos[id] = true;
-            axios.post(apiUrl('/updateFavs'), payload)
-                .then(response => {
-                    console.log(response.data.message);
-                })
-                .catch(error => {
-                    console.error("Error en la solicitud:", error);
-                });
-        }
-    } else {
+    if (!userToken) {
         router.push({ name: "login" });
+        return;
+    }
+    const payload = { idrecipe: id };
+    if (favoritos[id]) {
+        favoritos[id] = false;
+        axios.post(apiUrl('/deleteFavs'), payload).catch((error) => {
+            favoritos[id] = true;
+            alert(error.response?.data?.message || 'No se pudo quitar de favoritos');
+        });
+    } else {
+        favoritos[id] = true;
+        axios.post(apiUrl('/updateFavs'), payload).catch((error) => {
+            favoritos[id] = false;
+            alert(error.response?.data?.message || 'No se pudo añadir a favoritos');
+        });
     }
 };
 
@@ -331,27 +310,18 @@ const isFavorite = (id) => {
 
 // Función para cambiar la calificación de una receta
 const ratingChanged = (recipeId) => {
-    if (userToken) {
-        return (newRating) => {
-            ratings[recipeId] = newRating;
-            const payload = {
-                idrecipe: recipeId,
-                rating: newRating,
-                userToken,
-                iduser
-            };
-
-            localStorage.setItem('ratings', JSON.stringify(ratings));
-            axios.post(apiUrl('/updateRating'), payload)
-                .then(response => {
-                    console.log(response.data.message);
-                    averageStars()
-                })
-                .catch(error => {
-                    console.error("Error en la solicitud:", error);
-                });
-        };
-    }
+    if (!userToken) return undefined;
+    return (newRating) => {
+        ratings[recipeId] = newRating;
+        axios.post(apiUrl('/updateRating'), {
+            idrecipe: recipeId,
+            rating: newRating,
+        })
+            .then(() => averageStars())
+            .catch((error) => {
+                alert(error.response?.data?.message || 'No se pudo guardar la valoración');
+            });
+    };
 };
 
 function averageStars() {

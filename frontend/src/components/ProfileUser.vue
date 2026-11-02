@@ -278,9 +278,11 @@ function changePassword() {
   payload.value.currentPassword = currentPassword.value;
   payload.value.newPassword = newPassword.value;
   axios
-    .post(apiUrl('/changePassword'), payload.value)
-    .then(response => {
-      console.log(response.data.message);
+    .post(apiUrl('/changePassword'), {
+      currentPassword: currentPassword.value,
+      newPassword: newPassword.value,
+    })
+    .then(() => {
       currentPassword.value = '';
       newPassword.value = '';
       confirmPassword.value = '';
@@ -294,66 +296,59 @@ function changePassword() {
 
 function changeImage(imageData) {
   axios
-    .post(apiUrl('/changeImage'), {
-      image: imageData,
-      iduser: payload.value.iduser,
-      userToken: payload.value.userToken
-    })
-    .then(response => {
-      console.log(response.data);
+    .post(apiUrl('/changeImage'), { image: imageData })
+    .then((response) => {
       imageUrl.value = mediaUrl(response.data.newImage);
     })
-    .catch(error => {
-      console.log(error);
+    .catch((err) => {
+      alert(err.response?.data?.message || 'No se pudo cambiar la imagen');
     });
 }
 
 function changeName() {
-  payload.value.name = name.value;
   axios
-    .post(apiUrl('/changeName'), payload.value)
-    .then(response => {
-      console.log(response.data.message);
+    .post(apiUrl('/changeName'), { name: name.value })
+    .then(() => {
       handleNameChange();
     })
-    .catch(error => {
-      console.log(error);
+    .catch((err) => {
+      alert(err.response?.data?.message || 'No se pudo cambiar el nombre');
     });
 }
 
 function changeEmail() {
-  payload.value.email = email.value;
   axios
-    .post(apiUrl('/changeEmail'), payload.value)
-    .then(response => {
-      console.log(response.data.message);
-      localStorage.setItem('userToken', response.data.userToken);
+    .post(apiUrl('/changeEmail'), { email: email.value })
+    .then((response) => {
+      if (response.data.userToken) {
+        localStorage.setItem('userToken', response.data.userToken);
+      }
       handleChangeEmail();
     })
-    .catch(error => {
-      console.log(error);
+    .catch((err) => {
+      alert(err.response?.data?.message || 'No se pudo cambiar el email');
     });
 }
 
 onMounted(() => {
   axios
-    .post(apiUrl('/viewProfile'), payload.value)
-    .then(response => {
+    .post(apiUrl('/viewProfile'), {})
+    .then((response) => {
       name.value = response.data.message[0].name;
       email.value = response.data.message[0].email;
       imageUrl.value = mediaUrl(response.data.message[0].image);
     })
-    .catch(error => {
-      console.log(error);
+    .catch((err) => {
+      alert(err.response?.data?.message || 'No se pudo cargar el perfil');
     });
   if (type == "admin") {
     axios
-      .post(apiUrl('/allUsers'), payload.value)
-      .then(response => {
+      .post(apiUrl('/allUsers'), {})
+      .then((response) => {
         users.value.push(...response.data.users_list)
       })
-      .catch(error => {
-        console.log(error);
+      .catch((err) => {
+        alert(err.response?.data?.message || 'No se pudieron cargar usuarios');
       });
   }
 });
@@ -363,14 +358,13 @@ function deleteProfile() {
     return;
   }
   axios
-    .post(apiUrl('/deleteProfile'), payload.value)
-    .then(response => {
-      console.log(response.data.message);
+    .post(apiUrl('/deleteProfile'), {})
+    .then(() => {
       clearSession();
       router.push({ name: "register" });
     })
-    .catch(error => {
-      console.log(error);
+    .catch((err) => {
+      alert(err.response?.data?.message || 'No se pudo eliminar el perfil');
     });
 }
 
@@ -378,16 +372,12 @@ function deleteUser(index) {
   if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
     const userId = users.value[index].iduser;
     axios
-      .post(apiUrl('/deleteUser'), {
-        iduser: userId,
-        userToken: payload.value.userToken
-      })
-      .then(response => {
-        console.log(response.data.message);
+      .post(apiUrl('/deleteUser'), { iduser: userId })
+      .then(() => {
         users.value.splice(index, 1);
       })
-      .catch(error => {
-        console.log(error);
+      .catch((err) => {
+        alert(err.response?.data?.message || 'No se pudo eliminar el usuario');
       });
   }
 }

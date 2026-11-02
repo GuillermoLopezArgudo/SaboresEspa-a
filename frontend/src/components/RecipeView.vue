@@ -211,36 +211,22 @@ import { apiUrl, mediaUrl } from '../api';
   const editedComment = ref("");
   const payload = {
       idrecipe: parseInt(recipeId),
-      userToken: userToken,
       comment: "",
-      iduser: iduser,
       idcomment: 0
   };
   const toggleFavorite = () => {
-      if (iduser) {
-          isFavorite.value = !isFavorite.value;
-          if (isFavorite.value) {
-              axios
-                  .post(apiUrl('/updateFavs'), payload)
-                  .then(response => {
-                      console.log(response.data.message)
-                  })
-                  .catch(error => {
-                      console.error("Error en la solicitud:", error);
-                  });
-          } else {
-              axios
-                  .post(apiUrl('/deleteFavs'), payload)
-                  .then(response => {
-                      console.log(response.data.message)
-                  })
-                  .catch(error => {
-                      console.error("Error en la solicitud:", error);
-                  });
-          }
-      } else {
+      if (!iduser) {
           router.push({ name: "login" });
+          return;
       }
+      isFavorite.value = !isFavorite.value;
+      const url = isFavorite.value ? '/updateFavs' : '/deleteFavs';
+      axios
+          .post(apiUrl(url), { idrecipe: payload.idrecipe })
+          .catch((error) => {
+              isFavorite.value = !isFavorite.value;
+              alert(error.response?.data?.message || 'Error al actualizar favoritos');
+          });
   };
   
   function fetchRecipe() {
@@ -291,7 +277,7 @@ import { apiUrl, mediaUrl } from '../api';
   }
   
   function editeRecipe() {
-      router.push({ name: "edite", query: { id: recipeId } });
+      router.push({ name: "edit", query: { id: recipeId } });
   }
   
   function createComment() {
@@ -322,12 +308,14 @@ import { apiUrl, mediaUrl } from '../api';
   function updateComment(idcomment) {
       payload.idcomment = idcomment;
       payload.comment = editedComment.value;
-      axios.post(apiUrl('/editeComment'), payload)
+      axios.post(apiUrl('/editComment'), payload)
           .then(() => {
               fetchRecipe();
               cancelEdit();
           })
-          .catch(error => console.error("Error en la solicitud:", error));
+          .catch(error => {
+              alert(error.response?.data?.message || 'No se pudo editar el comentario');
+          });
   }
   
   function startEditComment(comment) {

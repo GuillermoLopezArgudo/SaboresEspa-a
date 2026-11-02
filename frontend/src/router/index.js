@@ -3,11 +3,12 @@ import LoginPage from '../components/LoginPage.vue';
 import RegisterPage from '../components/RegisterPage.vue';
 import CreateRecipe from '@/components/CreateRecipe.vue';
 import Recipe from '@/components/RecipeView.vue';
-import EditeRecipe from '@/components/EditeRecipe.vue';
+import EditRecipe from '@/components/EditRecipe.vue';
 import Profile from '@/components/ProfileUser.vue';
 import MainPage from '@/components/MainPage.vue';
 import HomeRecipe from '@/components/HomeRecipe.vue';
 import PersonalRecipes from '@/components/PersonalRecipes.vue';
+import { clearSession, isTokenValid } from '../api';
 
 const routes = [
   { path: '/', component: MainPage, name: 'landing' },
@@ -22,11 +23,16 @@ const routes = [
     props: (route) => ({ id: route.query.id }),
   },
   {
-    path: '/edite',
-    component: EditeRecipe,
-    name: 'edite',
+    path: '/edit',
+    component: EditRecipe,
+    name: 'edit',
     meta: { requiresAuth: true },
     props: (route) => ({ id: route.query.id }),
+  },
+  // alias tipográfico legacy
+  {
+    path: '/edite',
+    redirect: (to) => ({ path: '/edit', query: to.query }),
   },
   { path: '/profile', component: Profile, name: 'profile', meta: { requiresAuth: true } },
   {
@@ -44,10 +50,14 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const token = localStorage.getItem('userToken');
-  if (to.meta.requiresAuth && !token) {
+  const valid = isTokenValid(token);
+  if (token && !valid) {
+    clearSession();
+  }
+  if (to.meta.requiresAuth && !valid) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
-  if (to.meta.guest && token && (to.name === 'login' || to.name === 'register')) {
+  if (to.meta.guest && valid && (to.name === 'login' || to.name === 'register')) {
     return { name: 'home' };
   }
   return true;

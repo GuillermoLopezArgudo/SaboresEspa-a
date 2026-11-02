@@ -1,44 +1,72 @@
 # SaboresEspaña
 
-App fullstack de recetas (Vue 3 + Flask + Peewee).
+App fullstack de recetas (Vue 3 + Vite + Flask + Peewee).
 
 ## Estructura (rama `developer`)
 
 ```
-app/                 # Backend Flask empaquetado
+app/                 # Backend Flask
   config.py
   db.py
   models.py
-  routes/            # Blueprints (auth, recipes, users, health, media)
-  services/          # Utilidades (ficheros base64)
-wsgi.py              # Entry point (Render / local)
-frontend/            # Vue 3 (Vercel)
-static/              # Imágenes y vídeos subidos
+  security.py
+  rate_limit.py
+  routes/
+  services/          # uploads (Cloudinary o disco local)
+wsgi.py
+frontend/            # Vue 3 + Vite (Vercel)
+scripts/promote_admin.py
+tests/
+static/
 ```
 
-## Local (rápido)
+## Local
 
-Backend con **SQLite** (sin Docker):
+Backend (SQLite):
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+set USE_SQLITE=1
 python wsgi.py
 ```
 
-API en `http://localhost:5000` → `/health`
+API: `http://localhost:5000` → `/health`
 
 Frontend:
 
 ```bash
 cd frontend
 npm install
-npm run serve
+npm run dev
 ```
 
-Front en `http://localhost:8080` (usa `VUE_APP_API_URL=http://localhost:5000`).
+Front: `http://localhost:8080` (`VITE_API_URL=http://localhost:5000`).
+
+Promover admin:
+
+```bash
+set USE_SQLITE=1
+python scripts/promote_admin.py tu@email.com
+```
 
 ## Producción
 
-Igual que Balonmano: **Vercel** (frontend) + **Render** (`gunicorn wsgi:app`) + **Neon** (`DATABASE_URL`).
+**Vercel** (frontend) + **Render** (`gunicorn wsgi:app`) + **Neon** (`DATABASE_URL`).
+
+Obligatorio en Render:
+
+- `JWT_SECRET_KEY` (auto en `render.yaml`)
+- `FLASK_ENV=production`
+- `CORS_ORIGINS=https://sabores-espana-one.vercel.app`
+- **Cloudinary** (`CLOUDINARY_CLOUD_NAME` + `API_KEY` + `API_SECRET`) para que las fotos no se pierdan al redeploy
+
+En Vercel: `VITE_API_URL=https://sabores-espana-api.onrender.com`
+
+## Tests
+
+```bash
+set USE_SQLITE=1
+pytest tests -q
+```

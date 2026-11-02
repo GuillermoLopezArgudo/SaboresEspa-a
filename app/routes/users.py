@@ -15,7 +15,7 @@ from app.models import (
     UserFavorite,
     Users,
 )
-from app.security import admin_required, hash_password, login_required
+from app.security import admin_required, hash_password, is_valid_email, login_required
 from app.services.files import save_base64_file
 
 users_bp = Blueprint("users", __name__)
@@ -107,6 +107,8 @@ def change_email(current_user):
     email = (data.get("email") or "").strip().lower()
     if not email:
         return jsonify(message="Email vacío"), 400
+    if not is_valid_email(email):
+        return jsonify(message="Email no válido"), 400
     if (
         Users.select()
         .where((Users.user_email == email) & (Users.id != current_user.id))

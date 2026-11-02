@@ -1,11 +1,15 @@
 import hashlib
+import re
 from functools import wraps
 
 import bcrypt
-from flask import jsonify
+from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
 from app.models import Users
+
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+MAX_COMMENT_LEN = 2000
 
 
 def hash_password(password: str) -> str:
@@ -15,18 +19,27 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, stored: str) -> bool:
     if not stored:
         return False
-    # bcrypt
     if stored.startswith("$2"):
         try:
             return bcrypt.checkpw(password.encode("utf-8"), stored.encode("utf-8"))
         except ValueError:
             return False
-    # legacy SHA-256 (TFG) → migrar en login
     return hashlib.sha256(password.encode("utf-8")).hexdigest() == stored
 
 
+def is_valid_email(email: str) -> bool:
+    return bool(email and EMAIL_RE.match(email) and len(email) <= 255)
+
+
+def _bearer_token() -> str:
+    auth = request.headers.get("Authorization") or ""
+    if auth.lower().startswith("bearer "):
+        return auth[7:].strip()
+    return ""
+
+
 def get_current_user() -> Users | None:
-    """Usuario autenticado vía JWT (identity = id de usuario)."""
+    """Usuario autenticado vía JWT; el token debe coincidir con user_token (revocación)."""
     verify_jwt_in_request()
     identity = get_jwt_identity()
     if identity is None:
@@ -35,13 +48,27 @@ def get_current_user() -> Users | None:
         user_id = int(identity)
     except (TypeError, ValueError):
         return Users.get_or_none(Users.user_email == identity)
-    return Users.get_or_none(Users.id == user_id)
+
+    user = Users.get_or_none(Users.id == user_id)
+    if not user:
+        return None
+
+    token = _bearer_token()
+    # Si hay token de sesión guardado, debe coincidir (logout / login nuevo lo invalidan)
+    if user.user_token and token and user.user_token != token:
+        return None
+    if not user.user_token:
+        return None
+    return user
 
 
 def login_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        user = get_current_user()
+        try:
+            user = get_current_user()
+        except Exception:
+            return jsonify(message="No autenticado"), 401
         if not user:
             return jsonify(message="No autenticado"), 401
         return fn(user, *args, **kwargs)
@@ -52,7 +79,10 @@ def login_required(fn):
 def admin_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        user = get_current_user()
+        try:
+            user = get_current_user()
+        except Exception:
+            return jsonify(message="No autenticado"), 401
         if not user:
             return jsonify(message="No autenticado"), 401
         if user.user_type != "admin":

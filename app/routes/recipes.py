@@ -15,7 +15,7 @@ from app.models import (
     UserFavorite,
     Users,
 )
-from app.security import login_required
+from app.security import MAX_COMMENT_LEN, login_required
 from app.services.files import save_base64_file
 
 recipes_bp = Blueprint("recipes", __name__)
@@ -73,7 +73,36 @@ def _recipe_dict(r):
 
 
 def _can_manage_recipe(user, recipe) -> bool:
-    return recipe.id_user_id == user.id or user.user_type == "admin"
+    return recipe.id_user_id == user.id or (user and user.user_type == "admin")
+
+
+def _optional_user():
+    try:
+        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+
+        from app.security import _bearer_token
+
+        verify_jwt_in_request(optional=True)
+        identity = get_jwt_identity()
+        if identity is None:
+            return None
+        user = Users.get_or_none(Users.id == int(identity))
+        if not user or not user.user_token:
+            return None
+        token = _bearer_token()
+        if token and user.user_token != token:
+            return None
+        return user
+    except Exception:
+        return None
+
+
+def _can_view_recipe(user, recipe) -> bool:
+    if recipe.recipe_visibility:
+        return True
+    if not user:
+        return False
+    return _can_manage_recipe(user, recipe)
 
 
 def _delete_recipe_cascade(idrecipe):
@@ -308,18 +337,9 @@ def view_recipe():
     if not recipe:
         return jsonify(message="Receta no encontrada"), 404
 
-    # Privada: solo dueño/admin con JWT
-    if not recipe.recipe_visibility:
-        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
-
-        try:
-            verify_jwt_in_request()
-            uid = int(get_jwt_identity())
-            user = Users.get_or_none(Users.id == uid)
-            if not user or not _can_manage_recipe(user, recipe):
-                return jsonify(message="No autorizado"), 403
-        except Exception:
-            return jsonify(message="No autorizado"), 403
+    viewer = _optional_user()
+    if not _can_view_recipe(viewer, recipe):
+        return jsonify(message="No autorizado"), 403
 
     recipe_list = [
         {
@@ -385,6 +405,11 @@ def view_comment():
         idrecipe = int(data.get("idrecipe"))
     except (TypeError, ValueError):
         return jsonify(message="Receta inválida"), 400
+    recipe = Recipe.get_or_none(Recipe.id == idrecipe)
+    if not recipe:
+        return jsonify(message="Receta no encontrada"), 404
+    if not _can_view_recipe(_optional_user(), recipe):
+        return jsonify(message="No autorizado"), 403
     comment_list = []
     for comment in RecipeComment.select().where(RecipeComment.id_recipe == idrecipe):
         user = Users.get_or_none(Users.id == comment.id_user_id)
@@ -410,8 +435,13 @@ def create_comment(current_user):
     comment = (data.get("comment") or "").strip()
     if not comment:
         return jsonify(message="Comentario vacío"), 400
-    if not Recipe.get_or_none(Recipe.id == idrecipe):
+    if len(comment) > MAX_COMMENT_LEN:
+        return jsonify(message=f"Comentario demasiado largo (máx. {MAX_COMMENT_LEN})"), 400
+    recipe = Recipe.get_or_none(Recipe.id == idrecipe)
+    if not recipe:
         return jsonify(message="Receta no encontrada"), 404
+    if not _can_view_recipe(current_user, recipe):
+        return jsonify(message="No autorizado"), 403
     RecipeComment.create(
         comment_text=comment,
         id_recipe=idrecipe,
@@ -456,7 +486,8 @@ def delete_comment(current_user):
     return jsonify(message="Comment deleted")
 
 
-@recipes_bp.post("/editeComment")
+@recipes_bp.post("/editComment")
+@recipes_bp.post("/editeComment")  # alias legacy
 @login_required
 def edit_comment(current_user):
     data = request.get_json() or {}
@@ -472,6 +503,8 @@ def edit_comment(current_user):
     text = (data.get("comment") or "").strip()
     if not text:
         return jsonify(message="Comentario vacío"), 400
+    if len(text) > MAX_COMMENT_LEN:
+        return jsonify(message=f"Comentario demasiado largo (máx. {MAX_COMMENT_LEN})"), 400
     RecipeComment.update(comment_text=text, modified_at=date.today()).where(
         RecipeComment.id == idcomment
     ).execute()
@@ -509,7 +542,8 @@ def view_favs(current_user):
     )
 
 
-@recipes_bp.post("/editeRecipe")
+@recipes_bp.post("/editRecipe")
+@recipes_bp.post("/editeRecipe")  # alias legacy
 @login_required
 def edit_recipe(current_user):
     data = request.get_json() or {}

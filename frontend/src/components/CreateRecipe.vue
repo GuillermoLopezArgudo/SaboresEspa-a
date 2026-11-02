@@ -451,8 +451,6 @@ function submitRecipe() {
       text: step.text,
       image: step.image
     })) : [],
-    idUser: localStorage.getItem("iduser"),
-    token: localStorage.getItem("userToken"),
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
     time: tiempo.value,
@@ -460,12 +458,11 @@ function submitRecipe() {
     visibility: showBasicInfo.value
   };
   axios.post(apiUrl('/create'), payload)
-    .then(response => {
-      console.log(response.data.message);
+    .then(() => {
       router.push({ name: "home" });
     })
-    .catch(error => {
-      console.log(error);
+    .catch((error) => {
+      alert(error.response?.data?.message || 'No se pudo crear la receta');
     });
 }
 

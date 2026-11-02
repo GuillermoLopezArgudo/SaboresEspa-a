@@ -1,5 +1,7 @@
 import os
-from urllib.parse import urlparse, unquote
+import sys
+from datetime import timedelta
+from urllib.parse import unquote, urlparse
 
 
 def parse_database_url(url: str) -> dict:
@@ -27,6 +29,14 @@ def parse_database_url(url: str) -> dict:
     }
 
 
+def _is_production() -> bool:
+    env = (os.getenv("FLASK_ENV") or os.getenv("ENV") or "").strip().lower()
+    if env in {"production", "prod"}:
+        return True
+    # Render / Vercel / similar
+    return bool(os.getenv("RENDER") or os.getenv("DYNO") or os.getenv("K_SERVICE"))
+
+
 class Config:
     MYSQL_HOST = os.getenv("MYSQL_HOST", "db")
     MYSQL_USER = os.getenv("MYSQL_USER", "root")
@@ -35,20 +45,49 @@ class Config:
     MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
 
     DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-    # Local sin Docker/Neon: SQLite por defecto
     SQLITE_PATH = os.getenv("SQLITE_PATH", "sabores_local.db")
     USE_SQLITE = os.getenv("USE_SQLITE", "").strip().lower() in {"1", "true", "yes"}
 
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-only-change-me")
+    _raw_jwt = os.getenv("JWT_SECRET_KEY", "").strip()
+    _default_jwt = "dev-only-change-me"
+    if _is_production() and (not _raw_jwt or _raw_jwt == _default_jwt):
+        print(
+            "[fatal] JWT_SECRET_KEY debe estar definido en producción "
+            "(no uses el valor por defecto).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    JWT_SECRET_KEY = _raw_jwt or _default_jwt
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        hours=int(os.getenv("JWT_ACCESS_HOURS", "12"))
+    )
+
     CORS_ORIGINS = [
         o.strip().rstrip("/")
         for o in os.getenv(
             "CORS_ORIGINS",
-            "http://localhost:8080,http://127.0.0.1:8080,https://sabores-espana-one.vercel.app",
+            "http://localhost:8080,http://127.0.0.1:8080,"
+            "http://localhost:5173,http://127.0.0.1:5173,"
+            "https://sabores-espana-one.vercel.app",
         ).split(",")
         if o.strip()
     ]
 
     UPLOAD_FOLDER_IMAGES = os.path.join("static", "images")
     UPLOAD_FOLDER_VIDEOS = os.path.join("static", "videos")
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "mp4", "mov", "avi"}
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "mp4", "mov", "avi", "webm"}
+
+    # Cloudinary (recomendado en Render). Si no hay credenciales → disco local.
+    CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "").strip()
+    CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "").strip()
+    CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "").strip()
+    CLOUDINARY_URL = os.getenv("CLOUDINARY_URL", "").strip()
+    USE_CLOUDINARY = bool(
+        CLOUDINARY_URL
+        or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+    )
+
+    AUTH_RATE_LIMIT = int(os.getenv("AUTH_RATE_LIMIT", "20"))  # intentos
+    AUTH_RATE_WINDOW = int(os.getenv("AUTH_RATE_WINDOW", "300"))  # segundos
+
+    IS_PRODUCTION = _is_production()
