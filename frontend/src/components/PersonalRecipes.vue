@@ -33,6 +33,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'PersonalRecipes' })
+
 import ListRecipes from './ListRecipes.vue';
 import NavbarHome from './NavbarHome.vue';
 import FooterPage from './FooterPage.vue';

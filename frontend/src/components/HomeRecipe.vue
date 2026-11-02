@@ -24,6 +24,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'HomeRecipe' })
+
 import FooterPage from './FooterPage.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -33,8 +35,6 @@ import NavbarHome from './NavbarHome.vue';
 const userToken = ref(localStorage.getItem("userToken"));
 const router = useRouter();
 
-
-// Redirigir al login si no hay token
 if (userToken.value == null) {
   router.push({ name: "login" });
 }

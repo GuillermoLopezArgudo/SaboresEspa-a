@@ -18,7 +18,8 @@
 </template>
 
 <script setup>
-import 'font-awesome/css/font-awesome.min.css';
+defineOptions({ name: 'MainPage' })
+
 import RecipeFilter from './FilterRecipe.vue';
 import ListRecipes from './ListRecipes.vue';
 import FooterPage from './FooterPage.vue';
