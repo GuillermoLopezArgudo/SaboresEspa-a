@@ -55,7 +55,14 @@ def register():
 
     token = create_access_token(identity=str(user.id))
     Users.update(user_token=token).where(Users.id == user.id).execute()
-    return jsonify(userToken=token, iduser=user.id, type=user.user_type)
+    return jsonify(
+        userToken=token,
+        iduser=user.id,
+        type=user.user_type,
+        name=user.user_name,
+        email=user.user_email,
+        image=user.user_image,
+    )
 
 
 @auth_bp.post("/login")
@@ -79,7 +86,14 @@ def login():
 
     token = create_access_token(identity=str(user.id))
     Users.update(user_token=token).where(Users.id == user.id).execute()
-    return jsonify(userToken=token, iduser=user.id, type=user.user_type)
+    return jsonify(
+        userToken=token,
+        iduser=user.id,
+        type=user.user_type,
+        name=user.user_name,
+        email=user.user_email,
+        image=user.user_image,
+    )
 
 
 @auth_bp.post("/logout")

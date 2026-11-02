@@ -2,14 +2,19 @@
   <div>
     <PageHero title="Mi perfil" subtitle="Gestiona tu cuenta y preferencias" />
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-100">
+      <div v-if="loading && !name && !email" class="bg-white rounded-xl border border-amber-100 p-8 animate-pulse space-y-4">
+        <div class="mx-auto h-36 w-36 rounded-full bg-amber-100" />
+        <div class="h-4 bg-amber-100 rounded w-1/3 mx-auto" />
+        <div class="h-10 bg-amber-50 rounded" />
+        <div class="h-10 bg-amber-50 rounded" />
+      </div>
+      <div v-else class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-100">
         <div class="p-6 md:p-8">
           <!-- Foto de perfil con efecto hover mejorado -->
           <div class="text-center mb-8">
             <div class="relative inline-block group">
               <img :src="imageUrl" alt="Imagen de perfil"
-                class="w-36 h-36 rounded-full mx-auto object-cover border-4 border-white shadow-lg transition-all duration-300 group-hover:border-amber-200 group-hover:shadow-md">
-              <label for="imageRecipe"
+                class="w-36 h-36 rounded-full mx-auto object-cover border-4 border-white shadow-lg transition-all duration-300 group-hover:border-amber-200 group-hover:shadow-md">              <label for="imageRecipe"
                 class="absolute bottom-2 right-2 bg-amber-500 text-white p-2 rounded-full cursor-pointer hover:bg-amber-600 transition duration-300 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -187,16 +192,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+defineOptions({ name: 'ProfileUser' })
+
+import { ref, onMounted, onActivated } from 'vue';
 import axios from 'axios';
 import { apiUrl, mediaUrl, clearSession } from '../api';
 import { useRouter } from 'vue-router';
 import PageHero from './PageHero.vue';
+import {
+  getCachedProfile,
+  setCachedProfile,
+  patchCachedProfile,
+} from '../utils/profileCache';
 
+const cached = getCachedProfile()
 const image = ref("");
-const imageUrl = ref("");
-const name = ref("");
-const email = ref("");
+const imageUrl = ref(cached?.image ? mediaUrl(cached.image) : "");
+const name = ref(cached?.name || "");
+const email = ref(cached?.email || "");
+const loading = ref(!cached?.name && !cached?.email);
 const error = ref('');
 const payload = ref({
   userToken: localStorage.getItem("userToken"),
@@ -292,6 +306,7 @@ function changeImage(imageData) {
     .post(apiUrl('/changeImage'), { image: imageData })
     .then((response) => {
       imageUrl.value = mediaUrl(response.data.newImage);
+      patchCachedProfile({ image: response.data.newImage || '' });
     })
     .catch((err) => {
       alert(err.response?.data?.message || 'No se pudo cambiar la imagen');
@@ -302,6 +317,7 @@ function changeName() {
   axios
     .post(apiUrl('/changeName'), { name: name.value })
     .then(() => {
+      patchCachedProfile({ name: name.value });
       handleNameChange();
     })
     .catch((err) => {
@@ -316,6 +332,7 @@ function changeEmail() {
       if (response.data.userToken) {
         localStorage.setItem('userToken', response.data.userToken);
       }
+      patchCachedProfile({ email: email.value });
       handleChangeEmail();
     })
     .catch((err) => {
@@ -323,29 +340,56 @@ function changeEmail() {
     });
 }
 
-onMounted(() => {
+function applyProfile(row) {
+  if (!row) return
+  name.value = row.name || ''
+  email.value = row.email || ''
+  imageUrl.value = mediaUrl(row.image || '')
+  setCachedProfile({
+    name: row.name || '',
+    email: row.email || '',
+    image: row.image || '',
+  })
+}
+
+function loadProfile({ silent = false } = {}) {
+  if (!silent && !name.value && !email.value) loading.value = true
   axios
     .post(apiUrl('/viewProfile'), {})
     .then((response) => {
-      name.value = response.data.message[0].name;
-      email.value = response.data.message[0].email;
-      imageUrl.value = mediaUrl(response.data.message[0].image);
+      applyProfile(response.data.message?.[0])
     })
     .catch((err) => {
-      alert(err.response?.data?.message || 'No se pudo cargar el perfil');
-    });
-  if (type == "admin") {
-    axios
-      .post(apiUrl('/allUsers'), {})
-      .then((response) => {
-        users.value.push(...response.data.users_list)
-      })
-      .catch((err) => {
-        alert(err.response?.data?.message || 'No se pudieron cargar usuarios');
-      });
-  }
-});
+      if (!name.value && !email.value) {
+        alert(err.response?.data?.message || 'No se pudo cargar el perfil')
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
 
+function loadAdminUsers() {
+  if (type !== 'admin' || users.value.length) return
+  axios
+    .post(apiUrl('/allUsers'), {})
+    .then((response) => {
+      users.value = response.data.users_list || []
+    })
+    .catch((err) => {
+      alert(err.response?.data?.message || 'No se pudieron cargar usuarios')
+    })
+}
+
+onMounted(() => {
+  loadProfile({ silent: Boolean(name.value || email.value) })
+  loadAdminUsers()
+})
+
+onActivated(() => {
+  // Refresco suave al volver; la UI ya tiene cache/keep-alive
+  loadProfile({ silent: true })
+})
 function deleteProfile() {
   if (!confirm("¿Seguro que quieres eliminar tu perfil? Esta acción no se puede deshacer.")) {
     return;
