@@ -2,7 +2,6 @@ import axios from 'axios'
 
 const raw =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ||
-  (typeof process !== 'undefined' && process.env && process.env.VUE_APP_API_URL) ||
   'http://localhost:5000'
 
 // Trim espacios (Vercel a veces deja un trailing space → %20 y ERR_NAME_NOT_RESOLVED)

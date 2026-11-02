@@ -4,7 +4,8 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    # 1 worker: rate-limit en memoria coherente en plan free
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120
     envVars:
       - key: DATABASE_URL
         sync: false

@@ -1,4 +1,8 @@
-"""Rate limit en memoria (por proceso). Suficiente para un worker; en multi-worker usar Redis."""
+"""Rate limit en memoria (por proceso).
+
+Con gunicorn multi-worker el límite no es global. En Render usamos 1 worker
+(+ threads) para que este contador sea coherente sin Redis.
+"""
 
 import time
 from collections import defaultdict, deque

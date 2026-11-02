@@ -34,7 +34,7 @@ python wsgi.py
 
 API: `http://localhost:5000` → `/health`
 
-Frontend:
+Frontend (Vite):
 
 ```bash
 cd frontend
@@ -43,6 +43,8 @@ npm run dev
 ```
 
 Front: `http://localhost:8080` (`VITE_API_URL=http://localhost:5000`).
+
+Docker Compose (opcional): `docker compose up --build` (Flask + Vite; `VITE_API_URL`).
 
 Promover admin:
 

@@ -227,23 +227,30 @@ const filtrosSeleccionados = computed(() => {
   
   if (tipoComida.value) {
     const tipo = foodTypes.find(t => t.value === tipoComida.value);
-    seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
+    if (tipo) seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
   }
   
   if (ccaa.value) {
     const region = regions.find(r => r.value === ccaa.value);
-    seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
+    if (region) seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
   }
   
   if (tiempo.value) {
     const tiempoSel = prepTimes.find(t => t.value === tiempo.value);
-    seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
+    if (tiempoSel) seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
   }
   
-  if (proteinas.value.length > 0) {
+  if (Array.isArray(proteinas.value) && proteinas.value.length > 0) {
     proteinas.value.forEach(p => {
       const proteina = proteins.find(pro => pro.value === p);
-      seleccionados.push({ category: 'proteinas', label: 'Proteína', value: proteina.label });
+      if (proteina) {
+        seleccionados.push({
+          category: 'proteinas',
+          label: 'Proteína',
+          value: proteina.label,
+          key: proteina.value,
+        });
+      }
     });
   }
   
@@ -262,27 +269,23 @@ const eliminarFiltro = (filtro) => {
       tiempo.value = '';
       break;
     case 'proteinas':
-      proteinas.value = proteinas.value.filter(p => p !== filtro.value.toLowerCase());
+      proteinas.value = proteinas.value.filter(p => p !== (filtro.key || filtro.value));
       break;
   }
 };
 
 const limpiarFiltros = () => {
-  // Limpiar radio buttons
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.checked = false;
   });
-
-  // Limpiar checkboxes
   document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
     checkbox.checked = false;
   });
-  tipoComida.value= "";
-  ccaa.value="";
-  tiempo.value="";
-  proteinas.value="";
+  tipoComida.value = '';
+  ccaa.value = '';
+  tiempo.value = '';
+  proteinas.value = [];
   emit('limpiarFiltros');
-
 };
 
 const buscarFiltros = () => {
@@ -295,10 +298,10 @@ const buscarFiltros = () => {
   
   axios.post(apiUrl('/filterRecipe'), payload)
     .then(response => {
-      emit('enviarIdRecipe', response.data.message)
+      emit('enviarIdRecipe', response.data.message || [])
     })
     .catch(error => {
-      console.log(error);
+      alert(error.response?.data?.message || 'No se pudieron aplicar los filtros');
     });
 } 
 </script>

@@ -78,8 +78,12 @@ def search_ingredient():
         return jsonify(error="Falta el ingrediente"), 400
     if not category_id:
         return jsonify(error="Falta category_id"), 400
+    try:
+        category_id = int(category_id)
+    except (TypeError, ValueError):
+        return jsonify(error="category_id inválido"), 400
 
-    data, status = _cached_get(f"/categories/{int(category_id)}")
+    data, status = _cached_get(f"/categories/{category_id}")
     if status != 200 or not isinstance(data, dict):
         return jsonify(data), status
 

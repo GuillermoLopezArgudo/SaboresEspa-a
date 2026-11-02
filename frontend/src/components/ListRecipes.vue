@@ -204,30 +204,33 @@ onMounted(() => {
 
 
 function allRecipes() {
-    axios.post(apiUrl('/viewAll'), { iduser })
+    axios.post(apiUrl('/viewAll'), {})
         .then(response => {
-            elementos.recetas = response.data.recipes_list;
-            if (iduser) {
-                selectFavorites(response.data.favorites_list)
-                selectReviews(response.data.reviews_list)
-                response.data.categories_list.forEach(element => {
-                    categorias.push(element)
-                });
-            }
+            elementos.recetas = response.data.recipes_list || [];
+            selectFavorites(response.data.favorites_list || [])
+            selectReviews(response.data.reviews_list || [])
+            ;(response.data.categories_list || []).forEach(element => {
+                categorias.push(element)
+            });
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
+            alert(error.response?.data?.message || 'No se pudieron cargar las recetas');
         });
 }
 
 function favoritesRecipes() {
+    if (!userToken) {
+        router.push({ name: "login" });
+        return;
+    }
     axios
         .post(apiUrl('/viewFavs'), {})
         .then(response => {
-            elementos.recetas = response.data.favorites_list;
-            selectFavorites(response.data.favorites_list)
-            selectReviews(response.data.reviews_list)
-            response.data.categories_list.forEach(element => {
+            elementos.recetas = response.data.favorites_list || [];
+            selectFavorites(response.data.favorites_list || [])
+            selectReviews(response.data.reviews_list || [])
+            ;(response.data.categories_list || []).forEach(element => {
                 categorias.push(element)
             });
         })
@@ -270,14 +273,13 @@ function filterRecipe() {
     });
     axios.post(apiUrl('/recipeFilter'), { filtered, iduser })
         .then(response => {
-            elementos.recetas = response.data.filtered_recipes
-            if (iduser) {
-                selectFavorites(response.data.favorites_list)
-                selectReviews(response.data.reviews_list)
-            }
+            elementos.recetas = response.data.filtered_recipes || []
+            selectFavorites(response.data.favorites_list || [])
+            selectReviews(response.data.reviews_list || [])
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
+            alert(error.response?.data?.message || 'No se pudieron filtrar las recetas');
         });
 }
 

@@ -25,3 +25,6 @@ sabores_local.db
 *.egg-info/
 dist/
 build/
+scripts/_media_cache/
+scripts/_sample.mp4
+.pytest_cache/

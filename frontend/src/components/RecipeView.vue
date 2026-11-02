@@ -245,15 +245,21 @@ import { apiUrl, mediaUrl } from '../api';
       axios
           .post(apiUrl('/viewRecipe'), payload)
           .then(response => {
+              if (!response.data.recipe_list?.length) {
+                  alert('Receta no encontrada');
+                  router.push({ name: 'landing' });
+                  return;
+              }
               receta.value = response.data.recipe_list[0]
-              response.data.ingredient_list.forEach(element => {
+              ;(response.data.ingredient_list || []).forEach(element => {
                   ingredients.value.push(element.ingredients);
                   quantity.value.push(element.quantity)
               });
-              steps.value = response.data.step_list;
+              steps.value = response.data.step_list || [];
               fetchRecipe();
+              const favs = response.data.favorites_list || [];
               if (iduser) {
-                  response.data.favorites_list.forEach(id => {
+                  favs.forEach(id => {
                       if (id.id_recipe === parseInt(recipeId)) {
                           isFavorite.value = true;
                       }
@@ -261,7 +267,7 @@ import { apiUrl, mediaUrl } from '../api';
               }
           })
           .catch(error => {
-              console.error("Error en la solicitud:", error);
+              alert(error.response?.data?.message || 'No se pudo cargar la receta');
           });
   });
   
@@ -269,12 +275,11 @@ import { apiUrl, mediaUrl } from '../api';
       if (confirm('¿Estás seguro de que quieres eliminar esta receta?')) {
           axios
               .post(apiUrl('/deleteRecipe'), payload)
-              .then(response => {
-                  console.log(response.data.message);
+              .then(() => {
                   router.push({ name: "home" });
               })
               .catch(error => {
-                  console.error("Error en la solicitud:", error);
+                  alert(error.response?.data?.message || 'No se pudo eliminar la receta');
               });
       }
   }
@@ -291,7 +296,9 @@ import { apiUrl, mediaUrl } from '../api';
                   fetchRecipe();
                   comment.value = "";
               })
-              .catch(error => console.error("Error en la solicitud:", error));
+              .catch(error => {
+                  alert(error.response?.data?.message || 'No se pudo publicar el comentario');
+              });
       } else {
           router.push({ name: "login" });
       }
@@ -304,7 +311,9 @@ import { apiUrl, mediaUrl } from '../api';
               .then(() => {
                   fetchRecipe();
               })
-              .catch(error => console.error("Error en la solicitud:", error));
+              .catch(error => {
+                  alert(error.response?.data?.message || 'No se pudo eliminar el comentario');
+              });
       }
   }
   

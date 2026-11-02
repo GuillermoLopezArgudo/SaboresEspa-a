@@ -24,17 +24,17 @@ class Users(BaseModel):
     user_password = CharField(max_length=255)
     user_type = CharField(max_length=50)
     user_token = CharField(max_length=512)
-    user_image = CharField(max_length=255)
+    user_image = CharField(max_length=1024)  # Cloudinary URLs
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
 
 
 class Recipe(BaseModel):
     recipe_title = CharField(max_length=255)
-    recipe_image = CharField(max_length=255, null=True)
+    recipe_image = CharField(max_length=1024, null=True)
     recipe_description = TextField(null=True)
     recipe_visibility = BooleanField(default=True)
-    recipe_video = CharField(max_length=255, null=True)
+    recipe_video = CharField(max_length=1024, null=True)
     id_user = ForeignKeyField(Users, backref="recipes")
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
@@ -74,7 +74,7 @@ class RecipeIngredient(BaseModel):
 
 class StepImage(BaseModel):
     id_user = ForeignKeyField(Users, backref="step_images")
-    step_image = CharField(max_length=255)
+    step_image = CharField(max_length=1024)
     created_at = DateTimeField(default=datetime.datetime.now)
     modified_at = DateTimeField(default=datetime.datetime.now)
 
@@ -115,6 +115,30 @@ ALL_MODELS = [
 ]
 
 
+def _widen_url_columns():
+    """Amplía columnas de media a 1024 en Postgres si venían de VARCHAR(255)."""
+    # Solo Postgres (Neon/Render). SQLite ignora o falla sin impacto.
+    try:
+        backend = type(db).__name__.lower()
+    except Exception:
+        return
+    if "postgres" not in backend and "postgresql" not in backend:
+        return
+
+    alters = [
+        'ALTER TABLE "users" ALTER COLUMN "user_image" TYPE VARCHAR(1024)',
+        'ALTER TABLE "recipe" ALTER COLUMN "recipe_image" TYPE VARCHAR(1024)',
+        'ALTER TABLE "recipe" ALTER COLUMN "recipe_video" TYPE VARCHAR(1024)',
+        'ALTER TABLE "stepimage" ALTER COLUMN "step_image" TYPE VARCHAR(1024)',
+    ]
+    for sql in alters:
+        try:
+            db.execute_sql(sql)
+        except Exception:
+            pass
+
+
 def create_tables():
     with db:
         db.create_tables(ALL_MODELS)
+        _widen_url_columns()
