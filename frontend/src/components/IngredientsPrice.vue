@@ -1,65 +1,172 @@
 <template>
   <div>
     <PageHero
-      title="Precios Mercadona"
-      :subtitle="ingredientLabel ? `Productos para: ${ingredientLabel}` : 'Consulta precios de ingredientes'"
+      :title="ingredientLabel || 'Precios Mercadona'"
+      :subtitle="heroSubtitle"
+      eyebrow="Mercadona"
     >
       <button
         type="button"
         class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
         @click="goBack"
       >
-        ← Volver
+        ← Volver a la receta
       </button>
     </PageHero>
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div v-if="loading" class="text-amber-700 animate-pulse">
-        Consultando la tienda de Mercadona…
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Loading skeleton -->
+      <div v-if="loading" class="space-y-5">
+        <div class="h-10 w-64 rounded-full bg-amber-100 animate-pulse" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="n in 6"
+            :key="'sk-' + n"
+            class="rounded-2xl border border-amber-100 bg-white overflow-hidden animate-pulse"
+          >
+            <div class="h-44 bg-amber-50" />
+            <div class="p-4 space-y-3">
+              <div class="h-4 bg-amber-100 rounded w-4/5" />
+              <div class="h-3 bg-amber-50 rounded w-1/2" />
+              <div class="h-6 bg-amber-100 rounded w-1/3" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-4">
-        {{ error }}
+      <!-- Error -->
+      <div
+        v-else-if="error"
+        class="rounded-2xl border border-red-200 bg-red-50 px-5 py-6 text-red-800"
+      >
+        <p class="font-semibold">No se pudo cargar Mercadona</p>
+        <p class="mt-1 text-sm text-red-700/90">{{ error }}</p>
+        <button
+          type="button"
+          class="mt-4 inline-flex px-4 py-2 rounded-full bg-red-700 text-white text-sm font-medium hover:bg-red-800 transition"
+          @click="load"
+        >
+          Reintentar
+        </button>
       </div>
 
-      <div v-else-if="productos.length === 0" class="bg-white border border-amber-200 rounded-xl p-6 text-amber-700">
-        No se han encontrado productos para este ingrediente.
-        <p v-if="categoryName" class="text-sm mt-2 text-amber-600">
-          Categoría usada: {{ categoryName }}
+      <!-- Empty -->
+      <div
+        v-else-if="!productos.length"
+        class="rounded-2xl border border-amber-200 bg-white px-6 py-12 text-center"
+      >
+        <p class="font-serif text-xl font-bold text-amber-950">Sin resultados</p>
+        <p class="mt-2 text-amber-800/80 max-w-md mx-auto">
+          No encontramos productos de Mercadona para
+          <span class="font-semibold">{{ ingredientLabel || 'este ingrediente' }}</span>.
         </p>
+        <p v-if="categoryName" class="mt-3 text-xs text-amber-700">
+          Categoría consultada: {{ categoryName }}
+        </p>
+        <button
+          type="button"
+          class="mt-6 inline-flex px-4 py-2 rounded-full border border-amber-300 text-amber-900 text-sm font-medium hover:bg-amber-50 transition"
+          @click="goBack"
+        >
+          Volver
+        </button>
       </div>
 
-      <div v-else>
-        <p class="text-sm text-amber-800/80 mb-4">
-          {{ productos.length }} producto{{ productos.length === 1 ? '' : 's' }}
-          <span v-if="categoryName"> · {{ categoryName }}</span>
-        </p>
+      <!-- Results -->
+      <div v-else class="space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-900 text-amber-50 font-medium">
+              {{ productos.length }} producto{{ productos.length === 1 ? '' : 's' }}
+            </span>
+            <span
+              v-if="categoryName"
+              class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-900"
+            >
+              {{ categoryName }}
+            </span>
+            <span
+              v-if="cheapest"
+              class="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200"
+            >
+              Desde {{ formatPrice(cheapest) }}
+            </span>
+          </div>
+
+          <label class="inline-flex items-center gap-2 text-sm text-amber-900">
+            <span class="text-amber-800/70">Ordenar</span>
+            <select
+              v-model="sortBy"
+              class="rounded-full border border-amber-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name-asc">Nombre A–Z</option>
+            </select>
+          </label>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <article
-            v-for="p in productos"
+            v-for="(p, idx) in sortedProductos"
             :key="p.id || p.display_name"
-            class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden hover:shadow-md transition"
+            class="group relative flex flex-col rounded-2xl border bg-white overflow-hidden shadow-sm hover:shadow-md transition"
+            :class="isCheapest(p) ? 'border-emerald-300 ring-1 ring-emerald-200' : 'border-amber-200'"
           >
-            <div class="h-40 bg-amber-50 flex items-center justify-center overflow-hidden">
+            <div
+              v-if="isCheapest(p)"
+              class="absolute top-3 left-3 z-[1] px-2.5 py-1 rounded-full bg-emerald-700 text-white text-[11px] font-semibold tracking-wide uppercase"
+            >
+              Más barato
+            </div>
+
+            <div class="h-44 bg-gradient-to-b from-amber-50 to-white flex items-center justify-center overflow-hidden px-4">
               <img
                 v-if="p.thumbnail"
                 :src="p.thumbnail"
                 :alt="p.display_name"
-                class="max-h-full object-contain"
+                class="max-h-36 object-contain transition duration-300 group-hover:scale-105"
+                loading="lazy"
               />
               <span v-else class="text-amber-400 text-sm">Sin imagen</span>
             </div>
-            <div class="p-4">
-              <h2 class="font-semibold text-amber-900 text-sm leading-snug">
+
+            <div class="flex flex-1 flex-col p-4 pt-3">
+              <h2 class="font-semibold text-amber-950 text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
                 {{ p.display_name }}
               </h2>
-              <p v-if="p.packaging" class="text-xs text-amber-600 mt-1">{{ p.packaging }}</p>
-              <p class="mt-3 text-lg font-bold text-amber-700">
-                {{ formatPrice(p) }}
-              </p>
+
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <span
+                  v-if="packagingLabel(p)"
+                  class="inline-flex px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[11px] border border-amber-100"
+                >
+                  {{ packagingLabel(p) }}
+                </span>
+                <span
+                  v-if="unitLabel(p)"
+                  class="inline-flex px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[11px] border border-amber-100"
+                >
+                  {{ unitLabel(p) }}
+                </span>
+              </div>
+
+              <div class="mt-auto pt-4 flex items-end justify-between gap-2">
+                <div>
+                  <p class="text-[11px] uppercase tracking-wide text-amber-700/70">Precio</p>
+                  <p class="text-xl font-bold text-amber-900 tabular-nums">
+                    {{ formatPrice(p) }}
+                  </p>
+                </div>
+                <span class="text-[11px] text-amber-600/80">#{{ idx + 1 }}</span>
+              </div>
             </div>
           </article>
         </div>
+
+        <p class="text-center text-xs text-amber-700/70 pt-2">
+          Precios orientativos de tienda.mercadona.es · pueden variar por zona
+        </p>
       </div>
     </div>
   </div>
@@ -83,10 +190,18 @@ const productos = ref([])
 const loading = ref(true)
 const error = ref('')
 const categoryName = ref('')
+const sortBy = ref('price-asc')
 
 const ingredientLabel = computed(() => {
   const q = route.query.ingredients
   return typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
+})
+
+const heroSubtitle = computed(() => {
+  if (loading.value) return 'Buscando productos en Mercadona…'
+  if (error.value) return 'Ha habido un problema al consultar precios'
+  if (!productos.value.length) return 'Compara opciones de la tienda online'
+  return `${productos.value.length} resultado${productos.value.length === 1 ? '' : 's'} encontrados`
 })
 
 function goBack() {
@@ -94,17 +209,74 @@ function goBack() {
   else router.push({ name: 'landing' })
 }
 
-function formatPrice(p) {
+function numericPrice(p) {
   const price =
-    p.price ??
-    p.bulk_price ??
-    p.price_instructions?.unit_price ??
-    p.price_instructions?.bulk_price
-  if (price === undefined || price === null || price === '') return 'Precio no disponible'
+    p?.price ??
+    p?.bulk_price ??
+    p?.price_instructions?.unit_price ??
+    p?.price_instructions?.bulk_price
   const n = Number(price)
-  if (Number.isNaN(n)) return `${price} €`
+  return Number.isFinite(n) ? n : null
+}
+
+function formatPrice(p) {
+  const n = numericPrice(p)
+  if (n === null) return 'No disponible'
   return `${n.toFixed(2)} €`
 }
+
+function packagingLabel(p) {
+  return p.packaging || ''
+}
+
+function unitLabel(p) {
+  const size =
+    p.unit_size ??
+    p.price_instructions?.unit_size
+  const format =
+    p.size_format ??
+    p.price_instructions?.size_format
+  if (size == null || size === '') return ''
+  return format ? `${size} ${format}` : String(size)
+}
+
+const cheapest = computed(() => {
+  let best = null
+  let bestPrice = Infinity
+  for (const p of productos.value) {
+    const n = numericPrice(p)
+    if (n === null) continue
+    if (n < bestPrice) {
+      bestPrice = n
+      best = p
+    }
+  }
+  return best
+})
+
+function isCheapest(p) {
+  const c = cheapest.value
+  if (!c) return false
+  return (p.id && c.id && p.id === c.id) || p.display_name === c.display_name
+}
+
+const sortedProductos = computed(() => {
+  const list = [...productos.value]
+  if (sortBy.value === 'name-asc') {
+    return list.sort((a, b) =>
+      String(a.display_name || '').localeCompare(String(b.display_name || ''), 'es')
+    )
+  }
+  const dir = sortBy.value === 'price-desc' ? -1 : 1
+  return list.sort((a, b) => {
+    const pa = numericPrice(a)
+    const pb = numericPrice(b)
+    if (pa === null && pb === null) return 0
+    if (pa === null) return 1
+    if (pb === null) return -1
+    return (pa - pb) * dir
+  })
+})
 
 function findCategoryId(results, categoria) {
   const target = normalizeText(categoria)
@@ -201,3 +373,12 @@ async function load() {
 onMounted(load)
 watch(() => route.query.ingredients, load)
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
