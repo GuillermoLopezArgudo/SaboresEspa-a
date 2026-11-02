@@ -73,8 +73,10 @@ class Config:
         if o.strip()
     ]
 
-    UPLOAD_FOLDER_IMAGES = os.path.join("static", "images")
-    UPLOAD_FOLDER_VIDEOS = os.path.join("static", "videos")
+    # Rutas absolutas (Render/gunicorn no siempre usa el cwd esperado)
+    _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    UPLOAD_FOLDER_IMAGES = os.path.join(_ROOT, "static", "images")
+    UPLOAD_FOLDER_VIDEOS = os.path.join(_ROOT, "static", "videos")
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "mp4", "mov", "avi", "webm"}
 
     # Cloudinary (recomendado en Render). Si no hay credenciales → disco local.
