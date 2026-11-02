@@ -1,5 +1,5 @@
 <template>
-  <nav class="sticky top-0 z-50 border-b border-amber-200/80 bg-amber-50/90 backdrop-blur-md shadow-sm">
+  <nav class="site-nav sticky top-0 z-50 border-b border-amber-200/80 bg-amber-50/90 backdrop-blur-md shadow-sm">
     <div class="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 sm:h-16 gap-3">
         <router-link to="/" class="flex items-center min-w-0 group shrink-0" @click="closeMenus">
@@ -11,7 +11,7 @@
               <span class="xs:hidden">Sabores</span>
               <span class="hidden xs:inline">Sabores España</span>
             </p>
-            <p class="hidden sm:block text-[10px] uppercase tracking-[0.16em] text-amber-700/70 font-semibold">
+            <p class="nav-tagline hidden sm:block text-[10px] uppercase tracking-[0.16em] text-amber-700/70 font-semibold">
               Cocina para compartir
             </p>
           </div>
@@ -36,7 +36,7 @@
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             type="button"
-            class="inline-flex items-center justify-center h-10 w-10 rounded-full text-amber-800 hover:bg-amber-200/80 transition"
+            class="nav-icon-btn inline-flex items-center justify-center h-10 w-10 rounded-full text-amber-800 hover:bg-amber-200/80 transition"
             :title="isDark ? 'Modo día' : 'Modo noche'"
             :aria-label="isDark ? 'Activar modo día' : 'Activar modo noche'"
             @click="toggleTheme"
@@ -64,7 +64,7 @@
             <div class="relative hidden lg:block" data-user-menu>
               <button
                 type="button"
-                class="inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-amber-200 bg-white hover:bg-amber-50 text-amber-900 text-sm font-medium transition"
+                class="account-trigger inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-amber-200 bg-white hover:bg-amber-50 text-amber-900 text-sm font-medium transition"
                 :aria-expanded="userMenuOpen"
                 @click.stop="userMenuOpen = !userMenuOpen"
               >
@@ -87,9 +87,9 @@
               >
                 <div
                   v-show="userMenuOpen"
-                  class="absolute right-0 mt-2 w-52 rounded-2xl border border-amber-200 bg-white shadow-xl shadow-amber-900/10 overflow-hidden z-50"
+                  class="account-menu absolute right-0 mt-2 w-52 rounded-2xl border border-amber-200 bg-white shadow-xl shadow-amber-900/10 overflow-hidden z-50"
                 >
-                  <div class="px-4 py-3 border-b border-amber-100 bg-amber-50/80">
+                  <div class="account-menu-head px-4 py-3 border-b border-amber-100 bg-amber-50/80">
                     <p class="text-xs font-semibold uppercase tracking-wide text-amber-700/70">Tu espacio</p>
                     <p class="text-sm font-semibold text-amber-950 truncate">{{ userLabel }}</p>
                   </div>
@@ -97,7 +97,7 @@
                     v-for="item in accountNav"
                     :key="item.to"
                     :to="item.to"
-                    class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-amber-900 hover:bg-amber-50 transition"
+                    class="account-menu-link flex items-center gap-2.5 px-4 py-2.5 text-sm text-amber-900 hover:bg-amber-50 transition"
                     @click="userMenuOpen = false"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@
                   </router-link>
                   <button
                     type="button"
-                    class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 border-t border-amber-100 transition"
+                    class="account-logout w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 border-t border-amber-100 transition"
                     @click="logout"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,7 +136,7 @@
 
           <button
             type="button"
-            class="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-xl text-amber-800 hover:bg-amber-200/80 transition"
+            class="nav-icon-btn lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-xl text-amber-800 hover:bg-amber-200/80 transition"
             :aria-expanded="navbarOpen"
             aria-controls="mobile-nav"
             @click="toggleNavbar"
@@ -159,13 +159,13 @@
         <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-[2px]" @click="navbarOpen = false" />
         <aside
           id="mobile-nav"
-          class="absolute top-0 right-0 h-full w-[min(20rem,88vw)] bg-amber-50 shadow-2xl border-l border-amber-200 flex flex-col animate-drawer"
+          class="mobile-drawer absolute top-0 right-0 h-full w-[min(20rem,88vw)] bg-amber-50 shadow-2xl border-l border-amber-200 flex flex-col animate-drawer"
         >
-          <div class="flex items-center justify-between px-4 h-14 border-b border-amber-200">
+          <div class="mobile-drawer-head flex items-center justify-between px-4 h-14 border-b border-amber-200">
             <p class="font-serif font-bold text-amber-950">Menú</p>
             <button
               type="button"
-              class="h-9 w-9 rounded-full border border-amber-200 bg-white text-amber-900"
+              class="mobile-close h-9 w-9 rounded-full border border-amber-200 bg-white text-amber-900"
               @click="navbarOpen = false"
             >
               ×
@@ -361,5 +361,93 @@ const logout = async () => {
 }
 .animate-drawer {
   animation: drawer-in 0.2s ease-out;
+}
+
+/* Modo noche: estilos propios (el @apply no hereda overrides globales) */
+:global(html.dark) .site-nav {
+  background-color: rgb(28 20 16 / 0.92) !important;
+  border-color: #4a372c !important;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+}
+:global(html.dark) .nav-tagline {
+  color: rgb(251 191 36 / 0.65) !important;
+}
+:global(html.dark) .nav-pill {
+  color: #fde68a !important;
+}
+:global(html.dark) .nav-pill:hover {
+  background-color: rgb(146 64 14 / 0.35) !important;
+  color: #fffbeb !important;
+}
+:global(html.dark) .nav-pill-active {
+  background-color: #d97706 !important;
+  color: #1c1410 !important;
+}
+:global(html.dark) .nav-pill-active:hover {
+  background-color: #f59e0b !important;
+  color: #1c1410 !important;
+}
+:global(html.dark) .nav-icon-btn {
+  color: #fde68a !important;
+}
+:global(html.dark) .nav-icon-btn:hover {
+  background-color: rgb(146 64 14 / 0.4) !important;
+  color: #fffbeb !important;
+}
+:global(html.dark) .account-trigger {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .account-trigger:hover {
+  background-color: #3d2e24 !important;
+}
+:global(html.dark) .account-menu {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+}
+:global(html.dark) .account-menu-head {
+  background-color: #1c1410 !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .account-menu-link {
+  color: #fef3c7 !important;
+}
+:global(html.dark) .account-menu-link:hover {
+  background-color: #3d2e24 !important;
+}
+:global(html.dark) .account-logout {
+  color: #fca5a5 !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .account-logout:hover {
+  background-color: rgb(127 29 29 / 0.35) !important;
+}
+:global(html.dark) .mobile-drawer {
+  background-color: #1c1410 !important;
+  border-color: #4a372c !important;
+}
+:global(html.dark) .mobile-drawer-head {
+  border-color: #4a372c !important;
+}
+:global(html.dark) .mobile-close {
+  background-color: #2a211c !important;
+  border-color: #5c4638 !important;
+  color: #fef3c7 !important;
+}
+:global(html.dark) .mobile-link {
+  color: #fde68a !important;
+}
+:global(html.dark) .mobile-link:hover {
+  background-color: #3d2e24 !important;
+  color: #fffbeb !important;
+}
+:global(html.dark) .mobile-link-active {
+  background-color: #d97706 !important;
+  color: #1c1410 !important;
+}
+:global(html.dark) .mobile-link-active:hover {
+  background-color: #f59e0b !important;
+  color: #1c1410 !important;
 }
 </style>
