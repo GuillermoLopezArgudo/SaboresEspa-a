@@ -25,11 +25,11 @@
 */
 html.dark {
   color-scheme: dark;
-  --se-bg: #352820;
-  --se-surface: #4a3c31;
-  --se-surface-2: #5a4a3d;
-  --se-border: #7a6552;
-  --se-text: #fff8e7;
+  --se-bg: #3f3228;
+  --se-surface: #564536;
+  --se-surface-2: #6a5644;
+  --se-border: #8a735c;
+  --se-text: #fffbeb;
   --se-text-soft: #fde68a;
   --se-accent: #fbbf24;
 }
