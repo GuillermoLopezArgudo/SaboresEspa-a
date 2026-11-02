@@ -97,6 +97,7 @@ import { useRouter } from "vue-router";
 import axios from 'axios';
 import { apiUrl } from '../api';
 import PageHero from './PageHero.vue';
+import { setCachedProfile } from '../utils/profileCache';
 
 const name = ref('');
 const email = ref('');
@@ -125,6 +126,11 @@ function OnSubmit() {
         localStorage.setItem("userToken", response.data.userToken);
         localStorage.setItem("iduser", response.data.iduser);
         localStorage.setItem("type", response.data.type);
+        setCachedProfile({
+          name: response.data.name || name.value,
+          email: response.data.email || email.value,
+          image: response.data.image || '',
+        })
         router.push({ name: "home" });
       } else {
         error.value = response.data.message;

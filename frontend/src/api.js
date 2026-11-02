@@ -71,6 +71,7 @@ export function clearSession() {
   localStorage.removeItem('iduser')
   localStorage.removeItem('type')
   localStorage.removeItem('token')
+  localStorage.removeItem('sabores_profile')
 }
 
 /** Comprueba expiración del JWT en cliente (la firma la valida el API). */

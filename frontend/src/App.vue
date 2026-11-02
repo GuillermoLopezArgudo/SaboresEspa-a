@@ -16,5 +16,5 @@
 import NavbarHome from './components/NavbarHome.vue'
 import FooterPage from './components/FooterPage.vue'
 
-const cachedPages = ['MainPage', 'HomeRecipe', 'PersonalRecipes']
+const cachedPages = ['MainPage', 'HomeRecipe', 'PersonalRecipes', 'ProfileUser']
 </script>
