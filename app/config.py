@@ -80,10 +80,13 @@ class Config:
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "mp4", "mov", "avi", "webm"}
 
     # Cloudinary (recomendado en Render). Si no hay credenciales → disco local.
-    CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "").strip()
-    CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "").strip()
-    CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "").strip()
-    CLOUDINARY_URL = os.getenv("CLOUDINARY_URL", "").strip()
+    def _env_clean(key: str) -> str:
+        return os.getenv(key, "").strip().strip('"').strip("'")
+
+    CLOUDINARY_CLOUD_NAME = _env_clean("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY = _env_clean("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET = _env_clean("CLOUDINARY_API_SECRET")
+    CLOUDINARY_URL = _env_clean("CLOUDINARY_URL")
     USE_CLOUDINARY = bool(
         CLOUDINARY_URL
         or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)

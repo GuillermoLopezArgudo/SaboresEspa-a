@@ -76,6 +76,33 @@ def _can_manage_recipe(user, recipe) -> bool:
     return recipe.id_user_id == user.id or (user and user.user_type == "admin")
 
 
+def _step_description(step: dict) -> str:
+    """Acepta description (edit/view) o text (create legacy)."""
+    if not isinstance(step, dict):
+        return ""
+    return (step.get("description") or step.get("text") or "").strip()
+
+
+def _require_upload(file_dict, folder, kind, label):
+    """Sube media si viene base64; falla la petición si el cliente envió archivo inválido."""
+    if not file_dict or not isinstance(file_dict, dict):
+        return None
+    if not file_dict.get("base64"):
+        # Solo nombre/URL previa (edición sin cambiar fichero)
+        return file_dict.get("name") or None
+    url = save_base64_file(
+        file_dict.get("base64"),
+        file_dict.get("name") or ("file.jpg" if kind == "image" else "file.mp4"),
+        folder,
+        kind=kind,
+    )
+    if not url:
+        from flask import jsonify
+
+        return jsonify(message=f"No se pudo guardar {label}"), 400
+    return url
+
+
 def _optional_user():
     try:
         from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
@@ -135,20 +162,24 @@ def create_recipe(current_user):
     video = data.get("video")
     image_url = None
     video_url = None
-    if image and isinstance(image, dict):
-        image_url = save_base64_file(
-            image.get("base64"),
-            image.get("name") or "recipe.jpg",
+    if image and isinstance(image, dict) and image.get("base64"):
+        image_url = _require_upload(
+            image,
             current_app.config["UPLOAD_FOLDER_IMAGES"],
-            kind="image",
+            "image",
+            "la imagen de la receta",
         )
-    if video and isinstance(video, dict):
-        video_url = save_base64_file(
-            video.get("base64"),
-            video.get("name") or "recipe.mp4",
+        if isinstance(image_url, tuple):
+            return image_url
+    if video and isinstance(video, dict) and video.get("base64"):
+        video_url = _require_upload(
+            video,
             current_app.config["UPLOAD_FOLDER_VIDEOS"],
-            kind="video",
+            "video",
+            "el vídeo de la receta",
         )
+        if isinstance(video_url, tuple):
+            return video_url
 
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
@@ -178,18 +209,20 @@ def create_recipe(current_user):
     for step in steps:
         step_image = step.get("image")
         step_image_url = None
-        if step_image and isinstance(step_image, dict):
-            step_image_url = save_base64_file(
-                step_image.get("base64"),
-                step_image.get("name") or "step.jpg",
+        if step_image and isinstance(step_image, dict) and step_image.get("base64"):
+            step_image_url = _require_upload(
+                step_image,
                 current_app.config["UPLOAD_FOLDER_IMAGES"],
-                kind="image",
+                "image",
+                "una imagen de paso",
             )
+            if isinstance(step_image_url, tuple):
+                return step_image_url
         recipe_step = RecipeStep.create(
             id_recipe=recipe.id,
             id_user=current_user.id,
             step_title=step.get("title"),
-            step_description=step.get("text"),
+            step_description=_step_description(step),
             created_at=date.today(),
             modified_at=date.today(),
         )
@@ -211,7 +244,6 @@ def create_recipe(current_user):
     )
     return jsonify(message="RECETA SUBIDA")
 
-
 @recipes_bp.post("/viewRecipes")
 @login_required
 def view_personal_recipes(current_user):
@@ -224,28 +256,15 @@ def view_personal_recipes(current_user):
 
 @recipes_bp.post("/viewAll")
 def view_all_recipes():
-    """Público: solo recetas visibles. Favoritos/reviews si hay JWT."""
-    from app.security import get_current_user
-    from flask_jwt_extended.exceptions import NoAuthorizationError
-    from jwt.exceptions import PyJWTError
-
-    current_user = None
-    try:
-        from flask_jwt_extended import verify_jwt_in_request
-
-        verify_jwt_in_request(optional=True)
-        from flask_jwt_extended import get_jwt_identity
-
-        identity = get_jwt_identity()
-        if identity is not None:
-            current_user = Users.get_or_none(Users.id == int(identity))
-    except (NoAuthorizationError, PyJWTError, ValueError, TypeError):
-        current_user = None
+    """Público: solo recetas visibles. Favoritos/reviews si hay JWT válido."""
+    current_user = _optional_user()
 
     recipes = list(Recipe.select().where(Recipe.recipe_visibility == True))  # noqa: E712
     payload = {
         "recipes_list": [_recipe_dict(r) for r in recipes],
         "categories_list": _categories_for_recipes(recipes),
+        "favorites_list": [],
+        "reviews_list": [],
     }
     if current_user:
         payload["favorites_list"] = [
@@ -379,21 +398,15 @@ def view_recipe():
         "ingredient_list": ingredient_list,
         "step_list": step_list,
         "filters_list": filters_list,
+        "favorites_list": [],
     }
 
-    try:
-        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
-
-        verify_jwt_in_request(optional=True)
-        identity = get_jwt_identity()
-        if identity is not None:
-            uid = int(identity)
-            payload["favorites_list"] = [
-                {"id_recipe": f.id_recipe_id}
-                for f in UserFavorite.select().where(UserFavorite.id_user == uid)
-            ]
-    except Exception:
-        pass
+    viewer = _optional_user()
+    if viewer:
+        payload["favorites_list"] = [
+            {"id_recipe": f.id_recipe_id}
+            for f in UserFavorite.select().where(UserFavorite.id_user == viewer.id)
+        ]
 
     return jsonify(**payload)
 
@@ -563,25 +576,25 @@ def edit_recipe(current_user):
     image_url = None
     video_url = None
     if image and isinstance(image, dict):
-        if image.get("base64"):
-            image_url = save_base64_file(
-                image["base64"],
-                image.get("name") or "recipe.jpg",
-                current_app.config["UPLOAD_FOLDER_IMAGES"],
-                kind="image",
-            )
-        else:
-            image_url = image.get("name")
+        uploaded = _require_upload(
+            image,
+            current_app.config["UPLOAD_FOLDER_IMAGES"],
+            "image",
+            "la imagen de la receta",
+        )
+        if isinstance(uploaded, tuple):
+            return uploaded
+        image_url = uploaded
     if video and isinstance(video, dict):
-        if video.get("base64"):
-            video_url = save_base64_file(
-                video["base64"],
-                video.get("name") or "recipe.mp4",
-                current_app.config["UPLOAD_FOLDER_VIDEOS"],
-                kind="video",
-            )
-        else:
-            video_url = video.get("name")
+        uploaded = _require_upload(
+            video,
+            current_app.config["UPLOAD_FOLDER_VIDEOS"],
+            "video",
+            "el vídeo de la receta",
+        )
+        if isinstance(uploaded, tuple):
+            return uploaded
+        video_url = uploaded
 
     recipe.recipe_title = (data.get("title") or recipe.recipe_title).strip()
     recipe.recipe_description = data.get("description")
@@ -625,20 +638,20 @@ def edit_recipe(current_user):
         step_image = step.get("image")
         step_image_url = None
         if step_image and isinstance(step_image, dict):
-            if step_image.get("base64"):
-                step_image_url = save_base64_file(
-                    step_image["base64"],
-                    step_image.get("name") or "step.jpg",
-                    current_app.config["UPLOAD_FOLDER_IMAGES"],
-                    kind="image",
-                )
-            else:
-                step_image_url = step_image.get("name")
+            uploaded = _require_upload(
+                step_image,
+                current_app.config["UPLOAD_FOLDER_IMAGES"],
+                "image",
+                "una imagen de paso",
+            )
+            if isinstance(uploaded, tuple):
+                return uploaded
+            step_image_url = uploaded
         recipe_step = RecipeStep.create(
             id_recipe=recipe.id,
             id_user=current_user.id,
             step_title=step.get("title"),
-            step_description=step.get("description"),
+            step_description=_step_description(step),
             created_at=date.today(),
             modified_at=date.today(),
         )
@@ -707,25 +720,21 @@ def recipe_filter():
             (Recipe.id.in_(idrecipes)) & (Recipe.recipe_visibility == True)  # noqa: E712
         )
     )
-    payload = {"filtered_recipes": [_recipe_dict(r) for r in filtereds]}
-
-    try:
-        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
-
-        verify_jwt_in_request(optional=True)
-        identity = get_jwt_identity()
-        if identity is not None:
-            uid = int(identity)
-            payload["favorites_list"] = [
-                {"id_recipe": f.id_recipe_id}
-                for f in UserFavorite.select().where(UserFavorite.id_user == uid)
-            ]
-            payload["reviews_list"] = [
-                {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
-                for r in RecipeReview.select().where(RecipeReview.id_user == uid)
-            ]
-    except Exception:
-        pass
+    payload = {
+        "filtered_recipes": [_recipe_dict(r) for r in filtereds],
+        "favorites_list": [],
+        "reviews_list": [],
+    }
+    viewer = _optional_user()
+    if viewer:
+        payload["favorites_list"] = [
+            {"id_recipe": f.id_recipe_id}
+            for f in UserFavorite.select().where(UserFavorite.id_user == viewer.id)
+        ]
+        payload["reviews_list"] = [
+            {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
+            for r in RecipeReview.select().where(RecipeReview.id_user == viewer.id)
+        ]
 
     return jsonify(**payload)
 

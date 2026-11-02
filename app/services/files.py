@@ -1,4 +1,5 @@
 import base64
+import io
 import os
 import uuid
 
@@ -6,18 +7,20 @@ ALLOWED_IMAGE_EXT = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 ALLOWED_VIDEO_EXT = {".mp4", ".mov", ".avi", ".webm"}
 MAX_BASE64_BYTES = 8 * 1024 * 1024  # 8 MB
 
-# Firmas mágicas (inicio del archivo)
-_IMAGE_SIGNATURES = (
-    (b"\xff\xd8\xff", ".jpg"),  # JPEG
-    (b"\x89PNG\r\n\x1a\n", ".png"),
-    (b"GIF87a", ".gif"),
-    (b"GIF89a", ".gif"),
-    (b"RIFF", ".webp"),  # WebP: RIFF....WEBP
-)
-_VIDEO_SIGNATURES = (
-    (b"\x00\x00\x00", ".mp4"),  # ftyp often at offset 4; checked below
-    (b"\x1aE\xdf\xa3", ".webm"),  # EBML / WebM / MKV
-)
+# Último error de Cloudinary (para /health)
+LAST_CLOUDINARY_ERROR: str | None = None
+
+_MIME = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".mp4": "video/mp4",
+    ".mov": "video/quicktime",
+    ".avi": "video/x-msvideo",
+    ".webm": "video/webm",
+}
 
 
 def _extension(file_name: str) -> str:
@@ -37,7 +40,6 @@ def _detect_image_ext(data: bytes) -> str | None:
 
 
 def _detect_video_ext(data: bytes) -> str | None:
-    # ISO BMFF (mp4/mov): ....ftyp
     if len(data) >= 12 and data[4:8] == b"ftyp":
         brand = data[8:12]
         if brand in (b"qt  ",):
@@ -45,7 +47,6 @@ def _detect_video_ext(data: bytes) -> str | None:
         return ".mp4"
     if data.startswith(b"\x1aE\xdf\xa3"):
         return ".webm"
-    # AVI: RIFF....AVI
     if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"AVI ":
         return ".avi"
     return None
@@ -60,37 +61,71 @@ def _decode_base64(base64_data) -> bytes | None:
         return None
 
 
+def _clean_env(value: str) -> str:
+    return (value or "").strip().strip('"').strip("'")
+
+
+def _configure_cloudinary():
+    import cloudinary
+    from app.config import Config
+
+    url = _clean_env(Config.CLOUDINARY_URL)
+    cloud = _clean_env(Config.CLOUDINARY_CLOUD_NAME)
+    key = _clean_env(Config.CLOUDINARY_API_KEY)
+    secret = _clean_env(Config.CLOUDINARY_API_SECRET)
+
+    if url:
+        # Formato: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+        os.environ["CLOUDINARY_URL"] = url
+        cloudinary.config(secure=True)
+    elif cloud and key and secret:
+        cloudinary.config(
+            cloud_name=cloud,
+            api_key=key,
+            api_secret=secret,
+            secure=True,
+        )
+    else:
+        raise RuntimeError(
+            "Cloudinary no configurado (faltan CLOUDINARY_URL o CLOUD_NAME/API_KEY/API_SECRET)"
+        )
+
+    cfg = cloudinary.config()
+    if not cfg.cloud_name or not cfg.api_key or not cfg.api_secret:
+        raise RuntimeError("Cloudinary config incompleta tras inicializar")
+    return cfg
+
+
 def _upload_cloudinary(file_data: bytes, kind: str, ext: str) -> str | None:
+    global LAST_CLOUDINARY_ERROR
+    LAST_CLOUDINARY_ERROR = None
     try:
-        import cloudinary
         import cloudinary.uploader
-        from app.config import Config
 
-        if Config.CLOUDINARY_URL:
-            cloudinary.config(cloudinary_url=Config.CLOUDINARY_URL)
-        else:
-            cloudinary.config(
-                cloud_name=Config.CLOUDINARY_CLOUD_NAME,
-                api_key=Config.CLOUDINARY_API_KEY,
-                api_secret=Config.CLOUDINARY_API_SECRET,
-                secure=True,
-            )
-
-        import io
-
+        cfg = _configure_cloudinary()
         resource = "image" if kind == "image" else "video"
         folder = "sabores/images" if kind == "image" else "sabores/videos"
+        mime = _MIME.get(ext) or (
+            "image/jpeg" if kind == "image" else "video/mp4"
+        )
+        data_uri = f"data:{mime};base64,{base64.b64encode(file_data).decode('ascii')}"
+
         result = cloudinary.uploader.upload(
-            io.BytesIO(file_data),
+            data_uri,
             resource_type=resource,
             folder=folder,
             public_id=uuid.uuid4().hex,
             overwrite=False,
-            format=ext.lstrip(".") if ext else None,
+            unique_filename=False,
         )
-        return result.get("secure_url") or result.get("url")
+        url = result.get("secure_url") or result.get("url")
+        if not url:
+            raise RuntimeError(f"Cloudinary sin URL en respuesta: {result}")
+        print(f"[cloudinary] ok cloud={cfg.cloud_name} -> {url[:80]}")
+        return url
     except Exception as exc:
-        print(f"Error Cloudinary: {exc}")
+        LAST_CLOUDINARY_ERROR = str(exc)
+        print(f"[cloudinary] ERROR: {exc}")
         return None
 
 
@@ -101,7 +136,6 @@ def _save_local(file_data: bytes, folder: str, ext: str) -> str | None:
         file_path = os.path.join(folder, safe_name)
         with open(file_path, "wb") as file:
             file.write(file_data)
-        # URL pública servida por app/routes/media.py
         kind_folder = "images" if "images" in folder.replace("\\", "/") else "videos"
         return f"/uploads/{kind_folder}/{safe_name}"
     except Exception as exc:
@@ -133,7 +167,9 @@ def save_base64_file(base64_data, file_name, folder, kind="image"):
         print(f"Extensión no permitida: {claimed_ext}")
         return None
 
-    detected = _detect_image_ext(file_data) if kind == "image" else _detect_video_ext(file_data)
+    detected = (
+        _detect_image_ext(file_data) if kind == "image" else _detect_video_ext(file_data)
+    )
     if not detected:
         print("Contenido no coincide con imagen/vídeo permitido")
         return None
@@ -154,7 +190,7 @@ def save_base64_file(base64_data, file_name, folder, kind="image"):
             return url
         print(
             "[warn] Cloudinary falló; fallback a disco local "
-            "(efímero en Render hasta corregir credenciales)"
+            f"({LAST_CLOUDINARY_ERROR})"
         )
 
     if Config.IS_PRODUCTION and not Config.USE_CLOUDINARY:
@@ -163,3 +199,20 @@ def save_base64_file(base64_data, file_name, folder, kind="image"):
         )
 
     return _save_local(file_data, folder, ext)
+
+
+def cloudinary_status() -> dict:
+    """Estado seguro (sin secretos ni detalles de error) para /health."""
+    from app.config import Config
+
+    status = {
+        "configured": bool(Config.USE_CLOUDINARY),
+        "sdk_installed": False,
+    }
+    try:
+        import cloudinary  # noqa: F401
+
+        status["sdk_installed"] = True
+    except Exception:
+        status["sdk_installed"] = False
+    return status

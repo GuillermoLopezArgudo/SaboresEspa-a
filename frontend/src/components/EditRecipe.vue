@@ -356,7 +356,8 @@ onMounted(() => {
       });
     })
     .catch(error => {
-      console.error("Error en la solicitud:", error);
+      alert(error.response?.data?.message || 'No se pudo cargar la receta para editar');
+      router.push({ name: 'home' });
     });
 });
 

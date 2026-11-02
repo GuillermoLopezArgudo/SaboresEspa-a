@@ -5,7 +5,8 @@
   "Aceite de girasol": "Aceite, vinagre y sal",
   "Vinagre de vino": "Aceite, vinagre y sal",
   "Vinagre de manzana": "Aceite, vinagre y sal",
-  "Viangre de Jerez":"Aceite, vinagre y sal",
+  "Vinagre de Jerez": "Aceite, vinagre y sal",
+  "Viangre de Jerez": "Aceite, vinagre y sal", // typo legacy
   "Sal": "Aceite, vinagre y sal",
   "Sal gruesa": "Aceite, vinagre y sal",
   "Pimienta negra": "Especias",

@@ -449,6 +449,7 @@ function submitRecipe() {
     steps: recipebook.steps.length > 0 ? recipebook.steps.map(step => ({
       title: step.title,
       text: step.text,
+      description: step.text,
       image: step.image
     })) : [],
     typeeat: tipoComida.value,

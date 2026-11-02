@@ -1,14 +1,13 @@
-FROM node:16
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json /app/
-COPY package-lock.json /app/
+COPY package.json package-lock.json ./
+RUN npm ci
 
-RUN npm install
-
-COPY . /app/
+COPY . .
 
 EXPOSE 8080
 
-CMD ["npm", "run", "serve"]
+# Vite (npm run dev / serve)
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "8080"]
