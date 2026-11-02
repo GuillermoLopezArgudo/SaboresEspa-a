@@ -32,6 +32,12 @@ html.dark #app {
 
 /* Fondos */
 html.dark .bg-white { background-color: #2a211c !important; }
+html.dark .bg-white\/90 { background-color: rgb(42 33 28 / 0.92) !important; }
+html.dark .bg-white\/80 { background-color: rgb(42 33 28 / 0.85) !important; }
+html.dark .bg-white\/15 { background-color: rgb(255 255 255 / 0.12) !important; }
+html.dark .bg-white\/25 { background-color: rgb(255 255 255 / 0.2) !important; }
+html.dark .text-amber-900\/70 { color: rgb(253 230 138 / 0.72) !important; }
+html.dark .text-amber-900\/80 { color: rgb(253 230 138 / 0.82) !important; }
 html.dark .bg-amber-50 { background-color: #1c1410 !important; }
 html.dark .bg-amber-50\/95 { background-color: rgb(28 20 16 / 0.95) !important; }
 html.dark .bg-amber-50\/90 { background-color: rgb(28 20 16 / 0.92) !important; }
