@@ -76,14 +76,17 @@ def _upload_cloudinary(file_data: bytes, kind: str, ext: str) -> str | None:
                 secure=True,
             )
 
+        import io
+
         resource = "image" if kind == "image" else "video"
         folder = "sabores/images" if kind == "image" else "sabores/videos"
         result = cloudinary.uploader.upload(
-            f"data:application/octet-stream;base64,{base64.b64encode(file_data).decode()}",
+            io.BytesIO(file_data),
             resource_type=resource,
             folder=folder,
             public_id=uuid.uuid4().hex,
             overwrite=False,
+            format=ext.lstrip(".") if ext else None,
         )
         return result.get("secure_url") or result.get("url")
     except Exception as exc:
