@@ -151,24 +151,44 @@ html.dark .filter-scroll::-webkit-scrollbar-thumb {
   background-color: #5c4638;
 }
 
-/* CTAs del PageHero: no deben heredar el remap de bg-white en noche */
+/* CTAs del PageHero — modo claro */
 .hero-cta-primary {
   @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition;
-  background-color: #fffbeb !important;
-  color: #1c1410 !important;
+  background-color: #78350f !important;
+  color: #fffbeb !important;
 }
 .hero-cta-primary:hover {
-  background-color: #fde68a !important;
-  color: #1c1410 !important;
+  background-color: #451a03 !important;
+  color: #fff !important;
 }
 
 .hero-cta-ghost {
   @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-medium border transition;
+  background-color: rgb(255 255 255 / 0.45) !important;
+  border-color: rgb(120 53 15 / 0.28) !important;
+  color: #451a03 !important;
+}
+.hero-cta-ghost:hover {
+  background-color: rgb(255 255 255 / 0.7) !important;
+  border-color: rgb(120 53 15 / 0.45) !important;
+  color: #1c1410 !important;
+}
+
+/* CTAs del PageHero — modo noche */
+html.dark .hero-cta-primary {
+  background-color: #fffbeb !important;
+  color: #1c1410 !important;
+}
+html.dark .hero-cta-primary:hover {
+  background-color: #fde68a !important;
+  color: #1c1410 !important;
+}
+html.dark .hero-cta-ghost {
   background-color: rgb(255 255 255 / 0.1) !important;
   border-color: rgb(255 255 255 / 0.28) !important;
   color: #fffbeb !important;
 }
-.hero-cta-ghost:hover {
+html.dark .hero-cta-ghost:hover {
   background-color: rgb(255 255 255 / 0.18) !important;
   border-color: rgb(255 255 255 / 0.4) !important;
   color: #fff !important;
