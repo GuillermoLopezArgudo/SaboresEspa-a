@@ -10,10 +10,28 @@
     </PageHero>
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <form @submit.prevent="submitEditRecipe"
+    <nav class="mb-5 flex gap-1 sm:gap-2 overflow-x-auto pb-1" aria-label="Pasos del formulario">
+      <button
+        v-for="(label, idx) in wizardLabels"
+        :key="label"
+        type="button"
+        class="shrink-0 inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs sm:text-sm font-semibold border transition"
+        :class="wizardStep === idx
+          ? 'bg-amber-800 text-white border-amber-800'
+          : wizardStep > idx
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            : 'bg-white text-amber-900 border-amber-200'"
+        @click="wizardStep = idx"
+      >
+        <span class="h-5 w-5 rounded-full bg-black/10 flex items-center justify-center text-[11px]">{{ idx + 1 }}</span>
+        {{ label }}
+      </button>
+    </nav>
+
+    <form @submit.prevent="onFormSubmit"
       class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
       <!-- Información básica -->
-      <div class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
+      <div v-show="wizardStep === 0" class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
         <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -92,7 +110,7 @@
       </div>
 
       <!-- Ingredientes -->
-      <div class="p-6 sm:p-8 border-b border-amber-100">
+      <div v-show="wizardStep === 1" class="p-6 sm:p-8 border-b border-amber-100">
         <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -130,7 +148,7 @@
       </div>
 
       <!-- Pasos de preparación -->
-      <div class="p-6 sm:p-8">
+      <div v-show="wizardStep === 2" class="p-6 sm:p-8">
         <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -193,7 +211,7 @@
       <!-- Filtros -->
 
       <!-- Sección de Filtros -->
-      <div class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
+      <div v-show="wizardStep === 3" class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
         <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -262,11 +280,31 @@
           </div>
         </div>
       </div>
-      <!-- Botón de enviar -->
-      <div class="px-6 sm:px-8 pb-6 sm:pb-8">
-        <button type="submit"
-          class="w-full py-3 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-semibold rounded-lg shadow-md transition duration-300 transform hover:scale-[1.01]">
-          Guardar Cambios
+      <!-- Navegación wizard / enviar -->
+      <div class="px-6 sm:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-2">
+        <button
+          v-if="wizardStep > 0"
+          type="button"
+          class="se-btn-ghost sm:flex-1"
+          @click="wizardStep -= 1"
+        >
+          ← Anterior
+        </button>
+        <button
+          v-if="wizardStep < wizardLabels.length - 1"
+          type="button"
+          class="se-btn-primary sm:flex-1"
+          @click="nextWizardStep"
+        >
+          Siguiente →
+        </button>
+        <button
+          v-else
+          type="submit"
+          class="w-full sm:flex-1 py-3 bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-semibold rounded-lg shadow-md transition duration-300"
+          :disabled="submitting"
+        >
+          {{ submitting ? 'Guardando…' : 'Guardar Cambios' }}
         </button>
       </div>
     </form>
@@ -275,11 +313,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import { apiUrl } from '../api';
 import { useRouter, useRoute } from 'vue-router';
 import PageHero from './PageHero.vue';
+import { compressImageFile } from '../utils/imageCompress';
+import { setPageSeo, resetPageSeo } from '../utils/seo';
 
 const route = useRoute();
 const router = useRouter();
@@ -294,6 +334,9 @@ const ccaa = ref('')
 const tiempo = ref('')
 const proteinas = ref([]);
 const showBasicInfo = ref();
+const wizardStep = ref(0);
+const submitting = ref(false);
+const wizardLabels = ['Básica', 'Ingredientes', 'Pasos', 'Categorías'];
 const recipebook = reactive({
   ingredients: [],
   quantities: [],
@@ -311,7 +354,27 @@ const addStep = () => {
   recipebook.steps.push({ title: '', description: '', image: null });
 };
 
+function nextWizardStep() {
+  if (wizardStep.value === 0 && !title.value.trim()) {
+    alert('Pon un nombre a la receta')
+    return
+  }
+  if (wizardStep.value < wizardLabels.length - 1) wizardStep.value += 1
+}
+
+function onFormSubmit() {
+  if (wizardStep.value < wizardLabels.length - 1) {
+    nextWizardStep()
+    return
+  }
+  submitEditRecipe()
+}
+
 onMounted(() => {
+  setPageSeo({
+    title: 'Editar receta',
+    description: 'Actualiza los detalles de tu creación culinaria',
+  })
   axios.post(apiUrl('/viewRecipe'), { idrecipe: recipeId })
     .then(response => {
       title.value = response.data.recipe_list[0].title;
@@ -350,17 +413,15 @@ onMounted(() => {
     });
 });
 
-function handleImageChange(event) {
+onBeforeUnmount(() => resetPageSeo())
+
+async function handleImageChange(event) {
   const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      image.value = {
-        base64: reader.result.split(",")[1],
-        name: file.name
-      };
-    };
+  if (!file) return
+  try {
+    image.value = await compressImageFile(file)
+  } catch (err) {
+    alert(err.message || 'No se pudo procesar la imagen')
   }
 }
 
@@ -371,28 +432,29 @@ function handleVideoChange(event) {
     reader.readAsDataURL(file);
     reader.onload = () => {
       video.value = {
-        base64: reader.result.split(",")[1],
+        base64: reader.result,
         name: file.name
       };
     };
   }
 }
 
-function handleStepImageChange(event, index) {
+async function handleStepImageChange(event, index) {
   const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      recipebook.steps[index].image = {
-        base64: reader.result.split(",")[1],
-        name: file.name
-      };
-    };
+  if (!file) return
+  try {
+    recipebook.steps[index].image = await compressImageFile(file, {
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.8,
+    })
+  } catch (err) {
+    alert(err.message || 'No se pudo procesar la imagen del paso')
   }
 }
 
 function submitEditRecipe() {
+  submitting.value = true
   const payload = {
     idrecipe: recipeId,
     title: title.value,
@@ -419,6 +481,9 @@ function submitEditRecipe() {
     })
     .catch((error) => {
       alert(error.response?.data?.message || 'No se pudo actualizar la receta');
+    })
+    .finally(() => {
+      submitting.value = false
     });
 }
 

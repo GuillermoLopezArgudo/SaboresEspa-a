@@ -30,6 +30,7 @@
       <ListRecipes
         :greeting="greeting"
         :filterCriteria="filterCriteria"
+        sync-url
         @seleccionarCategoria="onSeleccionarCategoria"
       />
     </div>

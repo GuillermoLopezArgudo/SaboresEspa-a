@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="min-h-screen bg-amber-50 text-amber-950 flex flex-col">
+  <div id="app" class="se-page">
     <NavbarHome />
     <main class="flex-1 w-full min-w-0">
       <router-view v-slot="{ Component, route }">
