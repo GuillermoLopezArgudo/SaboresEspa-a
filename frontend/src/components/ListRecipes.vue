@@ -1,508 +1,635 @@
 <template>
-    <!-- Skeleton mientras carga la primera vez -->
-    <div v-if="loading && !elementos.recetas.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="n in 6" :key="'sk-' + n" class="bg-white rounded-xl overflow-hidden border border-amber-100 animate-pulse">
-            <div class="h-48 bg-amber-100" />
-            <div class="p-5 space-y-3">
-                <div class="h-5 bg-amber-100 rounded w-3/4" />
-                <div class="h-4 bg-amber-50 rounded w-full" />
-                <div class="h-4 bg-amber-50 rounded w-2/3" />
-                <div class="h-10 bg-amber-100 rounded" />
-            </div>
-        </div>
-    </div>
-
-    <!-- Listado de recetas -->
-    <div v-else-if="elementos.recetas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <article
-            v-for="(item) in elementos.recetas"
-            :key="item.id"
-            role="link"
-            tabindex="0"
-            class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-amber-100 transform hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500"
-            @click="openRecipe(item.id)"
-            @keydown.enter.prevent="openRecipe(item.id)"
+  <div class="space-y-5">
+    <!-- Toolbar: búsqueda + orden + contador -->
+    <div
+      v-if="showToolbar"
+      class="flex flex-col lg:flex-row lg:items-center gap-3"
+    >
+      <div class="relative flex-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-700/60"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-            <div class="relative">
-                <div class="absolute top-3 left-3 bg-amber-600 text-white rounded-full px-3 py-1 text-sm z-[1]">
-                    {{ average[item.id] !== undefined && average[item.id] !== null ? Number(average[item.id]).toFixed(2)
-                        : "Sin calificación" }} ★
-                </div>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          v-model="searchQuery"
+          type="search"
+          placeholder="Buscar por título, autor o descripción…"
+          class="w-full rounded-full border border-amber-200 bg-white pl-10 pr-4 py-2.5 text-sm text-amber-950 placeholder:text-amber-700/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+        />
+      </div>
 
-                <img v-if="item.image" :src="mediaUrl(item.image)" class="w-full h-48 object-cover"
-                    alt="" loading="lazy" decoding="async">
-                <div v-else class="h-48 bg-amber-200 flex items-center justify-center text-amber-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                </div>
-
-                <button
-                    v-if="props.greeting !== 'personal'"
-                    type="button"
-                    @click.stop="toggleFavorite(item.id)"
-                    class="absolute top-3 right-3 p-2 bg-white bg-opacity-80 rounded-full shadow-md hover:bg-opacity-100 transition-all duration-300 transform hover:scale-110"
-                >
-                    <i class="fa text-2xl"
-                        :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-600'"></i>
-                </button>
-            </div>
-
-            <div class="p-5">
-                <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
-                <p class="mt-1.5 text-sm font-medium text-amber-900/80">
-                    {{ item.author ? `Por ${item.author}` : 'Autor desconocido' }}
-                </p>
-                <p class="text-amber-600 text-sm mt-2 line-clamp-2">{{ item.description }}</p>
-                <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'" @click.stop>
-                    <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
-                </div>
-
-                <div class="text-sm text-amber-700 mt-3" @click.stop>
-                    <span class="font-semibold mr-1">Categorías:</span>
-                    <template v-if="(catsByRecipe[item.id] || []).length">
-                        <button
-                            v-for="cat in catsByRecipe[item.id]"
-                            :key="cat.type + cat.category"
-                            type="button"
-                            class="inline-block bg-amber-100 hover:bg-amber-700 hover:text-white text-amber-800 px-2 py-1 rounded-full text-xs mr-1 mb-1 transition"
-                            :title="'Filtrar por ' + categoryLabel(cat)"
-                            @click="onCategoryClick(cat)"
-                        >
-                            {{ categoryLabel(cat) }}
-                        </button>
-                    </template>
-                    <span v-else class="text-amber-500 italic">No tiene categorías</span>
-                </div>
-            </div>
-        </article>
+      <div class="flex flex-wrap items-center gap-2">
+        <span
+          class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-900 text-amber-50 text-sm font-medium"
+        >
+          {{ visibleRecipes.length }}
+          receta{{ visibleRecipes.length === 1 ? '' : 's' }}
+        </span>
+        <label class="inline-flex items-center gap-2 text-sm text-amber-900">
+          <span class="text-amber-800/70 hidden sm:inline">Ordenar</span>
+          <select
+            v-model="sortBy"
+            class="rounded-full border border-amber-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="rating-desc">Mejor valoradas</option>
+            <option value="title-asc">Título A–Z</option>
+            <option value="author-asc">Autor A–Z</option>
+          </select>
+        </label>
+      </div>
     </div>
 
-    <!-- Mensaje si no hay recetas -->
-    <div v-else-if="!loading" class="text-center py-12">
-        <div class="max-w-md mx-auto">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-amber-400" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-
-            <!-- Mensaje para "all" -->
-            <div v-if="props.greeting === 'all'">
-                <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas disponibles</h3>
-                <p class="mt-2 text-amber-600">Parece que aún no hay recetas. ¡Sé el primero en compartir una!</p>
-                <div class="mt-6">
-                    <router-link to="/create"
-                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Crear nueva receta
-                    </router-link>
-                </div>
-            </div>
-
-            <!-- Mensaje para "favs" -->
-            <div v-else-if="props.greeting === 'favs'">
-                <h3 class="mt-4 text-lg font-medium text-amber-800">No tienes recetas favoritas</h3>
-                <p class="mt-2 text-amber-600">Añade recetas a tus favoritos para encontrarlas fácilmente más tarde.</p>
-                <div class="mt-6">
-                    <router-link to="/"
-                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Explorar recetas
-                    </router-link>
-                </div>
-            </div>
-
-            <!-- Mensaje para "personal" -->
-            <div v-else-if="props.greeting === 'personal'">
-                <h3 class="mt-4 text-lg font-medium text-amber-800">No has creado ninguna receta</h3>
-                <p class="mt-2 text-amber-600">Comparte tus creaciones culinarias con la comunidad.</p>
-                <div class="mt-6">
-                    <router-link to="/create"
-                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Crear mi primera receta
-                    </router-link>
-                </div>
-            </div>
-            <!-- Mensaje para "filtred" -->
-            <div v-else>
-                <h3 class="mt-4 text-lg font-medium text-amber-800">No hay recetas que coincidan con tu filtro</h3>
-                <p class="mt-2 text-amber-600">Intenta ajustar los filtros para encontrar lo que buscas.</p>
-            </div>
+    <!-- Skeleton -->
+    <div
+      v-if="loading && !elementos.recetas.length"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+    >
+      <div
+        v-for="n in 6"
+        :key="'sk-' + n"
+        class="rounded-2xl overflow-hidden border border-amber-100 bg-white animate-pulse"
+      >
+        <div class="h-52 bg-amber-100" />
+        <div class="p-5 space-y-3">
+          <div class="h-5 bg-amber-100 rounded w-3/4" />
+          <div class="h-3 bg-amber-50 rounded w-1/3" />
+          <div class="h-4 bg-amber-50 rounded w-full" />
+          <div class="h-4 bg-amber-50 rounded w-2/3" />
         </div>
+      </div>
     </div>
+
+    <!-- Listado -->
+    <div
+      v-else-if="visibleRecipes.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+    >
+      <article
+        v-for="item in visibleRecipes"
+        :key="item.id"
+        role="link"
+        tabindex="0"
+        class="group flex flex-col rounded-2xl overflow-hidden border border-amber-200 bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500"
+        @click="openRecipe(item.id)"
+        @keydown.enter.prevent="openRecipe(item.id)"
+      >
+        <div class="relative overflow-hidden">
+          <div
+            class="absolute top-3 left-3 z-[1] inline-flex items-center gap-1 rounded-full bg-amber-950/85 text-amber-50 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+          >
+            <span>{{ ratingLabel(item.id) }}</span>
+            <span aria-hidden="true">★</span>
+          </div>
+
+          <button
+            v-if="props.greeting !== 'personal'"
+            type="button"
+            class="absolute top-3 right-3 z-[1] h-10 w-10 rounded-full bg-white/90 shadow-md text-amber-700 hover:bg-white transition flex items-center justify-center"
+            :aria-label="isFavorite(item.id) ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+            @click.stop="toggleFavorite(item.id)"
+          >
+            <i
+              class="fa text-xl"
+              :class="isFavorite(item.id) ? 'fa-heart text-red-500' : 'fa-heart-o'"
+            />
+          </button>
+
+          <img
+            v-if="item.image"
+            :src="mediaUrl(item.image)"
+            :alt="item.title"
+            class="w-full h-52 object-cover transition duration-500 group-hover:scale-105"
+            loading="lazy"
+            decoding="async"
+          />
+          <div
+            v-else
+            class="h-52 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-700/70"
+          >
+            <span class="font-serif text-lg">Sin imagen</span>
+          </div>
+        </div>
+
+        <div class="flex flex-1 flex-col p-5">
+          <h3 class="text-xl font-bold text-amber-950 font-serif line-clamp-1 group-hover:text-amber-800 transition">
+            {{ item.title }}
+          </h3>
+          <p class="mt-1 text-sm font-medium text-amber-800/75">
+            {{ item.author ? `Por ${item.author}` : 'Autor desconocido' }}
+          </p>
+          <p class="mt-2 text-sm text-amber-700/90 line-clamp-2 min-h-[2.5rem]">
+            {{ item.description || 'Sin descripción.' }}
+          </p>
+
+          <div
+            v-if="props.greeting !== 'personal'"
+            class="mt-4 pt-3 border-t border-amber-100"
+            @click.stop
+          >
+            <p class="text-[11px] uppercase tracking-wide text-amber-700/70 mb-1">Tu nota</p>
+            <StarRating
+              :rating="ratings[item.id] || 0"
+              :onRatingChanged="ratingChanged(item.id)"
+              :showRatingText="false"
+            />
+          </div>
+
+          <div class="mt-3" @click.stop>
+            <div v-if="visibleCats(item.id).length" class="flex flex-wrap gap-1.5">
+              <button
+                v-for="cat in visibleCats(item.id)"
+                :key="cat.type + cat.category"
+                type="button"
+                class="inline-flex px-2.5 py-1 rounded-full bg-amber-50 hover:bg-amber-800 hover:text-white text-amber-900 text-xs font-medium border border-amber-100 transition"
+                :title="'Filtrar por ' + categoryLabel(cat)"
+                @click="onCategoryClick(cat)"
+              >
+                {{ categoryLabel(cat) }}
+              </button>
+              <span
+                v-if="extraCatsCount(item.id) > 0"
+                class="inline-flex px-2 py-1 text-xs text-amber-700/80"
+              >
+                +{{ extraCatsCount(item.id) }}
+              </span>
+            </div>
+            <p v-else class="text-xs text-amber-600/80 italic">Sin categorías</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Sin resultados de búsqueda (hay recetas base) -->
+    <div
+      v-else-if="!loading && elementos.recetas.length && !visibleRecipes.length"
+      class="rounded-2xl border border-amber-200 bg-white px-6 py-12 text-center"
+    >
+      <p class="font-serif text-xl font-bold text-amber-950">Sin coincidencias</p>
+      <p class="mt-2 text-amber-800/80">
+        No hay recetas para “{{ searchQuery }}”. Prueba otro término.
+      </p>
+      <button
+        type="button"
+        class="mt-5 inline-flex px-4 py-2 rounded-full border border-amber-300 text-amber-900 text-sm font-medium hover:bg-amber-50"
+        @click="searchQuery = ''"
+      >
+        Limpiar búsqueda
+      </button>
+    </div>
+
+    <!-- Vacío real -->
+    <div
+      v-else-if="!loading"
+      class="rounded-2xl border border-amber-200 bg-white px-6 py-14 text-center"
+    >
+      <p class="font-serif text-2xl font-bold text-amber-950">
+        {{ emptyTitle }}
+      </p>
+      <p class="mt-2 text-amber-800/80 max-w-md mx-auto">
+        {{ emptySubtitle }}
+      </p>
+      <div class="mt-6">
+        <router-link
+          v-if="emptyLink"
+          :to="emptyLink.to"
+          class="inline-flex items-center px-5 py-2.5 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-sm font-semibold transition"
+        >
+          {{ emptyLink.label }}
+        </router-link>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch, onMounted } from 'vue';
-import StarRating from './StarRating.vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { apiUrl, mediaUrl } from '../api';
+import { computed, reactive, ref, watch, onMounted } from 'vue'
+import StarRating from './StarRating.vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { apiUrl, mediaUrl } from '../api'
 import {
-    getAverageStarsCache,
-    getViewAllCache,
-    invalidateRecipeCaches,
-    setAverageStarsCache,
-    setViewAllCache,
-} from '../utils/recipeCache';
-import { labelForFilter } from '../utils/filterOptions';
+  getAverageStarsCache,
+  getViewAllCache,
+  invalidateRecipeCaches,
+  setAverageStarsCache,
+  setViewAllCache,
+} from '../utils/recipeCache'
+import { labelForFilter } from '../utils/filterOptions'
 
-const emit = defineEmits(['seleccionarCategoria']);
+const emit = defineEmits(['seleccionarCategoria'])
 
-const favoritos = reactive({});
-const ratings = reactive({});
-const average = reactive({});
-const userToken = localStorage.getItem('userToken');
-const iduser = localStorage.getItem('iduser');
-const router = useRouter();
-const elementos = reactive({
-    recetas: []
-});
-const categorias = reactive([]);
-const loading = ref(false);
+const favoritos = reactive({})
+const ratings = reactive({})
+const average = reactive({})
+const userToken = localStorage.getItem('userToken')
+const router = useRouter()
+const elementos = reactive({ recetas: [] })
+const categorias = reactive([])
+const loading = ref(false)
+const searchQuery = ref('')
+const sortBy = ref('rating-desc')
+
+const MAX_CATS = 3
 
 function setCategories(list) {
-    categorias.splice(0, categorias.length, ...(list || []))
+  categorias.splice(0, categorias.length, ...(list || []))
 }
 
 const catsByRecipe = computed(() => {
-    const map = Object.create(null);
-    for (const cat of categorias) {
-        const id = cat.recipe_id;
-        if (!map[id]) map[id] = [];
-        map[id].push(cat);
-    }
-    return map;
-});
+  const map = Object.create(null)
+  for (const cat of categorias) {
+    const id = cat.recipe_id
+    if (!map[id]) map[id] = []
+    map[id].push(cat)
+  }
+  return map
+})
 
-/** Ignora respuestas obsoletas si el usuario cambió de modo / re-filtró. */
 let loadGen = 0
 
 const props = defineProps({
-    greeting: {
-        type: String,
-        required: true
-    },
-    filterCriteria: {
-        type: Object,
-        default: null,
-    },
-});
+  greeting: {
+    type: String,
+    required: true,
+  },
+  filterCriteria: {
+    type: Object,
+    default: null,
+  },
+})
+
+const showToolbar = computed(
+  () => loading.value || elementos.recetas.length > 0 || searchQuery.value
+)
+
+const visibleRecipes = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  let list = [...elementos.recetas]
+  if (q) {
+    list = list.filter((r) => {
+      const hay = `${r.title || ''} ${r.author || ''} ${r.description || ''}`.toLowerCase()
+      return hay.includes(q)
+    })
+  }
+  if (sortBy.value === 'title-asc') {
+    return list.sort((a, b) =>
+      String(a.title || '').localeCompare(String(b.title || ''), 'es')
+    )
+  }
+  if (sortBy.value === 'author-asc') {
+    return list.sort((a, b) =>
+      String(a.author || '').localeCompare(String(b.author || ''), 'es')
+    )
+  }
+  // rating-desc
+  return list.sort((a, b) => {
+    const ra = Number(average[a.id])
+    const rb = Number(average[b.id])
+    const na = Number.isFinite(ra) ? ra : -1
+    const nb = Number.isFinite(rb) ? rb : -1
+    return nb - na
+  })
+})
+
+const emptyTitle = computed(() => {
+  if (props.greeting === 'favs') return 'No tienes favoritos'
+  if (props.greeting === 'personal') return 'Aún no has publicado'
+  if (props.greeting === 'filtred') return 'Sin resultados para el filtro'
+  return 'Todavía no hay recetas'
+})
+
+const emptySubtitle = computed(() => {
+  if (props.greeting === 'favs') {
+    return 'Guarda recetas con el corazón para encontrarlas aquí.'
+  }
+  if (props.greeting === 'personal') {
+    return 'Comparte tu primera creación con la comunidad.'
+  }
+  if (props.greeting === 'filtred') {
+    return 'Prueba a quitar algún filtro o elige otras categorías.'
+  }
+  return 'Sé el primero en compartir una receta de la cocina española.'
+})
+
+const emptyLink = computed(() => {
+  if (props.greeting === 'favs') return { to: '/', label: 'Explorar recetario' }
+  if (props.greeting === 'personal' || props.greeting === 'all') {
+    return { to: '/create', label: 'Crear receta' }
+  }
+  return null
+})
 
 watch(
-    () => [props.greeting, props.filterCriteria],
-    () => {
-        if (props.greeting === 'filtred') {
-            applyLocalFilter()
-        } else if (props.greeting === 'all') {
-            allRecipes()
-        }
-    },
-    { deep: true }
+  () => [props.greeting, props.filterCriteria],
+  () => {
+    if (props.greeting === 'filtred') applyLocalFilter()
+    else if (props.greeting === 'all') allRecipes()
+  },
+  { deep: true }
 )
 
 function selectFavorites(favorites_list) {
-    Object.keys(favoritos).forEach((k) => { delete favoritos[k] })
-    ;(favorites_list || []).forEach(recipe => {
-        const recipeId = recipe.id_recipe || recipe.id;
-        favoritos[recipeId] = true;
-    });
+  Object.keys(favoritos).forEach((k) => {
+    delete favoritos[k]
+  })
+  ;(favorites_list || []).forEach((recipe) => {
+    const recipeId = recipe.id_recipe || recipe.id
+    favoritos[recipeId] = true
+  })
 }
 
 function selectReviews(reviews_list) {
-    Object.keys(ratings).forEach((k) => { delete ratings[k] })
-    ;(reviews_list || []).forEach(recipe => {
-        ratings[recipe.id_recipe] = recipe.review;
-    });
+  Object.keys(ratings).forEach((k) => {
+    delete ratings[k]
+  })
+  ;(reviews_list || []).forEach((recipe) => {
+    ratings[recipe.id_recipe] = recipe.review
+  })
 }
 
 function applyViewAllPayload(data) {
-    elementos.recetas = data.recipes_list || [];
-    selectFavorites(data.favorites_list || [])
-    selectReviews(data.reviews_list || [])
-    setCategories(data.categories_list)
+  elementos.recetas = data.recipes_list || []
+  selectFavorites(data.favorites_list || [])
+  selectReviews(data.reviews_list || [])
+  setCategories(data.categories_list)
 }
 
 function applyAverages(media) {
-    ;(media || []).forEach(rating => {
-        average[rating.recipe_id] = rating.average_rating
-    });
+  ;(media || []).forEach((rating) => {
+    average[rating.recipe_id] = rating.average_rating
+  })
 }
 
 onMounted(() => {
-    if (props.greeting === "all") {
-        allRecipes()
-    } else if (props.greeting === "favs") {
-        favoritesRecipes()
-    } else if (props.greeting === "personal") {
-        personalRecipes()
-    } else if (props.greeting === 'filtred') {
-        applyLocalFilter()
-    }
-    averageStars();
-});
+  if (props.greeting === 'all') allRecipes()
+  else if (props.greeting === 'favs') favoritesRecipes()
+  else if (props.greeting === 'personal') personalRecipes()
+  else if (props.greeting === 'filtred') applyLocalFilter()
+  averageStars()
+})
 
 function openRecipe(id) {
-    router.push({ path: '/recipe', query: { id } })
+  router.push({ path: '/recipe', query: { id } })
 }
 
 function categoryLabel(cat) {
-    return labelForFilter(cat.category, cat.type)
+  return labelForFilter(cat.category, cat.type)
 }
 
 function onCategoryClick(cat) {
-    emit('seleccionarCategoria', {
-        category: cat.category,
-        type: cat.type,
+  emit('seleccionarCategoria', {
+    category: cat.category,
+    type: cat.type,
+  })
+}
+
+function visibleCats(id) {
+  return (catsByRecipe.value[id] || []).slice(0, MAX_CATS)
+}
+
+function extraCatsCount(id) {
+  const total = (catsByRecipe.value[id] || []).length
+  return Math.max(0, total - MAX_CATS)
+}
+
+function ratingLabel(id) {
+  const v = average[id]
+  if (v === undefined || v === null || Number.isNaN(Number(v))) return '—'
+  return Number(v).toFixed(1)
+}
+
+function allRecipes({ force = false } = {}) {
+  const cached = !force ? getViewAllCache() : null
+  if (cached) {
+    applyViewAllPayload(cached)
+    loading.value = false
+  } else if (!elementos.recetas.length) {
+    loading.value = true
+  }
+
+  const gen = ++loadGen
+  axios
+    .post(apiUrl('/viewAll'), {})
+    .then((response) => {
+      if (gen !== loadGen) return
+      const data = response.data || {}
+      setViewAllCache(data)
+      applyViewAllPayload(data)
+    })
+    .catch((error) => {
+      if (gen !== loadGen) return
+      if (!elementos.recetas.length) {
+        console.error('Error en la solicitud:', error)
+        alert(error.response?.data?.message || 'No se pudieron cargar las recetas')
+      }
+    })
+    .finally(() => {
+      if (gen === loadGen) loading.value = false
     })
 }
 
-
-function allRecipes({ force = false } = {}) {
-    const cached = !force ? getViewAllCache() : null
-    if (cached) {
-        applyViewAllPayload(cached)
-        loading.value = false
-    } else if (!elementos.recetas.length) {
-        loading.value = true
-    }
-
-    const gen = ++loadGen
-    axios.post(apiUrl('/viewAll'), {})
-        .then(response => {
-            if (gen !== loadGen) return
-            const data = response.data || {}
-            setViewAllCache(data)
-            applyViewAllPayload(data)
-        })
-        .catch(error => {
-            if (gen !== loadGen) return
-            if (!elementos.recetas.length) {
-                console.error("Error en la solicitud:", error);
-                alert(error.response?.data?.message || 'No se pudieron cargar las recetas');
-            }
-        })
-        .finally(() => {
-            if (gen === loadGen) loading.value = false
-        });
-}
-
 function favoritesRecipes() {
-    if (!userToken) {
-        router.push({ name: "login" });
-        return;
-    }
-    if (!elementos.recetas.length) loading.value = true
-    const gen = ++loadGen
-    axios
-        .post(apiUrl('/viewFavs'), {})
-        .then(response => {
-            if (gen !== loadGen) return
-            elementos.recetas = response.data.favorites_list || [];
-            selectFavorites(response.data.favorites_list || [])
-            selectReviews(response.data.reviews_list || [])
-            setCategories(response.data.categories_list)
-        })
-        .catch(error => {
-            if (gen !== loadGen) return
-            console.error("Error en la solicitud:", error);
-            alert(error.response?.data?.message || 'No se pudieron cargar favoritos');
-        })
-        .finally(() => {
-            if (gen === loadGen) loading.value = false
-        });
+  if (!userToken) {
+    router.push({ name: 'login' })
+    return
+  }
+  if (!elementos.recetas.length) loading.value = true
+  const gen = ++loadGen
+  axios
+    .post(apiUrl('/viewFavs'), {})
+    .then((response) => {
+      if (gen !== loadGen) return
+      elementos.recetas = response.data.favorites_list || []
+      selectFavorites(response.data.favorites_list || [])
+      selectReviews(response.data.reviews_list || [])
+      setCategories(response.data.categories_list)
+    })
+    .catch((error) => {
+      if (gen !== loadGen) return
+      console.error('Error en la solicitud:', error)
+      alert(error.response?.data?.message || 'No se pudieron cargar favoritos')
+    })
+    .finally(() => {
+      if (gen === loadGen) loading.value = false
+    })
 }
 
 function personalRecipes() {
-    if (!userToken) {
-        router.push({ name: "login" });
-        return;
-    }
-    if (!elementos.recetas.length) loading.value = true
-    const gen = ++loadGen
-    axios.post(apiUrl('/viewRecipes'), {})
-        .then(response => {
-            if (gen !== loadGen) return
-            elementos.recetas = response.data.message || [];
-            setCategories(response.data.categories_list)
-        })
-        .catch(error => {
-            if (gen !== loadGen) return
-            console.error("Error al obtener las recetas:", error);
-            alert(error.response?.data?.message || 'No se pudieron cargar tus recetas');
-        })
-        .finally(() => {
-            if (gen === loadGen) loading.value = false
-        });
+  if (!userToken) {
+    router.push({ name: 'login' })
+    return
+  }
+  if (!elementos.recetas.length) loading.value = true
+  const gen = ++loadGen
+  axios
+    .post(apiUrl('/viewRecipes'), {})
+    .then((response) => {
+      if (gen !== loadGen) return
+      elementos.recetas = response.data.message || []
+      setCategories(response.data.categories_list)
+    })
+    .catch((error) => {
+      if (gen !== loadGen) return
+      console.error('Error al obtener las recetas:', error)
+      alert(error.response?.data?.message || 'No se pudieron cargar tus recetas')
+    })
+    .finally(() => {
+      if (gen === loadGen) loading.value = false
+    })
 }
 
 function recipeMatchesCriteria(recipeId, catsById, criteria) {
-    if (!criteria) return true
-    const cats = catsById.get(recipeId) || []
-    const has = (category, type) =>
-        cats.some((c) => c.category === category && c.type === type)
+  if (!criteria) return true
+  const cats = catsById.get(recipeId) || []
+  const has = (category, type) =>
+    cats.some((c) => c.category === category && c.type === type)
 
-    if (criteria.typeeat && !has('typeeat', criteria.typeeat)) return false
-    if (criteria.ccaa && !has('ccaa', criteria.ccaa)) return false
-    if (criteria.time && !has('time', criteria.time)) return false
+  if (criteria.typeeat && !has('typeeat', criteria.typeeat)) return false
+  if (criteria.ccaa && !has('ccaa', criteria.ccaa)) return false
+  if (criteria.time && !has('time', criteria.time)) return false
 
-    const proteins = Array.isArray(criteria.proteins) ? criteria.proteins : []
-    for (const protein of proteins) {
-        if (protein && !has('protein', protein)) return false
-    }
-    return true
+  const proteins = Array.isArray(criteria.proteins) ? criteria.proteins : []
+  for (const protein of proteins) {
+    if (protein && !has('protein', protein)) return false
+  }
+  return true
 }
 
 function filterPayload(data, criteria) {
-    const recipes = data.recipes_list || []
-    const categories = data.categories_list || []
-    const catsById = new Map()
-    for (const cat of categories) {
-        const id = cat.recipe_id
-        if (!catsById.has(id)) catsById.set(id, [])
-        catsById.get(id).push(cat)
-    }
+  const recipes = data.recipes_list || []
+  const categories = data.categories_list || []
+  const catsById = new Map()
+  for (const cat of categories) {
+    const id = cat.recipe_id
+    if (!catsById.has(id)) catsById.set(id, [])
+    catsById.get(id).push(cat)
+  }
 
-    const matched = recipes.filter((r) => recipeMatchesCriteria(r.id, catsById, criteria))
-    const matchedIds = new Set(matched.map((r) => r.id))
+  const matched = recipes.filter((r) =>
+    recipeMatchesCriteria(r.id, catsById, criteria)
+  )
+  const matchedIds = new Set(matched.map((r) => r.id))
 
-    elementos.recetas = matched
-    selectFavorites(data.favorites_list || [])
-    selectReviews(data.reviews_list || [])
-    setCategories(categories.filter((c) => matchedIds.has(c.recipe_id)))
+  elementos.recetas = matched
+  selectFavorites(data.favorites_list || [])
+  selectReviews(data.reviews_list || [])
+  setCategories(categories.filter((c) => matchedIds.has(c.recipe_id)))
 }
 
 function applyLocalFilter() {
-    const criteria = props.filterCriteria
-    if (!criteria) {
-        allRecipes()
-        return
-    }
+  const criteria = props.filterCriteria
+  if (!criteria) {
+    allRecipes()
+    return
+  }
 
-    const cached = getViewAllCache()
-    if (cached) {
-        loadGen += 1
-        filterPayload(cached, criteria)
-        loading.value = false
-        return
-    }
+  const cached = getViewAllCache()
+  if (cached) {
+    loadGen += 1
+    filterPayload(cached, criteria)
+    loading.value = false
+    return
+  }
 
-    loading.value = true
-    const gen = ++loadGen
-    axios.post(apiUrl('/viewAll'), {})
-        .then((response) => {
-            if (gen !== loadGen) return
-            const data = response.data || {}
-            setViewAllCache(data)
-            filterPayload(data, criteria)
-        })
-        .catch((error) => {
-            if (gen !== loadGen) return
-            console.error('Error en la solicitud:', error)
-            alert(error.response?.data?.message || 'No se pudieron filtrar las recetas')
-        })
-        .finally(() => {
-            if (gen === loadGen) loading.value = false
-        })
+  loading.value = true
+  const gen = ++loadGen
+  axios
+    .post(apiUrl('/viewAll'), {})
+    .then((response) => {
+      if (gen !== loadGen) return
+      const data = response.data || {}
+      setViewAllCache(data)
+      filterPayload(data, criteria)
+    })
+    .catch((error) => {
+      if (gen !== loadGen) return
+      console.error('Error en la solicitud:', error)
+      alert(error.response?.data?.message || 'No se pudieron filtrar las recetas')
+    })
+    .finally(() => {
+      if (gen === loadGen) loading.value = false
+    })
 }
 
-// Cambiar el estado de favoritos
 const toggleFavorite = (id) => {
-    if (!userToken) {
-        router.push({ name: "login" });
-        return;
-    }
-    const payload = { idrecipe: id };
-    if (favoritos[id]) {
-        favoritos[id] = false;
-        invalidateRecipeCaches();
-        axios.post(apiUrl('/deleteFavs'), payload).catch((error) => {
-            favoritos[id] = true;
-            alert(error.response?.data?.message || 'No se pudo quitar de favoritos');
-        });
-    } else {
-        favoritos[id] = true;
-        invalidateRecipeCaches();
-        axios.post(apiUrl('/updateFavs'), payload).catch((error) => {
-            favoritos[id] = false;
-            alert(error.response?.data?.message || 'No se pudo añadir a favoritos');
-        });
-    }
-};
+  if (!userToken) {
+    router.push({ name: 'login' })
+    return
+  }
+  const payload = { idrecipe: id }
+  if (favoritos[id]) {
+    favoritos[id] = false
+    invalidateRecipeCaches()
+    axios.post(apiUrl('/deleteFavs'), payload).catch((error) => {
+      favoritos[id] = true
+      alert(error.response?.data?.message || 'No se pudo quitar de favoritos')
+    })
+  } else {
+    favoritos[id] = true
+    invalidateRecipeCaches()
+    axios.post(apiUrl('/updateFavs'), payload).catch((error) => {
+      favoritos[id] = false
+      alert(error.response?.data?.message || 'No se pudo añadir a favoritos')
+    })
+  }
+}
 
-// Comprobar si una receta es favorita
-const isFavorite = (id) => {
-    return favoritos[id] || false;
-};
+const isFavorite = (id) => favoritos[id] || false
 
-// Función para cambiar la calificación de una receta (siempre callback válido)
 const ratingChanged = (recipeId) => {
-    return (newRating) => {
-        if (!userToken) {
-            router.push({ name: 'login' });
-            return;
-        }
-        ratings[recipeId] = newRating;
-        axios.post(apiUrl('/updateRating'), {
-            idrecipe: recipeId,
-            rating: newRating,
-        })
-            .then(() => {
-                invalidateRecipeCaches();
-                averageStars({ force: true });
-            })
-            .catch((error) => {
-                alert(error.response?.data?.message || 'No se pudo guardar la valoración');
-            });
-    };
-};
+  return (newRating) => {
+    if (!userToken) {
+      router.push({ name: 'login' })
+      return
+    }
+    ratings[recipeId] = newRating
+    axios
+      .post(apiUrl('/updateRating'), {
+        idrecipe: recipeId,
+        rating: newRating,
+      })
+      .then(() => {
+        invalidateRecipeCaches()
+        averageStars({ force: true })
+      })
+      .catch((error) => {
+        alert(error.response?.data?.message || 'No se pudo guardar la valoración')
+      })
+  }
+}
 
 function averageStars({ force = false } = {}) {
-    const cached = !force ? getAverageStarsCache() : null
-    if (cached) {
-        applyAverages(cached)
-    }
-    axios.post(apiUrl('/averageStars'))
-        .then(response => {
-            const media = response.data.media || []
-            setAverageStarsCache(media)
-            applyAverages(media)
-        })
-        .catch(error => {
-            console.error("Error en la solicitud:", error);
-        });
+  const cached = !force ? getAverageStarsCache() : null
+  if (cached) applyAverages(cached)
+  axios
+    .post(apiUrl('/averageStars'))
+    .then((response) => {
+      const media = response.data.media || []
+      setAverageStarsCache(media)
+      applyAverages(media)
+    })
+    .catch((error) => {
+      console.error('Error en la solicitud:', error)
+    })
 }
-
 </script>
 
 <style scoped>
 .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-
 .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>
