@@ -12,10 +12,15 @@
 
         <!-- Triggers desktop / tablet -->
         <div class="hidden md:flex flex-1 flex-wrap items-center gap-2 min-w-0">
-          <div v-for="panel in panels" :key="panel.id" class="relative">
+          <div
+            v-for="panel in panels"
+            :key="panel.id"
+            class="relative"
+            :data-filter-panel="panel.id"
+          >
             <button
               type="button"
-              @click="toggleAccordion(panel.id)"
+              @click.stop="toggleAccordion(panel.id)"
               class="group inline-flex items-center gap-1.5 max-w-[14rem] px-3 py-2 rounded-full text-sm font-medium border transition"
               :class="triggerClass(panel)"
             >
@@ -35,6 +40,7 @@
             <div
               v-show="activeAccordion === panel.id"
               class="absolute left-0 top-full mt-2 z-50 w-64 rounded-2xl border border-amber-200 bg-white shadow-xl shadow-amber-900/10 overflow-hidden"
+              @click.stop
             >
               <div class="px-3 py-2 border-b border-amber-100 bg-amber-50/80">
                 <p class="text-xs font-semibold uppercase tracking-wide text-amber-800/80">{{ panel.title }}</p>
@@ -125,13 +131,6 @@
       </div>
     </div>
 
-    <!-- Backdrop desktop dropdowns -->
-    <div
-      v-if="activeAccordion"
-      class="fixed inset-0 z-30 hidden md:block"
-      @click="activeAccordion = ''"
-    />
-
     <!-- Mobile bottom sheet -->
     <Teleport to="body">
       <div v-if="mobileOpen" class="md:hidden fixed inset-0 z-[60]">
@@ -204,7 +203,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import {
   foodTypes,
   regions,
@@ -225,6 +224,26 @@ const activeAccordion = ref('');
 const mobileOpen = ref(false);
 let debounceTimer = null;
 let syncingFromParent = false;
+
+function closeAccordion() {
+  activeAccordion.value = '';
+}
+
+function onDocumentPointerDown(event) {
+  if (!activeAccordion.value) return;
+  const openId = activeAccordion.value;
+  const panel = document.querySelector(`[data-filter-panel="${openId}"]`);
+  if (panel && panel.contains(event.target)) return;
+  closeAccordion();
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', onDocumentPointerDown, true);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+});
 
 const tipoComida = ref('');
 const ccaa = ref('');
@@ -327,7 +346,7 @@ function hasActiveFilters() {
 
 function selectRadio(panel, value) {
   panel.model.value = panel.model.value === value ? '' : value;
-  activeAccordion.value = '';
+  closeAccordion();
   scheduleSearch(0);
 }
 
