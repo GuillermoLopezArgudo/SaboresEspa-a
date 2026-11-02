@@ -157,25 +157,39 @@ const elementos = reactive({
 });
 const categorias = reactive([])
 
+function setCategories(list) {
+    categorias.splice(0, categorias.length, ...(list || []))
+}
+
 const props = defineProps({
     greeting: {
         type: String,
         required: true
     },
     idRecipe: {
-        type: String,
-        required: true
+        type: [Array, String],
+        default: () => [],
     }
 });
 
 watch(() => props.greeting, (newGreeting) => {
     if (newGreeting === "filtred") {
         filterRecipe()
-    } else if (props.greeting === "all") {
-        // Solicitar todas las recetas y datos relacionados
+    } else if (newGreeting === "all") {
         allRecipes()
     }
 })
+
+// Re-aplicar filtro si ya estamos en filtred y cambian los ids (sin tocar all)
+watch(
+    () => props.idRecipe,
+    () => {
+        if (props.greeting === "filtred") {
+            filterRecipe()
+        }
+    },
+    { deep: true }
+)
 
 function selectFavorites(favorites_list) {
 
@@ -209,9 +223,7 @@ function allRecipes() {
             elementos.recetas = response.data.recipes_list || [];
             selectFavorites(response.data.favorites_list || [])
             selectReviews(response.data.reviews_list || [])
-            ;(response.data.categories_list || []).forEach(element => {
-                categorias.push(element)
-            });
+            setCategories(response.data.categories_list)
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -230,9 +242,7 @@ function favoritesRecipes() {
             elementos.recetas = response.data.favorites_list || [];
             selectFavorites(response.data.favorites_list || [])
             selectReviews(response.data.reviews_list || [])
-            ;(response.data.categories_list || []).forEach(element => {
-                categorias.push(element)
-            });
+            setCategories(response.data.categories_list)
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);
@@ -247,12 +257,8 @@ function personalRecipes() {
     }
     axios.post(apiUrl('/viewRecipes'), {})
         .then(response => {
-            if (response.data.message && response.data.message.length > 0) {
-                elementos.recetas = response.data.message;
-                response.data.categories_list.forEach(element => {
-                    categorias.push(element)
-                });
-            }
+            elementos.recetas = response.data.message || [];
+            setCategories(response.data.categories_list)
         })
         .catch(error => {
             console.error("Error al obtener las recetas:", error);
@@ -263,8 +269,9 @@ function personalRecipes() {
 function filterRecipe() {
     const seen = new Set();
     const filtered = [];
+    const source = Array.isArray(props.idRecipe) ? props.idRecipe : [];
 
-    props.idRecipe.forEach(element => {
+    source.forEach(element => {
         const id = element["idrecipe"];
         if (!seen.has(id)) {
             seen.add(id);
@@ -276,6 +283,7 @@ function filterRecipe() {
             elementos.recetas = response.data.filtered_recipes || []
             selectFavorites(response.data.favorites_list || [])
             selectReviews(response.data.reviews_list || [])
+            setCategories(response.data.categories_list)
         })
         .catch(error => {
             console.error("Error en la solicitud:", error);

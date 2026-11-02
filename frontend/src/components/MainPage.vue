@@ -124,19 +124,17 @@ import { ref } from 'vue';
 import { logoutRequest } from '../api';
 
 const navbarOpen = ref(false);
-const idRecipe = ref('')
+const idRecipe = ref([])
 const greeting = ref("all")
 
 function recibirIdRecipe(mensaje) {
-  idRecipe.value = mensaje
-  greeting.value = "all";
-  setTimeout(() => {
-    greeting.value = "filtred";
-  }, 0);
+  idRecipe.value = Array.isArray(mensaje) ? mensaje : []
+  // Directo a filtred (sin pasar por all) evita carrera viewAll vs recipeFilter
+  greeting.value = "filtred";
 }
 
 const limpiarFiltros = () => {
-
+  idRecipe.value = []
   greeting.value = "all";
 }
 

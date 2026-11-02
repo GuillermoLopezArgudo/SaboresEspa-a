@@ -24,27 +24,49 @@ from app.services.files import save_base64_file
 users_bp = Blueprint("users", __name__)
 
 
-def _delete_user_cascade(iduser):
-    with db.atomic():
-        for recipe in Recipe.select().where(Recipe.id_user == iduser):
-            for step in RecipeStep.select().where(RecipeStep.id_recipe == recipe.id):
-                RecipeStepImage.delete().where(
-                    RecipeStepImage.id_step == step.id
-                ).execute()
-            RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
-            RecipeIngredient.delete().where(
-                RecipeIngredient.id_recipe == recipe.id
-            ).execute()
-            RecipeComment.delete().where(RecipeComment.id_recipe == recipe.id).execute()
-            RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
-            RecipeReview.delete().where(RecipeReview.id_recipe == recipe.id).execute()
-            UserFavorite.delete().where(UserFavorite.id_recipe == recipe.id).execute()
+def _reassign_child_to_recipe_owner(model, iduser):
+    """Filas de este usuario en recetas ajenas → dueño de la receta (limpia FKs admin-edit)."""
+    for row in list(model.select().where(model.id_user == iduser)):
+        recipe = Recipe.get_or_none(Recipe.id == row.id_recipe_id)
+        if recipe and recipe.id_user_id != iduser:
+            model.update(id_user=recipe.id_user_id).where(model.id == row.id).execute()
+        elif not recipe:
+            row.delete_instance()
 
-        StepImage.delete().where(StepImage.id_user == iduser).execute()
+
+def _delete_user_cascade(iduser):
+    from app.routes.recipes import _delete_recipe_cascade
+
+    with db.atomic():
+        # 1) Borrar recetas propias (cascade completo)
+        owned_ids = [
+            r.id for r in Recipe.select(Recipe.id).where(Recipe.id_user == iduser)
+        ]
+        for rid in owned_ids:
+            _delete_recipe_cascade(rid)
+
+        # 2) Reasignar restos en recetas ajenas (p.ej. admin editó y dejó id_user propio)
+        _reassign_child_to_recipe_owner(RecipeIngredient, iduser)
+        _reassign_child_to_recipe_owner(RecipeStep, iduser)
+        for img in list(StepImage.select().where(StepImage.id_user == iduser)):
+            # Vincular al dueño vía step → recipe si existe; si no, borrar
+            link = RecipeStepImage.get_or_none(RecipeStepImage.id_image == img.id)
+            if link:
+                step = RecipeStep.get_or_none(RecipeStep.id == link.id_step_id)
+                recipe = (
+                    Recipe.get_or_none(Recipe.id == step.id_recipe_id) if step else None
+                )
+                if recipe and recipe.id_user_id != iduser:
+                    StepImage.update(id_user=recipe.id_user_id).where(
+                        StepImage.id == img.id
+                    ).execute()
+                    continue
+            img.delete_instance()
+
+        # 3) Datos sociales del usuario
         UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
         RecipeComment.delete().where(RecipeComment.id_user == iduser).execute()
         RecipeReview.delete().where(RecipeReview.id_user == iduser).execute()
-        Recipe.delete().where(Recipe.id_user == iduser).execute()
         Users.delete().where(Users.id == iduser).execute()
 
 

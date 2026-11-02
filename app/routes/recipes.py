@@ -717,10 +717,13 @@ def edit_recipe(current_user):
         RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
         RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
 
+        # Siempre el dueño de la receta (no el admin editor) → evita FKs cruzadas al borrar usuarios
+        owner_id = recipe.id_user_id
+
         for i, ingredient in enumerate(ingredients):
             RecipeIngredient.create(
                 id_recipe=recipe.id,
-                id_user=current_user.id,
+                id_user=owner_id,
                 ingredients_text=ingredient,
                 quantity_unit=quantities[i] if i < len(quantities) else "",
                 created_at=date.today(),
@@ -730,7 +733,7 @@ def edit_recipe(current_user):
         for step, step_image_url in prepared_steps:
             recipe_step = RecipeStep.create(
                 id_recipe=recipe.id,
-                id_user=current_user.id,
+                id_user=owner_id,
                 step_title=step.get("title"),
                 step_description=_step_description(step),
                 created_at=date.today(),
@@ -738,7 +741,7 @@ def edit_recipe(current_user):
             )
             if step_image_url:
                 step_img = StepImage.create(
-                    id_user=current_user.id,
+                    id_user=owner_id,
                     step_image=step_image_url,
                     created_at=date.today(),
                     modified_at=date.today(),
@@ -814,6 +817,7 @@ def recipe_filter():
     )
     payload = {
         "filtered_recipes": [_recipe_dict(r) for r in filtereds],
+        "categories_list": _categories_for_recipes(filtereds),
         "favorites_list": [],
         "reviews_list": [],
     }
