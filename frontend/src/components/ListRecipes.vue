@@ -712,21 +712,21 @@ function averageStars({ force = false } = {}) {
 
 :global(html.dark) .list-search,
 :global(html.dark) .list-sort {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
   color: #fef3c7 !important;
 }
 :global(html.dark) .pager-btn {
-  background-color: #2a211c !important;
-  border-color: #5c4638 !important;
+  background-color: #3d3128 !important;
+  border-color: #6b5342 !important;
   color: #fef3c7 !important;
 }
 :global(html.dark) .pager-btn:hover:not(:disabled) {
-  background-color: #3d2e24 !important;
+  background-color: #4a3a2f !important;
 }
 :global(html.dark) .pager-btn-active {
   background-color: #d97706 !important;
   border-color: #d97706 !important;
-  color: #1c1410 !important;
+  color: #2b211a !important;
 }
 </style>
