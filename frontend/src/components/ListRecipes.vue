@@ -756,8 +756,8 @@ function averageStars({ force = false } = {}) {
       setAverageStarsCache(media)
       applyAverages(media)
     })
-    .catch((error) => {
-      console.error('Error en la solicitud:', error)
+    .catch(() => {
+      // No crítico: las cards muestran "—" si no hay medias
     })
 }
 </script>
