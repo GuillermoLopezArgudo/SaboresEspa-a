@@ -69,14 +69,30 @@ def _categories_for_recipes(recipes):
     ]
 
 
-def _recipe_dict(r):
+def _recipe_dict(r, author=""):
     return {
         "id": r.id,
         "title": r.recipe_title,
         "image": r.recipe_image,
         "description": r.recipe_description,
         "video": r.recipe_video,
+        "id_user": r.id_user_id,
+        "author": author or "",
     }
+
+
+def _recipes_as_dicts(recipes):
+    """Serializa recetas con nombre de autor en un solo query de usuarios."""
+    user_ids = {r.id_user_id for r in recipes if r.id_user_id}
+    names = {}
+    if user_ids:
+        names = {
+            u.id: u.user_name
+            for u in Users.select(Users.id, Users.user_name).where(
+                Users.id.in_(list(user_ids))
+            )
+        }
+    return [_recipe_dict(r, names.get(r.id_user_id, "")) for r in recipes]
 
 
 def _can_manage_recipe(user, recipe) -> bool:
@@ -284,7 +300,7 @@ def create_recipe(current_user):
 def view_personal_recipes(current_user):
     recipes = list(Recipe.select().where(Recipe.id_user == current_user.id))
     return jsonify(
-        message=[_recipe_dict(r) for r in recipes],
+        message=_recipes_as_dicts(recipes),
         categories_list=_categories_for_recipes(recipes),
     )
 
@@ -296,7 +312,7 @@ def view_all_recipes():
 
     recipes = list(Recipe.select().where(Recipe.recipe_visibility == True))  # noqa: E712
     payload = {
-        "recipes_list": [_recipe_dict(r) for r in recipes],
+        "recipes_list": _recipes_as_dicts(recipes),
         "categories_list": _categories_for_recipes(recipes),
         "favorites_list": [],
         "reviews_list": [],
@@ -414,6 +430,11 @@ def view_recipe():
     if not _can_view_recipe(viewer, recipe):
         return jsonify(message="No autorizado"), 403
 
+    author = ""
+    owner = Users.get_or_none(Users.id == recipe.id_user_id)
+    if owner:
+        author = owner.user_name or ""
+
     recipe_list = [
         {
             "title": recipe.recipe_title,
@@ -422,6 +443,7 @@ def view_recipe():
             "video": recipe.recipe_video,
             "id_user": recipe.id_user_id,
             "image": recipe.recipe_image,
+            "author": author,
         }
     ]
     ingredient_list = [
@@ -598,7 +620,7 @@ def view_favs(current_user):
     ]
     visible_ids = [r.id for r in recipes]
     return jsonify(
-        favorites_list=[_recipe_dict(r) for r in recipes],
+        favorites_list=_recipes_as_dicts(recipes),
         reviews_list=[
             {"id_recipe": r.id_recipe_id, "review": r.recipe_review_item_value}
             for r in RecipeReview.select().where(
@@ -830,7 +852,7 @@ def filter_recipe():
     message = [{"idrecipe": r.id} for r in recipes]
     payload = {
         "message": message,
-        "filtered_recipes": [_recipe_dict(r) for r in recipes],
+        "filtered_recipes": _recipes_as_dicts(recipes),
         "categories_list": _categories_for_recipes(recipes),
         "favorites_list": [],
         "reviews_list": [],
@@ -862,7 +884,7 @@ def recipe_filter():
         )
     )
     payload = {
-        "filtered_recipes": [_recipe_dict(r) for r in filtereds],
+        "filtered_recipes": _recipes_as_dicts(filtereds),
         "categories_list": _categories_for_recipes(filtereds),
         "favorites_list": [],
         "reviews_list": [],

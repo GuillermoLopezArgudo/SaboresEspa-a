@@ -41,6 +41,9 @@
 
             <div class="p-5">
                 <h3 class="text-xl font-bold text-amber-800 font-serif line-clamp-1">{{ item.title }}</h3>
+                <p v-if="item.author" class="mt-1 text-xs font-medium text-amber-800/70">
+                    Por {{ item.author }}
+                </p>
                 <p class="text-amber-600 text-sm mt-2 line-clamp-2">{{ item.description }}</p>
                 <div class="mt-4 pt-4 border-t border-amber-100" v-if="props.greeting != 'personal'">
                     <StarRating :rating="ratings[item.id] || 0" :onRatingChanged="ratingChanged(item.id)" />
