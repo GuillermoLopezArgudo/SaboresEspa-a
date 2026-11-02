@@ -12,7 +12,7 @@
       </router-link>
     </PageHero>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-6xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <div v-if="loading" class="text-center py-16">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600" />
         <p class="mt-4 text-amber-700">Cargando receta…</p>
@@ -102,7 +102,7 @@
         <!-- Ingredientes + pasos -->
         <section class="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <aside class="lg:col-span-2">
-            <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden sticky top-20">
+            <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden lg:sticky lg:top-20">
               <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
                 <h3 class="font-serif font-bold text-amber-950 text-lg">Ingredientes</h3>
               </div>

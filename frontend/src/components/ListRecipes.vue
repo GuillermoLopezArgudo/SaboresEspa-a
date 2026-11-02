@@ -47,14 +47,14 @@
     <!-- Skeleton -->
     <div
       v-if="loading && !elementos.recetas.length"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
     >
       <div
         v-for="n in 6"
         :key="'sk-' + n"
         class="rounded-2xl overflow-hidden border border-amber-100 bg-white animate-pulse"
       >
-        <div class="h-52 bg-amber-100" />
+        <div class="h-44 sm:h-52 bg-amber-100" />
         <div class="p-5 space-y-3">
           <div class="h-5 bg-amber-100 rounded w-3/4" />
           <div class="h-3 bg-amber-50 rounded w-1/3" />
@@ -67,7 +67,7 @@
     <!-- Listado -->
     <div
       v-else-if="visibleRecipes.length > 0"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
     >
       <article
         v-for="item in visibleRecipes"
@@ -103,20 +103,20 @@
             v-if="item.image"
             :src="mediaUrl(item.image)"
             :alt="item.title"
-            class="w-full h-52 object-cover transition duration-500 group-hover:scale-105"
+            class="w-full h-44 sm:h-52 object-cover transition duration-500 group-hover:scale-105"
             loading="lazy"
             decoding="async"
           />
           <div
             v-else
-            class="h-52 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-700/70"
+            class="h-44 sm:h-52 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-700/70"
           >
             <span class="font-serif text-lg">Sin imagen</span>
           </div>
         </div>
 
-        <div class="flex flex-1 flex-col p-5">
-          <h3 class="text-xl font-bold text-amber-950 font-serif line-clamp-1 group-hover:text-amber-800 transition">
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <h3 class="text-lg sm:text-xl font-bold text-amber-950 font-serif line-clamp-1 group-hover:text-amber-800 transition">
             {{ item.title }}
           </h3>
           <p class="mt-1 text-sm font-medium text-amber-800/75">

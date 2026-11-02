@@ -12,12 +12,12 @@
       </router-link>
     </PageHero>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <form @submit.prevent="submitRecipe" class="space-y-5">
+    <div class="max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <form @submit.prevent="submitRecipe" class="space-y-4 sm:space-y-5">
       <!-- Sección de información básica -->
       <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50 flex items-center justify-between gap-3">
-          <h2 class="font-serif text-xl font-bold text-amber-950">Información básica</h2>
+        <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50 flex items-center justify-between gap-3">
+          <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Información básica</h2>
           <button
             type="button"
             class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
@@ -29,7 +29,7 @@
             {{ showBasicInfo ? 'Pública' : 'Oculta' }}
           </button>
         </div>
-        <div class="p-6 sm:p-8">
+        <div class="p-4 sm:p-6 md:p-8">
         <!-- Título de la receta -->
         <div class="mb-6">
           <label for="titleRecipe" class="block text-sm font-medium text-amber-900 mb-1.5">Nombre de la receta*</label>
@@ -91,13 +91,13 @@
 
       <!-- Sección de ingredientes -->
       <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
-          <h2 class="font-serif text-xl font-bold text-amber-950">Ingredientes</h2>
+        <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Ingredientes</h2>
         </div>
-        <div class="p-6 sm:p-8">
+        <div class="p-4 sm:p-6 md:p-8">
 
-        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid md:grid-cols-12 gap-4 mb-4">
-          <div class="md:col-span-5">
+        <div v-for="(ingredient, index) in recipebook.ingredients" :key="index" class="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 mb-4">
+          <div class="sm:col-span-5">
             <label :for="'ingredient' + index" class="block text-sm font-medium text-amber-700 mb-1">Ingrediente {{
               index + 1 }}</label>
             <div class="flex">
@@ -114,15 +114,13 @@
               </button>
             </div>
           </div>
-          <div class="md:col-span-5">
+          <div class="sm:col-span-5">
             <label :for="'quantity' + index" class="block text-sm font-medium text-amber-700 mb-1">Cantidad</label>
             <input :id="'quantity' + index" v-model="recipebook.quantities[index]" required
               class="w-full px-4 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-amber-400 shadow-sm"
               placeholder="Ej: 300 gramos">
           </div>
-          <div class="md:col-span-2 flex items-end">
-            <!-- Espacio para alinear correctamente -->
-          </div>
+          <div class="hidden sm:block sm:col-span-2" />
         </div>
 
         <button type="button" @click.prevent="moreIngredients"
@@ -134,12 +132,12 @@
 
       <!-- Sección de pasos -->
       <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
-          <h2 class="font-serif text-xl font-bold text-amber-950">Pasos de preparación</h2>
+        <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Pasos de preparación</h2>
         </div>
-        <div class="p-6 sm:p-8">
+        <div class="p-4 sm:p-6 md:p-8">
         <div v-for="(step, index) in recipebook.steps" :key="index"
-          class="mb-5 p-5 bg-amber-50/60 rounded-xl border border-amber-200 relative">
+          class="mb-5 p-4 sm:p-5 bg-amber-50/60 rounded-xl border border-amber-200 relative">
           <button @click.prevent="removeStep(index)"
             class="absolute top-2 right-2 p-1 text-red-600 hover:text-red-800 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -196,11 +194,11 @@
 
       <!-- Sección de Filtros -->
       <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
-          <h2 class="font-serif text-xl font-bold text-amber-950">Categorías</h2>
+        <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Categorías</h2>
           <p class="text-sm text-amber-800/70 mt-0.5">Ayudan a encontrar tu receta en el recetario</p>
         </div>
-        <div class="p-6 sm:p-8 space-y-4">
+        <div class="p-4 sm:p-6 md:p-8 space-y-4">
           <!-- Tipo de comida -->
           <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
             <button type="button" @click="toggleAccordion('foodType')"

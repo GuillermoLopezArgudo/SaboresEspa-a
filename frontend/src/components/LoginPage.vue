@@ -12,14 +12,14 @@
       </router-link>
     </PageHero>
 
-    <div class="max-w-md mx-auto px-4 sm:px-6 py-10">
+    <div class="max-w-md mx-auto px-3 xs:px-4 sm:px-6 py-8 sm:py-10">
       <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+        <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
           <p class="font-serif font-bold text-amber-950 text-lg">Tu cuenta</p>
           <p class="text-sm text-amber-800/70">Usa el email con el que te registraste</p>
         </div>
 
-        <form class="p-6 sm:p-8 space-y-5" @submit.prevent="OnSubmit">
+        <form class="p-4 sm:p-6 md:p-8 space-y-5" @submit.prevent="OnSubmit">
           <div
             v-if="error"
             class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
