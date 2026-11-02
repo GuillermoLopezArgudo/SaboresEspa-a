@@ -1,165 +1,233 @@
 <template>
-  <div class="w-full bg-white rounded-xl shadow-sm border border-amber-200 p-4">
-    <div class="flex flex-wrap gap-4">
-      <!-- Filtro Tipo de Comida -->
-      <div class="relative">
-        <button 
-          @click="toggleAccordion('tipoComida')"
-          class="flex items-center px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-colors"
-          :class="{ 'bg-amber-100': activeAccordion === 'tipoComida' }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-          </svg>
-          Tipo
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform" 
-               :class="{ 'rotate-180': activeAccordion === 'tipoComida' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div class="absolute z-10 mt-1 w-56 bg-white rounded-md shadow-lg border border-amber-200 transition-all duration-200 origin-top"
-             :class="activeAccordion === 'tipoComida' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
-          <div class="p-2 space-y-1">
-            <label v-for="type in foodTypes" :key="type.value" class="flex items-center px-3 py-2 hover:bg-amber-50 rounded cursor-pointer">
-              <input type="radio" name="tipoComida" :value="type.value" v-model="tipoComida" class="text-amber-600 focus:ring-amber-500">
-              <span class="ml-2 text-sm text-amber-800">{{ type.label }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filtro CCAA -->
-      <div class="relative">
-        <button 
-          @click="toggleAccordion('ccaa')"
-          class="flex items-center px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-colors"
-          :class="{ 'bg-amber-100': activeAccordion === 'ccaa' }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Región
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform" 
-               :class="{ 'rotate-180': activeAccordion === 'ccaa' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div class="absolute z-10 mt-1 w-56 bg-white rounded-md shadow-lg border border-amber-200 max-h-96 overflow-y-auto transition-all duration-200 origin-top"
-             :class="activeAccordion === 'ccaa' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
-          <div class="p-2 space-y-1">
-            <label v-for="region in regions" :key="region.value" class="flex items-center px-3 py-2 hover:bg-amber-50 rounded cursor-pointer">
-              <input type="radio" name="ccaa" :value="region.value" v-model="ccaa" class="text-amber-600 focus:ring-amber-500">
-              <span class="ml-2 text-sm text-amber-800">{{ region.label }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filtro Proteínas -->
-      <div class="relative">
-        <button 
-          @click="toggleAccordion('proteinas')"
-          class="flex items-center px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-colors"
-          :class="{ 'bg-amber-100': activeAccordion === 'proteinas' }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Proteínas
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform" 
-               :class="{ 'rotate-180': activeAccordion === 'proteinas' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div class="absolute z-10 mt-1 w-56 bg-white rounded-md shadow-lg border border-amber-200 transition-all duration-200 origin-top"
-             :class="activeAccordion === 'proteinas' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
-          <div class="p-2 space-y-1">
-            <label v-for="protein in proteins" :key="protein.value" class="flex items-center px-3 py-2 hover:bg-amber-50 rounded cursor-pointer">
-              <input type="checkbox" :value="protein.value" v-model="proteinas" class="text-amber-600 focus:ring-amber-500 rounded">
-              <span class="ml-2 text-sm text-amber-800">{{ protein.label }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filtro Tiempo -->
-      <div class="relative">
-        <button 
-          @click="toggleAccordion('tiempo')"
-          class="flex items-center px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-colors"
-          :class="{ 'bg-amber-100': activeAccordion === 'tiempo' }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Tiempo
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform" 
-               :class="{ 'rotate-180': activeAccordion === 'tiempo' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div class="absolute z-10 mt-1 w-56 bg-white rounded-md shadow-lg border border-amber-200 transition-all duration-200 origin-top"
-             :class="activeAccordion === 'tiempo' ? 'scale-y-100 opacity-100' : 'scale-y-95 opacity-0 pointer-events-none'">
-          <div class="p-2 space-y-1">
-            <label v-for="time in prepTimes" :key="time.value" class="flex items-center px-3 py-2 hover:bg-amber-50 rounded cursor-pointer">
-              <input type="radio" name="tiempo" :value="time.value" v-model="tiempo" class="text-amber-600 focus:ring-amber-500">
-              <span class="ml-2 text-sm text-amber-800">{{ time.label }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="flex items-center gap-2 ml-auto">
-        <button @click="limpiarFiltros" class="px-3 py-2 text-amber-700 hover:text-amber-900 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Limpiar
-        </button>
-        <button @click="buscarFiltros" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Buscar
-        </button>
-      </div>
-    </div>
-
-    <!-- Filtros seleccionados (chips) -->
-    <div class="mt-3 flex flex-wrap gap-2" v-if="filtrosSeleccionados.length > 0">
-      <div v-for="(filtro, index) in filtrosSeleccionados" :key="index" 
-           class="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm">
-        {{ filtro.label }}: {{ filtro.value }}
-        <button @click="eliminarFiltro(filtro)" class="ml-2 text-amber-600 hover:text-amber-800">
+  <div class="sticky top-16 z-40 border-b border-amber-200/80 bg-amber-50/95 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <!-- Barra principal -->
+      <div class="flex items-center gap-2">
+        <div class="hidden sm:flex items-center gap-1.5 text-amber-900/70 shrink-0 pr-2 border-r border-amber-200">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
+          <span class="text-xs font-semibold tracking-wide uppercase">Filtrar</span>
+        </div>
+
+        <!-- Triggers desktop / tablet -->
+        <div class="hidden md:flex flex-1 flex-wrap items-center gap-2 min-w-0">
+          <div v-for="panel in panels" :key="panel.id" class="relative">
+            <button
+              type="button"
+              @click="toggleAccordion(panel.id)"
+              class="group inline-flex items-center gap-1.5 max-w-[14rem] px-3 py-2 rounded-full text-sm font-medium border transition"
+              :class="triggerClass(panel)"
+            >
+              <span class="truncate">{{ triggerLabel(panel) }}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-3.5 w-3.5 shrink-0 opacity-70 transition-transform"
+                :class="{ 'rotate-180': activeAccordion === panel.id }"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <div
+              v-show="activeAccordion === panel.id"
+              class="absolute left-0 top-full mt-2 z-50 w-64 rounded-2xl border border-amber-200 bg-white shadow-xl shadow-amber-900/10 overflow-hidden"
+            >
+              <div class="px-3 py-2 border-b border-amber-100 bg-amber-50/80">
+                <p class="text-xs font-semibold uppercase tracking-wide text-amber-800/80">{{ panel.title }}</p>
+              </div>
+              <div class="max-h-72 overflow-y-auto p-2 filter-scroll">
+                <template v-if="panel.mode === 'radio'">
+                  <button
+                    v-for="opt in panel.options"
+                    :key="opt.value"
+                    type="button"
+                    class="w-full text-left px-3 py-2.5 rounded-xl text-sm transition flex items-center justify-between gap-2"
+                    :class="panel.model.value === opt.value
+                      ? 'bg-amber-700 text-white'
+                      : 'text-amber-900 hover:bg-amber-50'"
+                    @click="selectRadio(panel, opt.value)"
+                  >
+                    <span>
+                      {{ opt.label }}
+                      <span v-if="opt.description" class="block text-xs opacity-70">{{ opt.description }}</span>
+                    </span>
+                    <span v-if="panel.model.value === opt.value" class="text-xs">✓</span>
+                  </button>
+                </template>
+                <template v-else>
+                  <button
+                    v-for="opt in panel.options"
+                    :key="opt.value"
+                    type="button"
+                    class="w-full text-left px-3 py-2.5 rounded-xl text-sm transition flex items-center justify-between gap-2"
+                    :class="panel.model.value.includes(opt.value)
+                      ? 'bg-amber-700 text-white'
+                      : 'text-amber-900 hover:bg-amber-50'"
+                    @click="toggleCheck(panel, opt.value)"
+                  >
+                    <span>{{ opt.label }}</span>
+                    <span v-if="panel.model.value.includes(opt.value)" class="text-xs">✓</span>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón móvil: abre sheet -->
+        <button
+          type="button"
+          class="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-full border border-amber-300 bg-white text-amber-900 text-sm font-medium shadow-sm"
+          @click="mobileOpen = true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros
+          <span
+            v-if="filtrosSeleccionados.length"
+            class="min-w-[1.25rem] h-5 px-1 rounded-full bg-amber-700 text-white text-xs flex items-center justify-center"
+          >
+            {{ filtrosSeleccionados.length }}
+          </span>
+        </button>
+
+        <div class="ml-auto flex items-center gap-2 shrink-0">
+          <button
+            v-if="filtrosSeleccionados.length"
+            type="button"
+            class="hidden sm:inline-flex px-3 py-2 text-sm text-amber-800/80 hover:text-amber-950"
+            @click="limpiarFiltros"
+          >
+            Limpiar
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-sm font-semibold shadow-sm transition disabled:opacity-60"
+            :disabled="searching"
+            @click="buscarFiltros"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {{ searching ? 'Buscando…' : 'Buscar' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Chips activos -->
+      <div v-if="filtrosSeleccionados.length" class="mt-2.5 flex flex-wrap gap-1.5">
+        <button
+          v-for="(filtro, index) in filtrosSeleccionados"
+          :key="index"
+          type="button"
+          class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-white border border-amber-200 text-amber-900 text-xs font-medium shadow-sm hover:border-amber-400 transition"
+          @click="eliminarFiltro(filtro)"
+          :title="'Quitar ' + filtro.value"
+        >
+          <span class="text-amber-600/80">{{ filtro.label }}</span>
+          <span>{{ filtro.value }}</span>
+          <span class="inline-flex h-5 w-5 items-center justify-center rounded-full hover:bg-amber-100 text-amber-700">×</span>
         </button>
       </div>
     </div>
+
+    <!-- Backdrop desktop dropdowns -->
+    <div
+      v-if="activeAccordion"
+      class="fixed inset-0 z-30 hidden md:block"
+      @click="activeAccordion = ''"
+    />
+
+    <!-- Mobile bottom sheet -->
+    <Teleport to="body">
+      <div v-if="mobileOpen" class="md:hidden fixed inset-0 z-[60]">
+        <div class="absolute inset-0 bg-stone-900/40" @click="mobileOpen = false" />
+        <div class="absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-3xl bg-amber-50 shadow-2xl flex flex-col overflow-hidden animate-sheet">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-amber-200">
+            <div>
+              <p class="text-lg font-semibold text-amber-950 font-serif">Filtros</p>
+              <p class="text-xs text-amber-800/70">Afiná el recetario a tu gusto</p>
+            </div>
+            <button type="button" class="h-9 w-9 rounded-full bg-white border border-amber-200 text-amber-900" @click="mobileOpen = false">×</button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4 filter-scroll">
+            <section v-for="panel in panels" :key="'m-' + panel.id" class="rounded-2xl bg-white border border-amber-100 p-3">
+              <h3 class="text-xs font-semibold uppercase tracking-wide text-amber-800/70 mb-2">{{ panel.title }}</h3>
+              <div class="flex flex-wrap gap-2">
+                <template v-if="panel.mode === 'radio'">
+                  <button
+                    v-for="opt in panel.options"
+                    :key="'m-' + opt.value"
+                    type="button"
+                    class="px-3 py-1.5 rounded-full text-sm border transition"
+                    :class="panel.model.value === opt.value
+                      ? 'bg-amber-800 text-white border-amber-800'
+                      : 'bg-amber-50 text-amber-900 border-amber-200'"
+                    @click="selectRadio(panel, opt.value)"
+                  >
+                    {{ opt.label }}
+                  </button>
+                </template>
+                <template v-else>
+                  <button
+                    v-for="opt in panel.options"
+                    :key="'m-' + opt.value"
+                    type="button"
+                    class="px-3 py-1.5 rounded-full text-sm border transition"
+                    :class="panel.model.value.includes(opt.value)
+                      ? 'bg-amber-800 text-white border-amber-800'
+                      : 'bg-amber-50 text-amber-900 border-amber-200'"
+                    @click="toggleCheck(panel, opt.value)"
+                  >
+                    {{ opt.label }}
+                  </button>
+                </template>
+              </div>
+            </section>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 p-4 border-t border-amber-200 bg-white">
+            <button type="button" class="py-3 rounded-xl border border-amber-300 text-amber-900 font-medium" @click="limpiarFiltros">
+              Limpiar
+            </button>
+            <button
+              type="button"
+              class="py-3 rounded-xl bg-amber-800 text-white font-semibold disabled:opacity-60"
+              :disabled="searching"
+              @click="buscarYCerrarMovil"
+            >
+              {{ searching ? 'Buscando…' : 'Aplicar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed,defineEmits } from 'vue';
+import { computed, ref } from 'vue';
 import axios from 'axios';
 import { apiUrl } from '../api';
 
-const emit = defineEmits(['enviarIdRecipe'])
+const emit = defineEmits(['enviarIdRecipe', 'limpiarFiltros']);
 
 const activeAccordion = ref('');
-
-const toggleAccordion = (section) => {
-  activeAccordion.value = activeAccordion.value === section ? '' : section;
-};
+const mobileOpen = ref(false);
+const searching = ref(false);
+let searchGen = 0;
 
 const tipoComida = ref('');
 const ccaa = ref('');
 const tiempo = ref('');
 const proteinas = ref([]);
 
-// Datos para los filtros
 const foodTypes = [
   { value: 'starters', label: 'Entrantes' },
   { value: 'maindishes', label: 'Platos principales' },
@@ -168,7 +236,7 @@ const foodTypes = [
   { value: 'soups', label: 'Sopas' },
   { value: 'salads', label: 'Ensaladas' },
   { value: 'sauces', label: 'Salsas' },
-  { value: 'breads', label: 'Panes y masas' }
+  { value: 'breads', label: 'Panes y masas' },
 ];
 
 const regions = [
@@ -188,7 +256,7 @@ const regions = [
   { value: 'madrid', label: 'Madrid' },
   { value: 'murcia', label: 'Murcia' },
   { value: 'navarra', label: 'Navarra' },
-  { value: 'paisvasco', label: 'País Vasco' }
+  { value: 'paisvasco', label: 'País Vasco' },
 ];
 
 const proteins = [
@@ -208,41 +276,43 @@ const proteins = [
   { value: 'calamar', label: 'Calamar / Sepia' },
   { value: 'huevo', label: 'Huevo' },
   { value: 'queso', label: 'Queso' },
-  { value: 'legumbres', label: 'Legumbres (lentejas, garbanzos)' },
-  { value: 'setas', label: 'Setas / Champiñones' },
+  { value: 'legumbres', label: 'Legumbres' },
+  { value: 'setas', label: 'Setas' },
   { value: 'vegetariana', label: 'Vegetariana' },
   { value: 'vegana', label: 'Vegana' },
 ];
 
 const prepTimes = [
-  { value: 'menos15', label: 'Rápida', description: '<15 minutos' },
-  { value: '15a30', label: 'Media', description: '15-30 minutos' },
-  { value: '30a60', label: 'Lenta', description: '30-60 minutos' },
-  { value: 'mas60', label: 'Muy lenta', description: '>1 hora' }
+  { value: 'menos15', label: 'Rápida', description: '<15 min' },
+  { value: '15a30', label: 'Media', description: '15–30 min' },
+  { value: '30a60', label: 'Lenta', description: '30–60 min' },
+  { value: 'mas60', label: 'Muy lenta', description: '>1 h' },
 ];
 
-// Computed para mostrar los filtros seleccionados
+const panels = computed(() => [
+  { id: 'tipoComida', title: 'Tipo de plato', mode: 'radio', model: tipoComida, options: foodTypes, placeholder: 'Tipo' },
+  { id: 'ccaa', title: 'Región', mode: 'radio', model: ccaa, options: regions, placeholder: 'Región' },
+  { id: 'proteinas', title: 'Proteína', mode: 'check', model: proteinas, options: proteins, placeholder: 'Proteína' },
+  { id: 'tiempo', title: 'Tiempo', mode: 'radio', model: tiempo, options: prepTimes, placeholder: 'Tiempo' },
+]);
+
 const filtrosSeleccionados = computed(() => {
   const seleccionados = [];
-  
   if (tipoComida.value) {
-    const tipo = foodTypes.find(t => t.value === tipoComida.value);
+    const tipo = foodTypes.find((t) => t.value === tipoComida.value);
     if (tipo) seleccionados.push({ category: 'tipo', label: 'Tipo', value: tipo.label });
   }
-  
   if (ccaa.value) {
-    const region = regions.find(r => r.value === ccaa.value);
+    const region = regions.find((r) => r.value === ccaa.value);
     if (region) seleccionados.push({ category: 'ccaa', label: 'Región', value: region.label });
   }
-  
   if (tiempo.value) {
-    const tiempoSel = prepTimes.find(t => t.value === tiempo.value);
+    const tiempoSel = prepTimes.find((t) => t.value === tiempo.value);
     if (tiempoSel) seleccionados.push({ category: 'tiempo', label: 'Tiempo', value: tiempoSel.label });
   }
-  
-  if (Array.isArray(proteinas.value) && proteinas.value.length > 0) {
-    proteinas.value.forEach(p => {
-      const proteina = proteins.find(pro => pro.value === p);
+  if (Array.isArray(proteinas.value) && proteinas.value.length) {
+    proteinas.value.forEach((p) => {
+      const proteina = proteins.find((pro) => pro.value === p);
       if (proteina) {
         seleccionados.push({
           category: 'proteinas',
@@ -253,12 +323,53 @@ const filtrosSeleccionados = computed(() => {
       }
     });
   }
-  
   return seleccionados;
 });
 
-const eliminarFiltro = (filtro) => {
-  switch(filtro.category) {
+function triggerLabel(panel) {
+  if (panel.mode === 'radio') {
+    if (!panel.model.value) return panel.placeholder;
+    return panel.options.find((o) => o.value === panel.model.value)?.label || panel.placeholder;
+  }
+  if (!panel.model.value.length) return panel.placeholder;
+  if (panel.model.value.length === 1) {
+    return panel.options.find((o) => o.value === panel.model.value[0])?.label || panel.placeholder;
+  }
+  return `${panel.placeholder} · ${panel.model.value.length}`;
+}
+
+function triggerClass(panel) {
+  const active =
+    panel.mode === 'radio' ? Boolean(panel.model.value) : panel.model.value.length > 0;
+  const open = activeAccordion.value === panel.id;
+  if (active) {
+    return 'bg-amber-800 text-white border-amber-800 shadow-sm';
+  }
+  if (open) {
+    return 'bg-white text-amber-900 border-amber-400 shadow-sm';
+  }
+  return 'bg-white/80 text-amber-900 border-amber-200 hover:border-amber-400';
+}
+
+function toggleAccordion(section) {
+  activeAccordion.value = activeAccordion.value === section ? '' : section;
+}
+
+function selectRadio(panel, value) {
+  panel.model.value = panel.model.value === value ? '' : value;
+  activeAccordion.value = '';
+}
+
+function toggleCheck(panel, value) {
+  const list = [...panel.model.value];
+  const idx = list.indexOf(value);
+  if (idx >= 0) list.splice(idx, 1);
+  else list.push(value);
+  panel.model.value = list;
+}
+
+function eliminarFiltro(filtro) {
+  switch (filtro.category) {
     case 'tipo':
       tipoComida.value = '';
       break;
@@ -269,82 +380,74 @@ const eliminarFiltro = (filtro) => {
       tiempo.value = '';
       break;
     case 'proteinas':
-      proteinas.value = proteinas.value.filter(p => p !== (filtro.key || filtro.value));
+      proteinas.value = proteinas.value.filter((p) => p !== (filtro.key || filtro.value));
       break;
   }
-};
+}
 
-let searchGen = 0
-
-const limpiarFiltros = () => {
-  searchGen += 1  // invalida /filterRecipe en vuelo
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.checked = false;
-  });
-  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.checked = false;
-  });
+function limpiarFiltros() {
+  searchGen += 1;
+  searching.value = false;
   tipoComida.value = '';
   ccaa.value = '';
   tiempo.value = '';
   proteinas.value = [];
+  activeAccordion.value = '';
   emit('limpiarFiltros');
-};
+}
 
-const buscarFiltros = () => {
+function buscarFiltros() {
   const payload = {
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
     time: tiempo.value,
     proteins: proteinas.value,
-  }
-  const gen = ++searchGen
-  axios.post(apiUrl('/filterRecipe'), payload)
-    .then(response => {
-      if (gen !== searchGen) return
-      emit('enviarIdRecipe', response.data.message || [])
+  };
+  const gen = ++searchGen;
+  searching.value = true;
+  activeAccordion.value = '';
+  axios
+    .post(apiUrl('/filterRecipe'), payload)
+    .then((response) => {
+      if (gen !== searchGen) return;
+      emit('enviarIdRecipe', response.data.message || []);
     })
-    .catch(error => {
-      if (gen !== searchGen) return
+    .catch((error) => {
+      if (gen !== searchGen) return;
       alert(error.response?.data?.message || 'No se pudieron aplicar los filtros');
+    })
+    .finally(() => {
+      if (gen === searchGen) searching.value = false;
     });
-} 
+}
+
+function buscarYCerrarMovil() {
+  buscarFiltros();
+  mobileOpen.value = false;
+}
 </script>
 
 <style scoped>
-/* Transiciones suaves */
-.absolute {
-  transition: all 0.2s ease-out;
-  transform-origin: top center;
-}
-
-/* Scroll personalizado */
-.max-h-96::-webkit-scrollbar {
+.filter-scroll::-webkit-scrollbar {
   width: 6px;
 }
-
-.max-h-96::-webkit-scrollbar-track {
-  background: #fffbeb;
+.filter-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.filter-scroll::-webkit-scrollbar-thumb {
+  background-color: #d97706;
+  border-radius: 999px;
 }
 
-.max-h-96::-webkit-scrollbar-thumb {
-  background-color: #f59e0b;
-  border-radius: 3px;
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
-
-/* Efecto hover para los botones de filtro */
-button:hover {
-  transform: translateY(-1px);
-  transition: all 0.2s ease;
-}
-
-/* Animación para los chips de filtros */
-.inline-flex {
-  transition: all 0.2s ease;
-}
-
-.inline-flex:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.animate-sheet {
+  animation: sheet-up 0.28s ease-out;
 }
 </style>
