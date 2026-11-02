@@ -161,6 +161,9 @@ function setCategories(list) {
     categorias.splice(0, categorias.length, ...(list || []))
 }
 
+/** Ignora respuestas obsoletas si el usuario cambió de modo / re-filtró. */
+let loadGen = 0
+
 const props = defineProps({
     greeting: {
         type: String,
@@ -192,15 +195,16 @@ watch(
 )
 
 function selectFavorites(favorites_list) {
-
-    favorites_list.forEach(recipe => {
+    Object.keys(favoritos).forEach((k) => { delete favoritos[k] })
+    ;(favorites_list || []).forEach(recipe => {
         const recipeId = recipe.id_recipe || recipe.id;
         favoritos[recipeId] = true;
     });
 }
 
 function selectReviews(reviews_list) {
-    reviews_list.forEach(recipe => {
+    Object.keys(ratings).forEach((k) => { delete ratings[k] })
+    ;(reviews_list || []).forEach(recipe => {
         ratings[recipe.id_recipe] = recipe.review;
     });
 }
@@ -218,14 +222,17 @@ onMounted(() => {
 
 
 function allRecipes() {
+    const gen = ++loadGen
     axios.post(apiUrl('/viewAll'), {})
         .then(response => {
+            if (gen !== loadGen) return
             elementos.recetas = response.data.recipes_list || [];
             selectFavorites(response.data.favorites_list || [])
             selectReviews(response.data.reviews_list || [])
             setCategories(response.data.categories_list)
         })
         .catch(error => {
+            if (gen !== loadGen) return
             console.error("Error en la solicitud:", error);
             alert(error.response?.data?.message || 'No se pudieron cargar las recetas');
         });
@@ -236,15 +243,18 @@ function favoritesRecipes() {
         router.push({ name: "login" });
         return;
     }
+    const gen = ++loadGen
     axios
         .post(apiUrl('/viewFavs'), {})
         .then(response => {
+            if (gen !== loadGen) return
             elementos.recetas = response.data.favorites_list || [];
             selectFavorites(response.data.favorites_list || [])
             selectReviews(response.data.reviews_list || [])
             setCategories(response.data.categories_list)
         })
         .catch(error => {
+            if (gen !== loadGen) return
             console.error("Error en la solicitud:", error);
             alert(error.response?.data?.message || 'No se pudieron cargar favoritos');
         });
@@ -255,12 +265,15 @@ function personalRecipes() {
         router.push({ name: "login" });
         return;
     }
+    const gen = ++loadGen
     axios.post(apiUrl('/viewRecipes'), {})
         .then(response => {
+            if (gen !== loadGen) return
             elementos.recetas = response.data.message || [];
             setCategories(response.data.categories_list)
         })
         .catch(error => {
+            if (gen !== loadGen) return
             console.error("Error al obtener las recetas:", error);
             alert(error.response?.data?.message || 'No se pudieron cargar tus recetas');
         });
@@ -278,14 +291,17 @@ function filterRecipe() {
             filtered.push(element);
         }
     });
+    const gen = ++loadGen
     axios.post(apiUrl('/recipeFilter'), { filtered, iduser })
         .then(response => {
+            if (gen !== loadGen) return
             elementos.recetas = response.data.filtered_recipes || []
             selectFavorites(response.data.favorites_list || [])
             selectReviews(response.data.reviews_list || [])
             setCategories(response.data.categories_list)
         })
         .catch(error => {
+            if (gen !== loadGen) return
             console.error("Error en la solicitud:", error);
             alert(error.response?.data?.message || 'No se pudieron filtrar las recetas');
         });

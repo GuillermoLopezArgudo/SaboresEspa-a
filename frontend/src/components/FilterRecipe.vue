@@ -274,7 +274,10 @@ const eliminarFiltro = (filtro) => {
   }
 };
 
+let searchGen = 0
+
 const limpiarFiltros = () => {
+  searchGen += 1  // invalida /filterRecipe en vuelo
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.checked = false;
   });
@@ -295,12 +298,14 @@ const buscarFiltros = () => {
     time: tiempo.value,
     proteins: proteinas.value,
   }
-  
+  const gen = ++searchGen
   axios.post(apiUrl('/filterRecipe'), payload)
     .then(response => {
+      if (gen !== searchGen) return
       emit('enviarIdRecipe', response.data.message || [])
     })
     .catch(error => {
+      if (gen !== searchGen) return
       alert(error.response?.data?.message || 'No se pudieron aplicar los filtros');
     });
 } 

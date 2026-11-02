@@ -28,8 +28,18 @@ axios.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       const reqUrl = String(error.config?.url || '')
-      // Fallos de validación de credenciales ≠ sesión inválida
-      if (/\/changePassword(\/|$|\?)/i.test(reqUrl)) {
+      const headers = error.config?.headers || {}
+      const sentAuth = Boolean(
+        headers.Authorization || headers.authorization
+      )
+      // Solo cerrar sesión si HABÍAMOS enviado Bearer (Mercadona/skipAuth no cuenta)
+      // y no es validación de credenciales / rotación de token en curso
+      const ignoreLogout =
+        !sentAuth ||
+        /\/(changePassword|changeEmail|categories|productos|searchIngredient|health)(\/|$|\?)/i.test(
+          reqUrl
+        )
+      if (ignoreLogout) {
         return Promise.reject(error)
       }
       const path = window.location.pathname

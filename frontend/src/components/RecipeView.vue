@@ -268,6 +268,7 @@ import { apiUrl, mediaUrl } from '../api';
           })
           .catch(error => {
               alert(error.response?.data?.message || 'No se pudo cargar la receta');
+              router.push({ name: 'landing' });
           });
   });
   

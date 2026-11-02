@@ -7,7 +7,13 @@ from peewee import IntegrityError
 from app.config import Config
 from app.models import Users
 from app.rate_limit import rate_limit
-from app.security import hash_password, is_valid_email, login_required, verify_password
+from app.security import (
+    MAX_NAME_LEN,
+    hash_password,
+    is_valid_email,
+    login_required,
+    verify_password,
+)
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -22,6 +28,8 @@ def register():
 
     if not name or not email or not password:
         return jsonify(message="Datos incompletos"), 400
+    if len(name) > MAX_NAME_LEN:
+        return jsonify(message=f"Nombre demasiado largo (máx. {MAX_NAME_LEN})"), 400
     if not is_valid_email(email):
         return jsonify(message="Email no válido"), 400
     if len(password) < 8:

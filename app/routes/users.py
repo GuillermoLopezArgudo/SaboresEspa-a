@@ -120,10 +120,14 @@ def change_image(current_user):
 @users_bp.post("/changeName")
 @login_required
 def change_name(current_user):
+    from app.security import MAX_NAME_LEN
+
     data = request.get_json() or {}
     name = (data.get("name") or "").strip()
     if not name:
         return jsonify(message="Nombre vacío"), 400
+    if len(name) > MAX_NAME_LEN:
+        return jsonify(message=f"Nombre demasiado largo (máx. {MAX_NAME_LEN})"), 400
     Users.update(user_name=name, modified_at=date.today()).where(
         Users.id == current_user.id
     ).execute()
