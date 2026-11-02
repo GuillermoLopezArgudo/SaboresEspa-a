@@ -10,9 +10,28 @@
     </PageHero>
 
     <div class="max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-    <form @submit.prevent="submitRecipe" class="space-y-4 sm:space-y-5">
+    <!-- Wizard steps (móvil / tablet) -->
+    <nav class="mb-5 flex gap-1 sm:gap-2 overflow-x-auto pb-1" aria-label="Pasos del formulario">
+      <button
+        v-for="(label, idx) in wizardLabels"
+        :key="label"
+        type="button"
+        class="shrink-0 inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs sm:text-sm font-semibold border transition"
+        :class="wizardStep === idx
+          ? 'bg-amber-800 text-white border-amber-800'
+          : wizardStep > idx
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            : 'bg-white text-amber-900 border-amber-200'"
+        @click="wizardStep = idx"
+      >
+        <span class="h-5 w-5 rounded-full bg-black/10 flex items-center justify-center text-[11px]">{{ idx + 1 }}</span>
+        {{ label }}
+      </button>
+    </nav>
+
+    <form @submit.prevent="onFormSubmit" class="space-y-4 sm:space-y-5">
       <!-- Sección de información básica -->
-      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+      <section v-show="wizardStep === 0" class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
         <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50 flex items-center justify-between gap-3">
           <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Información básica</h2>
           <button
@@ -87,7 +106,7 @@
       </section>
 
       <!-- Sección de ingredientes -->
-      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+      <section v-show="wizardStep === 1" class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
         <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
           <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Ingredientes</h2>
         </div>
@@ -128,7 +147,7 @@
       </section>
 
       <!-- Sección de pasos -->
-      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+      <section v-show="wizardStep === 2" class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
         <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
           <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Pasos de preparación</h2>
         </div>
@@ -190,7 +209,7 @@
       </section>
 
       <!-- Sección de Filtros -->
-      <section class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
+      <section v-show="wizardStep === 3" class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
         <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-amber-100 bg-amber-50">
           <h2 class="font-serif text-lg sm:text-xl font-bold text-amber-950">Categorías</h2>
           <p class="text-sm text-amber-800/70 mt-0.5">Ayudan a encontrar tu receta en el recetario</p>
@@ -301,23 +320,45 @@
         </div>
       </section>
 
-      <button
-        type="submit"
-        class="w-full rounded-full bg-amber-800 hover:bg-amber-900 text-white font-semibold py-3.5 shadow-sm transition"
-      >
-        Publicar receta
-      </button>
+      <div class="flex flex-col sm:flex-row gap-2 pt-1">
+        <button
+          v-if="wizardStep > 0"
+          type="button"
+          class="se-btn-ghost sm:flex-1"
+          @click="wizardStep -= 1"
+        >
+          ← Anterior
+        </button>
+        <button
+          v-if="wizardStep < wizardLabels.length - 1"
+          type="button"
+          class="se-btn-primary sm:flex-1"
+          @click="nextWizardStep"
+        >
+          Siguiente →
+        </button>
+        <button
+          v-else
+          type="submit"
+          class="w-full sm:flex-1 rounded-full bg-amber-800 hover:bg-amber-900 text-white font-semibold py-3.5 shadow-sm transition"
+          :disabled="submitting"
+        >
+          {{ submitting ? 'Publicando…' : 'Publicar receta' }}
+        </button>
+      </div>
     </form>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import { apiUrl } from '../api';
 import { useRouter } from "vue-router";
 import PageHero from './PageHero.vue';
+import { compressImageFile } from '../utils/imageCompress';
+import { setPageSeo, resetPageSeo } from '../utils/seo';
 
 const title = ref('');
 const image = ref('');
@@ -335,22 +376,45 @@ const ccaa = ref('')
 const tiempo = ref('')
 const proteinas = ref([]);
 const showBasicInfo = ref(true);
+const wizardStep = ref(0);
+const submitting = ref(false);
+const wizardLabels = ['Básica', 'Ingredientes', 'Pasos', 'Categorías'];
 
 if (userToken.value == null) {
   router.push({ name: "login" });
 }
 
-function handleImageChange(event) {
+onMounted(() => {
+  setPageSeo({
+    title: 'Crear receta',
+    description: 'Comparte tu creación culinaria con la comunidad de Sabores España',
+  })
+})
+onBeforeUnmount(() => resetPageSeo())
+
+function nextWizardStep() {
+  if (wizardStep.value === 0 && !title.value.trim()) {
+    alert('Pon un nombre a la receta')
+    return
+  }
+  if (wizardStep.value < wizardLabels.length - 1) wizardStep.value += 1
+}
+
+function onFormSubmit() {
+  if (wizardStep.value < wizardLabels.length - 1) {
+    nextWizardStep()
+    return
+  }
+  submitRecipe()
+}
+
+async function handleImageChange(event) {
   const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      image.value = {
-        name: file.name,
-        base64: reader.result
-      };
-    };
-    reader.readAsDataURL(file);
+  if (!file) return
+  try {
+    image.value = await compressImageFile(file)
+  } catch (err) {
+    alert(err.message || 'No se pudo procesar la imagen')
   }
 }
 
@@ -377,21 +441,22 @@ function moreSteps() {
   recipebook.steps.push({ title: '', text: '', image: null });
 }
 
-function handleStepImageChange(event, index) {
+async function handleStepImageChange(event, index) {
   const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      recipebook.steps[index].image = {
-        name: file.name,
-        base64: reader.result
-      };
-    };
-    reader.readAsDataURL(file);
+  if (!file) return
+  try {
+    recipebook.steps[index].image = await compressImageFile(file, {
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.8,
+    })
+  } catch (err) {
+    alert(err.message || 'No se pudo procesar la imagen del paso')
   }
 }
 
 function submitRecipe() {
+  submitting.value = true
   const payload = {
     title: title.value,
     image: image.value,
@@ -417,6 +482,9 @@ function submitRecipe() {
     })
     .catch((error) => {
       alert(error.response?.data?.message || 'No se pudo crear la receta');
+    })
+    .finally(() => {
+      submitting.value = false
     });
 }
 

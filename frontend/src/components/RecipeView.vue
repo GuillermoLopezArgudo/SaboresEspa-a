@@ -37,11 +37,14 @@
           <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-200 bg-white text-amber-900 text-sm font-medium hover:border-amber-400 transition"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition"
+              :class="isFavorite
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-amber-800 text-white hover:bg-amber-900'"
               @click="toggleFavorite"
             >
-              <i class="fa text-lg" :class="isFavorite ? 'fa-heart text-red-500' : 'fa-heart-o text-amber-700'" />
-              {{ isFavorite ? 'En favoritos' : 'Favorito' }}
+              <i class="fa text-lg" :class="isFavorite ? 'fa-heart' : 'fa-heart-o'" />
+              {{ isFavorite ? 'Guardada en favoritos' : 'Añadir a favoritos' }}
             </button>
             <template v-if="canManage">
               <button
@@ -69,10 +72,12 @@
               v-if="receta.image"
               class="rounded-2xl overflow-hidden border border-amber-200 bg-amber-100 shadow-sm"
             >
-              <img
-                :src="mediaUrl(receta.image)"
+              <RecipeImage
+                :path="receta.image"
                 :alt="receta.title"
-                class="w-full max-h-[28rem] object-cover"
+                wrap-class="w-full max-h-[28rem] min-h-[14rem]"
+                img-class="max-h-[28rem]"
+                loading="eager"
               />
             </div>
             <div
@@ -85,8 +90,8 @@
 
           <div class="lg:col-span-2">
             <div class="h-full rounded-2xl border border-amber-200 bg-white p-5 sm:p-6 shadow-sm">
-              <h2 class="text-lg font-serif font-bold text-amber-950 mb-3">Sobre la receta</h2>
-              <p class="text-amber-800/90 leading-relaxed whitespace-pre-line">
+              <h2 class="text-xl font-serif font-bold text-amber-950 mb-3 tracking-tight">Sobre la receta</h2>
+              <p class="text-amber-900/90 leading-[1.7] text-[15px] sm:text-base whitespace-pre-line font-serif">
                 {{ receta.description || 'Sin descripción.' }}
               </p>
               <p class="mt-5 text-xs text-amber-700/80">
@@ -101,7 +106,7 @@
           <aside class="lg:col-span-2">
             <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden lg:sticky lg:top-20">
               <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
-                <h3 class="font-serif font-bold text-amber-950 text-lg">Ingredientes</h3>
+                <h3 class="font-serif font-bold text-amber-950 text-xl tracking-tight">Ingredientes</h3>
               </div>
               <ul class="divide-y divide-amber-100">
                 <li v-for="(ingrediente, idx) in ingredients" :key="idx">
@@ -132,35 +137,43 @@
           <div class="lg:col-span-3">
             <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
               <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
-                <h3 class="font-serif font-bold text-amber-950 text-lg">Preparación</h3>
+                <h3 class="font-serif font-bold text-amber-950 text-xl tracking-tight">Preparación</h3>
+                <p class="text-xs text-amber-700/80 mt-0.5">{{ steps.length }} paso{{ steps.length === 1 ? '' : 's' }}</p>
               </div>
-              <div v-if="steps.length" class="p-5 space-y-4">
+              <div v-if="steps.length" class="p-5 sm:p-6 space-y-5">
                 <article
                   v-for="(step, idx) in steps"
                   :key="idx"
-                  class="rounded-xl border border-amber-100 bg-amber-50/40 p-4"
+                  class="relative rounded-2xl border border-amber-100 bg-amber-50/40 p-4 sm:p-5"
                 >
-                  <div class="flex gap-3">
-                    <span
-                      class="shrink-0 h-8 w-8 rounded-full bg-amber-800 text-white text-sm font-bold flex items-center justify-center"
-                    >
-                      {{ idx + 1 }}
-                    </span>
-                    <div class="min-w-0 flex-1">
-                      <h4 class="font-semibold text-amber-950">
+                  <div class="flex gap-4">
+                    <div class="shrink-0 flex flex-col items-center">
+                      <span
+                        class="h-10 w-10 rounded-full bg-amber-800 text-white text-base font-bold flex items-center justify-center shadow-sm ring-4 ring-amber-100"
+                      >
+                        {{ idx + 1 }}
+                      </span>
+                      <span
+                        v-if="idx < steps.length - 1"
+                        class="mt-2 w-px flex-1 min-h-[1.5rem] bg-amber-200"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div class="min-w-0 flex-1 pb-1">
+                      <h4 class="font-serif text-lg font-bold text-amber-950 tracking-tight">
                         {{ step.title || `Paso ${idx + 1}` }}
                       </h4>
-                      <p class="mt-1 text-amber-800/90 leading-relaxed whitespace-pre-line">
+                      <p class="mt-2 text-amber-900/90 leading-[1.7] text-[15px] whitespace-pre-line">
                         {{ step.description }}
                       </p>
                       <div
                         v-if="step.image"
-                        class="mt-3 rounded-lg overflow-hidden border border-amber-200 max-w-md"
+                        class="mt-4 rounded-xl overflow-hidden border border-amber-200 max-w-md"
                       >
-                        <img
-                          :src="mediaUrl(step.image)"
+                        <RecipeImage
+                          :path="step.image"
                           :alt="`Paso ${idx + 1}`"
-                          class="w-full object-cover"
+                          wrap-class="w-full h-40 sm:h-48"
                         />
                       </div>
                     </div>
@@ -274,12 +287,14 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import axios from 'axios'
 import { apiUrl, mediaUrl } from '../api'
 import { useRouter, useRoute } from 'vue-router'
 import PageHero from './PageHero.vue'
+import RecipeImage from './RecipeImage.vue'
 import { labelForFilter } from '../utils/filterOptions'
+import { setPageSeo, resetPageSeo } from '../utils/seo'
 import 'font-awesome/css/font-awesome.min.css'
 
 const route = useRoute()
@@ -341,6 +356,25 @@ function fetchComments() {
     })
     .catch((error) => console.error('Error en la solicitud:', error))
 }
+
+watch(
+  receta,
+  (r) => {
+    if (!r) return
+    setPageSeo({
+      title: r.title,
+      description: (r.description || `Receta de ${r.author || 'Sabores España'}`).slice(0, 160),
+      image: r.image ? mediaUrl(r.image) : undefined,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+      type: 'article',
+    })
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  resetPageSeo()
+})
 
 onMounted(() => {
   loading.value = true

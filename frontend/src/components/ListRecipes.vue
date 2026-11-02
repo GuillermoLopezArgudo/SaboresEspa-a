@@ -99,20 +99,12 @@
             />
           </button>
 
-          <img
-            v-if="item.image"
-            :src="mediaUrl(item.image)"
+          <RecipeImage
+            :path="item.image"
             :alt="item.title"
-            class="w-full h-44 sm:h-52 object-cover transition duration-500 group-hover:scale-105"
-            loading="lazy"
-            decoding="async"
+            wrap-class="h-44 sm:h-52"
+            img-class="transition duration-500 group-hover:scale-105"
           />
-          <div
-            v-else
-            class="h-44 sm:h-52 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-700/70"
-          >
-            <span class="font-serif text-lg">Sin imagen</span>
-          </div>
         </div>
 
         <div class="flex flex-1 flex-col p-4 sm:p-5">
@@ -176,6 +168,22 @@
       </article>
     </div>
 
+    <!-- Error de carga -->
+    <div
+      v-else-if="loadError"
+      class="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center"
+    >
+      <p class="font-serif text-2xl font-bold text-red-900">No se pudo cargar</p>
+      <p class="mt-2 text-red-800/90 max-w-md mx-auto text-sm">{{ loadError }}</p>
+      <button
+        type="button"
+        class="mt-6 inline-flex px-5 py-2.5 rounded-full bg-red-700 hover:bg-red-800 text-white text-sm font-semibold"
+        @click="retryLoad"
+      >
+        Reintentar
+      </button>
+    </div>
+
     <!-- Vacío / sin coincidencias -->
     <div
       v-else-if="!loading"
@@ -186,7 +194,7 @@
       </p>
       <p class="mt-2 text-amber-800/80 max-w-md mx-auto">
         <template v-if="searchQuery.trim()">
-          No hay recetas para “{{ searchQuery }}”. Prueba otro término.
+          No hay recetas para “{{ searchQuery }}”. Prueba otro término o quita filtros.
         </template>
         <template v-else>
           {{ emptySubtitle }}
@@ -204,7 +212,7 @@
         <router-link
           v-else-if="emptyLink"
           :to="emptyLink.to"
-          class="inline-flex items-center px-5 py-2.5 rounded-full bg-amber-800 hover:bg-amber-900 text-white text-sm font-semibold transition"
+          class="se-btn-primary"
         >
           {{ emptyLink.label }}
         </router-link>
@@ -256,9 +264,10 @@
 <script setup>
 import { computed, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import StarRating from './StarRating.vue'
-import { useRouter } from 'vue-router'
+import RecipeImage from './RecipeImage.vue'
+import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
-import { apiUrl, mediaUrl } from '../api'
+import { apiUrl } from '../api'
 import {
   getAverageStarsCache,
   invalidateRecipeCaches,
@@ -275,12 +284,15 @@ const ratings = reactive({})
 const average = reactive({})
 const userToken = localStorage.getItem('userToken')
 const router = useRouter()
+const route = useRoute()
 const elementos = reactive({ recetas: [] })
 const categorias = reactive([])
 const loading = ref(false)
+const loadError = ref('')
 const searchQuery = ref('')
 const sortBy = ref('rating-desc')
 const currentPage = ref(1)
+let syncingUrl = false
 const pagination = reactive({
   page: 1,
   page_size: PAGE_SIZE,
@@ -319,7 +331,38 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  syncUrl: {
+    type: Boolean,
+    default: false,
+  },
 })
+
+function readUrlState() {
+  if (!props.syncUrl) return
+  const q = typeof route.query.q === 'string' ? route.query.q : ''
+  const sort = typeof route.query.sort === 'string' ? route.query.sort : 'rating-desc'
+  const page = parseInt(String(route.query.page || '1'), 10)
+  syncingUrl = true
+  searchQuery.value = q
+  if (['rating-desc', 'title-asc', 'author-asc'].includes(sort)) sortBy.value = sort
+  currentPage.value = Number.isFinite(page) && page > 0 ? page : 1
+  queueMicrotask(() => {
+    syncingUrl = false
+  })
+}
+
+function writeUrlState() {
+  if (!props.syncUrl || syncingUrl) return
+  const query = { ...route.query }
+  const q = searchQuery.value.trim()
+  if (q) query.q = q
+  else delete query.q
+  if (sortBy.value && sortBy.value !== 'rating-desc') query.sort = sortBy.value
+  else delete query.sort
+  if (currentPage.value > 1) query.page = String(currentPage.value)
+  else delete query.page
+  router.replace({ query }).catch(() => {})
+}
 
 const showToolbar = computed(
   () =>
@@ -387,17 +430,30 @@ watch(
 )
 
 watch(sortBy, () => {
+  if (syncingUrl) return
   currentPage.value = 1
+  writeUrlState()
   reloadList()
 })
 
 watch(searchQuery, () => {
+  if (syncingUrl) return
   if (searchDebounce) clearTimeout(searchDebounce)
   searchDebounce = setTimeout(() => {
     currentPage.value = 1
+    writeUrlState()
     reloadList()
   }, 350)
 })
+
+watch(
+  () => [route.query.q, route.query.page, route.query.sort],
+  () => {
+    if (!props.syncUrl) return
+    readUrlState()
+    reloadList()
+  }
+)
 
 onBeforeUnmount(() => {
   if (searchDebounce) clearTimeout(searchDebounce)
@@ -468,11 +524,18 @@ function goToPage(page) {
   if (!Number.isFinite(next) || next < 1 || next > pagination.total_pages) return
   if (next === currentPage.value) return
   currentPage.value = next
+  writeUrlState()
   reloadList()
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+function retryLoad() {
+  loadError.value = ''
+  reloadList()
+}
+
 onMounted(() => {
+  readUrlState()
   reloadList()
   averageStars()
 })
@@ -525,6 +588,7 @@ function ratingLabel(id) {
 
 function allRecipes() {
   loading.value = true
+  loadError.value = ''
   const gen = ++loadGen
   axios
     .post(apiUrl('/viewAll'), listQuery())
@@ -536,7 +600,9 @@ function allRecipes() {
     .catch((error) => {
       if (gen !== loadGen) return
       console.error('Error en la solicitud:', error)
-      alert(error.response?.data?.message || 'No se pudieron cargar las recetas')
+      elementos.recetas = []
+      loadError.value =
+        error.response?.data?.message || 'No se pudieron cargar las recetas. Comprueba la conexión.'
     })
     .finally(() => {
       if (gen === loadGen) loading.value = false
@@ -549,6 +615,7 @@ function favoritesRecipes() {
     return
   }
   loading.value = true
+  loadError.value = ''
   const gen = ++loadGen
   axios
     .post(apiUrl('/viewFavs'), listQuery())
@@ -564,7 +631,8 @@ function favoritesRecipes() {
     .catch((error) => {
       if (gen !== loadGen) return
       console.error('Error en la solicitud:', error)
-      alert(error.response?.data?.message || 'No se pudieron cargar favoritos')
+      elementos.recetas = []
+      loadError.value = error.response?.data?.message || 'No se pudieron cargar favoritos'
     })
     .finally(() => {
       if (gen === loadGen) loading.value = false
@@ -577,6 +645,7 @@ function personalRecipes() {
     return
   }
   loading.value = true
+  loadError.value = ''
   const gen = ++loadGen
   axios
     .post(apiUrl('/viewRecipes'), listQuery())
@@ -588,7 +657,8 @@ function personalRecipes() {
     .catch((error) => {
       if (gen !== loadGen) return
       console.error('Error al obtener las recetas:', error)
-      alert(error.response?.data?.message || 'No se pudieron cargar tus recetas')
+      elementos.recetas = []
+      loadError.value = error.response?.data?.message || 'No se pudieron cargar tus recetas'
     })
     .finally(() => {
       if (gen === loadGen) loading.value = false
@@ -603,6 +673,7 @@ function filteredRecipes() {
   }
 
   loading.value = true
+  loadError.value = ''
   const gen = ++loadGen
   axios
     .post(apiUrl('/filterRecipe'), {
@@ -620,7 +691,8 @@ function filteredRecipes() {
     .catch((error) => {
       if (gen !== loadGen) return
       console.error('Error en la solicitud:', error)
-      alert(error.response?.data?.message || 'No se pudieron filtrar las recetas')
+      elementos.recetas = []
+      loadError.value = error.response?.data?.message || 'No se pudieron filtrar las recetas'
     })
     .finally(() => {
       if (gen === loadGen) loading.value = false
