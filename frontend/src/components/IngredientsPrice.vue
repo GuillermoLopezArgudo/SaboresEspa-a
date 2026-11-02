@@ -1,23 +1,18 @@
 <template>
-  <div class="min-h-screen bg-amber-50 py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto mb-6">
+  <div>
+    <PageHero
+      title="Precios Mercadona"
+      :subtitle="ingredientLabel ? `Buscando productos para: ${ingredientLabel}` : 'Consulta precios de ingredientes'"
+    >
       <router-link
         to="/"
-        class="inline-flex items-center px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition"
+        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
       >
-        ← Volver
+        ← Volver al recetario
       </router-link>
-    </div>
+    </PageHero>
 
-    <div class="max-w-5xl mx-auto">
-      <h1 class="text-3xl font-bold text-amber-800 font-serif mb-2">
-        Precios Mercadona
-      </h1>
-      <p class="text-amber-700 mb-6">
-        Buscando productos para:
-        <span class="font-semibold">{{ ingredientLabel }}</span>
-      </p>
-
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div v-if="loading" class="text-amber-700 animate-pulse">
         Consultando la tienda de Mercadona…
       </div>
@@ -69,6 +64,7 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { apiUrl } from '../api'
 import { resolveMercadonaCategory } from '../utils/ingredientes'
+import PageHero from './PageHero.vue'
 
 const route = useRoute()
 const productos = ref([])

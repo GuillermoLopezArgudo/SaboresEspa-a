@@ -1,30 +1,20 @@
 <template>
-  <div class="min-h-screen bg-amber-50 py-12 px-4 sm:px-6 lg:px-8">
-    <!-- Encabezado con efecto de receta -->
-    <div class="max-w-4xl mx-auto text-center mb-12">
-      <h1
-        class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-4">
-        Crear Nueva Receta
-      </h1>
-      <p class="text-lg text-amber-700">Comparte tu creación culinaria con la comunidad</p>
-    </div>
-
-    <!-- Botón de regreso -->
-    <div class="max-w-4xl mx-auto mb-8">
-      <router-link to="/home"
-        class="inline-flex items-center px-6 py-3 bg-amber-800 hover:bg-amber-900 text-white rounded-xl transition duration-300 shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-            clip-rule="evenodd" />
-        </svg>
-        Volver al inicio
+  <div>
+    <PageHero
+      title="Crear receta"
+      subtitle="Comparte tu creación culinaria con la comunidad"
+    >
+      <router-link
+        to="/"
+        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+      >
+        ← Volver al recetario
       </router-link>
-    </div>
+    </PageHero>
 
-    <!-- Formulario -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <form @submit.prevent="submitRecipe"
-      class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-amber-200">
+      class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
       <!-- Sección de información básica -->
       <div class="p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
         <h2 class="text-2xl font-bold text-amber-800 mb-6 flex items-center">
@@ -357,6 +347,7 @@
         </button>
       </div>
     </form>
+    </div>
   </div>
 </template>
 
@@ -365,6 +356,7 @@ import { ref, reactive } from 'vue';
 import axios from 'axios';
 import { apiUrl } from '../api';
 import { useRouter } from "vue-router";
+import PageHero from './PageHero.vue';
 
 const title = ref('');
 const image = ref('');

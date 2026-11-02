@@ -1,13 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
-      <!-- Encabezado -->
-      <div class="bg-gradient-to-r from-amber-600 to-amber-700 py-6 px-8 text-center">
-        <h1 class="text-3xl font-bold text-white font-serif">Únete a nuestra comunidad</h1>
-        <p class="text-amber-100 mt-2">Crea tu cuenta en el Recetario</p>
-      </div>
-      
-      <!-- Formulario -->
+  <div>
+    <PageHero title="Crear cuenta" subtitle="Únete a la comunidad de Sabores España" />
+    <div class="max-w-md mx-auto px-4 sm:px-6 py-10">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
       <form @submit.prevent="OnSubmit" class="p-8">
         <!-- Mensaje de error -->
         <div v-if="error" class="mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg flex items-center">
@@ -92,6 +87,7 @@
         </div>
       </form>
     </div>
+    </div>
   </div>
 </template>
 
@@ -100,6 +96,7 @@ import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from 'axios';
 import { apiUrl } from '../api';
+import PageHero from './PageHero.vue';
 
 const name = ref('');
 const email = ref('');
