@@ -123,6 +123,14 @@ html.dark {
     color: var(--se-text);
   }
 
+  .se-prose {
+    color: var(--se-text);
+  }
+
+  .se-muted-text {
+    color: var(--se-text-soft);
+  }
+
   .hero-cta-primary {
     @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition;
     background-color: #78350f;

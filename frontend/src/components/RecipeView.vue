@@ -91,10 +91,10 @@
           <div class="lg:col-span-2">
             <div class="h-full rounded-2xl border border-amber-200 bg-white p-5 sm:p-6 shadow-sm">
               <h2 class="text-xl font-serif font-bold text-amber-950 mb-3 tracking-tight">Sobre la receta</h2>
-              <p class="text-amber-900/90 leading-[1.7] text-[15px] sm:text-base whitespace-pre-line font-serif">
+              <p class="se-prose leading-[1.7] text-[15px] sm:text-base whitespace-pre-line font-serif">
                 {{ receta.description || 'Sin descripción.' }}
               </p>
-              <p class="mt-5 text-xs text-amber-700/80">
+              <p class="mt-5 text-xs se-muted-text">
                 Pulsa un ingrediente para ver precios en Mercadona.
               </p>
             </div>
@@ -118,7 +118,7 @@
                       <p class="font-medium text-amber-950 group-hover:text-amber-800">
                         {{ ingrediente }}
                       </p>
-                      <p class="text-sm text-amber-700/80 mt-0.5">
+                      <p class="text-sm se-muted-text mt-0.5">
                         {{ quantity[idx] || 'Cantidad no indicada' }}
                       </p>
                     </div>
@@ -163,7 +163,7 @@
                       <h4 class="font-serif text-lg font-bold text-amber-950 tracking-tight">
                         {{ step.title || `Paso ${idx + 1}` }}
                       </h4>
-                      <p class="mt-2 text-amber-900/90 leading-[1.7] text-[15px] whitespace-pre-line">
+                      <p class="mt-2 se-prose leading-[1.7] text-[15px] whitespace-pre-line">
                         {{ step.description }}
                       </p>
                       <div
@@ -225,7 +225,7 @@
                   </div>
                 </div>
                 <div v-else>
-                  <p class="text-amber-950 leading-relaxed">{{ c.comment }}</p>
+                  <p class="se-prose leading-relaxed">{{ c.comment }}</p>
                   <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
                     <p class="text-xs font-medium text-amber-700">{{ c.username || 'Usuario' }}</p>
                     <div
