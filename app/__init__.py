@@ -12,6 +12,11 @@ from app.routes import register_blueprints
 def create_app() -> Flask:
     app = Flask(__name__, static_folder="../static", static_url_path="/static")
     app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = Config.JWT_ACCESS_TOKEN_EXPIRES
+    app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+    app.config["JWT_HEADER_NAME"] = "Authorization"
+    app.config["JWT_HEADER_TYPE"] = "Bearer"
+    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
     app.config["UPLOAD_FOLDER_IMAGES"] = Config.UPLOAD_FOLDER_IMAGES
     app.config["UPLOAD_FOLDER_VIDEOS"] = Config.UPLOAD_FOLDER_VIDEOS
     app.config["ALLOWED_EXTENSIONS"] = Config.ALLOWED_EXTENSIONS

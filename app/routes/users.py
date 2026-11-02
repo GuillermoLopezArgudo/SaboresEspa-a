@@ -1,4 +1,3 @@
-import hashlib
 from datetime import date
 
 from flask import Blueprint, current_app, jsonify, request
@@ -16,17 +15,10 @@ from app.models import (
     UserFavorite,
     Users,
 )
+from app.security import admin_required, hash_password, is_valid_email, login_required
 from app.services.files import save_base64_file
 
 users_bp = Blueprint("users", __name__)
-
-
-def _is_admin(user_token: str) -> bool:
-    return (
-        Users.select()
-        .where((Users.user_token == user_token) & (Users.user_type == "admin"))
-        .exists()
-    )
 
 
 def _delete_user_cascade(iduser):
@@ -42,99 +34,138 @@ def _delete_user_cascade(iduser):
 
     StepImage.delete().where(StepImage.id_user == iduser).execute()
     UserFavorite.delete().where(UserFavorite.id_user == iduser).execute()
+    RecipeComment.delete().where(RecipeComment.id_user == iduser).execute()
+    RecipeReview.delete().where(RecipeReview.id_user == iduser).execute()
     Recipe.delete().where(Recipe.id_user == iduser).execute()
     Users.delete().where(Users.id == iduser).execute()
 
 
 @users_bp.post("/viewProfile")
-def view_profile():
-    data = request.get_json() or {}
-    users = Users.select(Users.user_name, Users.user_email, Users.user_image).where(
-        Users.id == data.get("iduser")
-    )
+@login_required
+def view_profile(current_user):
+    data = request.get_json(silent=True) or {}
+    # Solo el propio perfil o admin
+    target_id = data.get("iduser") or current_user.id
+    try:
+        target_id = int(target_id)
+    except (TypeError, ValueError):
+        return jsonify(message="Usuario inválido"), 400
+
+    if target_id != current_user.id and current_user.user_type != "admin":
+        return jsonify(message="No autorizado"), 403
+
+    user = Users.get_or_none(Users.id == target_id)
+    if not user:
+        return jsonify(message="Usuario no encontrado"), 404
     return jsonify(
         message=[
-            {"name": u.user_name, "email": u.user_email, "image": u.user_image}
-            for u in users
+            {"name": user.user_name, "email": user.user_email, "image": user.user_image}
         ]
     )
 
 
 @users_bp.post("/changeImage")
-def change_image():
+@login_required
+def change_image(current_user):
     data = request.get_json() or {}
     image = data.get("image")
     if not image or not isinstance(image, dict) or not image.get("base64"):
-        return jsonify(message="Image data not valid"), 400
+        return jsonify(message="Imagen no válida"), 400
 
     image_url = save_base64_file(
         image.get("base64"),
-        image.get("name"),
+        image.get("name") or "avatar.jpg",
         current_app.config["UPLOAD_FOLDER_IMAGES"],
+        kind="image",
     )
     if not image_url:
-        return jsonify(message="Failed to save image"), 500
+        return jsonify(message="No se pudo guardar la imagen"), 400
 
     Users.update(user_image=image_url, modified_at=date.today()).where(
-        Users.id == data.get("iduser")
+        Users.id == current_user.id
     ).execute()
     return jsonify(message="Image Changed", newImage=image_url)
 
 
 @users_bp.post("/changeName")
-def change_name():
+@login_required
+def change_name(current_user):
     data = request.get_json() or {}
-    if not Users.select().where(Users.user_token == data.get("userToken")).exists():
-        return jsonify(message="ERROR"), 401
-    Users.update(user_name=data.get("name"), modified_at=date.today()).where(
-        Users.id == data.get("iduser")
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify(message="Nombre vacío"), 400
+    Users.update(user_name=name, modified_at=date.today()).where(
+        Users.id == current_user.id
     ).execute()
-    return jsonify(message=data.get("name"))
+    return jsonify(message=name)
 
 
 @users_bp.post("/changeEmail")
-def change_email():
+@login_required
+def change_email(current_user):
     data = request.get_json() or {}
-    if not Users.select().where(Users.user_token == data.get("userToken")).exists():
-        return jsonify(message="ERROR"), 401
-    email = data.get("email")
-    iduser = data.get("iduser")
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify(message="Email vacío"), 400
+    if not is_valid_email(email):
+        return jsonify(message="Email no válido"), 400
+    if (
+        Users.select()
+        .where((Users.user_email == email) & (Users.id != current_user.id))
+        .exists()
+    ):
+        return jsonify(message="Email en uso"), 409
+
     Users.update(user_email=email, modified_at=date.today()).where(
-        Users.id == iduser
+        Users.id == current_user.id
     ).execute()
-    token = create_access_token(identity=email)
+    token = create_access_token(identity=str(current_user.id))
     Users.update(user_token=token, modified_at=date.today()).where(
-        Users.id == iduser
+        Users.id == current_user.id
     ).execute()
     return jsonify(message=email, userToken=token)
 
 
 @users_bp.post("/changePassword")
-def change_password():
+@login_required
+def change_password(current_user):
     data = request.get_json() or {}
-    if not Users.select().where(Users.user_token == data.get("userToken")).exists():
-        return jsonify(message="ERROR"), 401
+    current_password = data.get("currentPassword") or data.get("oldPassword") or ""
     new_password = data.get("newPassword") or ""
+    if len(new_password) < 8:
+        return jsonify(message="La contraseña debe tener al menos 8 caracteres"), 400
+
+    # Exigir contraseña actual si se envía; si no, rechazar por seguridad
+    from app.security import verify_password
+
+    if not current_password or not verify_password(
+        current_password, current_user.user_password
+    ):
+        # Compat: si el front aún no manda currentPassword, exigir newPassword fuerte
+        # pero NO permitir cambio sin demostrar posesión del token JWT (ya lo tenemos)
+        # Mejor: exigir currentPassword siempre
+        if not current_password:
+            return jsonify(message="Debes indicar la contraseña actual"), 400
+        return jsonify(message="Contraseña actual incorrecta"), 401
+
     Users.update(
-        user_password=hashlib.sha256(new_password.encode("utf-8")).hexdigest(),
+        user_password=hash_password(new_password),
         modified_at=date.today(),
-    ).where(Users.id == data.get("iduser")).execute()
+    ).where(Users.id == current_user.id).execute()
     return jsonify(message="Contraseña Actualizada")
 
 
 @users_bp.post("/deleteProfile")
-def delete_profile():
-    data = request.get_json() or {}
-    _delete_user_cascade(data.get("iduser"))
+@login_required
+def delete_profile(current_user):
+    _delete_user_cascade(current_user.id)
     return jsonify(message="Perfil eliminado")
 
 
 @users_bp.post("/allUsers")
-def all_users():
-    data = request.get_json() or {}
-    if not _is_admin(data.get("userToken")):
-        return jsonify(users_list=[])
-    users = Users.select().where(Users.user_type != data.get("type"))
+@admin_required
+def all_users(current_user):
+    users = Users.select().where(Users.id != current_user.id)
     return jsonify(
         users_list=[
             {"iduser": u.id, "name": u.user_name, "email": u.user_email} for u in users
@@ -143,9 +174,16 @@ def all_users():
 
 
 @users_bp.post("/deleteUser")
-def delete_user():
+@admin_required
+def delete_user(current_user):
     data = request.get_json() or {}
-    if not _is_admin(data.get("userToken")):
-        return jsonify(message="ERROR"), 403
-    _delete_user_cascade(data.get("iduser"))
+    try:
+        target_id = int(data.get("iduser"))
+    except (TypeError, ValueError):
+        return jsonify(message="Usuario inválido"), 400
+    if target_id == current_user.id:
+        return jsonify(message="No puedes borrarte desde admin así"), 400
+    if not Users.get_or_none(Users.id == target_id):
+        return jsonify(message="Usuario no encontrado"), 404
+    _delete_user_cascade(target_id)
     return jsonify(message="Perfil eliminado")

@@ -1,4 +1,36 @@
-const API_URL = (process.env.VUE_APP_API_URL || 'http://localhost:5000').replace(/\/$/, '')
+import axios from 'axios'
+
+const raw =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ||
+  (typeof process !== 'undefined' && process.env && process.env.VUE_APP_API_URL) ||
+  'http://localhost:5000'
+
+const API_URL = String(raw).replace(/\/$/, '')
+
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('userToken')
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const path = window.location.pathname
+      if (path !== '/login' && path !== '/register' && path !== '/') {
+        clearSession()
+        if (!path.startsWith('/login')) {
+          window.location.assign('/login')
+        }
+      }
+    }
+    return Promise.reject(error)
+  }
+)
 
 export function apiUrl(path = '') {
   if (!path) return API_URL
@@ -10,6 +42,40 @@ export function mediaUrl(path) {
   if (!path) return ''
   if (/^https?:\/\//i.test(path)) return path
   return apiUrl(path)
+}
+
+export function clearSession() {
+  localStorage.removeItem('userToken')
+  localStorage.removeItem('iduser')
+  localStorage.removeItem('type')
+  localStorage.removeItem('token')
+}
+
+/** Comprueba expiración del JWT en cliente (la firma la valida el API). */
+export function isTokenValid(token = localStorage.getItem('userToken')) {
+  if (!token || typeof token !== 'string') return false
+  const parts = token.split('.')
+  if (parts.length < 2) return false
+  try {
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    if (payload.exp && Date.now() >= payload.exp * 1000) return false
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function logoutRequest() {
+  const token = localStorage.getItem('userToken')
+  try {
+    if (token && isTokenValid(token)) {
+      await axios.post(apiUrl('/logout'), {})
+    }
+  } catch {
+    // ignorar errores de red al cerrar sesión
+  } finally {
+    clearSession()
+  }
 }
 
 export default API_URL
