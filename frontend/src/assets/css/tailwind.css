@@ -150,3 +150,26 @@ html.dark .ring-emerald-200 { --tw-ring-color: rgb(16 185 129 / 0.35) !important
 html.dark .filter-scroll::-webkit-scrollbar-thumb {
   background-color: #5c4638;
 }
+
+/* CTAs del PageHero: no deben heredar el remap de bg-white en noche */
+.hero-cta-primary {
+  @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition;
+  background-color: #fffbeb !important;
+  color: #1c1410 !important;
+}
+.hero-cta-primary:hover {
+  background-color: #fde68a !important;
+  color: #1c1410 !important;
+}
+
+.hero-cta-ghost {
+  @apply inline-flex items-center px-5 py-2.5 rounded-full text-sm font-medium border transition;
+  background-color: rgb(255 255 255 / 0.1) !important;
+  border-color: rgb(255 255 255 / 0.28) !important;
+  color: #fffbeb !important;
+}
+.hero-cta-ghost:hover {
+  background-color: rgb(255 255 255 / 0.18) !important;
+  border-color: rgb(255 255 255 / 0.4) !important;
+  color: #fff !important;
+}

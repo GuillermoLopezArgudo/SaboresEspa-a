@@ -7,14 +7,14 @@
       <router-link
         v-if="loggedIn"
         to="/create"
-        class="inline-flex items-center px-4 py-2 rounded-full bg-white text-amber-950 text-sm font-semibold shadow-sm hover:bg-amber-50 transition"
+        class="hero-cta-primary"
       >
         + Nueva receta
       </router-link>
       <router-link
         v-else
         to="/register"
-        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+        class="hero-cta-ghost"
       >
         Únete para compartir
       </router-link>

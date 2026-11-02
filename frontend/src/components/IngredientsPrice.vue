@@ -5,11 +5,7 @@
       :subtitle="heroSubtitle"
       eyebrow="Mercadona"
     >
-      <button
-        type="button"
-        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
-        @click="goBack"
-      >
+      <button type="button" class="hero-cta-ghost" @click="goBack">
         ← Volver a la receta
       </button>
     </PageHero>
