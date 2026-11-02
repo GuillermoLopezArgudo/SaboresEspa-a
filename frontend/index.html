@@ -20,7 +20,10 @@
           if (stored == null) dark = true;
           if (dark) {
             document.documentElement.classList.add('dark');
+            document.documentElement.dataset.theme = 'dark';
             document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.dataset.theme = 'light';
           }
         } catch (e) {}
       })();

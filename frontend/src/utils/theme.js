@@ -17,6 +17,7 @@ export function applyTheme(dark) {
   isDark.value = dark
   const root = document.documentElement
   root.classList.toggle('dark', dark)
+  root.dataset.theme = dark ? 'dark' : 'light'
   root.style.colorScheme = dark ? 'dark' : 'light'
   try {
     localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light')
