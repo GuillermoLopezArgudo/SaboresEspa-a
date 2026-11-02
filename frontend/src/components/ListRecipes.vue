@@ -140,7 +140,7 @@
           </div>
 
           <div class="mt-3" @click.stop>
-            <div v-if="visibleCats(item.id).length" class="flex flex-wrap gap-1.5">
+            <div v-if="catsFor(item.id).length" class="flex flex-wrap gap-1.5">
               <button
                 v-for="cat in visibleCats(item.id)"
                 :key="cat.type + cat.category"
@@ -151,12 +151,24 @@
               >
                 {{ categoryLabel(cat) }}
               </button>
-              <span
-                v-if="extraCatsCount(item.id) > 0"
-                class="inline-flex px-2 py-1 text-xs text-amber-700/80"
+              <button
+                v-if="extraCatsCount(item.id) > 0 && !isCatsExpanded(item.id)"
+                type="button"
+                class="inline-flex px-2.5 py-1 rounded-full bg-amber-100 hover:bg-amber-800 hover:text-white text-amber-900 text-xs font-semibold border border-amber-200 transition"
+                :title="'Ver las ' + catsFor(item.id).length + ' categorías'"
+                @click="expandCats(item.id)"
               >
                 +{{ extraCatsCount(item.id) }}
-              </span>
+              </button>
+              <button
+                v-else-if="isCatsExpanded(item.id) && catsFor(item.id).length > MAX_CATS"
+                type="button"
+                class="inline-flex px-2.5 py-1 rounded-full border border-amber-200 text-amber-800/80 hover:bg-amber-50 text-xs font-medium transition"
+                title="Mostrar menos"
+                @click="collapseCats(item.id)"
+              >
+                Menos
+              </button>
             </div>
             <p v-else class="text-xs text-amber-600/80 italic">Sin categorías</p>
           </div>
@@ -235,6 +247,7 @@ const searchQuery = ref('')
 const sortBy = ref('rating-desc')
 
 const MAX_CATS = 3
+const expandedCats = reactive({})
 
 function setCategories(list) {
   categorias.splice(0, categorias.length, ...(list || []))
@@ -388,13 +401,29 @@ function onCategoryClick(cat) {
   })
 }
 
+function catsFor(id) {
+  return catsByRecipe.value[id] || []
+}
+
+function isCatsExpanded(id) {
+  return !!expandedCats[id]
+}
+
+function expandCats(id) {
+  expandedCats[id] = true
+}
+
+function collapseCats(id) {
+  expandedCats[id] = false
+}
+
 function visibleCats(id) {
-  return (catsByRecipe.value[id] || []).slice(0, MAX_CATS)
+  const all = catsFor(id)
+  return isCatsExpanded(id) ? all : all.slice(0, MAX_CATS)
 }
 
 function extraCatsCount(id) {
-  const total = (catsByRecipe.value[id] || []).length
-  return Math.max(0, total - MAX_CATS)
+  return Math.max(0, catsFor(id).length - MAX_CATS)
 }
 
 function ratingLabel(id) {
