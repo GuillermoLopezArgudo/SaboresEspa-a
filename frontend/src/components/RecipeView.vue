@@ -1,24 +1,19 @@
 <template>
-    <div class="min-h-screen bg-amber-50 py-8 px-4 sm:px-6 lg:px-8">
-      <!-- Encabezado -->
-      <div class="max-w-7xl mx-auto text-center mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
-          Detalle de Receta
-        </h1>
-      </div>
-  
-      <!-- Botón de regreso -->
-      <div class="max-w-7xl mx-auto mb-6">
-        <router-link to="/" class="inline-flex items-center px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition duration-300 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-          </svg>
-          Volver al inicio
+    <div>
+      <PageHero
+        :title="receta?.title || 'Detalle de receta'"
+        :subtitle="receta ? 'Ingredientes, pasos y opiniones' : 'Cargando…'"
+      >
+        <router-link
+          to="/"
+          class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+        >
+          ← Volver al recetario
         </router-link>
-      </div>
-  
-      <!-- Contenido principal -->
-      <div v-if="receta" class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
+      </PageHero>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div v-if="receta" class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
         <!-- Sección superior -->
         <div class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
           <div class="flex justify-between items-start">
@@ -181,10 +176,10 @@
         </div>
       </div>
   
-      <!-- Cargando -->
-      <div v-else class="max-w-7xl mx-auto text-center py-12">
+      <div v-else class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
         <p class="mt-4 text-amber-700">Cargando receta...</p>
+      </div>
       </div>
     </div>
   </template>
@@ -195,6 +190,7 @@
 import { apiUrl, mediaUrl } from '../api';
   import { useRouter } from 'vue-router';
   import { useRoute } from 'vue-router';
+  import PageHero from './PageHero.vue';
   import 'font-awesome/css/font-awesome.min.css';
   
   const route = useRoute();

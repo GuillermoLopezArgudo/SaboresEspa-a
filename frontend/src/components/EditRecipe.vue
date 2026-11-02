@@ -1,30 +1,20 @@
 <template>
-  <div class="min-h-screen bg-amber-50 py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Encabezado -->
-    <div class="max-w-4xl mx-auto text-center mb-8">
-      <h1
-        class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600 font-serif mb-2">
-        Editar Receta
-      </h1>
-      <p class="text-lg text-amber-700">Actualiza los detalles de tu creación culinaria</p>
-    </div>
-
-    <!-- Botón de regreso -->
-    <div class="max-w-4xl mx-auto mb-6">
-      <router-link to="/home"
-        class="inline-flex items-center px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition duration-300 shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-            clip-rule="evenodd" />
-        </svg>
-        Volver al inicio
+  <div>
+    <PageHero
+      title="Editar receta"
+      subtitle="Actualiza los detalles de tu creación culinaria"
+    >
+      <router-link
+        to="/"
+        class="inline-flex items-center px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-medium border border-white/20 transition"
+      >
+        ← Volver al recetario
       </router-link>
-    </div>
+    </PageHero>
 
-    <!-- Formulario -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <form @submit.prevent="submitEditRecipe"
-      class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
+      class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
       <!-- Información básica -->
       <div class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
         <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
@@ -283,6 +273,7 @@
         </button>
       </div>
     </form>
+    </div>
   </div>
 </template>
 
@@ -291,6 +282,7 @@ import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import { apiUrl } from '../api';
 import { useRouter, useRoute } from 'vue-router';
+import PageHero from './PageHero.vue';
 
 const route = useRoute();
 const router = useRouter();

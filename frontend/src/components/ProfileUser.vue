@@ -1,15 +1,8 @@
 <template>
-  <NavbarHome />
-  <div class="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto space-y-8">
-      <!-- Tarjeta principal de perfil -->
-      <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-        <!-- Encabezado con gradiente mejorado -->
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-5 px-6">
-          <h2 class="text-2xl font-bold text-white text-center font-serif tracking-wide">MI PERFIL</h2>
-        </div>
-
-        <!-- Contenido -->
+  <div>
+    <PageHero title="Mi perfil" subtitle="Gestiona tu cuenta y preferencias" />
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-100">
         <div class="p-6 md:p-8">
           <!-- Foto de perfil con efecto hover mejorado -->
           <div class="text-center mb-8">
@@ -168,12 +161,10 @@
         </div>
       </div>
 
-      <!-- Sección de administración (solo para admin) -->
-      <div v-if="type === 'admin'" class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 py-5 px-6">
-          <h2 class="text-2xl font-bold text-white text-center font-serif tracking-wide">ADMINISTRACIÓN DE USUARIOS</h2>
+      <div v-if="type === 'admin'" class="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-100">
+        <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+          <h2 class="text-xl font-bold text-amber-900 font-serif">Administración de usuarios</h2>
         </div>
-        
         <div class="p-6">
           <div v-for="(item, index) in users" :key="index" 
                class="mb-4 p-4 bg-amber-50 rounded-lg border border-amber-100 flex justify-between items-center transition duration-200 hover:bg-amber-100">
@@ -193,16 +184,14 @@
       </div>
     </div>
   </div>
-  <FooterPage />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { apiUrl, mediaUrl, clearSession } from '../api';
-import NavbarHome from './NavbarHome.vue';
 import { useRouter } from 'vue-router';
-import FooterPage from './FooterPage.vue';
+import PageHero from './PageHero.vue';
 
 const image = ref("");
 const imageUrl = ref("");
