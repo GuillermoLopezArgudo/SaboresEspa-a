@@ -8,6 +8,8 @@ from threading import Lock
 import requests
 from flask import Blueprint, jsonify, request
 
+from app.rate_limit import rate_limit
+
 mercadona_bp = Blueprint("mercadona", __name__)
 
 MERCADONA_BASE = "https://tienda.mercadona.es/api"
@@ -23,6 +25,21 @@ HEADERS = {
 _cache: dict[str, tuple[float, dict]] = {}
 _lock = Lock()
 CACHE_TTL = 60 * 30  # 30 min
+CACHE_MAX_KEYS = 200
+
+
+def _evict_cache(now: float) -> None:
+    """Quita entradas caducadas y recorta si hay demasiadas claves."""
+    expired = [k for k, (ts, _) in _cache.items() if now - ts >= CACHE_TTL]
+    for k in expired:
+        _cache.pop(k, None)
+    if len(_cache) <= CACHE_MAX_KEYS:
+        return
+    # Más antiguas primero
+    ordered = sorted(_cache.items(), key=lambda item: item[1][0])
+    overflow = len(_cache) - CACHE_MAX_KEYS
+    for k, _ in ordered[:overflow]:
+        _cache.pop(k, None)
 
 
 def _cached_get(path: str) -> tuple[dict | list, int]:
@@ -39,6 +56,7 @@ def _cached_get(path: str) -> tuple[dict | list, int]:
             return {"error": f"Mercadona respondió {resp.status_code}"}, resp.status_code
         data = resp.json()
         with _lock:
+            _evict_cache(now)
             _cache[url] = (now, data)
         return data, 200
     except requests.Timeout:
@@ -48,12 +66,14 @@ def _cached_get(path: str) -> tuple[dict | list, int]:
 
 
 @mercadona_bp.get("/categories")
+@rate_limit(max_calls=60, window_seconds=60, prefix="mercadona")
 def get_categories():
     data, status = _cached_get("/categories/")
     return jsonify(data), status
 
 
 @mercadona_bp.post("/productos")
+@rate_limit(max_calls=60, window_seconds=60, prefix="mercadona")
 def get_productos():
     body = request.get_json(silent=True) or {}
     category_id = body.get("id") or request.args.get("id")
@@ -69,6 +89,7 @@ def get_productos():
 
 
 @mercadona_bp.post("/searchIngredient")
+@rate_limit(max_calls=60, window_seconds=60, prefix="mercadona")
 def search_ingredient():
     """Atajo: recibe texto de ingrediente y devuelve productos candidatos."""
     body = request.get_json(silent=True) or {}

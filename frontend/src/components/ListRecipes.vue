@@ -310,10 +310,13 @@ const isFavorite = (id) => {
     return favoritos[id] || false;
 };
 
-// Función para cambiar la calificación de una receta
+// Función para cambiar la calificación de una receta (siempre callback válido)
 const ratingChanged = (recipeId) => {
-    if (!userToken) return undefined;
     return (newRating) => {
+        if (!userToken) {
+            router.push({ name: 'login' });
+            return;
+        }
         ratings[recipeId] = newRating;
         axios.post(apiUrl('/updateRating'), {
             idrecipe: recipeId,
@@ -329,7 +332,7 @@ const ratingChanged = (recipeId) => {
 function averageStars() {
     axios.post(apiUrl('/averageStars'))
         .then(response => {
-            response.data.media.forEach(rating => {
+            ;(response.data.media || []).forEach(rating => {
                 average[rating.recipe_id] = rating.average_rating
             });
         })

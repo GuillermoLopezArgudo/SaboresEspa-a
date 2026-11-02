@@ -3,6 +3,7 @@ from datetime import date
 from flask import Blueprint, current_app, jsonify, request
 from peewee import fn
 
+from app.db import db
 from app.models import (
     Recipe,
     RecipeComment,
@@ -158,6 +159,7 @@ def create_recipe(current_user):
     if not title:
         return jsonify(message="Título obligatorio"), 400
 
+    # Subir TODA la media antes de tocar la BD (evita recetas huérfanas)
     image = data.get("image")
     video = data.get("video")
     image_url = None
@@ -184,28 +186,7 @@ def create_recipe(current_user):
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
     steps = data.get("steps") or []
-
-    recipe = Recipe.create(
-        recipe_title=title,
-        recipe_visibility=bool(data.get("visibility", True)),
-        recipe_image=image_url,
-        recipe_description=data.get("description"),
-        recipe_video=video_url,
-        id_user=current_user.id,
-        created_at=date.today(),
-        modified_at=date.today(),
-    )
-
-    for i, ingredient in enumerate(ingredients):
-        RecipeIngredient.create(
-            id_recipe=recipe.id,
-            id_user=current_user.id,
-            ingredients_text=ingredient,
-            quantity_unit=quantities[i] if i < len(quantities) else "",
-            created_at=date.today(),
-            modified_at=date.today(),
-        )
-
+    prepared_steps = []
     for step in steps:
         step_image = step.get("image")
         step_image_url = None
@@ -218,30 +199,55 @@ def create_recipe(current_user):
             )
             if isinstance(step_image_url, tuple):
                 return step_image_url
-        recipe_step = RecipeStep.create(
-            id_recipe=recipe.id,
+        prepared_steps.append((step, step_image_url))
+
+    with db.atomic():
+        recipe = Recipe.create(
+            recipe_title=title,
+            recipe_visibility=bool(data.get("visibility", True)),
+            recipe_image=image_url,
+            recipe_description=data.get("description"),
+            recipe_video=video_url,
             id_user=current_user.id,
-            step_title=step.get("title"),
-            step_description=_step_description(step),
             created_at=date.today(),
             modified_at=date.today(),
         )
-        if step_image_url:
-            step_img = StepImage.create(
+
+        for i, ingredient in enumerate(ingredients):
+            RecipeIngredient.create(
+                id_recipe=recipe.id,
                 id_user=current_user.id,
-                step_image=step_image_url,
+                ingredients_text=ingredient,
+                quantity_unit=quantities[i] if i < len(quantities) else "",
                 created_at=date.today(),
                 modified_at=date.today(),
             )
-            RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
 
-    _save_filters(
-        recipe.id,
-        data.get("typeeat"),
-        data.get("ccaa"),
-        data.get("time"),
-        data.get("proteins") or [],
-    )
+        for step, step_image_url in prepared_steps:
+            recipe_step = RecipeStep.create(
+                id_recipe=recipe.id,
+                id_user=current_user.id,
+                step_title=step.get("title"),
+                step_description=_step_description(step),
+                created_at=date.today(),
+                modified_at=date.today(),
+            )
+            if step_image_url:
+                step_img = StepImage.create(
+                    id_user=current_user.id,
+                    step_image=step_image_url,
+                    created_at=date.today(),
+                    modified_at=date.today(),
+                )
+                RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
+
+        _save_filters(
+            recipe.id,
+            data.get("typeeat"),
+            data.get("ccaa"),
+            data.get("time"),
+            data.get("proteins") or [],
+        )
     return jsonify(message="RECETA SUBIDA")
 
 @recipes_bp.post("/viewRecipes")
@@ -571,6 +577,7 @@ def edit_recipe(current_user):
     if not _can_manage_recipe(current_user, recipe):
         return jsonify(message="No autorizado"), 403
 
+    # Subir media ANTES de borrar/recrear hijos (evita pérdida de datos a mitad)
     image = data.get("image")
     video = data.get("video")
     image_url = None
@@ -596,44 +603,9 @@ def edit_recipe(current_user):
             return uploaded
         video_url = uploaded
 
-    recipe.recipe_title = (data.get("title") or recipe.recipe_title).strip()
-    recipe.recipe_description = data.get("description")
-    recipe.recipe_visibility = bool(data.get("visibility"))
-    if image_url:
-        recipe.recipe_image = image_url
-    if video_url:
-        recipe.recipe_video = video_url
-    recipe.modified_at = date.today()
-    recipe.save()
-
-    step_ids = [
-        s.id for s in RecipeStep.select(RecipeStep.id).where(RecipeStep.id_recipe == recipe.id)
-    ]
-    if step_ids:
-        image_ids = [
-            link.id_image_id
-            for link in RecipeStepImage.select().where(RecipeStepImage.id_step.in_(step_ids))
-        ]
-        RecipeStepImage.delete().where(RecipeStepImage.id_step.in_(step_ids)).execute()
-        if image_ids:
-            StepImage.delete().where(StepImage.id.in_(image_ids)).execute()
-
-    RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
-    RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
-    RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
-
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
-    for i, ingredient in enumerate(ingredients):
-        RecipeIngredient.create(
-            id_recipe=recipe.id,
-            id_user=current_user.id,
-            ingredients_text=ingredient,
-            quantity_unit=quantities[i] if i < len(quantities) else "",
-            created_at=date.today(),
-            modified_at=date.today(),
-        )
-
+    prepared_steps = []
     for step in data.get("steps") or []:
         step_image = step.get("image")
         step_image_url = None
@@ -647,30 +619,73 @@ def edit_recipe(current_user):
             if isinstance(uploaded, tuple):
                 return uploaded
             step_image_url = uploaded
-        recipe_step = RecipeStep.create(
-            id_recipe=recipe.id,
-            id_user=current_user.id,
-            step_title=step.get("title"),
-            step_description=_step_description(step),
-            created_at=date.today(),
-            modified_at=date.today(),
-        )
-        if step_image_url:
-            step_img = StepImage.create(
+        prepared_steps.append((step, step_image_url))
+
+    with db.atomic():
+        recipe.recipe_title = (data.get("title") or recipe.recipe_title).strip()
+        recipe.recipe_description = data.get("description")
+        recipe.recipe_visibility = bool(data.get("visibility"))
+        if image_url:
+            recipe.recipe_image = image_url
+        if video_url:
+            recipe.recipe_video = video_url
+        recipe.modified_at = date.today()
+        recipe.save()
+
+        step_ids = [
+            s.id
+            for s in RecipeStep.select(RecipeStep.id).where(RecipeStep.id_recipe == recipe.id)
+        ]
+        if step_ids:
+            image_ids = [
+                link.id_image_id
+                for link in RecipeStepImage.select().where(
+                    RecipeStepImage.id_step.in_(step_ids)
+                )
+            ]
+            RecipeStepImage.delete().where(RecipeStepImage.id_step.in_(step_ids)).execute()
+            if image_ids:
+                StepImage.delete().where(StepImage.id.in_(image_ids)).execute()
+
+        RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
+        RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
+        RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+
+        for i, ingredient in enumerate(ingredients):
+            RecipeIngredient.create(
+                id_recipe=recipe.id,
                 id_user=current_user.id,
-                step_image=step_image_url,
+                ingredients_text=ingredient,
+                quantity_unit=quantities[i] if i < len(quantities) else "",
                 created_at=date.today(),
                 modified_at=date.today(),
             )
-            RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
 
-    _save_filters(
-        recipe.id,
-        data.get("typeeat"),
-        data.get("ccaa"),
-        data.get("time"),
-        data.get("proteins") or [],
-    )
+        for step, step_image_url in prepared_steps:
+            recipe_step = RecipeStep.create(
+                id_recipe=recipe.id,
+                id_user=current_user.id,
+                step_title=step.get("title"),
+                step_description=_step_description(step),
+                created_at=date.today(),
+                modified_at=date.today(),
+            )
+            if step_image_url:
+                step_img = StepImage.create(
+                    id_user=current_user.id,
+                    step_image=step_image_url,
+                    created_at=date.today(),
+                    modified_at=date.today(),
+                )
+                RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
+
+        _save_filters(
+            recipe.id,
+            data.get("typeeat"),
+            data.get("ccaa"),
+            data.get("time"),
+            data.get("proteins") or [],
+        )
     return jsonify(message="Receta actualizada correctamente")
 
 
@@ -704,7 +719,18 @@ def filter_recipe():
         id_sets.append(ids)
 
     result_ids = set.intersection(*id_sets) if id_sets else set()
-    return jsonify(message=[{"idrecipe": rid} for rid in result_ids])
+    if not result_ids:
+        return jsonify(message=[])
+
+    # Solo IDs de recetas públicas (no filtrar privadas por categoría)
+    visible = {
+        r.id
+        for r in Recipe.select(Recipe.id).where(
+            (Recipe.id.in_(list(result_ids)))
+            & (Recipe.recipe_visibility == True)  # noqa: E712
+        )
+    }
+    return jsonify(message=[{"idrecipe": rid} for rid in visible])
 
 
 @recipes_bp.post("/recipeFilter")
@@ -742,10 +768,15 @@ def recipe_filter():
 @recipes_bp.post("/averageStars")
 def average_stars():
     try:
-        query = RecipeReview.select(
-            RecipeReview.id_recipe,
-            fn.AVG(RecipeReview.recipe_review_item_value).alias("average_rating"),
-        ).group_by(RecipeReview.id_recipe)
+        query = (
+            RecipeReview.select(
+                RecipeReview.id_recipe,
+                fn.AVG(RecipeReview.recipe_review_item_value).alias("average_rating"),
+            )
+            .join(Recipe, on=(RecipeReview.id_recipe == Recipe.id))
+            .where(Recipe.recipe_visibility == True)  # noqa: E712
+            .group_by(RecipeReview.id_recipe)
+        )
         return jsonify(
             media=[
                 {
@@ -755,5 +786,5 @@ def average_stars():
                 for item in query
             ]
         )
-    except Exception as exc:
-        return jsonify(message="Error: " + str(exc)), 500
+    except Exception:
+        return jsonify(message="No se pudieron calcular las valoraciones"), 500
