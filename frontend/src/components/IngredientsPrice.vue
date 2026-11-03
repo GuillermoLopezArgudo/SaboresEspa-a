@@ -230,7 +230,6 @@ import { apiUrl } from '../api'
 import {
   normalizeText,
   resolveMercadonaCategory,
-  textMatchesIngredient,
 } from '../utils/ingredientes'
 import PageHero from './PageHero.vue'
 
@@ -389,21 +388,6 @@ function collectAllProducts(payload) {
   return found
 }
 
-function collectProducts(payload, palabra) {
-  const found = []
-  const seen = new Set()
-  for (const category of payload?.categories || []) {
-    for (const product of category.products || []) {
-      if (!textMatchesIngredient(product.display_name, palabra)) continue
-      const key = product.id || product.display_name
-      if (seen.has(key)) continue
-      seen.add(key)
-      found.push(product)
-    }
-  }
-  return found
-}
-
 async function ensureCategories() {
   if (categoriesRaw.value) return categoriesRaw.value
   const cats = await axios.get(apiUrl('/categories'), { skipAuth: true })
@@ -443,8 +427,9 @@ async function loadByCategoryId(categoryId, filterText = '') {
   )
   const all = collectAllProducts(response.data)
   if (filterText) {
+    const q = normalizeText(filterText)
     productos.value = all.filter((p) =>
-      textMatchesIngredient(p.display_name, filterText)
+      normalizeText(p.display_name || '').includes(q)
     )
   } else {
     productos.value = all
@@ -475,57 +460,34 @@ async function load() {
     }
 
     if (palabra) {
+      // Búsqueda global en catálogo (no limita a una sola categoría)
       const categoria = resolveMercadonaCategory(palabra)
-      let categoryId = null
+      let categoryId = selectedCategoryId.value
+        ? Number(selectedCategoryId.value)
+        : null
 
-      // Prioridad: categoría inferida del texto (canela→Especias, jamón→…).
-      // Solo si no hay mapeo usamos la categoría elegida a mano / URL.
-      if (categoria) {
-        categoryName.value = categoria
-        categoryId = findCategoryId(categoriesRaw.value.results, categoria)
-      }
-      if (!categoryId && selectedCategoryId.value) {
-        categoryId = Number(selectedCategoryId.value)
-      }
-
-      if (!categoryId) {
-        error.value =
-          'No tenemos mapeada una categoría para esta búsqueda. Elige una categoría.'
-        loading.value = false
-        return
-      }
-
-      selectedCategoryId.value = String(categoryId)
-
-      try {
-        const search = await axios.post(
-          apiUrl('/searchIngredient'),
-          { q: palabra, category_id: categoryId },
-          { skipAuth: true }
-        )
-        if (search.data.products?.length) {
-          productos.value = search.data.products
-          const hit = flatCategories.value.find(
-            (c) => String(c.id) === String(categoryId)
-          )
-          categoryName.value = hit?.name || categoria || ''
-          loading.value = false
-          return
+      // Sugerencia suave de categoría en el select (no bloquea resultados)
+      if (!categoryId && categoria) {
+        const mapped = findCategoryId(categoriesRaw.value.results, categoria)
+        if (mapped) {
+          categoryId = mapped
+          selectedCategoryId.value = String(mapped)
+          categoryName.value = categoria
         }
-      } catch {
-        // fallback
+      } else if (categoryId) {
+        const hit = flatCategories.value.find(
+          (c) => String(c.id) === String(categoryId)
+        )
+        categoryName.value = hit?.name || ''
       }
 
-      const response = await axios.post(
-        apiUrl('/productos'),
-        { id: categoryId },
-        { skipAuth: true }
-      )
-      productos.value = collectProducts(response.data, palabra)
-      const hit = flatCategories.value.find(
-        (c) => String(c.id) === String(categoryId)
-      )
-      categoryName.value = hit?.name || categoria || ''
+      const payload = { q: palabra }
+      if (categoryId) payload.category_id = categoryId
+
+      const search = await axios.post(apiUrl('/searchIngredient'), payload, {
+        skipAuth: true,
+      })
+      productos.value = search.data.products || []
       loading.value = false
       return
     }
