@@ -43,9 +43,13 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/mercadona',
-    name: 'mercadona',
+    path: '/precios',
+    name: 'precios',
     component: IngredientsPrice,
+  },
+  {
+    path: '/mercadona',
+    redirect: (to) => ({ path: '/precios', query: to.query }),
   },
   {
     path: '/ingredients',

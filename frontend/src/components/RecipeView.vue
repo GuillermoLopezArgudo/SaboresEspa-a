@@ -95,7 +95,7 @@
                 {{ receta.description || 'Sin descripción.' }}
               </p>
               <p class="mt-5 text-xs se-muted-text">
-                Pulsa un ingrediente para ver precios en Mercadona.
+                Pulsa un ingrediente para ver precios orientativos.
               </p>
             </div>
           </div>

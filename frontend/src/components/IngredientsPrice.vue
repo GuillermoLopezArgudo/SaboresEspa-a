@@ -3,7 +3,7 @@
     <PageHero
       :title="pageTitle"
       :subtitle="heroSubtitle"
-      eyebrow="Mercadona"
+      eyebrow="Precios"
     >
       <button type="button" class="hero-cta-ghost" @click="goBack">
         ← {{ fromRecipe ? 'Volver a la receta' : 'Volver al recetario' }}
@@ -53,7 +53,7 @@
           </button>
         </div>
         <p class="text-xs text-amber-700/80">
-          Precios de tienda.mercadona.es · orientativos · pueden variar por zona
+          Precios orientativos de tienda online · pueden variar por zona
         </p>
       </form>
 
@@ -81,7 +81,7 @@
         v-else-if="error"
         class="rounded-2xl border border-red-200 bg-red-50 px-5 py-6 text-red-800"
       >
-        <p class="font-semibold">No se pudo cargar Mercadona</p>
+        <p class="font-semibold">No se pudieron cargar los precios</p>
         <p class="mt-1 text-sm text-red-700/90">{{ error }}</p>
         <button
           type="button"
@@ -99,7 +99,7 @@
       >
         <p class="font-serif text-xl font-bold text-amber-950">Explora el catálogo</p>
         <p class="mt-2 text-amber-800/80 max-w-md mx-auto text-sm">
-          Escribe un producto o elige una categoría para ver precios de Mercadona.
+          Escribe un producto o elige una categoría para ver precios orientativos.
         </p>
       </div>
 
@@ -261,11 +261,11 @@ const hasQuery = computed(
 const pageTitle = computed(() => {
   if (ingredientLabel.value) return ingredientLabel.value
   if (categoryName.value) return categoryName.value
-  return 'Productos Mercadona'
+  return 'Precios de productos'
 })
 
 const heroSubtitle = computed(() => {
-  if (loading.value) return 'Consultando catálogo de Mercadona…'
+  if (loading.value) return 'Consultando catálogo…'
   if (error.value) return 'Ha habido un problema al consultar precios'
   if (!hasQuery.value) return 'Busca o filtra por categoría'
   if (!productos.value.length) return 'Compara opciones de la tienda online'
@@ -422,7 +422,7 @@ function onSearch() {
   } else if (selectedCategoryId.value) {
     query.category = selectedCategoryId.value
   }
-  const name = route.name === 'ingredients' ? 'ingredients' : 'mercadona'
+  const name = route.name === 'ingredients' ? 'ingredients' : 'precios'
   router.replace({ name, query })
 }
 
@@ -431,7 +431,7 @@ function onCategoryChange() {
   const query = {}
   if (q) query.q = q
   if (selectedCategoryId.value) query.category = selectedCategoryId.value
-  const name = route.name === 'ingredients' ? 'ingredients' : 'mercadona'
+  const name = route.name === 'ingredients' ? 'ingredients' : 'precios'
   router.replace({ name, query })
 }
 
@@ -490,7 +490,7 @@ async function load() {
 
       if (!categoryId) {
         error.value =
-          'No tenemos mapeada una categoría de Mercadona para esta búsqueda. Elige una categoría.'
+          'No tenemos mapeada una categoría para esta búsqueda. Elige una categoría.'
         loading.value = false
         return
       }
@@ -536,7 +536,7 @@ async function load() {
     console.error(err)
     error.value =
       err.response?.data?.error ||
-      'No se pudo consultar Mercadona. Inténtalo más tarde.'
+      'No se pudieron consultar los precios. Inténtalo más tarde.'
   } finally {
     loading.value = false
   }
