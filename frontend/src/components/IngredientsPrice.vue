@@ -415,8 +415,13 @@ async function ensureCategories() {
 function onSearch() {
   const q = searchInput.value.trim()
   const query = {}
-  if (q) query.q = q
-  if (selectedCategoryId.value) query.category = selectedCategoryId.value
+  if (q) {
+    // Nueva búsqueda por texto: no arrastrar la categoría anterior
+    // (se infiere otra vez con el mapeo de ingredientes).
+    query.q = q
+  } else if (selectedCategoryId.value) {
+    query.category = selectedCategoryId.value
+  }
   const name = route.name === 'ingredients' ? 'ingredients' : 'mercadona'
   router.replace({ name, query })
 }
@@ -471,22 +476,19 @@ async function load() {
 
     if (palabra) {
       const categoria = resolveMercadonaCategory(palabra)
-      let categoryId = selectedCategoryId.value
-        ? Number(selectedCategoryId.value)
-        : null
+      let categoryId = null
 
-      if (!categoryId && categoria) {
+      // Prioridad: categoría inferida del texto (canela→Especias, jamón→…).
+      // Solo si no hay mapeo usamos la categoría elegida a mano / URL.
+      if (categoria) {
         categoryName.value = categoria
         categoryId = findCategoryId(categoriesRaw.value.results, categoria)
       }
+      if (!categoryId && selectedCategoryId.value) {
+        categoryId = Number(selectedCategoryId.value)
+      }
 
       if (!categoryId) {
-        // Sin categoría mapeada: si el usuario eligió una, usarla; si no, error suave
-        if (selectedCategoryId.value) {
-          await loadByCategoryId(selectedCategoryId.value, palabra)
-          loading.value = false
-          return
-        }
         error.value =
           'No tenemos mapeada una categoría de Mercadona para esta búsqueda. Elige una categoría.'
         loading.value = false
