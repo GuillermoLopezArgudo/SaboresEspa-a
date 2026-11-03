@@ -242,7 +242,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { isTokenValid, logoutRequest } from '../api'
+import { logoutRequest } from '../api'
+import { useAuth } from '../utils/auth'
 import { useTheme } from '../utils/theme'
 
 const router = useRouter()
@@ -250,12 +251,7 @@ const route = useRoute()
 const navbarOpen = ref(false)
 const userMenuOpen = ref(false)
 const { isDark, toggleTheme } = useTheme()
-
-const loggedIn = computed(() => isTokenValid(localStorage.getItem('userToken')))
-
-const userLabel = computed(() => {
-  return localStorage.getItem('userName') || localStorage.getItem('email') || 'Usuario'
-})
+const { loggedIn, userName: userLabel } = useAuth()
 
 const userInitial = computed(() => {
   const label = String(userLabel.value || 'U').trim()

@@ -259,6 +259,7 @@ defineOptions({ name: 'ProfileUser' })
 import { ref, onMounted, onActivated } from 'vue'
 import axios from 'axios'
 import { apiUrl, mediaUrl, clearSession } from '../api'
+import { notifyAuthChanged } from '../utils/authBus'
 import { useRouter } from 'vue-router'
 import PageHero from './PageHero.vue'
 import {
@@ -355,6 +356,7 @@ function changePassword() {
       if (response.data.userToken) {
         localStorage.setItem('userToken', response.data.userToken)
         payload.value.userToken = response.data.userToken
+        notifyAuthChanged()
       }
       currentPassword.value = ''
       newPassword.value = ''
@@ -387,6 +389,7 @@ function changeName() {
     .then(() => {
       localStorage.setItem('userName', name.value)
       patchCachedProfile({ name: name.value })
+      notifyAuthChanged()
       handleNameChange()
     })
     .catch((err) => {
@@ -400,6 +403,7 @@ function changeEmail() {
     .then((response) => {
       if (response.data.userToken) {
         localStorage.setItem('userToken', response.data.userToken)
+        notifyAuthChanged()
       }
       patchCachedProfile({ email: email.value })
       handleChangeEmail()

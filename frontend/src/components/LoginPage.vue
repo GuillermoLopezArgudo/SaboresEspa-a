@@ -78,7 +78,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
-import { apiUrl } from '../api'
+import { apiUrl, setSession } from '../api'
 import PageHero from './PageHero.vue'
 import { setCachedProfile } from '../utils/profileCache'
 
@@ -99,10 +99,13 @@ function OnSubmit() {
     })
     .then((response) => {
       if (response.data.userToken) {
-        localStorage.setItem('userToken', response.data.userToken)
-        localStorage.setItem('iduser', response.data.iduser)
-        localStorage.setItem('type', response.data.type)
-        if (response.data.name) localStorage.setItem('userName', response.data.name)
+        setSession({
+          userToken: response.data.userToken,
+          iduser: response.data.iduser,
+          type: response.data.type,
+          name: response.data.name || '',
+          email: response.data.email || email.value,
+        })
         setCachedProfile({
           name: response.data.name || '',
           email: response.data.email || email.value,
