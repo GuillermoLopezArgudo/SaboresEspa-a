@@ -2,6 +2,8 @@
   // Condimentos y básicos
   "Aceite de oliva": "Aceite, vinagre y sal",
   "Aceite de oliva virgen extra": "Aceite, vinagre y sal",
+  "Aceite de Oliva Virgen Extra": "Aceite, vinagre y sal",
+  "AOVE": "Aceite, vinagre y sal",
   "Aceite de girasol": "Aceite, vinagre y sal",
   "Vinagre de vino": "Aceite, vinagre y sal",
   "Vinagre de manzana": "Aceite, vinagre y sal",

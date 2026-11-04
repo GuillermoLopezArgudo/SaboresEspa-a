@@ -20,6 +20,8 @@ def test_clean_query_strips_recipe_noise():
     assert _clean_search_query("Piel de limón") == "limon"
     assert _clean_search_query("Pollo en trozos") == "pollo"
     assert _clean_search_query("Conejo en trozos") == "conejo"
+    assert _clean_search_query("AOVE") == "aceite oliva virgen extra"
+    assert _clean_search_query("aove") == "aceite oliva virgen extra"
 
 
 def test_huevos_prefers_eggs_not_pasta():

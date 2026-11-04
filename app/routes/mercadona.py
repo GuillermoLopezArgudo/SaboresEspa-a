@@ -203,6 +203,10 @@ _QUERY_ALIASES = {
     "oregano fresco": "oregano",
     "tomillo fresco": "tomillo",
     "perejil fresco": "perejil",
+    # Nunca dejar la abreviatura: AOVE = Aceite de Oliva Virgen Extra
+    "aove": "aceite oliva virgen extra",
+    "aceite aove": "aceite oliva virgen extra",
+    "aceite de oliva aove": "aceite oliva virgen extra",
 }
 
 # Cortes / formatos: no sirven solos como búsqueda (lomo ≠ bacalao)
