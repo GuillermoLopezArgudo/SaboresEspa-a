@@ -1,9 +1,12 @@
-"""Proxy a la API pública de tienda.mercadona.es para precios de ingredientes."""
+"""Proxy a la API de tienda online (catálogo + búsqueda Algolia) para precios."""
 
 from __future__ import annotations
 
+import os
+import re
 import time
 from threading import Lock
+from urllib.parse import urlencode
 
 import requests
 from flask import Blueprint, jsonify, request
@@ -13,6 +16,10 @@ from app.rate_limit import rate_limit
 mercadona_bp = Blueprint("mercadona", __name__)
 
 MERCADONA_BASE = "https://tienda.mercadona.es/api"
+# Credenciales de solo lectura embebidas en el frontend de la tienda (Algolia)
+ALGOLIA_APP_ID = "7UZJKL1DJ0"
+ALGOLIA_API_KEY = "9d8f2e39e90df472b4f2e559a116fe17"
+ALGOLIA_WAREHOUSE = os.getenv("MERCADONA_WH", "mad1")
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -123,26 +130,82 @@ def _product_payload(product: dict) -> dict:
     }
 
 
-@mercadona_bp.post("/searchIngredient")
-@rate_limit(max_calls=60, window_seconds=60, prefix="mercadona")
-def search_ingredient():
-    """Atajo: recibe texto de ingrediente y devuelve productos candidatos."""
-    body = request.get_json(silent=True) or {}
-    query = (body.get("q") or body.get("ingredient") or "").strip()
-    category_id = body.get("category_id")
-    if not query:
-        return jsonify(error="Falta el ingrediente"), 400
-    if not category_id:
-        return jsonify(error="Falta category_id"), 400
-    try:
-        category_id = int(category_id)
-    except (TypeError, ValueError):
-        return jsonify(error="category_id inválido"), 400
+def _algolia_hit_payload(hit: dict) -> dict:
+    price_info = hit.get("price_instructions") or {}
+    return {
+        "id": hit.get("id"),
+        "display_name": hit.get("display_name"),
+        "thumbnail": hit.get("thumbnail"),
+        "price": price_info.get("unit_price") or price_info.get("bulk_price"),
+        "bulk_price": price_info.get("bulk_price"),
+        "unit_size": price_info.get("unit_size"),
+        "size_format": price_info.get("size_format"),
+        "packaging": hit.get("packaging"),
+    }
 
+
+def _algolia_search(query: str, limit: int = 40) -> tuple[list[dict], int]:
+    """Búsqueda de catálogo vía Algolia (misma que usa la tienda online)."""
+    q = (query or "").strip()
+    if not q:
+        return [], 400
+    limit = max(1, min(int(limit or 40), 50))
+    index = f"products_prod_{ALGOLIA_WAREHOUSE}_es"
+    cache_key = f"algolia:{ALGOLIA_WAREHOUSE}:{_normalize(q)}:{limit}"
+    now = time.time()
+    with _lock:
+        hit = _cache.get(cache_key)
+        if hit and now - hit[0] < CACHE_TTL:
+            return hit[1], 200
+
+    url = (
+        f"https://{ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/{index}/query"
+        f"?x-algolia-application-id={ALGOLIA_APP_ID}"
+        f"&x-algolia-api-key={ALGOLIA_API_KEY}"
+    )
+    params = urlencode({"query": q, "hitsPerPage": str(limit)})
+    try:
+        resp = requests.post(
+            url,
+            headers={**HEADERS, "Content-Type": "application/json"},
+            json={"params": params},
+            timeout=20,
+        )
+        if resp.status_code >= 400:
+            return [{"error": f"Búsqueda respondió {resp.status_code}"}], resp.status_code
+        hits = resp.json().get("hits") or []
+        products = [_algolia_hit_payload(h) for h in hits if h.get("display_name")]
+        with _lock:
+            _evict_cache(now)
+            _cache[cache_key] = (now, products)
+        return products, 200
+    except requests.Timeout:
+        return [{"error": "Timeout en la búsqueda"}], 504
+    except requests.RequestException as exc:
+        return [{"error": str(exc)}], 502
+
+
+def _merge_products(*lists: list[dict], limit: int = 60) -> list[dict]:
+    seen = set()
+    out = []
+    for lst in lists:
+        for p in lst or []:
+            if not isinstance(p, dict) or p.get("error"):
+                continue
+            pid = p.get("id") or p.get("display_name")
+            if not pid or pid in seen:
+                continue
+            seen.add(pid)
+            out.append(p)
+            if len(out) >= limit:
+                return out
+    return out
+
+
+def _search_category_local(query: str, category_id: int) -> list[dict]:
     data, status = _cached_get(f"/categories/{category_id}")
     if status != 200 or not isinstance(data, dict):
-        return jsonify(data), status
-
+        return []
     variants = _variants(query)
     products = []
     seen = set()
@@ -155,4 +218,86 @@ def search_ingredient():
                     continue
                 seen.add(pid)
                 products.append(_product_payload(product))
-    return jsonify(ingredient=query, products=products, count=len(products))
+    return products
+
+
+@mercadona_bp.post("/searchIngredient")
+@rate_limit(max_calls=60, window_seconds=60, prefix="mercadona")
+def search_ingredient():
+    """Busca productos por texto en todo el catálogo (Algolia) y opcionalmente por categoría."""
+    body = request.get_json(silent=True) or {}
+    query = (body.get("q") or body.get("ingredient") or "").strip()
+    category_id = body.get("category_id")
+    if not query:
+        return jsonify(error="Falta el ingrediente"), 400
+
+    # Búsqueda por la frase completa (no partir en "carne" OR "picada")
+    primary, status = _algolia_search(query, limit=48)
+    if status != 200:
+        if category_id:
+            try:
+                cid = int(category_id)
+            except (TypeError, ValueError):
+                return jsonify(error="category_id inválido"), 400
+            local = _search_category_local(query, cid)
+            return jsonify(ingredient=query, products=local, count=len(local), source="category")
+        err = primary[0] if primary and isinstance(primary[0], dict) else {"error": "Búsqueda fallida"}
+        return jsonify(err), status
+
+    products = list(primary)
+
+    # Exigir cada token como palabra completa (canela ≠ canelones; carne+picada juntos)
+    strict = _filter_by_tokens(products, query)
+    if strict:
+        products = strict
+
+    products = _rank_by_query(products, query)
+    return jsonify(
+        ingredient=query,
+        products=products,
+        count=len(products),
+        source="catalog",
+    )
+
+
+def _query_tokens(query: str) -> list[str]:
+    phrase = _normalize(query)
+    return [t for t in phrase.replace("/", " ").replace("-", " ").split() if len(t) > 2]
+
+
+def _token_in_name(token: str, name: str) -> bool:
+    """Palabra completa; admite plural simple (canela/canelas), no prefijos (canelones)."""
+    if not token or not name:
+        return False
+    pat = rf"(?<![a-z0-9]){re.escape(token)}(?:es|s)?(?![a-z0-9])"
+    return re.search(pat, name) is not None
+
+
+def _filter_by_tokens(products: list[dict], query: str) -> list[dict]:
+    tokens = _query_tokens(query)
+    if not tokens:
+        return []
+    out = []
+    for p in products:
+        name = _normalize(p.get("display_name") or "")
+        if all(_token_in_name(t, name) for t in tokens):
+            out.append(p)
+    return out
+
+
+def _rank_by_query(products: list[dict], query: str) -> list[dict]:
+    """Prioriza coincidencia de frase completa frente a parciales."""
+    phrase = _normalize(query)
+    tokens = _query_tokens(query)
+
+    def score(p: dict) -> tuple:
+        name = _normalize(p.get("display_name") or "")
+        if phrase and " " in phrase and phrase in name:
+            return (0, name)
+        if phrase and " " not in phrase and _token_in_name(phrase, name):
+            return (0, name)
+        if tokens and all(_token_in_name(t, name) for t in tokens):
+            return (1, name)
+        return (2, name)
+
+    return sorted(products, key=score)

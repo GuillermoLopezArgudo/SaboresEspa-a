@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { notifyAuthChanged } from './utils/authBus'
 
 const raw =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ||
@@ -72,7 +73,19 @@ export function clearSession() {
   localStorage.removeItem('type')
   localStorage.removeItem('token')
   localStorage.removeItem('userName')
+  localStorage.removeItem('email')
   localStorage.removeItem('sabores_profile')
+  notifyAuthChanged()
+}
+
+/** Guarda sesión tras login/registro y avisa a la UI. */
+export function setSession({ userToken, iduser, type, name, email } = {}) {
+  if (userToken) localStorage.setItem('userToken', userToken)
+  if (iduser != null) localStorage.setItem('iduser', String(iduser))
+  if (type != null) localStorage.setItem('type', String(type))
+  if (name) localStorage.setItem('userName', name)
+  if (email) localStorage.setItem('email', email)
+  notifyAuthChanged()
 }
 
 /** Comprueba expiración del JWT en cliente (la firma la valida el API). */

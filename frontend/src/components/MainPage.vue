@@ -43,8 +43,8 @@ defineOptions({ name: 'MainPage' })
 import PageHero from './PageHero.vue'
 import RecipeFilter from './FilterRecipe.vue'
 import ListRecipes from './ListRecipes.vue'
-import { computed, ref } from 'vue'
-import { isTokenValid } from '../api'
+import { ref } from 'vue'
+import { useAuth } from '../utils/auth'
 import {
   hasActiveFilters,
   mergeFilterCriteria,
@@ -52,7 +52,7 @@ import {
 
 const greeting = ref('all')
 const filterCriteria = ref(null)
-const loggedIn = computed(() => isTokenValid(localStorage.getItem('userToken')))
+const { loggedIn } = useAuth()
 
 function aplicarFiltros(criteria) {
   filterCriteria.value = criteria

@@ -1,16 +1,62 @@
 <template>
   <div>
     <PageHero
-      :title="ingredientLabel || 'Precios Mercadona'"
+      :title="pageTitle"
       :subtitle="heroSubtitle"
-      eyebrow="Mercadona"
+      eyebrow="Precios"
     >
       <button type="button" class="hero-cta-ghost" @click="goBack">
-        ← Volver a la receta
+        ← {{ fromRecipe ? 'Volver a la receta' : 'Volver al recetario' }}
       </button>
     </PageHero>
 
     <div class="max-w-6xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- Buscador / filtros -->
+      <form
+        class="mb-6 rounded-2xl border border-amber-200 bg-white p-4 sm:p-5 shadow-sm space-y-3"
+        @submit.prevent="onSearch"
+      >
+        <div class="grid grid-cols-1 sm:grid-cols-[1fr_minmax(0,14rem)_auto] gap-3">
+          <label class="block min-w-0">
+            <span class="sr-only">Buscar producto</span>
+            <input
+              v-model="searchInput"
+              type="search"
+              enterkeyhint="search"
+              placeholder="Buscar producto o ingrediente…"
+              class="w-full rounded-xl border border-amber-300 px-4 py-2.5 text-sm text-amber-950 placeholder:text-amber-700/40 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+          </label>
+          <label class="block min-w-0">
+            <span class="sr-only">Categoría</span>
+            <select
+              v-model="selectedCategoryId"
+              class="w-full rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              @change="onCategoryChange"
+            >
+              <option value="">Todas las categorías</option>
+              <option
+                v-for="cat in flatCategories"
+                :key="cat.id"
+                :value="String(cat.id)"
+              >
+                {{ cat.name }}
+              </option>
+            </select>
+          </label>
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-sm font-semibold px-5 py-2.5 transition"
+            :disabled="loading"
+          >
+            Buscar
+          </button>
+        </div>
+        <p class="text-xs text-amber-700/80">
+          Precios orientativos de tienda online · pueden variar por zona
+        </p>
+      </form>
+
       <!-- Loading skeleton -->
       <div v-if="loading" class="space-y-5">
         <div class="h-10 w-64 rounded-full bg-amber-100 animate-pulse" />
@@ -35,7 +81,7 @@
         v-else-if="error"
         class="rounded-2xl border border-red-200 bg-red-50 px-5 py-6 text-red-800"
       >
-        <p class="font-semibold">No se pudo cargar Mercadona</p>
+        <p class="font-semibold">No se pudieron cargar los precios</p>
         <p class="mt-1 text-sm text-red-700/90">{{ error }}</p>
         <button
           type="button"
@@ -46,26 +92,27 @@
         </button>
       </div>
 
-      <!-- Empty -->
+      <!-- Idle: aún no hay búsqueda -->
+      <div
+        v-else-if="!hasQuery && !productos.length"
+        class="rounded-2xl border border-amber-200 bg-white px-6 py-12 text-center"
+      >
+        <p class="font-serif text-xl font-bold text-amber-950">Explora el catálogo</p>
+        <p class="mt-2 text-amber-800/80 max-w-md mx-auto text-sm">
+          Escribe un producto o elige una categoría para ver precios orientativos.
+        </p>
+      </div>
+
+      <!-- Empty results -->
       <div
         v-else-if="!productos.length"
         class="rounded-2xl border border-amber-200 bg-white px-6 py-12 text-center"
       >
         <p class="font-serif text-xl font-bold text-amber-950">Sin resultados</p>
         <p class="mt-2 text-amber-800/80 max-w-md mx-auto">
-          No encontramos productos de Mercadona para
-          <span class="font-semibold">{{ ingredientLabel || 'este ingrediente' }}</span>.
+          No encontramos productos para
+          <span class="font-semibold">{{ ingredientLabel || categoryName || 'esta búsqueda' }}</span>.
         </p>
-        <p v-if="categoryName" class="mt-3 text-xs text-amber-700">
-          Categoría consultada: {{ categoryName }}
-        </p>
-        <button
-          type="button"
-          class="mt-6 inline-flex px-4 py-2 rounded-full border border-amber-300 text-amber-900 text-sm font-medium hover:bg-amber-50 transition"
-          @click="goBack"
-        >
-          Volver
-        </button>
       </div>
 
       <!-- Results -->
@@ -73,7 +120,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="flex flex-wrap items-center gap-2 text-sm">
             <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-900 text-amber-50 font-medium">
-              {{ productos.length }} producto{{ productos.length === 1 ? '' : 's' }}
+              {{ filteredProductos.length }} producto{{ filteredProductos.length === 1 ? '' : 's' }}
             </span>
             <span
               v-if="categoryName"
@@ -89,17 +136,28 @@
             </span>
           </div>
 
-          <label class="inline-flex items-center gap-2 text-sm text-amber-900">
-            <span class="text-amber-800/70">Ordenar</span>
-            <select
-              v-model="sortBy"
-              class="rounded-full border border-amber-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="price-asc">Precio: menor a mayor</option>
-              <option value="price-desc">Precio: mayor a menor</option>
-              <option value="name-asc">Nombre A–Z</option>
-            </select>
-          </label>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="inline-flex items-center gap-2 text-sm text-amber-900">
+              <span class="text-amber-800/70 hidden sm:inline">Filtrar</span>
+              <input
+                v-model="localFilter"
+                type="search"
+                placeholder="Filtrar en resultados…"
+                class="rounded-full border border-amber-300 bg-white px-3 py-1.5 text-sm w-40 sm:w-52 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </label>
+            <label class="inline-flex items-center gap-2 text-sm text-amber-900">
+              <span class="text-amber-800/70">Ordenar</span>
+              <select
+                v-model="sortBy"
+                class="rounded-full border border-amber-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="name-asc">Nombre A–Z</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -159,10 +217,6 @@
             </div>
           </article>
         </div>
-
-        <p class="text-center text-xs text-amber-700/70 pt-2">
-          Precios orientativos de tienda.mercadona.es · pueden variar por zona
-        </p>
       </div>
     </div>
   </div>
@@ -176,28 +230,45 @@ import { apiUrl } from '../api'
 import {
   normalizeText,
   resolveMercadonaCategory,
-  textMatchesIngredient,
 } from '../utils/ingredientes'
 import PageHero from './PageHero.vue'
 
 const route = useRoute()
 const router = useRouter()
 const productos = ref([])
-const loading = ref(true)
+const loading = ref(false)
 const error = ref('')
 const categoryName = ref('')
 const sortBy = ref('price-asc')
+const searchInput = ref('')
+const localFilter = ref('')
+const selectedCategoryId = ref('')
+const flatCategories = ref([])
+const categoriesRaw = ref(null)
 
 const ingredientLabel = computed(() => {
-  const q = route.query.ingredients
+  const q = route.query.ingredients || route.query.q
   return typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
 })
 
+const fromRecipe = computed(() => Boolean(route.query.ingredients))
+
+const hasQuery = computed(
+  () => Boolean(ingredientLabel.value) || Boolean(selectedCategoryId.value)
+)
+
+const pageTitle = computed(() => {
+  if (ingredientLabel.value) return ingredientLabel.value
+  if (categoryName.value) return categoryName.value
+  return 'Precios de productos'
+})
+
 const heroSubtitle = computed(() => {
-  if (loading.value) return 'Buscando productos en Mercadona…'
+  if (loading.value) return 'Consultando catálogo…'
   if (error.value) return 'Ha habido un problema al consultar precios'
+  if (!hasQuery.value) return 'Busca o filtra por categoría'
   if (!productos.value.length) return 'Compara opciones de la tienda online'
-  return `${productos.value.length} resultado${productos.value.length === 1 ? '' : 's'} encontrados`
+  return `${filteredProductos.value.length} resultado${filteredProductos.value.length === 1 ? '' : 's'}`
 })
 
 function goBack() {
@@ -226,20 +297,24 @@ function packagingLabel(p) {
 }
 
 function unitLabel(p) {
-  const size =
-    p.unit_size ??
-    p.price_instructions?.unit_size
-  const format =
-    p.size_format ??
-    p.price_instructions?.size_format
+  const size = p.unit_size ?? p.price_instructions?.unit_size
+  const format = p.size_format ?? p.price_instructions?.size_format
   if (size == null || size === '') return ''
   return format ? `${size} ${format}` : String(size)
 }
 
+const filteredProductos = computed(() => {
+  const q = normalizeText(localFilter.value)
+  if (!q) return productos.value
+  return productos.value.filter((p) =>
+    normalizeText(p.display_name || '').includes(q)
+  )
+})
+
 const cheapest = computed(() => {
   let best = null
   let bestPrice = Infinity
-  for (const p of productos.value) {
+  for (const p of filteredProductos.value) {
     const n = numericPrice(p)
     if (n === null) continue
     if (n < bestPrice) {
@@ -257,7 +332,7 @@ function isCheapest(p) {
 }
 
 const sortedProductos = computed(() => {
-  const list = [...productos.value]
+  const list = [...filteredProductos.value]
   if (sortBy.value === 'name-asc') {
     return list.sort((a, b) =>
       String(a.display_name || '').localeCompare(String(b.display_name || ''), 'es')
@@ -289,14 +364,23 @@ function findCategoryId(results, categoria) {
   return fuzzy
 }
 
-function collectProducts(payload, palabra) {
+function flattenCategories(results) {
+  const out = []
+  for (const group of results || []) {
+    for (const cat of group.categories || []) {
+      if (cat?.id && cat?.name) out.push({ id: cat.id, name: cat.name })
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name, 'es'))
+}
+
+function collectAllProducts(payload) {
   const found = []
   const seen = new Set()
   for (const category of payload?.categories || []) {
     for (const product of category.products || []) {
-      if (!textMatchesIngredient(product.display_name, palabra)) continue
       const key = product.id || product.display_name
-      if (seen.has(key)) continue
+      if (!key || seen.has(key)) continue
       seen.add(key)
       found.push(product)
     }
@@ -304,70 +388,127 @@ function collectProducts(payload, palabra) {
   return found
 }
 
+async function ensureCategories() {
+  if (categoriesRaw.value) return categoriesRaw.value
+  const cats = await axios.get(apiUrl('/categories'), { skipAuth: true })
+  categoriesRaw.value = cats.data
+  flatCategories.value = flattenCategories(cats.data.results)
+  return cats.data
+}
+
+function onSearch() {
+  const q = searchInput.value.trim()
+  const query = {}
+  if (q) {
+    // Nueva búsqueda por texto: no arrastrar la categoría anterior
+    // (se infiere otra vez con el mapeo de ingredientes).
+    query.q = q
+  } else if (selectedCategoryId.value) {
+    query.category = selectedCategoryId.value
+  }
+  const name = route.name === 'ingredients' ? 'ingredients' : 'precios'
+  router.replace({ name, query })
+}
+
+function onCategoryChange() {
+  const q = searchInput.value.trim()
+  const query = {}
+  if (q) query.q = q
+  if (selectedCategoryId.value) query.category = selectedCategoryId.value
+  const name = route.name === 'ingredients' ? 'ingredients' : 'precios'
+  router.replace({ name, query })
+}
+
+async function loadByCategoryId(categoryId, filterText = '') {
+  const response = await axios.post(
+    apiUrl('/productos'),
+    { id: categoryId },
+    { skipAuth: true }
+  )
+  const all = collectAllProducts(response.data)
+  if (filterText) {
+    const q = normalizeText(filterText)
+    productos.value = all.filter((p) =>
+      normalizeText(p.display_name || '').includes(q)
+    )
+  } else {
+    productos.value = all
+  }
+  const hit = flatCategories.value.find((c) => String(c.id) === String(categoryId))
+  categoryName.value = hit?.name || ''
+}
+
 async function load() {
   loading.value = true
   error.value = ''
   productos.value = []
   categoryName.value = ''
+
   const palabra = ingredientLabel.value
-  if (!palabra) {
-    error.value = 'No se ha indicado un ingrediente.'
-    loading.value = false
-    return
-  }
+  const catFromUrl =
+    typeof route.query.category === 'string' ? route.query.category : ''
+
+  searchInput.value = palabra || searchInput.value
+  if (catFromUrl) selectedCategoryId.value = catFromUrl
 
   try {
-    const categoria = resolveMercadonaCategory(palabra)
-    if (!categoria) {
-      error.value =
-        'No tenemos mapeada una categoría de Mercadona para este ingrediente.'
-      loading.value = false
-      return
-    }
-    categoryName.value = categoria
+    await ensureCategories()
 
-    const cats = await axios.get(apiUrl('/categories'), { skipAuth: true })
-    const categoryId = findCategoryId(cats.data.results, categoria)
-
-    if (!categoryId) {
-      error.value = `No se encontró la categoría "${categoria}" en Mercadona.`
+    if (!palabra && !selectedCategoryId.value) {
       loading.value = false
       return
     }
 
-    try {
+    if (palabra) {
+      // Búsqueda global: no arrastrar categoría de búsquedas anteriores (Vacuno + canela)
+      const categoria = resolveMercadonaCategory(palabra)
+      selectedCategoryId.value = ''
+      categoryName.value = ''
+      if (categoria) {
+        const mapped = findCategoryId(categoriesRaw.value.results, categoria)
+        if (mapped) {
+          selectedCategoryId.value = String(mapped)
+          categoryName.value = categoria
+        }
+      }
+
       const search = await axios.post(
         apiUrl('/searchIngredient'),
-        { q: palabra, category_id: categoryId },
+        { q: palabra },
         { skipAuth: true }
       )
-      if (search.data.products?.length) {
-        productos.value = search.data.products
-        loading.value = false
-        return
-      }
-    } catch {
-      // fallback
+      productos.value = search.data.products || []
+      loading.value = false
+      return
     }
 
-    const response = await axios.post(
-      apiUrl('/productos'),
-      { id: categoryId },
-      { skipAuth: true }
-    )
-    productos.value = collectProducts(response.data, palabra)
+    // Solo categoría (sin texto)
+    await loadByCategoryId(selectedCategoryId.value)
   } catch (err) {
     console.error(err)
     error.value =
       err.response?.data?.error ||
-      'No se pudo consultar Mercadona. Inténtalo más tarde.'
+      'No se pudieron consultar los precios. Inténtalo más tarde.'
   } finally {
     loading.value = false
   }
 }
 
-onMounted(load)
-watch(() => route.query.ingredients, load)
+onMounted(async () => {
+  try {
+    await ensureCategories()
+  } catch {
+    /* load() también lo intentará */
+  }
+  await load()
+})
+
+watch(
+  () => [route.query.ingredients, route.query.q, route.query.category],
+  () => {
+    load()
+  }
+)
 </script>
 
 <style scoped>

@@ -43,9 +43,19 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/precios',
+    name: 'precios',
+    component: IngredientsPrice,
+  },
+  {
+    path: '/mercadona',
+    redirect: (to) => ({ path: '/precios', query: to.query }),
+  },
+  {
     path: '/ingredients',
     name: 'ingredients',
     component: IngredientsPrice,
+    // alias legacy desde recetas (?ingredients=…)
   },
 ];
 
