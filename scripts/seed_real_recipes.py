@@ -56,7 +56,7 @@ RECIPES = {
         "ccaa": "castillaleon",
         "time": "15a30",
         "proteins": ["huevo", "vegetariana"],
-        "image": "https://images.unsplash.com/photo-1604908176997-43116b137a95?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Tortilla_de_patatas_con_cebolla.jpg/1280px-Tortilla_de_patatas_con_cebolla.jpg",
         "video": "https://www.youtube.com/watch?v=w_3YM-DZVOE",
         "ingredients": [
             ("Patatas", "600 g"),
@@ -72,7 +72,7 @@ RECIPES = {
                     "Pela las patatas y córtalas en láminas finas. Pocha a fuego suave "
                     "en AOVE 15–20 min con la cebolla en juliana. Escurre bien."
                 ),
-                "image": "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/1656663/pexels-photo-1656663.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Mezclar con el huevo",
@@ -80,7 +80,7 @@ RECIPES = {
                     "Bate los huevos con sal. Incorpora la patata escurrida, mezcla y "
                     "deja reposar 2–3 minutos."
                 ),
-                "image": "https://images.unsplash.com/photo-1498654071233-5abbef0b1f51?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/824635/pexels-photo-824635.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Cuajar y dar la vuelta",
@@ -88,7 +88,7 @@ RECIPES = {
                     "En sartén antiadherente a fuego medio-bajo, cuaja un lado, da la "
                     "vuelta con un plato y termina al punto que prefieras."
                 ),
-                "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Tortilla_de_Patatas_%28Corte_transversal%29.jpg/1280px-Tortilla_de_Patatas_%28Corte_transversal%29.jpg",
             },
         ],
         "comments": [
@@ -108,7 +108,7 @@ RECIPES = {
         "ccaa": "andalucia",
         "time": "menos15",
         "proteins": ["vegana", "vegetariana"],
-        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Gazpacho_Cazuela_Barro.jpg/1280px-Gazpacho_Cazuela_Barro.jpg",
         "video": "https://www.youtube.com/watch?v=Q155S4hWaLk",
         "ingredients": [
             ("Tomates maduros", "1 kg"),
@@ -124,7 +124,7 @@ RECIPES = {
             {
                 "title": "Trocear hortalizas",
                 "description": "Lava y trocea tomate, pimiento, pepino y ajo. Remoja el pan si está muy duro.",
-                "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Gazpacho_ingredients.png",
             },
             {
                 "title": "Triturar y colar",
@@ -132,7 +132,7 @@ RECIPES = {
                     "Tritura con AOVE, vinagre, sal y un poco de agua. Pasa por chino "
                     "si quieres textura fina. Enfría 1–2 h."
                 ),
-                "image": "https://images.unsplash.com/photo-1568158879083-c42860933ed7?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/1327838/pexels-photo-1327838.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
         ],
         "comments": [
@@ -151,7 +151,7 @@ RECIPES = {
         "ccaa": "valencia",
         "time": "mas60",
         "proteins": ["pollo", "conejo"],
-        "image": "https://images.unsplash.com/photo-1534080564583-6be25764b25f?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/01_Paella_Valenciana_original.jpg/1280px-01_Paella_Valenciana_original.jpg",
         "video": "https://www.youtube.com/watch?v=vWySIREExjo",
         "ingredients": [
             ("Arroz bomba", "500–800 g según paella"),
@@ -168,12 +168,12 @@ RECIPES = {
             {
                 "title": "Sofreír carnes",
                 "description": "Dora bien pollo y conejo en AOVE con sal. El tostado marca el sabor del caldo.",
-                "image": "https://images.unsplash.com/photo-1516684669134-de6f7c973a1f?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/4253312/pexels-photo-4253312.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Verdura y tomate",
                 "description": "Añade bajoqueta y garrofón, sofríe. Incorpora tomate y reduce. Tosta azafrán/pimentón sin quemar.",
-                "image": "https://images.unsplash.com/photo-1515443961218-a59527a01999?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Caldo y arroz",
@@ -181,7 +181,7 @@ RECIPES = {
                     "Cubre con agua hasta remaches, cuece ~20–25 min, prueba sal, "
                     "añade arroz y no remuevas. Reposa 5 min."
                 ),
-                "image": "https://images.unsplash.com/photo-1534080564583-6be25764b25f?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/01_Paella_Valenciana_original.jpg/900px-01_Paella_Valenciana_original.jpg",
             },
         ],
         "comments": [
@@ -201,7 +201,7 @@ RECIPES = {
         "ccaa": "galicia",
         "time": "30a60",
         "proteins": ["pulpo"],
-        "image": "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/El_Pulpo_a_la_gallega%2C_t%C3%ADpica_tapa_espa%C3%B1ola.jpg/1280px-El_Pulpo_a_la_gallega%2C_t%C3%ADpica_tapa_espa%C3%B1ola.jpg",
         "video": None,
         "ingredients": [
             ("Pulpo", "1–1,5 kg"),
@@ -215,12 +215,12 @@ RECIPES = {
             {
                 "title": "Cocer el pulpo",
                 "description": "Congelado descongelado o fresco asustado. Cuece 30–45 min según tamaño. Reposa en el agua 15 min.",
-                "image": "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/262959/pexels-photo-262959.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Cachelos y emplatar",
                 "description": "Cuece patatas, córtalas. Corta pulpo, monta, sal gruesa, pimentón y AOVE en crudo.",
-                "image": "https://images.unsplash.com/photo-1615141982883-c7adbf2f93c3?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Polbo_%C3%A1_feira._Galiza.jpg/900px-Polbo_%C3%A1_feira._Galiza.jpg",
             },
         ],
         "comments": [
@@ -239,7 +239,7 @@ RECIPES = {
         "ccaa": "madrid",
         "time": "30a60",
         "proteins": ["vegetariana"],
-        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Patatas_bravas._Tapa_de_bar_%28Espa%C3%B1a%29.jpg/1280px-Patatas_bravas._Tapa_de_bar_%28Espa%C3%B1a%29.jpg",
         "video": None,
         "ingredients": [
             ("Patatas", "800 g"),
@@ -254,12 +254,12 @@ RECIPES = {
             {
                 "title": "Freír patatas",
                 "description": "Corta en dados, seca bien y fríe en dos tiempos si puedes: primero suave, luego fuerte.",
-                "image": "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Salsa brava",
                 "description": "Sofríe ajo, pimentón y tomate. Ajusta picante y sal. Sirve con alioli.",
-                "image": "https://images.unsplash.com/photo-1623238913973-21e45cced554?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/1893556/pexels-photo-1893556.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
         ],
         "comments": [
@@ -278,7 +278,7 @@ RECIPES = {
         "ccaa": "catalunya",
         "time": "30a60",
         "proteins": ["huevo"],
-        "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Crema_catalana._Postre.jpg/1280px-Crema_catalana._Postre.jpg",
         "video": None,
         "ingredients": [
             ("Leche entera", "500 ml"),
@@ -292,7 +292,7 @@ RECIPES = {
             {
                 "title": "Infusionar la leche",
                 "description": "Calienta leche con canela y limón. Reserva 10 min y cuela.",
-                "image": "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/1126359/pexels-photo-1126359.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Cuajar y quemar",
@@ -300,7 +300,7 @@ RECIPES = {
                     "Mezcla yemas, azúcar y maicena; incorpora leche caliente. "
                     "Cuece sin hervir fuerte. Enfría, azucara y quema."
                 ),
-                "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cd?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Cazuelita_con_crema_catalana._Postre.jpg/900px-Cazuelita_con_crema_catalana._Postre.jpg",
             },
         ],
         "comments": [
@@ -319,7 +319,7 @@ RECIPES = {
         "ccaa": "paisvasco",
         "time": "30a60",
         "proteins": ["bacalao"],
-        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Bacalao_al_Pil_Pil_%28Vizcaya%29.jpg",
         "video": None,
         "ingredients": [
             ("Lomos de bacalao desalado", "4"),
@@ -331,7 +331,7 @@ RECIPES = {
             {
                 "title": "Preparar el bacalao",
                 "description": "Desala bien y seca. Reserva a temperatura ambiente 20 min.",
-                "image": "https://images.unsplash.com/photo-1580959375944-abd7e991f971?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Emulsionar el pil-pil",
@@ -339,7 +339,7 @@ RECIPES = {
                     "Dora ajos en AOVE suave, retira. Confita el bacalao piel abajo "
                     "y mueve la cazuela en círculos hasta emulsionar."
                 ),
-                "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Bacalao-pil-pil-vaionnoth.jpg",
             },
         ],
         "comments": [
@@ -358,7 +358,7 @@ RECIPES = {
         "ccaa": "navarra",
         "time": "30a60",
         "proteins": ["bacalao"],
-        "image": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=1400&q=80",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Tapa_de_pimientos_del_piquillo_rellenos.jpg/1280px-Tapa_de_pimientos_del_piquillo_rellenos.jpg",
         "video": None,
         "ingredients": [
             ("Pimientos del piquillo", "12–16"),
@@ -372,12 +372,12 @@ RECIPES = {
             {
                 "title": "Brandada",
                 "description": "Pochar cebolla, añadir bacalao desmigado y ligar con un poco de bechamel/nata.",
-                "image": "https://images.unsplash.com/photo-1592419044706-39796d40f98c?auto=format&fit=crop&w=900&q=80",
+                "image": "https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=900",
             },
             {
                 "title": "Rellenar y gratinar",
                 "description": "Rellena piquillos, napa con salsa de pimiento triturado y gratina 5–8 min.",
-                "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Piquillo_Peppers.jpg/900px-Piquillo_Peppers.jpg",
             },
         ],
         "comments": [
@@ -398,7 +398,12 @@ def download(url: str, key: str) -> dict:
         r = requests.get(
             url,
             timeout=120,
-            headers={"User-Agent": "Mozilla/5.0 SaboresEspanaSeed/2.0"},
+            headers={
+                "User-Agent": (
+                    "SaboresEspanaSeed/2.0 "
+                    "(https://github.com/GuillermoLopezArgudo/SaboresEspa-a; recipe demo seed)"
+                )
+            },
             allow_redirects=True,
         )
         r.raise_for_status()
@@ -406,6 +411,7 @@ def download(url: str, key: str) -> dict:
         if len(data) < 2000:
             raise RuntimeError(f"imagen demasiado pequeña: {key}")
         path.write_bytes(data)
+        time.sleep(0.6)
     ext = ".jpg"
     if data.startswith(b"\x89PNG"):
         ext = ".png"
