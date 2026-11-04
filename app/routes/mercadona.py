@@ -679,13 +679,196 @@ _FRUIT_NOISE = (
     "batido",
 )
 
+# Derivados que NUNCA son el ingrediente “de cocina” pedido
+_ALWAYS_REJECT = (
+    "papilla",
+    "tarrito",
+    "+6 meses",
+    "+8 meses",
+    "+4 meses",
+    "+12 meses",
+    "hero solo",
+    "potito",
+    "infantil",
+    "bebes",
+    "bebe ",
+    "sazonador",
+    "pastilla",
+    "pastillas",
+    "sandwich",
+    "sandwiches",
+    "bocadillo",
+    "rosca ",
+    "pizza",
+    "empanadilla",
+    "gyoza",
+    "gyozas",
+    "fideos orientales",
+    "ramen",
+    "sabor gamba",
+    "sabor pollo",
+)
+
+_MEAT_FISH_REJECT = (
+    "caldo",
+    "fumet",
+    "concentrado",
+    "carcasa",
+    "espinazo",
+    "salteado de",
+    "plato preparado",
+    "preparado de",
+    "elaborado de",
+    "fingers",
+    "palitos de",
+    "nugget",
+    "croqueta",
+    "rebozad",
+    "empanad",
+    "a la romana",
+    "al huevo",
+    "panado",
+    "panada",
+    "brocheta",
+    "brochetas",
+    "hamburguesa",
+    "albóndiga",
+    "albondiga",
+    "fiambre",
+    "gyoza",
+)
+
+_CANNED_SEAFOOD_REJECT = (
+    "en salsa",
+    "salsa americana",
+    "en escabeche",
+    "al natural",  # only when wanting limpio/fresco — handled contextually
+    "en tinta",
+    "en aceite de",
+)
+
+
+def _reject_derivative(name: str, query: str, head: str) -> bool:
+    """True = descartar producto (no es el ingrediente pedido)."""
+    original = _normalize(query)
+    if any(x in name for x in _ALWAYS_REJECT):
+        return True
+
+    # Vino ≠ vinagre
+    if "vino" in original and "vinagre" in name:
+        return True
+    if head.startswith("vino") and "vinagre" in name:
+        return True
+
+    # Hígado fresco ≠ paté
+    if "higado" in original or head.startswith("higado"):
+        if "pate" in name or "paté" in name or "mousse" in name:
+            return True
+
+    # Jamón serrano ≠ rosca/sandwich (ya en ALWAYS) ni loncheados raros de pan
+    if "jamon" in original and ("rosca" in name or "empanad" in name or "croissant" in name):
+        return True
+
+    # Hierbas / limón
+    if head in _HERB_ANCHORS and any(n in name for n in _HERB_NOISE):
+        return True
+    if head.startswith("limon") and any(n in name for n in _FRUIT_NOISE):
+        return True
+
+    # Pescado / carne “enteros”: fuera papillas, caldos, panados, salteados…
+    proteinish = head.startswith(
+        (
+            "merluz",
+            "bacala",
+            "salmon",
+            "rape",
+            "atun",
+            "bonito",
+            "sardina",
+            "boqueron",
+            "pulp",
+            "calamar",
+            "chipiron",
+            "gamba",
+            "langostin",
+            "mejillon",
+            "navaja",
+            "poll",
+            "conej",
+            "cerdo",
+            "ternera",
+            "vacuno",
+            "cordero",
+            "pavo",
+        )
+    ) or any(
+        x in original
+        for x in ("pollo", "merluza", "gamba", "calamar", "mejill", "jamon", "higado")
+    )
+    if proteinish and any(x in name for x in _MEAT_FISH_REJECT):
+        # Excepción: si la query pide explícitamente rebozado/romana
+        if not any(x in original for x in ("reboz", "romana", "finger", "nugget", "croqueta")):
+            return True
+
+    # Pollo en trozos: solo piezas de carne, no vísceras / caldo / platos
+    if "pollo" in original:
+        if any(
+            x in name
+            for x in (
+                "higado",
+                "higados",
+                "corazon",
+                "corazones",
+                "carcasa",
+                "espinazo",
+                "caldo",
+                "sazonador",
+                "sandwich",
+                "fiambre",
+                "gyoza",
+                "brocheta",
+                "nugget",
+                "croqueta",
+                "sabor pollo",
+                "fideo",
+                "barbacoa",
+                "teriyaki",
+                "curry",
+                "empanado",
+            )
+        ):
+            return True
+
+    # Calamar/gambas/mejillón “limpio” o crudo: priorizar; latas de salsa fuera
+    if any(x in original for x in ("calamar", "gamba", "pulpo", "mejillon", "chipiron")):
+        if "limpio" in original or "limpia" in original or "crudo" in original or "fresca" in original:
+            if any(
+                x in name
+                for x in (
+                    "en salsa",
+                    "salsa americana",
+                    "en tinta",
+                    "escabeche",
+                    "salteado",
+                    "relleno",
+                )
+            ):
+                return True
+        # Aunque no diga limpio, latas de salsa americana no son el marisco base
+        if "salsa americana" in name or "salteado de" in name:
+            return True
+
+    # Mejillones: si busca solo “mejillones”, las latas pueden valer;
+    # pero si busca frescos/vapor implícito en receta, prefiera no-escabeche en ranking (no reject all)
+
+    return False
+
 
 def _filter_relevant(products: list[dict], query: str, *, soft: bool = False) -> list[dict]:
-    """Exige el núcleo del ingrediente y descarta mascotas / ruido claro."""
+    """Exige el núcleo del ingrediente y descarta derivados engañosos."""
     cores = _core_tokens(query)
     if not cores:
         cores = _anchor_tokens(query) or [t for t in _normalize(query).split() if len(t) > 2]
-    # Nunca filtrar solo por corte genérico
     cores = [t for t in cores if not _is_shape_token(t)] or cores
     head = cores[0] if cores else ""
     out = []
@@ -693,15 +876,27 @@ def _filter_relevant(products: list[dict], query: str, *, soft: bool = False) ->
         name = _normalize(p.get("display_name") or "")
         if not name or _is_pet_or_noise(name):
             continue
-        if head in _HERB_ANCHORS and any(n in name for n in _HERB_NOISE):
-            continue
-        if head.startswith("limon") and any(n in name for n in _FRUIT_NOISE):
+        if _reject_derivative(name, query, head):
             continue
         if cores:
             need = cores[:1] if soft else cores
             if not all(_token_in_name(t, name) for t in need):
                 continue
+        # “limpio”: si hay resultados con limpio, en soft no filtramos aún;
+        # en ranking se prioriza (abajo). Aquí, si la query pide limpio y el
+        # nombre no lo tiene pero hay muchos, dejamos pasar y rankea.
         out.append(p)
+    # Si pedían “limpio” y hay alguno con limpio, quédate solo con esos
+    original = _normalize(query)
+    if "limpio" in original or "limpia" in original:
+        with_clean = [
+            p
+            for p in out
+            if "limpio" in _normalize(p.get("display_name") or "")
+            or "limpia" in _normalize(p.get("display_name") or "")
+        ]
+        if with_clean:
+            return with_clean
     return out
 
 
@@ -855,18 +1050,60 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
                     "croqueta",
                     "asado",
                     "relleno",
+                    "gyoza",
+                    "taquito",
                 )
             ):
                 s += 70
-            if any(x in name for x in ("pechuga", "muslo", "filete", "contramuslo", "entero", "troceado")) and (
-                "asado" not in name and "curry" not in name
-            ):
-                s -= 40
+            if any(
+                x in name
+                for x in (
+                    "pechuga",
+                    "muslo",
+                    "filete",
+                    "contramuslo",
+                    "entero",
+                    "troceado",
+                    "solomillo",
+                    "ala",
+                    "alitas",
+                )
+            ) and ("asado" not in name and "curry" not in name):
+                s -= 45
         if head.startswith("conej"):
             if "enano" in name or "alimento" in name:
                 s += 200
             if "troceado" in name or "entero" in name:
                 s -= 30
+
+        # Preferir “limpio/crudo/fresco” y filetes frente a latas
+        if any(x in original for x in ("limpio", "limpia", "crudo", "fresca", "fresco")):
+            if any(x in name for x in ("limpio", "limpia", "crudo", "fresca", "fresco")):
+                s -= 40
+            if any(x in name for x in ("lata", "conserva", "escabeche", "salsa")):
+                s += 60
+        if head.startswith("merluz") or head.startswith("gamba") or head.startswith("calamar"):
+            if name.startswith(head) or name.startswith(head.rstrip("a") + "as") or name.startswith(
+                head.rstrip("o") + "os"
+            ):
+                s -= 25
+            if "filete" in name or "lomo" in name or "pelada" in name or "pelado" in name:
+                s -= 20
+        if "jamon" in original and "serrano" in original:
+            if "serrano" in name and "rosca" not in name:
+                s -= 30
+            if "queso" in name or "emmental" in name:
+                s += 80
+        if "higado" in original:
+            if "filete" in name or name.startswith("filetes"):
+                s -= 40
+            if "pate" in name:
+                s += 100
+        if "vino" in original and "vinagre" not in original:
+            if name.startswith("vino"):
+                s -= 40
+            if "vinagre" in name:
+                s += 200
 
         # Tier grueso: 0 = producto pedido, luego derivados.
         # Dentro del mismo tier → precio (más barato primero).
@@ -875,7 +1112,6 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
         if s >= 180 or not has_anchor:
             tier = 3
         elif shapes:
-            # "lomos de bacalao" → primero los lomos de bacalao; luego otro bacalao
             tier = 0 if has_shape else 1
             if s >= 120:
                 tier = max(tier, 2)
@@ -887,6 +1123,15 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
             else:
                 tier = 2
 
+        p["_match_tier"] = tier
         return (tier, price, s, word_count, name)
 
-    return sorted(products, key=score)
+    ranked = sorted(products, key=score)
+    # Anotar tier limpio para el front (badge “más barato” solo en tier mínimo)
+    if ranked:
+        best_tier = ranked[0].get("_match_tier", 0)
+        for p in ranked:
+            p["match_tier"] = p.get("_match_tier", 2)
+            p["is_best_match"] = p.get("_match_tier", 2) == best_tier
+            p.pop("_match_tier", None)
+    return ranked
