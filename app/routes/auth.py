@@ -68,32 +68,38 @@ def register():
 @auth_bp.post("/login")
 @rate_limit(Config.AUTH_RATE_LIMIT, Config.AUTH_RATE_WINDOW, prefix="login")
 def login():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
     if not email or not password:
         return jsonify(message="Credenciales inválidas"), 400
 
-    user = Users.get_or_none(Users.user_email == email)
-    if not user or not verify_password(password, user.user_password):
-        return jsonify(message="Credenciales inválidas"), 401
+    try:
+        user = Users.get_or_none(Users.user_email == email)
+        if not user or not verify_password(password, user.user_password):
+            return jsonify(message="Credenciales inválidas"), 401
 
-    # Migrar hash legacy SHA-256 → bcrypt
-    if not user.user_password.startswith("$2"):
-        Users.update(user_password=hash_password(password)).where(
-            Users.id == user.id
-        ).execute()
+        # Migrar hash legacy SHA-256 → bcrypt
+        stored = user.user_password or ""
+        if not stored.startswith("$2"):
+            Users.update(user_password=hash_password(password)).where(
+                Users.id == user.id
+            ).execute()
 
-    token = create_access_token(identity=str(user.id))
-    Users.update(user_token=token).where(Users.id == user.id).execute()
-    return jsonify(
-        userToken=token,
-        iduser=user.id,
-        type=user.user_type,
-        name=user.user_name,
-        email=user.user_email,
-        image=user.user_image,
-    )
+        token = create_access_token(identity=str(user.id))
+        Users.update(user_token=token).where(Users.id == user.id).execute()
+        return jsonify(
+            userToken=token,
+            iduser=user.id,
+            type=user.user_type,
+            name=user.user_name,
+            email=user.user_email,
+            image=user.user_image or "",
+        )
+    except Exception:
+        # Evitar HTML 500 genérico en el cliente durante deploys / fallos puntuales
+        return jsonify(message="No se pudo iniciar sesión. Inténtalo de nuevo."), 503
+
 
 
 @auth_bp.post("/logout")
