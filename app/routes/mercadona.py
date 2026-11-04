@@ -835,6 +835,12 @@ def _reject_derivative(name: str, query: str, head: str) -> bool:
                 "teriyaki",
                 "curry",
                 "empanado",
+                "patas de pollo",
+                "pata de pollo",
+                "molleja",
+                "mollejas",
+                "cuello",
+                "menudillo",
             )
         ):
             return True
