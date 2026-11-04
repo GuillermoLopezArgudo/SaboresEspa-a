@@ -127,6 +127,21 @@ def test_among_real_products_cheapest_first():
     assert ranked[-1]["display_name"].startswith("Sopa")
 
 
+def test_real_group_sorted_by_price():
+    products = [
+        _p("Huevos camperos Hacendado", 3.35),
+        _p("Huevos grandes L", 1.80),
+        _p("Huevos medianos M", 2.85),
+        _p("Pasta fresca tagliatelle al huevo Hacendado", 1.20),
+    ]
+    ranked = _rank_by_query(_filter_relevant(products, "Huevos frescos M/L"), "Huevos frescos M/L")
+    assert ranked[0]["display_name"] == "Huevos grandes L"
+    assert ranked[0]["price"] == 1.80
+    # Entre huevos reales, orden por precio
+    egg_prices = [p["price"] for p in ranked if p["display_name"].startswith("Huevos")]
+    assert egg_prices == sorted(egg_prices)
+
+
 def test_bacalao_not_pork_loin():
     q = "Lomos de bacalao desalado"
     assert _clean_search_query(q) == "lomo bacalao"

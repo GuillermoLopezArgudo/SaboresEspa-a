@@ -725,7 +725,7 @@ def _product_price(p: dict) -> float:
 
 
 def _rank_by_query(products: list[dict], query: str) -> list[dict]:
-    """Prioriza producto real; a igual relevancia, el más barato."""
+    """Grupo de producto real primero; dentro del grupo, el más barato."""
     phrase = _clean_search_query(query)
     cores = _core_tokens(query)
     anchors = _anchor_tokens(query) or cores
@@ -738,7 +738,7 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
         # Menor es mejor
         s = 100
         if _is_pet_or_noise(name):
-            return (10_000, price, 99, name)
+            return (9, price, 10_000, 99, name)
 
         if phrase and phrase in name:
             s -= 60
@@ -868,7 +868,25 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
             if "troceado" in name or "entero" in name:
                 s -= 30
 
-        # 1) relevancia  2) precio (más barato entre reales)  3) nombre corto
-        return (s, price, word_count, name)
+        # Tier grueso: 0 = producto pedido, luego derivados.
+        # Dentro del mismo tier → precio (más barato primero).
+        has_anchor = bool(anchors) and all(_token_in_name(a, name) for a in anchors[:1])
+        has_shape = bool(shapes) and any(_token_in_name(sh, name) for sh in shapes)
+        if s >= 180 or not has_anchor:
+            tier = 3
+        elif shapes:
+            # "lomos de bacalao" → primero los lomos de bacalao; luego otro bacalao
+            tier = 0 if has_shape else 1
+            if s >= 120:
+                tier = max(tier, 2)
+        else:
+            if s <= 55:
+                tier = 0
+            elif s <= 100:
+                tier = 1
+            else:
+                tier = 2
+
+        return (tier, price, s, word_count, name)
 
     return sorted(products, key=score)
