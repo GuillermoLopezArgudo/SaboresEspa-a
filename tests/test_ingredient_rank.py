@@ -109,3 +109,17 @@ def test_core_tokens():
     # Catálogo online: bomba → redondo (Sendra / paella)
     assert _clean_search_query("Arroz bomba (o D.O. Valencia)") == "arroz redondo"
     assert _core_tokens("Arroz bomba (o D.O. Valencia)") == ["arroz", "redondo"]
+
+
+def test_among_real_products_cheapest_first():
+    products = [
+        _p("Cebollas rojas", 1.40),
+        _p("Cebollas", 1.50),
+        _p("Cebollas", 1.20),
+        _p("Sopa de cebolla Hacendado", 0.65),
+    ]
+    ranked = _rank_by_query(_filter_relevant(products, "Cebolla"), "Cebolla")
+    # Sopa queda atrás pese a ser más barata; entre cebollas gana la de 1.20
+    assert ranked[0]["display_name"] == "Cebollas"
+    assert ranked[0]["price"] == 1.20
+    assert ranked[-1]["display_name"].startswith("Sopa")
