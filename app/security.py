@@ -22,12 +22,19 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, stored: str) -> bool:
     if not stored:
         return False
+    if not isinstance(stored, str):
+        stored = str(stored)
     if stored.startswith("$2"):
         try:
             return bcrypt.checkpw(password.encode("utf-8"), stored.encode("utf-8"))
-        except ValueError:
+        except Exception:
+            # Hash corrupto / truncado: tratar como credencial inválida, no 500
             return False
-    return hashlib.sha256(password.encode("utf-8")).hexdigest() == stored
+    try:
+        return hashlib.sha256(password.encode("utf-8")).hexdigest() == stored
+    except Exception:
+        return False
+
 
 
 def is_valid_email(email: str) -> bool:
