@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 from threading import Lock
 from urllib.parse import urlencode
@@ -230,10 +231,9 @@ def search_ingredient():
     if not query:
         return jsonify(error="Falta el ingrediente"), 400
 
-    # 1) Búsqueda global (frase completa)
-    primary, status = _algolia_search(query, limit=40)
+    # Búsqueda por la frase completa (no partir en "carne" OR "picada")
+    primary, status = _algolia_search(query, limit=48)
     if status != 200:
-        # Si Algolia falla y hay categoría, intentar solo categoría
         if category_id:
             try:
                 cid = int(category_id)
@@ -244,34 +244,60 @@ def search_ingredient():
         err = primary[0] if primary and isinstance(primary[0], dict) else {"error": "Búsqueda fallida"}
         return jsonify(err), status
 
-    # 2) Ampliar con tokens sueltos (pan, cheddar, carne…) para cestas / frases largas
-    token_lists = []
-    tokens = [
-        t
-        for t in _normalize(query).replace("/", " ").replace("-", " ").split()
-        if len(t) > 3
-    ]
-    # Evitar repetir la frase completa
-    for token in tokens[:4]:
-        if token == _normalize(query):
-            continue
-        extra, st = _algolia_search(token, limit=12)
-        if st == 200:
-            token_lists.append(extra)
+    products = list(primary)
 
-    # 3) Si el usuario forzó categoría, mezclar también ese filtro local
-    local = []
-    if category_id:
-        try:
-            cid = int(category_id)
-            local = _search_category_local(query, cid)
-        except (TypeError, ValueError):
-            pass
+    # Exigir cada token como palabra completa (canela ≠ canelones; carne+picada juntos)
+    strict = _filter_by_tokens(products, query)
+    if strict:
+        products = strict
 
-    products = _merge_products(primary, *token_lists, local, limit=60)
+    products = _rank_by_query(products, query)
     return jsonify(
         ingredient=query,
         products=products,
         count=len(products),
         source="catalog",
     )
+
+
+def _query_tokens(query: str) -> list[str]:
+    phrase = _normalize(query)
+    return [t for t in phrase.replace("/", " ").replace("-", " ").split() if len(t) > 2]
+
+
+def _token_in_name(token: str, name: str) -> bool:
+    """Palabra completa; admite plural simple (canela/canelas), no prefijos (canelones)."""
+    if not token or not name:
+        return False
+    pat = rf"(?<![a-z0-9]){re.escape(token)}(?:es|s)?(?![a-z0-9])"
+    return re.search(pat, name) is not None
+
+
+def _filter_by_tokens(products: list[dict], query: str) -> list[dict]:
+    tokens = _query_tokens(query)
+    if not tokens:
+        return []
+    out = []
+    for p in products:
+        name = _normalize(p.get("display_name") or "")
+        if all(_token_in_name(t, name) for t in tokens):
+            out.append(p)
+    return out
+
+
+def _rank_by_query(products: list[dict], query: str) -> list[dict]:
+    """Prioriza coincidencia de frase completa frente a parciales."""
+    phrase = _normalize(query)
+    tokens = _query_tokens(query)
+
+    def score(p: dict) -> tuple:
+        name = _normalize(p.get("display_name") or "")
+        if phrase and " " in phrase and phrase in name:
+            return (0, name)
+        if phrase and " " not in phrase and _token_in_name(phrase, name):
+            return (0, name)
+        if tokens and all(_token_in_name(t, name) for t in tokens):
+            return (1, name)
+        return (2, name)
+
+    return sorted(products, key=score)

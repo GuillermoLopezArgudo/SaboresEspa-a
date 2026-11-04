@@ -460,33 +460,23 @@ async function load() {
     }
 
     if (palabra) {
-      // Búsqueda global en catálogo (no limita a una sola categoría)
+      // Búsqueda global: no arrastrar categoría de búsquedas anteriores (Vacuno + canela)
       const categoria = resolveMercadonaCategory(palabra)
-      let categoryId = selectedCategoryId.value
-        ? Number(selectedCategoryId.value)
-        : null
-
-      // Sugerencia suave de categoría en el select (no bloquea resultados)
-      if (!categoryId && categoria) {
+      selectedCategoryId.value = ''
+      categoryName.value = ''
+      if (categoria) {
         const mapped = findCategoryId(categoriesRaw.value.results, categoria)
         if (mapped) {
-          categoryId = mapped
           selectedCategoryId.value = String(mapped)
           categoryName.value = categoria
         }
-      } else if (categoryId) {
-        const hit = flatCategories.value.find(
-          (c) => String(c.id) === String(categoryId)
-        )
-        categoryName.value = hit?.name || ''
       }
 
-      const payload = { q: palabra }
-      if (categoryId) payload.category_id = categoryId
-
-      const search = await axios.post(apiUrl('/searchIngredient'), payload, {
-        skipAuth: true,
-      })
+      const search = await axios.post(
+        apiUrl('/searchIngredient'),
+        { q: palabra },
+        { skipAuth: true }
+      )
       productos.value = search.data.products || []
       loading.value = false
       return
