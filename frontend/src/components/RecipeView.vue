@@ -84,7 +84,22 @@
               v-if="receta.video"
               class="rounded-2xl overflow-hidden border border-amber-200 bg-black shadow-sm"
             >
-              <video controls :src="mediaUrl(receta.video)" class="w-full" />
+              <iframe
+                v-if="youtubeEmbedUrl"
+                class="w-full aspect-video"
+                :src="youtubeEmbedUrl"
+                title="Vídeo de la receta"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+              />
+              <video
+                v-else
+                controls
+                :src="mediaUrl(receta.video)"
+                class="w-full"
+              />
             </div>
           </div>
 
@@ -314,6 +329,27 @@ const comments = ref([])
 const isFavorite = ref(false)
 const editingCommentId = ref(null)
 const editedComment = ref('')
+
+function youtubeIdFromUrl(raw) {
+  if (!raw || typeof raw !== 'string') return null
+  const url = raw.trim()
+  const patterns = [
+    /(?:youtube\.com\/watch\?[^#]*v=)([\w-]{11})/i,
+    /(?:youtu\.be\/)([\w-]{11})/i,
+    /(?:youtube\.com\/embed\/)([\w-]{11})/i,
+    /(?:youtube-nocookie\.com\/embed\/)([\w-]{11})/i,
+  ]
+  for (const re of patterns) {
+    const m = url.match(re)
+    if (m?.[1]) return m[1]
+  }
+  return null
+}
+
+const youtubeEmbedUrl = computed(() => {
+  const id = youtubeIdFromUrl(receta.value?.video)
+  return id ? `https://www.youtube-nocookie.com/embed/${id}` : null
+})
 
 const payload = {
   idrecipe: parseInt(recipeId, 10),
