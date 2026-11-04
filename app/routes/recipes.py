@@ -119,6 +119,31 @@ def _media_refs_equal(a, b) -> bool:
     return os.path.basename(a) == os.path.basename(b) and bool(os.path.basename(a))
 
 
+def _external_video_url(value) -> str | None:
+    """Acepta URL https de YouTube/Vimeo o archivo ya alojado (Cloudinary/uploads)."""
+    if isinstance(value, dict):
+        value = value.get("url") or value.get("href") or ""
+    if not isinstance(value, str):
+        return None
+    url = value.strip()
+    if not url or len(url) > 1024:
+        return None
+    lower = url.casefold()
+    if lower.startswith("https://www.youtube.com/") or lower.startswith("https://youtube.com/"):
+        return url
+    if lower.startswith("https://youtu.be/"):
+        return url
+    if lower.startswith("https://www.youtube-nocookie.com/"):
+        return url
+    if lower.startswith("https://vimeo.com/") or lower.startswith("https://player.vimeo.com/"):
+        return url
+    if lower.startswith("https://") and (
+        "cloudinary.com" in lower or "/uploads/videos/" in lower or "/static/videos/" in lower
+    ):
+        return url
+    return None
+
+
 def _require_upload(file_dict, folder, kind, label, allowed_existing=None):
     """Sube media si viene base64; falla la petición si el cliente envió archivo inválido.
 
@@ -332,6 +357,10 @@ def create_recipe(current_user):
         )
         if isinstance(video_url, tuple):
             return video_url
+    elif video:
+        video_url = _external_video_url(video)
+        if video and not video_url:
+            return jsonify(message="URL de vídeo no válida (usa YouTube/Vimeo https)"), 400
 
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
@@ -409,7 +438,7 @@ def create_recipe(current_user):
             data.get("time"),
             data.get("proteins") or [],
         )
-    return jsonify(message="RECETA SUBIDA")
+    return jsonify(message="RECETA SUBIDA", idrecipe=recipe.id)
 
 @recipes_bp.post("/viewRecipes")
 @login_required
@@ -818,7 +847,7 @@ def edit_recipe(current_user):
         if isinstance(uploaded, tuple):
             return uploaded
         image_url = uploaded
-    if video and isinstance(video, dict):
+    if video and isinstance(video, dict) and video.get("base64"):
         uploaded = _require_upload(
             video,
             current_app.config["UPLOAD_FOLDER_VIDEOS"],
@@ -829,6 +858,15 @@ def edit_recipe(current_user):
         if isinstance(uploaded, tuple):
             return uploaded
         video_url = uploaded
+    elif video:
+        ext = _external_video_url(video)
+        raw = str(video).strip() if not isinstance(video, dict) else ""
+        if ext:
+            video_url = ext
+        elif raw in existing_videos:
+            video_url = raw
+        else:
+            return jsonify(message="URL de vídeo no válida (usa YouTube/Vimeo https)"), 400
 
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
