@@ -539,18 +539,30 @@ def _name_starts_with_ingredient(name: str, cores: list[str], phrase: str) -> bo
     return bool(cores and _token_in_name(cores[0], first))
 
 
+def _product_price(p: dict) -> float:
+    raw = p.get("price")
+    if raw is None:
+        raw = p.get("bulk_price")
+    try:
+        n = float(raw)
+    except (TypeError, ValueError):
+        return float("inf")
+    return n if n >= 0 else float("inf")
+
+
 def _rank_by_query(products: list[dict], query: str) -> list[dict]:
-    """Prioriza el producto “real” del ingrediente frente a derivados baratos."""
+    """Prioriza producto real; a igual relevancia, el más barato."""
     phrase = _clean_search_query(query)
     cores = _core_tokens(query)
     original = _normalize(query)
 
     def score(p: dict) -> tuple:
         name = _normalize(p.get("display_name") or "")
+        price = _product_price(p)
         # Menor es mejor
         s = 100
         if _is_pet_or_noise(name):
-            return (10_000, name)
+            return (10_000, price, 99, name)
 
         # Coincidencia de frase limpia / original
         if phrase and phrase in name:
@@ -659,7 +671,7 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
                 if "troceado" in name or "entero" in name:
                     s -= 30
 
-        # Desempate: nombre más corto y alfabético
-        return (s, word_count, name)
+        # 1) relevancia  2) precio  3) nombre más corto
+        return (s, price, word_count, name)
 
     return sorted(products, key=score)

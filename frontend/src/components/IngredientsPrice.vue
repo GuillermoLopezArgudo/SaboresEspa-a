@@ -152,7 +152,7 @@
                 v-model="sortBy"
                 class="rounded-full border border-amber-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="relevance">Relevancia</option>
+                <option value="relevance">Relevancia (real + barato)</option>
                 <option value="price-asc">Precio: menor a mayor</option>
                 <option value="price-desc">Precio: mayor a menor</option>
                 <option value="name-asc">Nombre A–Z</option>
