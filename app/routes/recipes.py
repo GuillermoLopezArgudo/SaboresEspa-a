@@ -1298,29 +1298,38 @@ def recipe_filter():
 @recipes_bp.post("/averageStars")
 def average_stars():
     """Media de estrellas por receta visible (público)."""
-    try:
-        visible = Recipe.select(Recipe.id).where(Recipe.recipe_visibility == True)  # noqa: E712
+    from app.models import with_db_retry
+
+    def _compute():
         rows = (
             RecipeReview.select(
-                RecipeReview.id_recipe_id.alias("recipe_id"),
+                RecipeReview.id_recipe,
                 fn.AVG(RecipeReview.recipe_review_item_value).alias("average_rating"),
             )
-            .where(RecipeReview.id_recipe.in_(visible))
-            .group_by(RecipeReview.id_recipe_id)
+            .join(Recipe, on=(RecipeReview.id_recipe == Recipe.id))
+            .where(Recipe.recipe_visibility == True)  # noqa: E712
+            .group_by(RecipeReview.id_recipe)
             .dicts()
         )
         media = []
         for row in rows:
+            recipe_id = row.get("id_recipe") or row.get("recipe_id") or row.get("id_recipe_id")
+            if recipe_id is None:
+                continue
             try:
                 avg = float(row.get("average_rating") or 0)
             except (TypeError, ValueError):
                 avg = 0.0
             media.append(
                 {
-                    "recipe_id": int(row["recipe_id"]),
+                    "recipe_id": int(recipe_id),
                     "average_rating": round(avg, 2),
                 }
             )
+        return media
+
+    try:
+        media = with_db_retry(_compute)
         return jsonify(media=media)
     except Exception as exc:
         print(f"[error] averageStars: {exc}")

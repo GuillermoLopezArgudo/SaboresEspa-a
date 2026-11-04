@@ -312,14 +312,15 @@ def create_tables():
             db.close()
 
 
-def ping_database() -> tuple[bool, str]:
-    """Comprueba SELECT 1. Devuelve (ok, motivo_corto)."""
+def ensure_alive_connection() -> bool:
+    """Conecta y valida con SELECT 1; cierra y reabre si la sesión está muerta (Neon sleep)."""
     try:
         if db.is_closed():
             db.connect(reuse_if_open=True)
         db.execute_sql("SELECT 1")
-        return True, "ok"
+        return True
     except Exception as exc:
+        print(f"[warn] db stale/closed: {exc}")
         try:
             db.close()
         except Exception:
@@ -327,9 +328,37 @@ def ping_database() -> tuple[bool, str]:
         try:
             db.connect()
             db.execute_sql("SELECT 1")
-            return True, "ok-reconnect"
+            return True
         except Exception as exc2:
-            msg = str(exc2 or exc)
-            # Sin secretos: solo tipo de error
-            short = msg.split("\n")[0][:160]
-            return False, short or "db-error"
+            print(f"[error] db reconnect failed: {exc2}")
+            return False
+
+
+def with_db_retry(fn, *, attempts: int = 2):
+    """Ejecuta fn(); si falla por conexión, reconecta y reintenta una vez."""
+    last_exc: Exception | None = None
+    for i in range(max(1, attempts)):
+        try:
+            if i > 0:
+                ensure_alive_connection()
+            return fn()
+        except Exception as exc:
+            last_exc = exc
+            print(f"[warn] db retry {i + 1}/{attempts}: {exc}")
+            try:
+                db.rollback()
+            except Exception:
+                pass
+            try:
+                db.close()
+            except Exception:
+                pass
+    assert last_exc is not None
+    raise last_exc
+
+
+def ping_database() -> tuple[bool, str]:
+    """Comprueba SELECT 1. Devuelve (ok, motivo_corto)."""
+    if ensure_alive_connection():
+        return True, "ok"
+    return False, "db-error"

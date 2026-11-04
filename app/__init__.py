@@ -48,23 +48,14 @@ def create_app() -> Flask:
 
     @app.before_request
     def _ensure_db_connection():
-        # Neon free duerme / Render reusa workers: reconectar si hace falta
+        # Neon free duerme: la conexión puede parecer abierta pero estar muerta
         from flask import request as flask_request
 
         if flask_request.method == "OPTIONS":
             return None
-        from app.db import db
+        from app.models import ensure_alive_connection
 
-        try:
-            if db.is_closed():
-                db.connect(reuse_if_open=True)
-        except Exception as exc:
-            print(f"[warn] db connect: {exc}")
-            try:
-                db.close()
-                db.connect()
-            except Exception as exc2:
-                print(f"[error] db reconnect failed: {exc2}")
+        ensure_alive_connection()
 
     @app.after_request
     def _ensure_cors(response):
