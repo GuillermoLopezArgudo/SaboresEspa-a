@@ -74,10 +74,12 @@ def login():
     if not email or not password:
         return jsonify(message="Credenciales inválidas"), 400
 
-    try:
+    from app.models import with_db_retry
+
+    def _do_login():
         user = Users.get_or_none(Users.user_email == email)
         if not user or not verify_password(password, user.user_password):
-            return jsonify(message="Credenciales inválidas"), 401
+            return None, jsonify(message="Credenciales inválidas"), 401
 
         # Migrar hash legacy SHA-256 → bcrypt
         stored = user.user_password or ""
@@ -88,16 +90,25 @@ def login():
 
         token = create_access_token(identity=str(user.id))
         Users.update(user_token=token).where(Users.id == user.id).execute()
-        return jsonify(
-            userToken=token,
-            iduser=user.id,
-            type=user.user_type,
-            name=user.user_name,
-            email=user.user_email,
-            image=user.user_image or "",
+        return (
+            True,
+            jsonify(
+                userToken=token,
+                iduser=user.id,
+                type=user.user_type,
+                name=user.user_name,
+                email=user.user_email,
+                image=user.user_image or "",
+            ),
+            200,
         )
-    except Exception:
+
+    try:
+        _ok, payload, status = with_db_retry(_do_login)
+        return payload, status
+    except Exception as exc:
         # Evitar HTML 500 genérico en el cliente durante deploys / fallos puntuales
+        print(f"[error] login: {exc}")
         return jsonify(message="No se pudo iniciar sesión. Inténtalo de nuevo."), 503
 
 
