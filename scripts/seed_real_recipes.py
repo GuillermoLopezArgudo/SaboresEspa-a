@@ -181,7 +181,7 @@ RECIPES = {
                     "Cubre con agua hasta remaches, cuece ~20–25 min, prueba sal, "
                     "añade arroz y no remuevas. Reposa 5 min."
                 ),
-                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/01_Paella_Valenciana_original.jpg/900px-01_Paella_Valenciana_original.jpg",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/01_Paella_Valenciana_original.jpg/1280px-01_Paella_Valenciana_original.jpg",
             },
         ],
         "comments": [
@@ -220,7 +220,7 @@ RECIPES = {
             {
                 "title": "Cachelos y emplatar",
                 "description": "Cuece patatas, córtalas. Corta pulpo, monta, sal gruesa, pimentón y AOVE en crudo.",
-                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Polbo_%C3%A1_feira._Galiza.jpg/900px-Polbo_%C3%A1_feira._Galiza.jpg",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Polbo_%C3%A1_feira._Galiza.jpg/1280px-Polbo_%C3%A1_feira._Galiza.jpg",
             },
         ],
         "comments": [
@@ -300,7 +300,7 @@ RECIPES = {
                     "Mezcla yemas, azúcar y maicena; incorpora leche caliente. "
                     "Cuece sin hervir fuerte. Enfría, azucara y quema."
                 ),
-                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Cazuelita_con_crema_catalana._Postre.jpg/900px-Cazuelita_con_crema_catalana._Postre.jpg",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Cazuelita_con_crema_catalana._Postre.jpg/1280px-Cazuelita_con_crema_catalana._Postre.jpg",
             },
         ],
         "comments": [
@@ -377,7 +377,7 @@ RECIPES = {
             {
                 "title": "Rellenar y gratinar",
                 "description": "Rellena piquillos, napa con salsa de pimiento triturado y gratina 5–8 min.",
-                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Piquillo_Peppers.jpg/900px-Piquillo_Peppers.jpg",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Piquillo_Peppers.jpg/1280px-Piquillo_Peppers.jpg",
             },
         ],
         "comments": [
@@ -389,29 +389,60 @@ RECIPES = {
 }
 
 
+def _candidate_urls(url: str) -> list[str]:
+    urls = [url]
+    if "/thumb/" in url and "900px-" in url:
+        urls.append(url.replace("900px-", "1280px-"))
+    if "/thumb/" in url and "1280px-" in url:
+        urls.append(url.replace("1280px-", "1024px-"))
+    # Pexels food fallback
+    urls.append(
+        "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1200"
+    )
+    # dedupe preserve order
+    seen = set()
+    out = []
+    for u in urls:
+        if u not in seen:
+            seen.add(u)
+            out.append(u)
+    return out
+
+
 def download(url: str, key: str) -> dict:
     path = CACHE / f"{key}.bin"
     if path.exists() and path.stat().st_size > 2000:
         data = path.read_bytes()
     else:
-        print(f"  DL {url[:90]}...")
-        r = requests.get(
-            url,
-            timeout=120,
-            headers={
-                "User-Agent": (
-                    "SaboresEspanaSeed/2.0 "
-                    "(https://github.com/GuillermoLopezArgudo/SaboresEspa-a; recipe demo seed)"
+        data = None
+        last_err = None
+        for candidate in _candidate_urls(url):
+            try:
+                print(f"  DL {candidate[:90]}...")
+                r = requests.get(
+                    candidate,
+                    timeout=120,
+                    headers={
+                        "User-Agent": (
+                            "SaboresEspanaSeed/2.0 "
+                            "(https://github.com/GuillermoLopezArgudo/SaboresEspa-a; recipe demo seed)"
+                        )
+                    },
+                    allow_redirects=True,
                 )
-            },
-            allow_redirects=True,
-        )
-        r.raise_for_status()
-        data = r.content
-        if len(data) < 2000:
-            raise RuntimeError(f"imagen demasiado pequeña: {key}")
-        path.write_bytes(data)
-        time.sleep(0.6)
+                r.raise_for_status()
+                data = r.content
+                if len(data) < 2000:
+                    raise RuntimeError(f"imagen demasiado pequeña: {key}")
+                path.write_bytes(data)
+                time.sleep(0.6)
+                break
+            except Exception as exc:
+                last_err = exc
+                print(f"  fail: {exc}")
+                continue
+        if data is None:
+            raise RuntimeError(f"no image for {key}: {last_err}")
     ext = ".jpg"
     if data.startswith(b"\x89PNG"):
         ext = ".png"

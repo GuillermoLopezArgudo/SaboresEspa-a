@@ -282,3 +282,27 @@ def test_gambas_not_stirfry_first():
     ranked = _rank_by_query(filtered, "Gambas")
     assert ranked[0]["display_name"].startswith("Gamba")
     assert ranked[0]["price"] == min(p["price"] for p in ranked)
+
+
+def test_nueces_not_pastry_first():
+    products = [
+        _p("Trenza con nueces pecán", 2.5),
+        _p("Galletas con nueces Hacendado", 1.8),
+        _p("Bífidus con nueces y cereales probióticos Hacendado 0% MG", 1.5),
+        _p("Bebida láctea Omega 3 Puleva con nueces y leche desnatada", 1.4),
+        _p("Nuez moscada molida Hacendado", 1.1),
+        _p("Nuez natural Hacendado", 2.2),
+        _p("Nuez natural Hacendado pelada", 2.9),
+        _p("Nueces peladas Hacendado", 2.4),
+    ]
+    filtered = _filter_relevant(products, "Nueces")
+    blob = " ".join(p["display_name"].lower() for p in filtered)
+    assert "trenza" not in blob
+    assert "galleta" not in blob
+    assert "bífidus" not in blob and "bifidus" not in blob
+    assert "bebida" not in blob and "puleva" not in blob
+    assert "moscada" not in blob
+    ranked = _rank_by_query(filtered, "Nueces")
+    top = ranked[0]["display_name"].lower()
+    assert "natural" in top or top.startswith("nueces")
+    assert "moscada" not in top

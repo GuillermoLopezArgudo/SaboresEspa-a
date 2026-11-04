@@ -118,13 +118,13 @@
 
         <!-- Ingredientes + pasos -->
         <section class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <aside class="lg:col-span-2">
+          <aside class="lg:col-span-2 space-y-6">
             <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden lg:sticky lg:top-20">
               <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
                 <h3 class="font-serif font-bold text-amber-950 text-xl tracking-tight">Ingredientes</h3>
               </div>
               <ul class="divide-y divide-amber-100">
-                <li v-for="(ingrediente, idx) in ingredients" :key="idx">
+                <li v-for="(ingrediente, idx) in ingredients" :key="'ing-' + idx">
                   <router-link
                     :to="{ path: '/ingredients', query: { ingredients: ingrediente } }"
                     class="flex items-start justify-between gap-3 px-5 py-3.5 hover:bg-amber-50 transition group"
@@ -147,9 +147,46 @@
                 </li>
               </ul>
             </div>
+
+            <div
+              v-for="(sub, sIdx) in subrecipes"
+              :key="'subing-block-' + sIdx"
+              v-show="(sub.ingredients || []).length"
+              class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden"
+            >
+              <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
+                <h3 class="font-serif font-bold text-amber-950 text-xl tracking-tight">
+                  {{ sub.title || `Subreceta ${sIdx + 1}` }}
+                </h3>
+                <p class="text-xs text-amber-700/80 mt-0.5">Ingredientes de la subreceta</p>
+              </div>
+              <ul class="divide-y divide-amber-100">
+                <li
+                  v-for="(row, idx) in (sub.ingredients || [])"
+                  :key="'subing-' + sIdx + '-' + idx"
+                >
+                  <router-link
+                    :to="{ path: '/ingredients', query: { ingredients: row.ingredients } }"
+                    class="flex items-start justify-between gap-3 px-5 py-3.5 hover:bg-amber-50 transition group"
+                  >
+                    <div class="min-w-0">
+                      <p class="font-medium text-amber-950 group-hover:text-amber-800">
+                        {{ row.ingredients }}
+                      </p>
+                      <p class="text-sm se-muted-text mt-0.5">
+                        {{ row.quantity || 'Cantidad no indicada' }}
+                      </p>
+                    </div>
+                    <span class="shrink-0 text-xs font-semibold text-amber-700 mt-1 opacity-80 group-hover:opacity-100">
+                      Precios →
+                    </span>
+                  </router-link>
+                </li>
+              </ul>
+            </div>
           </aside>
 
-          <div class="lg:col-span-3">
+          <div class="lg:col-span-3 space-y-6">
             <div class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
               <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
                 <h3 class="font-serif font-bold text-amber-950 text-xl tracking-tight">Preparación</h3>
@@ -158,7 +195,7 @@
               <div v-if="steps.length" class="p-5 sm:p-6 space-y-5">
                 <article
                   v-for="(step, idx) in steps"
-                  :key="idx"
+                  :key="'step-' + idx"
                   class="relative rounded-2xl border border-amber-100 bg-amber-50/40 p-4 sm:p-5"
                 >
                   <div class="flex gap-4">
@@ -197,6 +234,64 @@
               </div>
               <p v-else class="px-5 py-8 text-sm text-amber-700">
                 No hay pasos publicados para esta receta.
+              </p>
+            </div>
+
+            <div
+              v-for="(sub, sIdx) in subrecipes"
+              :key="'substep-block-' + sIdx"
+              class="rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden"
+            >
+              <div class="px-5 py-4 border-b border-amber-100 bg-amber-50">
+                <h3 class="font-serif font-bold text-amber-950 text-xl tracking-tight">
+                  Preparación · {{ sub.title || `Subreceta ${sIdx + 1}` }}
+                </h3>
+                <p class="text-xs text-amber-700/80 mt-0.5">
+                  {{ (sub.steps || []).length }} paso{{ (sub.steps || []).length === 1 ? '' : 's' }}
+                </p>
+              </div>
+              <div v-if="(sub.steps || []).length" class="p-5 sm:p-6 space-y-5">
+                <article
+                  v-for="(step, idx) in sub.steps"
+                  :key="'substep-' + sIdx + '-' + idx"
+                  class="relative rounded-2xl border border-amber-100 bg-amber-50/40 p-4 sm:p-5"
+                >
+                  <div class="flex gap-4">
+                    <div class="shrink-0 flex flex-col items-center">
+                      <span
+                        class="h-10 w-10 rounded-full bg-amber-700 text-white text-base font-bold flex items-center justify-center shadow-sm ring-4 ring-amber-100"
+                      >
+                        {{ idx + 1 }}
+                      </span>
+                      <span
+                        v-if="idx < sub.steps.length - 1"
+                        class="mt-2 w-px flex-1 min-h-[1.5rem] bg-amber-200"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div class="min-w-0 flex-1 pb-1">
+                      <h4 class="font-serif text-lg font-bold text-amber-950 tracking-tight">
+                        {{ step.title || `Paso ${idx + 1}` }}
+                      </h4>
+                      <p class="mt-2 se-prose leading-[1.7] text-[15px] whitespace-pre-line">
+                        {{ step.description }}
+                      </p>
+                      <div
+                        v-if="step.image"
+                        class="mt-4 rounded-xl overflow-hidden border border-amber-200 max-w-md"
+                      >
+                        <RecipeImage
+                          :path="step.image"
+                          :alt="`${sub.title} paso ${idx + 1}`"
+                          wrap-class="w-full h-40 sm:h-48"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              <p v-else class="px-5 py-6 text-sm text-amber-700">
+                Sin pasos publicados para esta subreceta.
               </p>
             </div>
           </div>
@@ -324,6 +419,7 @@ const type = localStorage.getItem('type')
 const ingredients = ref([])
 const quantity = ref([])
 const steps = ref([])
+const subrecipes = ref([])
 const filters = ref([])
 const comments = ref([])
 const isFavorite = ref(false)
@@ -430,6 +526,21 @@ onMounted(() => {
         quantity.value.push(element.quantity)
       })
       steps.value = response.data.step_list || []
+      subrecipes.value = response.data.subrecipes || []
+      // Compat: si solo viene el formato plano antiguo, envolver en una subreceta
+      if (
+        !subrecipes.value.length &&
+        ((response.data.subingredient_list || []).length ||
+          (response.data.substep_list || []).length)
+      ) {
+        subrecipes.value = [
+          {
+            title: 'Subreceta',
+            ingredients: response.data.subingredient_list || [],
+            steps: response.data.substep_list || [],
+          },
+        ]
+      }
       filters.value = response.data.filters_list || []
       fetchComments()
       const favs = response.data.favorites_list || []

@@ -1,4 +1,4 @@
-﻿export const ingredientes = {
+export const ingredientes = {
   // Condimentos y básicos
   "Aceite de oliva": "Aceite, vinagre y sal",
   "Aceite de oliva virgen extra": "Aceite, vinagre y sal",

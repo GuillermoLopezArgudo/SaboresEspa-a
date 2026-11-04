@@ -107,6 +107,47 @@ class RecipeFilter(BaseModel):
     modified_at = DateTimeField(default=datetime.datetime.now)
 
 
+class SubRecipe(BaseModel):
+    """Subreceta independiente (ej. Alioli, Salsa brava) dentro de una receta."""
+
+    id_recipe = ForeignKeyField(Recipe, backref="sub_recipes")
+    id_user = ForeignKeyField(Users, backref="owned_sub_recipes")
+    title = CharField(max_length=255)
+    sort_order = IntegerField(default=0)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+
+class SubRecipeIngredient(BaseModel):
+    id_sub_recipe = ForeignKeyField(SubRecipe, backref="ingredients")
+    id_user = ForeignKeyField(Users, backref="sub_recipe_ingredients")
+    ingredients_text = TextField(null=True)
+    quantity_unit = CharField(max_length=50, null=True)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+
+class SubRecipeStep(BaseModel):
+    id_sub_recipe = ForeignKeyField(SubRecipe, backref="steps")
+    id_user = ForeignKeyField(Users, backref="sub_recipe_steps")
+    step_title = CharField(max_length=255)
+    step_description = TextField()
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+
+class SubStepImage(BaseModel):
+    id_user = ForeignKeyField(Users, backref="sub_step_images")
+    step_image = CharField(max_length=1024)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField(default=datetime.datetime.now)
+
+
+class RecipeSubStepImage(BaseModel):
+    id_step = ForeignKeyField(SubRecipeStep, backref="step_images")
+    id_image = ForeignKeyField(SubStepImage, backref="step_links")
+
+
 ALL_MODELS = [
     Users,
     Recipe,
@@ -118,6 +159,11 @@ ALL_MODELS = [
     RecipeStep,
     RecipeStepImage,
     RecipeFilter,
+    SubRecipe,
+    SubRecipeIngredient,
+    SubRecipeStep,
+    SubStepImage,
+    RecipeSubStepImage,
 ]
 
 
@@ -151,6 +197,7 @@ def _widen_url_columns():
         'ALTER TABLE "recipe" ALTER COLUMN "recipe_image" TYPE VARCHAR(1024)',
         'ALTER TABLE "recipe" ALTER COLUMN "recipe_video" TYPE VARCHAR(1024)',
         'ALTER TABLE "stepimage" ALTER COLUMN "step_image" TYPE VARCHAR(1024)',
+        'ALTER TABLE "substepimage" ALTER COLUMN "step_image" TYPE VARCHAR(1024)',
     ]
     for sql in alters:
         _pg_exec(sql)
@@ -191,11 +238,73 @@ def _ensure_unique_fav_review_indexes():
         _pg_exec(sql)
 
 
+def _migrate_named_subrecipes():
+    """Si quedaron tablas planas (id_recipe), las recrea con SubRecipe nombrada."""
+    try:
+        cols = [row[1] for row in db.execute_sql("PRAGMA table_info(subrecipeingredient)")]
+    except Exception:
+        try:
+            db.rollback()
+        except Exception:
+            pass
+        # Postgres u otra BD sin esa tabla aún
+        try:
+            rows = list(
+                db.execute_sql(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'subrecipeingredient'"
+                )
+            )
+            cols = [r[0] for r in rows]
+        except Exception:
+            try:
+                db.rollback()
+            except Exception:
+                pass
+            return
+
+    if not cols:
+        return
+    # Esquema nuevo ya ok
+    if "id_sub_recipe_id" in cols or "id_sub_recipe" in cols:
+        return
+    # Esquema viejo plano → recrear tablas de subreceta
+    if "id_recipe_id" in cols or "id_recipe" in cols:
+        print("[migrate] recreating named subrecipe tables")
+        try:
+            db.drop_tables(
+                [
+                    RecipeSubStepImage,
+                    SubRecipeIngredient,
+                    SubRecipeStep,
+                    SubStepImage,
+                    SubRecipe,
+                ],
+                safe=True,
+            )
+        except Exception as exc:
+            print(f"[warn] drop old subrecipe tables: {exc}")
+            try:
+                db.rollback()
+            except Exception:
+                pass
+        db.create_tables(
+            [
+                SubRecipe,
+                SubRecipeIngredient,
+                SubRecipeStep,
+                SubStepImage,
+                RecipeSubStepImage,
+            ]
+        )
+
+
 def create_tables():
     # Cada paso aislado: un fallo de migración no debe dejar la conexión en estado aborted
     db.connect(reuse_if_open=True)
     try:
         db.create_tables(ALL_MODELS)
+        _migrate_named_subrecipes()
         _widen_url_columns()
         _ensure_unique_fav_review_indexes()
     finally:

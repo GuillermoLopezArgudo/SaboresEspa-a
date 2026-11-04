@@ -229,8 +229,12 @@ _QUERY_ALIASES = {
     "pescado de roca": "rape",
     "pimienta": "pimienta negra",
     "caldo de pollo o agua": "caldo de pollo",
-    "morcilllo / pollo / tocino": "pollo",
-    "morcillo / pollo / tocino": "pollo",
+    "morcilllo / pollo / tocino": "morcillo",
+    "morcillo / pollo / tocino": "morcillo",
+    "morcillo de ternera": "morcillo",
+    "morcilllo": "morcillo",
+    "nueces": "nuez",
+    "nueces naturales": "nuez",
 }
 
 # Cortes / formatos: no sirven solos como búsqueda (lomo ≠ bacalao)
@@ -654,10 +658,16 @@ def _token_in_name(token: str, name: str) -> bool:
         return False
     # Singularizar token de consulta para cubrir huevos→huevo y al revés
     forms = {token}
+    if token.endswith("ces") and len(token) > 4:
+        # nueces → nuez (no “nuec”)
+        forms.add(token[:-3] + "z")
     if token.endswith("es") and len(token) > 4:
         forms.add(token[:-2])
     elif token.endswith("s") and len(token) > 3:
         forms.add(token[:-1])
+    # z → ces (nuez → nueces en el nombre del producto)
+    if token.endswith("z") and len(token) > 2:
+        forms.add(token[:-1] + "ces")
     for form in forms:
         pat = rf"(?<![a-z0-9]){re.escape(form)}(?:es|s)?(?![a-z0-9])"
         if re.search(pat, name):
@@ -733,6 +743,36 @@ _ALWAYS_REJECT = (
     "sabor pollo",
 )
 
+# Bollería / lácteos / platos compuestos cuando se busca el fruto seco base
+_PASTRY_NOISE = (
+    "trenza",
+    "croissant",
+    "magdalena",
+    "bizcocho",
+    "pastel",
+    "tarta",
+    "galleta",
+    "cookie",
+    "helado",
+    "bombon",
+    "bombón",
+    "chocolate con",
+    "bifidus",
+    "bífidus",
+    "yogur",
+    "yogurt",
+    "probiot",
+    "probiótico",
+    "cereales",
+    "muesli",
+    "granola",
+    "barrita",
+    "bebida",
+    "leche",
+    "puleva",
+    "omega",
+)
+
 _MEAT_FISH_REJECT = (
     "caldo",
     "fumet",
@@ -777,6 +817,22 @@ def _reject_derivative(name: str, query: str, head: str) -> bool:
     original = _normalize(query)
     if any(x in name for x in _ALWAYS_REJECT):
         return True
+
+    # Nueces/almendras/avellanas ≠ bollería / especias (nuez moscada) / bebidas
+    nut_heads = ("nuez", "nueces", "almendra", "almendras", "avellana", "avellanas", "pistacho", "pistachos")
+    if head.startswith(nut_heads) or any(h in original.split() for h in nut_heads):
+        if "moscada" in name and "moscada" not in original:
+            return True
+        if any(x in name for x in _PASTRY_NOISE):
+            # Permitir si el nombre ES básicamente el fruto (Nueces naturales…)
+            if not (
+                name.startswith("nuez")
+                or name.startswith("nueces")
+                or name.startswith("almendra")
+                or name.startswith("avellana")
+                or name.startswith("pistacho")
+            ):
+                return True
 
     # Vino ≠ vinagre (pero “vinagre de vino” sí debe encontrar vinagre)
     if "vinagre" not in original:
@@ -1086,6 +1142,13 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
                 )
             ):
                 s += 100
+        if head.startswith("nuez") or "nueces" in original:
+            if "moscada" in name and "moscada" not in original:
+                s += 200
+            if "natural" in name or name.startswith("nueces ") or name.startswith("nuez natural"):
+                s -= 40
+            if any(x in name for x in ("macadamia", "pecana", "pecán", "brasil", "troceada")):
+                s += 12
         if head.startswith("pulp") and any(x in name for x in ("pota", "calamar", "sepia")):
             s += 90
         if head.startswith("bacala"):

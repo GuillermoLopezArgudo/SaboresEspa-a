@@ -13,7 +13,12 @@ from app.models import (
     RecipeReview,
     RecipeStep,
     RecipeStepImage,
+    RecipeSubStepImage,
     StepImage,
+    SubRecipe,
+    SubRecipeIngredient,
+    SubRecipeStep,
+    SubStepImage,
     UserFavorite,
     Users,
 )
@@ -303,6 +308,278 @@ def _can_view_recipe(user, recipe) -> bool:
     return _can_manage_recipe(user, recipe)
 
 
+def _clear_subrecipe_children(recipe_id):
+    """Borra todas las subrecetas (y su contenido) de una receta."""
+    sub_ids = [
+        s.id for s in SubRecipe.select(SubRecipe.id).where(SubRecipe.id_recipe == recipe_id)
+    ]
+    if not sub_ids:
+        return
+    step_ids = [
+        st.id
+        for st in SubRecipeStep.select(SubRecipeStep.id).where(
+            SubRecipeStep.id_sub_recipe.in_(sub_ids)
+        )
+    ]
+    if step_ids:
+        image_ids = [
+            link.id_image_id
+            for link in RecipeSubStepImage.select().where(
+                RecipeSubStepImage.id_step.in_(step_ids)
+            )
+        ]
+        RecipeSubStepImage.delete().where(
+            RecipeSubStepImage.id_step.in_(step_ids)
+        ).execute()
+        if image_ids:
+            SubStepImage.delete().where(SubStepImage.id.in_(image_ids)).execute()
+        SubRecipeStep.delete().where(SubRecipeStep.id.in_(step_ids)).execute()
+    SubRecipeIngredient.delete().where(
+        SubRecipeIngredient.id_sub_recipe.in_(sub_ids)
+    ).execute()
+    SubRecipe.delete().where(SubRecipe.id.in_(sub_ids)).execute()
+
+
+def _prepare_steps_payload(steps, *, existing_images=None):
+    """Valida y prepara pasos (receta o subreceta) antes de escribir en BD."""
+    prepared = []
+    for step in steps or []:
+        step_title = (step.get("title") or "").strip()
+        if not step_title:
+            return None, (
+                jsonify(message="Cada paso necesita título"),
+                400,
+            )
+        if len(step_title) > MAX_STEP_TITLE_LEN:
+            return None, (
+                jsonify(
+                    message=f"Título de paso demasiado largo (máx. {MAX_STEP_TITLE_LEN})"
+                ),
+                400,
+            )
+        step_image = step.get("image")
+        step_image_url = None
+        if step_image and isinstance(step_image, dict):
+            uploaded = _require_upload(
+                step_image,
+                current_app.config["UPLOAD_FOLDER_IMAGES"],
+                "image",
+                "una imagen de paso",
+                allowed_existing=existing_images,
+            )
+            if isinstance(uploaded, tuple):
+                return None, uploaded
+            step_image_url = uploaded
+        prepared.append((step, step_title, step_image_url))
+    return prepared, None
+
+
+def _validate_quantities(ingredients, quantities):
+    for i, _ingredient in enumerate(ingredients or []):
+        qty = quantities[i] if i < len(quantities or []) else ""
+        if qty is not None and len(str(qty)) > MAX_QUANTITY_LEN:
+            return (
+                jsonify(message=f"Cantidad demasiado larga (máx. {MAX_QUANTITY_LEN})"),
+                400,
+            )
+    return None
+
+
+def _normalize_subrecipes_payload(data):
+    """Acepta subrecipes[] o el formato plano legacy (una sola subreceta)."""
+    raw = data.get("subrecipes")
+    if isinstance(raw, list):
+        return [s for s in raw if isinstance(s, dict)]
+    # Legacy: un único bloque plano
+    ings = data.get("subingredients") or []
+    qtys = data.get("subquantities") or []
+    steps = data.get("substeps") or []
+    if not ings and not steps:
+        return []
+    return [
+        {
+            "title": (data.get("subrecipe_title") or "Subreceta").strip() or "Subreceta",
+            "ingredients": ings,
+            "quantities": qtys,
+            "steps": steps,
+        }
+    ]
+
+
+def _prepare_subrecipes_payload(data, *, existing_images=None):
+    """Valida N subrecetas independientes. Devuelve (prepared_list, error)."""
+    prepared = []
+    for idx, sub in enumerate(_normalize_subrecipes_payload(data)):
+        title = (sub.get("title") or "").strip()
+        ingredients = sub.get("ingredients") or []
+        quantities = sub.get("quantities") or []
+        steps = sub.get("steps") or []
+        # Ignorar bloques vacíos sin título ni contenido
+        has_content = any(str(x or "").strip() for x in ingredients) or bool(steps)
+        if not title and not has_content:
+            continue
+        if not title:
+            return None, (
+                jsonify(message=f"La subreceta #{idx + 1} necesita un nombre (ej. Alioli)"),
+                400,
+            )
+        if len(title) > 255:
+            return None, (jsonify(message="Nombre de subreceta demasiado largo"), 400)
+        qty_err = _validate_quantities(ingredients, quantities)
+        if qty_err:
+            return None, qty_err
+        prepared_steps, err = _prepare_steps_payload(
+            steps, existing_images=existing_images
+        )
+        if err:
+            return None, err
+        # Filtrar ingredientes vacíos manteniendo cantidades alineadas
+        pairs = [
+            (name, quantities[i] if i < len(quantities) else "")
+            for i, name in enumerate(ingredients)
+            if str(name or "").strip()
+        ]
+        prepared.append(
+            {
+                "title": title,
+                "ingredients": [p[0] for p in pairs],
+                "quantities": [p[1] for p in pairs],
+                "steps": prepared_steps,
+            }
+        )
+    return prepared, None
+
+
+def _save_ingredient_rows(recipe_id, user_id, ingredients, quantities):
+    for i, ingredient in enumerate(ingredients or []):
+        qty = quantities[i] if i < len(quantities or []) else ""
+        RecipeIngredient.create(
+            id_recipe=recipe_id,
+            id_user=user_id,
+            ingredients_text=ingredient,
+            quantity_unit=str(qty or "")[:MAX_QUANTITY_LEN],
+            created_at=date.today(),
+            modified_at=date.today(),
+        )
+
+
+def _save_step_rows(recipe_id, user_id, prepared_steps):
+    for step, step_title, step_image_url in prepared_steps:
+        recipe_step = RecipeStep.create(
+            id_recipe=recipe_id,
+            id_user=user_id,
+            step_title=step_title,
+            step_description=_step_description(step),
+            created_at=date.today(),
+            modified_at=date.today(),
+        )
+        if step_image_url:
+            step_img = StepImage.create(
+                id_user=user_id,
+                step_image=step_image_url,
+                created_at=date.today(),
+                modified_at=date.today(),
+            )
+            RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
+
+
+def _save_subrecipes(recipe_id, user_id, prepared_subs):
+    for order, sub in enumerate(prepared_subs or []):
+        sub_row = SubRecipe.create(
+            id_recipe=recipe_id,
+            id_user=user_id,
+            title=sub["title"],
+            sort_order=order,
+            created_at=date.today(),
+            modified_at=date.today(),
+        )
+        for i, ingredient in enumerate(sub.get("ingredients") or []):
+            qty = (sub.get("quantities") or [None])[i] if i < len(sub.get("quantities") or []) else ""
+            SubRecipeIngredient.create(
+                id_sub_recipe=sub_row.id,
+                id_user=user_id,
+                ingredients_text=ingredient,
+                quantity_unit=str(qty or "")[:MAX_QUANTITY_LEN],
+                created_at=date.today(),
+                modified_at=date.today(),
+            )
+        for step, step_title, step_image_url in sub.get("steps") or []:
+            sub_step = SubRecipeStep.create(
+                id_sub_recipe=sub_row.id,
+                id_user=user_id,
+                step_title=step_title,
+                step_description=_step_description(step),
+                created_at=date.today(),
+                modified_at=date.today(),
+            )
+            if step_image_url:
+                step_img = SubStepImage.create(
+                    id_user=user_id,
+                    step_image=step_image_url,
+                    created_at=date.today(),
+                    modified_at=date.today(),
+                )
+                RecipeSubStepImage.create(id_step=sub_step.id, id_image=step_img.id)
+
+
+def _serialize_main_steps(recipe_id):
+    step_list = []
+    for step in RecipeStep.select().where(RecipeStep.id_recipe == recipe_id):
+        step_image = (
+            StepImage.select(StepImage.step_image)
+            .join(RecipeStepImage)
+            .where(RecipeStepImage.id_step == step.id)
+            .first()
+        )
+        step_list.append(
+            {
+                "title": step.step_title,
+                "description": step.step_description,
+                "image": step_image.step_image if step_image else None,
+            }
+        )
+    return step_list
+
+
+def _serialize_subrecipes(recipe_id):
+    result = []
+    for sub in (
+        SubRecipe.select()
+        .where(SubRecipe.id_recipe == recipe_id)
+        .order_by(SubRecipe.sort_order, SubRecipe.id)
+    ):
+        ingredients = [
+            {"ingredients": i.ingredients_text, "quantity": i.quantity_unit}
+            for i in SubRecipeIngredient.select().where(
+                SubRecipeIngredient.id_sub_recipe == sub.id
+            )
+        ]
+        steps = []
+        for step in SubRecipeStep.select().where(SubRecipeStep.id_sub_recipe == sub.id):
+            step_image = (
+                SubStepImage.select(SubStepImage.step_image)
+                .join(RecipeSubStepImage)
+                .where(RecipeSubStepImage.id_step == step.id)
+                .first()
+            )
+            steps.append(
+                {
+                    "title": step.step_title,
+                    "description": step.step_description,
+                    "image": step_image.step_image if step_image else None,
+                }
+            )
+        result.append(
+            {
+                "id": sub.id,
+                "title": sub.title,
+                "ingredients": ingredients,
+                "steps": steps,
+            }
+        )
+    return result
+
+
 def _delete_recipe_cascade(idrecipe):
     with db.atomic():
         RecipeFilter.delete().where(RecipeFilter.id_recipe == idrecipe).execute()
@@ -310,6 +587,7 @@ def _delete_recipe_cascade(idrecipe):
         RecipeComment.delete().where(RecipeComment.id_recipe == idrecipe).execute()
         UserFavorite.delete().where(UserFavorite.id_recipe == idrecipe).execute()
         RecipeReview.delete().where(RecipeReview.id_recipe == idrecipe).execute()
+        _clear_subrecipe_children(idrecipe)
 
         for step in RecipeStep.select().where(RecipeStep.id_recipe == idrecipe):
             links = list(
@@ -364,31 +642,17 @@ def create_recipe(current_user):
 
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
-    steps = data.get("steps") or []
-    prepared_steps = []
-    for step in steps:
-        step_title = (step.get("title") or "").strip()
-        if not step_title:
-            return jsonify(message="Cada paso necesita título"), 400
-        if len(step_title) > MAX_STEP_TITLE_LEN:
-            return jsonify(message=f"Título de paso demasiado largo (máx. {MAX_STEP_TITLE_LEN})"), 400
-        step_image = step.get("image")
-        step_image_url = None
-        if step_image and isinstance(step_image, dict) and step_image.get("base64"):
-            step_image_url = _require_upload(
-                step_image,
-                current_app.config["UPLOAD_FOLDER_IMAGES"],
-                "image",
-                "una imagen de paso",
-            )
-            if isinstance(step_image_url, tuple):
-                return step_image_url
-        prepared_steps.append((step, step_title, step_image_url))
 
-    for i, _ingredient in enumerate(ingredients):
-        qty = quantities[i] if i < len(quantities) else ""
-        if qty is not None and len(str(qty)) > MAX_QUANTITY_LEN:
-            return jsonify(message=f"Cantidad demasiado larga (máx. {MAX_QUANTITY_LEN})"), 400
+    prepared_steps, err = _prepare_steps_payload(data.get("steps") or [])
+    if err:
+        return err
+    prepared_subs, err = _prepare_subrecipes_payload(data)
+    if err:
+        return err
+
+    qty_err = _validate_quantities(ingredients, quantities)
+    if qty_err:
+        return qty_err
 
     with db.atomic():
         recipe = Recipe.create(
@@ -402,34 +666,9 @@ def create_recipe(current_user):
             modified_at=date.today(),
         )
 
-        for i, ingredient in enumerate(ingredients):
-            qty = quantities[i] if i < len(quantities) else ""
-            RecipeIngredient.create(
-                id_recipe=recipe.id,
-                id_user=current_user.id,
-                ingredients_text=ingredient,
-                quantity_unit=str(qty or "")[:MAX_QUANTITY_LEN],
-                created_at=date.today(),
-                modified_at=date.today(),
-            )
-
-        for step, step_title, step_image_url in prepared_steps:
-            recipe_step = RecipeStep.create(
-                id_recipe=recipe.id,
-                id_user=current_user.id,
-                step_title=step_title,
-                step_description=_step_description(step),
-                created_at=date.today(),
-                modified_at=date.today(),
-            )
-            if step_image_url:
-                step_img = StepImage.create(
-                    id_user=current_user.id,
-                    step_image=step_image_url,
-                    created_at=date.today(),
-                    modified_at=date.today(),
-                )
-                RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
+        _save_ingredient_rows(recipe.id, current_user.id, ingredients, quantities)
+        _save_step_rows(recipe.id, current_user.id, prepared_steps)
+        _save_subrecipes(recipe.id, current_user.id, prepared_subs)
 
         _save_filters(
             recipe.id,
@@ -601,21 +840,14 @@ def view_recipe():
         {"ingredients": i.ingredients_text, "quantity": i.quantity_unit}
         for i in RecipeIngredient.select().where(RecipeIngredient.id_recipe == idrecipe)
     ]
-    step_list = []
-    for step in RecipeStep.select().where(RecipeStep.id_recipe == idrecipe):
-        step_image = (
-            StepImage.select(StepImage.step_image)
-            .join(RecipeStepImage)
-            .where(RecipeStepImage.id_step == step.id)
-            .first()
-        )
-        step_list.append(
-            {
-                "title": step.step_title,
-                "description": step.step_description,
-                "image": step_image.step_image if step_image else None,
-            }
-        )
+    step_list = _serialize_main_steps(idrecipe)
+    subrecipes_list = _serialize_subrecipes(idrecipe)
+    # Compat lectura: aplanar primera subreceta para clientes viejos
+    flat_ings = []
+    flat_steps = []
+    for sub in subrecipes_list:
+        flat_ings.extend(sub.get("ingredients") or [])
+        flat_steps.extend(sub.get("steps") or [])
     filters_list = [
         {"type": f.type, "category": f.category}
         for f in RecipeFilter.select().where(RecipeFilter.id_recipe == idrecipe)
@@ -624,6 +856,9 @@ def view_recipe():
         "recipe_list": recipe_list,
         "ingredient_list": ingredient_list,
         "step_list": step_list,
+        "subrecipes": subrecipes_list,
+        "subingredient_list": flat_ings,
+        "substep_list": flat_steps,
         "filters_list": filters_list,
         "favorites_list": [],
     }
@@ -829,6 +1064,14 @@ def edit_recipe(current_user):
             img = StepImage.get_or_none(StepImage.id == link.id_image_id)
             if img and img.step_image:
                 existing_images.add(img.step_image)
+    for sub in SubRecipe.select().where(SubRecipe.id_recipe == recipe.id):
+        for step in SubRecipeStep.select().where(SubRecipeStep.id_sub_recipe == sub.id):
+            for link in RecipeSubStepImage.select().where(
+                RecipeSubStepImage.id_step == step.id
+            ):
+                img = SubStepImage.get_or_none(SubStepImage.id == link.id_image_id)
+                if img and img.step_image:
+                    existing_images.add(img.step_image)
     existing_videos = {recipe.recipe_video} if recipe.recipe_video else set()
 
     # Subir media ANTES de borrar/recrear hijos (evita pérdida de datos a mitad)
@@ -870,32 +1113,21 @@ def edit_recipe(current_user):
 
     ingredients = data.get("ingredients") or []
     quantities = data.get("quantities") or []
-    prepared_steps = []
-    for step in data.get("steps") or []:
-        step_title = (step.get("title") or "").strip()
-        if not step_title:
-            return jsonify(message="Cada paso necesita título"), 400
-        if len(step_title) > MAX_STEP_TITLE_LEN:
-            return jsonify(message=f"Título de paso demasiado largo (máx. {MAX_STEP_TITLE_LEN})"), 400
-        step_image = step.get("image")
-        step_image_url = None
-        if step_image and isinstance(step_image, dict):
-            uploaded = _require_upload(
-                step_image,
-                current_app.config["UPLOAD_FOLDER_IMAGES"],
-                "image",
-                "una imagen de paso",
-                allowed_existing=existing_images,
-            )
-            if isinstance(uploaded, tuple):
-                return uploaded
-            step_image_url = uploaded
-        prepared_steps.append((step, step_title, step_image_url))
 
-    for i, _ingredient in enumerate(ingredients):
-        qty = quantities[i] if i < len(quantities) else ""
-        if qty is not None and len(str(qty)) > MAX_QUANTITY_LEN:
-            return jsonify(message=f"Cantidad demasiado larga (máx. {MAX_QUANTITY_LEN})"), 400
+    prepared_steps, err = _prepare_steps_payload(
+        data.get("steps") or [], existing_images=existing_images
+    )
+    if err:
+        return err
+    prepared_subs, err = _prepare_subrecipes_payload(
+        data, existing_images=existing_images
+    )
+    if err:
+        return err
+
+    qty_err = _validate_quantities(ingredients, quantities)
+    if qty_err:
+        return qty_err
 
     with db.atomic():
         if new_title is not None:
@@ -929,38 +1161,14 @@ def edit_recipe(current_user):
         RecipeFilter.delete().where(RecipeFilter.id_recipe == recipe.id).execute()
         RecipeIngredient.delete().where(RecipeIngredient.id_recipe == recipe.id).execute()
         RecipeStep.delete().where(RecipeStep.id_recipe == recipe.id).execute()
+        _clear_subrecipe_children(recipe.id)
 
         # Siempre el dueño de la receta (no el admin editor) → evita FKs cruzadas al borrar usuarios
         owner_id = recipe.id_user_id
 
-        for i, ingredient in enumerate(ingredients):
-            qty = quantities[i] if i < len(quantities) else ""
-            RecipeIngredient.create(
-                id_recipe=recipe.id,
-                id_user=owner_id,
-                ingredients_text=ingredient,
-                quantity_unit=str(qty or "")[:MAX_QUANTITY_LEN],
-                created_at=date.today(),
-                modified_at=date.today(),
-            )
-
-        for step, step_title, step_image_url in prepared_steps:
-            recipe_step = RecipeStep.create(
-                id_recipe=recipe.id,
-                id_user=owner_id,
-                step_title=step_title,
-                step_description=_step_description(step),
-                created_at=date.today(),
-                modified_at=date.today(),
-            )
-            if step_image_url:
-                step_img = StepImage.create(
-                    id_user=owner_id,
-                    step_image=step_image_url,
-                    created_at=date.today(),
-                    modified_at=date.today(),
-                )
-                RecipeStepImage.create(id_step=recipe_step.id, id_image=step_img.id)
+        _save_ingredient_rows(recipe.id, owner_id, ingredients, quantities)
+        _save_step_rows(recipe.id, owner_id, prepared_steps)
+        _save_subrecipes(recipe.id, owner_id, prepared_subs)
 
         _save_filters(
             recipe.id,
