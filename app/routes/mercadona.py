@@ -188,7 +188,103 @@ _QUERY_ALIASES = {
     "arroz bomba": "arroz redondo",
     "arroz bomba o d.o. valencia": "arroz redondo",
     "arroz bomba o do valencia": "arroz redondo",
+    # Maicena / Maizena → harina de maíz del catálogo
+    "maicena": "harina maiz",
+    "maizena": "harina maiz",
+    "fecula de maiz": "harina maiz",
+    "fecula maiz": "harina maiz",
+    # Cortes genéricos + especie: buscar la especie (si no, "lomos" = cerdo)
+    "lomos de bacalao desalado": "lomo bacalao",
+    "lomo de bacalao desalado": "lomo bacalao",
+    "lomos de bacalao": "lomo bacalao",
+    "lomo de bacalao": "lomo bacalao",
+    "bacalao desalado": "bacalao",
+    "romero fresco": "romero",
+    "oregano fresco": "oregano",
+    "tomillo fresco": "tomillo",
+    "perejil fresco": "perejil",
+    # Nunca dejar la abreviatura: AOVE = Aceite de Oliva Virgen Extra
+    "aove": "aceite oliva virgen extra",
+    "aceite aove": "aceite oliva virgen extra",
+    "aceite de oliva aove": "aceite oliva virgen extra",
+    # Regionalismos / nombres que el catálogo no indexa igual
+    "ajonjoli": "sesamo",
+    "ajonjolí": "sesamo",
+    "berza": "repollo",
+    "grelos": "acelgas",
+    "fabes": "alubias",
+    "fabes de la granja": "alubias",
+    "galets": "macarrones",
+    "ternasco": "cordero",
+    "chuleton de vacuno": "entrecot",
+    "chuletón de vacuno": "entrecot",
+    "papas arrugadas": "patatas",
+    "papas pequenas": "patatas",
+    "papas pequeñas": "patatas",
+    "mojo rojo": "salsa",
+    "mojo verde": "salsa",
+    "cherne o corvina salada": "corvina",
+    "pulmon o magro": "lomo de cerdo",
+    "pulmón o magro": "lomo de cerdo",
+    "pescado de roca": "rape",
+    "pimienta": "pimienta negra",
+    "caldo de pollo o agua": "caldo de pollo",
+    "morcilllo / pollo / tocino": "morcillo",
+    "morcillo / pollo / tocino": "morcillo",
+    "morcillo de ternera": "morcillo",
+    "morcilllo": "morcillo",
+    "nueces": "nuez",
+    "nueces naturales": "nuez",
 }
+
+# Cortes / formatos: no sirven solos como búsqueda (lomo ≠ bacalao)
+_SHAPE_TOKENS = {
+    "lomo",
+    "lomos",
+    "filete",
+    "filetes",
+    "pechuga",
+    "pechugas",
+    "muslo",
+    "muslos",
+    "contramuslo",
+    "contramuslos",
+    "trozo",
+    "trozos",
+    "pieza",
+    "piezas",
+    "porcion",
+    "porciones",
+    "medallon",
+    "medallones",
+    "rodaja",
+    "rodajas",
+    "loncha",
+    "lonchas",
+    "entero",
+    "entera",
+    "enteros",
+    "enteras",
+    "migas",
+    "tira",
+    "tiras",
+    "dado",
+    "dados",
+}
+
+# Higiene / no-comida frecuente en resultados de especias
+_NOISE_NONFOOD = (
+    "alcohol de",
+    "corporal",
+    "champu",
+    "shampoo",
+    "gel de ducha",
+    "colonia",
+    "desodorante",
+    "crema de manos",
+    "after shave",
+    "aftershave",
+)
 
 # Ruido genérico (procesados / mascotas) cuando buscamos el ingrediente “de verdad”
 _NOISE_ALWAYS = (
@@ -289,36 +385,100 @@ def _variants(query: str) -> set[str]:
     return {v for v in out if v}
 
 
-def _clean_search_query(query: str) -> str:
-    """Reduce texto de receta a lo que conviene buscar en el catálogo."""
+def _strip_recipe_noise(query: str) -> str:
     raw = _normalize(query)
     raw = _PAREN_RE.sub(" ", raw)
     raw = _SIZE_RE.sub(" ", raw)
     raw = _QTY_RE.sub(" ", raw)
     raw = raw.replace("/", " ").replace("-", " ")
     raw = re.sub(r"[^a-z0-9.\s]", " ", raw)
-    raw = re.sub(r"\s+", " ", raw).strip()
+    return re.sub(r"\s+", " ", raw).strip()
+
+
+def _raw_meaningful_tokens(query: str) -> list[str]:
+    raw = _strip_recipe_noise(query)
+    return [
+        t
+        for t in raw.replace(".", " ").split()
+        if t and t not in _FILLER_TOKENS and t not in {"d", "do"} and len(t) > 1
+    ]
+
+
+def _is_shape_token(token: str) -> bool:
+    if not token:
+        return False
+    if token in _SHAPE_TOKENS:
+        return True
+    # plural simple
+    if token.endswith("es") and token[:-2] in _SHAPE_TOKENS:
+        return True
+    if token.endswith("s") and token[:-1] in _SHAPE_TOKENS:
+        return True
+    return False
+
+
+def _singular_shape(token: str) -> str:
+    if token.endswith("es") and len(token) > 4 and token[:-2] in _SHAPE_TOKENS:
+        return token[:-2]
+    if token.endswith("s") and len(token) > 3 and token[:-1] in _SHAPE_TOKENS:
+        return token[:-1]
+    return token
+
+
+def _anchor_tokens(query: str) -> list[str]:
+    """Tokens que identifican el alimento (bacalao), no el corte (lomo)."""
+    return [t for t in _raw_meaningful_tokens(query) if not _is_shape_token(t)]
+
+
+def _shape_tokens_in_query(query: str) -> list[str]:
+    return [_singular_shape(t) for t in _raw_meaningful_tokens(query) if _is_shape_token(t)]
+
+
+def _clean_search_query(query: str) -> str:
+    """Reduce texto de receta a lo que conviene buscar en el catálogo."""
+    raw = _strip_recipe_noise(query)
 
     if raw in _QUERY_ALIASES:
         return _QUERY_ALIASES[raw]
 
-    # Alias por prefijo (p.ej. "piel de limon ..." )
     for alias, target in sorted(_QUERY_ALIASES.items(), key=lambda x: -len(x[0])):
         if raw == alias or raw.startswith(alias + " "):
             return target
 
-    tokens = [t for t in raw.split() if t and t not in _FILLER_TOKENS and len(t) > 1]
+    tokens = _raw_meaningful_tokens(query)
     cleaned = " ".join(tokens).strip()
     if cleaned in _QUERY_ALIASES:
         return _QUERY_ALIASES[cleaned]
+
+    anchors = [t for t in tokens if not _is_shape_token(t)]
+    shapes = [_singular_shape(t) for t in tokens if _is_shape_token(t)]
+
+    # "lomos de bacalao desalado" → buscar "lomo bacalao" (no "lomos" solo)
+    if anchors and shapes:
+        return f"{shapes[0]} {anchors[0]}"
+    if anchors:
+        return " ".join(anchors)
     return cleaned or raw
 
 
 def _core_tokens(query: str) -> list[str]:
+    """Tokens que DEBEN aparecer en el producto (ancla alimentaria, no el corte)."""
     cleaned = _clean_search_query(query)
-    tokens = [t for t in cleaned.replace(".", " ").split() if len(t) > 1]
-    # Quitar restos tipo "d" "o" sueltos
-    return [t for t in tokens if t not in _FILLER_TOKENS and t not in {"d", "do"}]
+    cleaned_tokens = [
+        t
+        for t in cleaned.replace(".", " ").split()
+        if t and t not in _FILLER_TOKENS and t not in {"d", "do"} and len(t) > 1
+    ]
+    anchors = _anchor_tokens(query)
+    # Anclas que siguen en la búsqueda (bacalao sí; desalado si el alias lo quitó, no)
+    required = [a for a in anchors if a in cleaned_tokens]
+    if required:
+        for t in cleaned_tokens:
+            if not _is_shape_token(t) and t not in required:
+                required.append(t)
+        return required
+    non_shape = [t for t in cleaned_tokens if not _is_shape_token(t)]
+    return non_shape or cleaned_tokens
 
 
 def _product_payload(product: dict) -> dict:
@@ -438,47 +598,50 @@ def search_ingredient():
 
     search_q = _clean_search_query(query)
     cores = _core_tokens(query)
-    # Si queda muy genérico, usa la consulta limpia; si no, la limpia
+    anchors = _anchor_tokens(query) or cores
+    shapes = _shape_tokens_in_query(query)
     algolia_q = search_q or query
 
     primary, status = _algolia_search(algolia_q, limit=48)
-    # Segunda pasada con el token principal si la frase compuesta da poco
+    # Segunda pasada SOLO con ancla alimentaria (nunca "lomos"/"filetes" solos)
     secondary: list[dict] = []
-    if cores and len(cores) > 1 and (status != 200 or len(primary) < 8):
-        sec, sec_status = _algolia_search(cores[0], limit=36)
+    anchor_q = anchors[0] if anchors else ""
+    if anchor_q and anchor_q != algolia_q and (status != 200 or len(primary) < 6):
+        sec, sec_status = _algolia_search(anchor_q, limit=36)
         if sec_status == 200:
             secondary = sec
 
     local: list[dict] = []
-    cid = None
     if category_id not in (None, "", False):
         try:
             cid = int(category_id)
         except (TypeError, ValueError):
             return jsonify(error="category_id inválido"), 400
         local = _search_category_local(algolia_q, cid)
-        if cores and cores[0] != algolia_q:
-            local = _merge_products(local, _search_category_local(cores[0], cid), limit=80)
+        if anchor_q and anchor_q != algolia_q:
+            local = _merge_products(local, _search_category_local(anchor_q, cid), limit=80)
 
     if status != 200 and not local:
         err = primary[0] if primary and isinstance(primary[0], dict) else {"error": "Búsqueda fallida"}
         return jsonify(err), status
 
-    # Categoría primero (producto fresco del pasillo correcto), luego catálogo
     catalog = primary if status == 200 else []
     products = _merge_products(local, catalog, secondary, limit=80)
     products = _filter_relevant(products, query)
-    # Si el filtro deja vacío, relaja exigiendo solo el primer core y sin procesados extremos
-    if not products and (catalog or local):
+    if not products and (catalog or local or secondary):
+        # Soft: exige la ancla (bacalao / maiz), nunca el corte genérico
+        soft_q = anchor_q or (cores[0] if cores else algolia_q)
         products = _filter_relevant(
             _merge_products(local, catalog, secondary, limit=80),
-            cores[0] if cores else algolia_q,
+            soft_q,
             soft=True,
         )
     products = _rank_by_query(products, query)
     return jsonify(
         ingredient=query,
         search_q=algolia_q,
+        anchors=anchors,
+        shapes=shapes,
         products=products,
         count=len(products),
         source="category+catalog" if local else "catalog",
@@ -495,10 +658,16 @@ def _token_in_name(token: str, name: str) -> bool:
         return False
     # Singularizar token de consulta para cubrir huevos→huevo y al revés
     forms = {token}
+    if token.endswith("ces") and len(token) > 4:
+        # nueces → nuez (no “nuec”)
+        forms.add(token[:-3] + "z")
     if token.endswith("es") and len(token) > 4:
         forms.add(token[:-2])
     elif token.endswith("s") and len(token) > 3:
         forms.add(token[:-1])
+    # z → ces (nuez → nueces en el nombre del producto)
+    if token.endswith("z") and len(token) > 2:
+        forms.add(token[:-1] + "ces")
     for form in forms:
         pat = rf"(?<![a-z0-9]){re.escape(form)}(?:es|s)?(?![a-z0-9])"
         if re.search(pat, name):
@@ -507,36 +676,357 @@ def _token_in_name(token: str, name: str) -> bool:
 
 
 def _is_pet_or_noise(name: str) -> bool:
-    return any(n in name for n in _NOISE_ALWAYS)
+    return any(n in name for n in _NOISE_ALWAYS) or any(n in name for n in _NOISE_NONFOOD)
+
+
+_HERB_ANCHORS = {
+    "romero",
+    "oregano",
+    "tomillo",
+    "perejil",
+    "albahaca",
+    "laurel",
+    "cilantro",
+    "hierbabuena",
+    "menta",
+}
+_HERB_NOISE = (
+    "hamburguesa",
+    "cracker",
+    "crackers",
+    "alcohol",
+    "corporal",
+    "salsa",
+    "snack",
+    "patatas fritas",
+)
+_FRUIT_NOISE = (
+    "granizado",
+    "mantecado",
+    "refresco",
+    "fanta",
+    "helado",
+    "galleta",
+    "golosina",
+    "gominola",
+    "yogur",
+    "batido",
+)
+
+# Derivados que NUNCA son el ingrediente “de cocina” pedido
+_ALWAYS_REJECT = (
+    "papilla",
+    "tarrito",
+    "+6 meses",
+    "+8 meses",
+    "+4 meses",
+    "+12 meses",
+    "hero solo",
+    "potito",
+    "infantil",
+    "bebes",
+    "bebe ",
+    "sazonador",
+    "pastilla",
+    "pastillas",
+    "sandwich",
+    "sandwiches",
+    "bocadillo",
+    "rosca ",
+    "pizza",
+    "empanadilla",
+    "gyoza",
+    "gyozas",
+    "fideos orientales",
+    "ramen",
+    "sabor gamba",
+    "sabor pollo",
+)
+
+# Bollería / lácteos / platos compuestos cuando se busca el fruto seco base
+_PASTRY_NOISE = (
+    "trenza",
+    "croissant",
+    "magdalena",
+    "bizcocho",
+    "pastel",
+    "tarta",
+    "galleta",
+    "cookie",
+    "helado",
+    "bombon",
+    "bombón",
+    "chocolate con",
+    "bifidus",
+    "bífidus",
+    "yogur",
+    "yogurt",
+    "probiot",
+    "probiótico",
+    "cereales",
+    "muesli",
+    "granola",
+    "barrita",
+    "bebida",
+    "leche",
+    "puleva",
+    "omega",
+)
+
+_MEAT_FISH_REJECT = (
+    "caldo",
+    "fumet",
+    "concentrado",
+    "carcasa",
+    "espinazo",
+    "salteado de",
+    "plato preparado",
+    "preparado de",
+    "elaborado de",
+    "fingers",
+    "palitos de",
+    "nugget",
+    "croqueta",
+    "rebozad",
+    "empanad",
+    "a la romana",
+    "al huevo",
+    "panado",
+    "panada",
+    "brocheta",
+    "brochetas",
+    "hamburguesa",
+    "albóndiga",
+    "albondiga",
+    "fiambre",
+    "gyoza",
+)
+
+_CANNED_SEAFOOD_REJECT = (
+    "en salsa",
+    "salsa americana",
+    "en escabeche",
+    "al natural",  # only when wanting limpio/fresco — handled contextually
+    "en tinta",
+    "en aceite de",
+)
+
+
+def _reject_derivative(name: str, query: str, head: str) -> bool:
+    """True = descartar producto (no es el ingrediente pedido)."""
+    original = _normalize(query)
+    if any(x in name for x in _ALWAYS_REJECT):
+        return True
+
+    # Nueces/almendras/avellanas ≠ bollería / especias (nuez moscada) / bebidas
+    nut_heads = ("nuez", "nueces", "almendra", "almendras", "avellana", "avellanas", "pistacho", "pistachos")
+    if head.startswith(nut_heads) or any(h in original.split() for h in nut_heads):
+        if "moscada" in name and "moscada" not in original:
+            return True
+        if any(x in name for x in _PASTRY_NOISE):
+            # Permitir si el nombre ES básicamente el fruto (Nueces naturales…)
+            if not (
+                name.startswith("nuez")
+                or name.startswith("nueces")
+                or name.startswith("almendra")
+                or name.startswith("avellana")
+                or name.startswith("pistacho")
+            ):
+                return True
+
+    # Vino ≠ vinagre (pero “vinagre de vino” sí debe encontrar vinagre)
+    if "vinagre" not in original:
+        if ("vino" in original or head.startswith("vino")) and "vinagre" in name:
+            return True
+
+    # Hígado fresco ≠ paté; pimienta ≠ paté con pimienta
+    if "higado" in original or head.startswith("higado"):
+        if "pate" in name or "paté" in name or "mousse" in name:
+            return True
+    if "pimienta" in original and ("pate" in name or "paté" in name):
+        return True
+    # Pescado / rape / pollo: no caldo si no buscan caldo
+    if "caldo" not in original and "fumet" not in original and not head.startswith("caldo"):
+        if name.startswith("caldo"):
+            return True
+
+    # Patatas/papas: no chips
+    if ("patata" in original or "papa" in original) and "frita" not in original:
+        if "frita" in name or "fritas" in name or "chip" in name:
+            return True
+
+    # Sésamo / ajonjolí: semillas, no pan
+    if "sesamo" in original or "ajonjol" in original:
+        if name.startswith("pan ") or " pan " in f" {name}":
+            return True
+
+    # Cordero/ternasco: no hamburguesa
+    if "cordero" in original or "ternasco" in original:
+        if "hamburguesa" in name:
+            return True
+
+    # Magro / lomo de cerdo para cocinar ≠ fiambre loncheado / paté
+    if ("magro" in original or "pulmon" in original or ("lomo" in original and "cerdo" in original)):
+        if "pate" in name or "fiambre" in name:
+            return True
+        if "loncha" in name and ("asado" in name or "cocido" in name):
+            return True
+
+    # Jamón serrano ≠ rosca/sandwich (ya en ALWAYS) ni loncheados raros de pan
+    if "jamon" in original and ("rosca" in name or "empanad" in name or "croissant" in name):
+        return True
+
+    # Hierbas / limón
+    if head in _HERB_ANCHORS and any(n in name for n in _HERB_NOISE):
+        return True
+    if head.startswith("limon") and any(n in name for n in _FRUIT_NOISE):
+        return True
+
+    # Pescado / carne “enteros”: fuera papillas, caldos, panados, salteados…
+    proteinish = head.startswith(
+        (
+            "merluz",
+            "bacala",
+            "salmon",
+            "rape",
+            "atun",
+            "bonito",
+            "sardina",
+            "boqueron",
+            "pulp",
+            "calamar",
+            "chipiron",
+            "gamba",
+            "langostin",
+            "mejillon",
+            "navaja",
+            "poll",
+            "conej",
+            "cerdo",
+            "ternera",
+            "vacuno",
+            "cordero",
+            "pavo",
+        )
+    ) or any(
+        x in original
+        for x in ("pollo", "merluza", "gamba", "calamar", "mejill", "jamon", "higado")
+    )
+    if proteinish and any(x in name for x in _MEAT_FISH_REJECT):
+        # Excepción: si la query pide explícitamente rebozado/romana/caldo
+        if "caldo" in original and "caldo" in name:
+            pass  # buscan caldo → no rechazar
+        elif not any(x in original for x in ("reboz", "romana", "finger", "nugget", "croqueta")):
+            return True
+
+    # Pollo en trozos: solo piezas de carne, no vísceras / caldo / platos
+    if "pollo" in original and "caldo" not in original:
+        if any(
+            x in name
+            for x in (
+                "higado",
+                "higados",
+                "corazon",
+                "corazones",
+                "carcasa",
+                "espinazo",
+                "caldo",
+                "sazonador",
+                "sandwich",
+                "fiambre",
+                "gyoza",
+                "brocheta",
+                "nugget",
+                "croqueta",
+                "sabor pollo",
+                "fideo",
+                "barbacoa",
+                "teriyaki",
+                "curry",
+                "empanado",
+                "patas de pollo",
+                "pata de pollo",
+                "molleja",
+                "mollejas",
+                "cuello",
+                "menudillo",
+                "gnocchi",
+                "ravioli",
+                "lasagna",
+                "canelon",
+                "pasta ",
+                "arroz con pollo",
+            )
+        ):
+            return True
+
+    # Calamar/gambas/mejillón “limpio” o crudo: priorizar; latas de salsa fuera
+    if any(x in original for x in ("calamar", "gamba", "pulpo", "mejillon", "chipiron")):
+        if "limpio" in original or "limpia" in original or "crudo" in original or "fresca" in original:
+            if any(
+                x in name
+                for x in (
+                    "en salsa",
+                    "salsa americana",
+                    "en tinta",
+                    "escabeche",
+                    "salteado",
+                    "relleno",
+                )
+            ):
+                return True
+        # Aunque no diga limpio, latas de salsa americana no son el marisco base
+        if "salsa americana" in name or "salteado de" in name:
+            return True
+
+    # Mejillones: si busca solo “mejillones”, las latas pueden valer;
+    # pero si busca frescos/vapor implícito en receta, prefiera no-escabeche en ranking (no reject all)
+
+    return False
 
 
 def _filter_relevant(products: list[dict], query: str, *, soft: bool = False) -> list[dict]:
-    """Exige el núcleo del ingrediente y descarta mascotas / ruido claro."""
+    """Exige el núcleo del ingrediente y descarta derivados engañosos."""
     cores = _core_tokens(query)
     if not cores:
-        cores = [t for t in _normalize(query).split() if len(t) > 2]
+        cores = _anchor_tokens(query) or [t for t in _normalize(query).split() if len(t) > 2]
+    cores = [t for t in cores if not _is_shape_token(t)] or cores
+    head = cores[0] if cores else ""
     out = []
     for p in products:
         name = _normalize(p.get("display_name") or "")
         if not name or _is_pet_or_noise(name):
             continue
+        if _reject_derivative(name, query, head):
+            continue
         if cores:
-            # En modo normal: todos los cores; en soft: al menos el primero
             need = cores[:1] if soft else cores
             if not all(_token_in_name(t, name) for t in need):
                 continue
+        # “limpio”: si hay resultados con limpio, en soft no filtramos aún;
+        # en ranking se prioriza (abajo). Aquí, si la query pide limpio y el
+        # nombre no lo tiene pero hay muchos, dejamos pasar y rankea.
         out.append(p)
+    # Si pedían “limpio” y hay alguno con limpio, quédate solo con esos
+    original = _normalize(query)
+    if "limpio" in original or "limpia" in original:
+        with_clean = [
+            p
+            for p in out
+            if "limpio" in _normalize(p.get("display_name") or "")
+            or "limpia" in _normalize(p.get("display_name") or "")
+        ]
+        if with_clean:
+            return with_clean
     return out
 
 
-def _name_starts_with_ingredient(name: str, cores: list[str], phrase: str) -> bool:
+def _name_starts_with_ingredient(name: str, anchors: list[str], phrase: str) -> bool:
     if phrase and name.startswith(phrase):
         return True
-    if cores and _token_in_name(cores[0], name.split(" ", 1)[0]):
-        return True
-    # "Huevos M/L ..." / "Cebollas ..."
     first = name.split(" ", 1)[0] if name else ""
-    return bool(cores and _token_in_name(cores[0], first))
+    # Empezar por el alimento (huevos, cebollas), no por "lomo" genérico
+    return bool(anchors and _token_in_name(anchors[0], first))
 
 
 def _product_price(p: dict) -> float:
@@ -551,9 +1041,11 @@ def _product_price(p: dict) -> float:
 
 
 def _rank_by_query(products: list[dict], query: str) -> list[dict]:
-    """Prioriza producto real; a igual relevancia, el más barato."""
+    """Grupo de producto real primero; dentro del grupo, el más barato."""
     phrase = _clean_search_query(query)
     cores = _core_tokens(query)
+    anchors = _anchor_tokens(query) or cores
+    shapes = _shape_tokens_in_query(query)
     original = _normalize(query)
 
     def score(p: dict) -> tuple:
@@ -562,116 +1054,212 @@ def _rank_by_query(products: list[dict], query: str) -> list[dict]:
         # Menor es mejor
         s = 100
         if _is_pet_or_noise(name):
-            return (10_000, price, 99, name)
+            return (9, price, 10_000, 99, name)
 
-        # Coincidencia de frase limpia / original
         if phrase and phrase in name:
             s -= 60
         if original and original != phrase and original in name:
             s -= 40
         if cores and all(_token_in_name(t, name) for t in cores):
-            s -= 35
-        elif cores and _token_in_name(cores[0], name):
-            s -= 15
+            s -= 40
+        elif anchors and _token_in_name(anchors[0], name):
+            s -= 20
         else:
-            s += 80
+            s += 90
 
-        if _name_starts_with_ingredient(name, cores, phrase):
+        # Corte pedido (lomo) suma; corte solo sin ancla ya está filtrado
+        if shapes and any(_token_in_name(sh, name) for sh in shapes):
+            s -= 25
+        if "desalad" in original and "desalad" in name:
+            s -= 20
+
+        if _name_starts_with_ingredient(name, anchors, phrase):
             s -= 45
 
-        # Nombres cortos ≈ producto base (Harina de trigo vs Panecillo harina integral…)
         word_count = len([w for w in name.split() if w])
         s += max(0, word_count - 3) * 4
 
-        # Penaliza procesados / derivados si no forman parte de la búsqueda
-        needle = f" {phrase} " if phrase else ""
         for noise in _NOISE_PROCESSED:
             n = noise.strip()
             if n and n in name and n not in phrase and n not in original:
-                # No penalizar "congelado" ligero tanto como sopa/pasta/bebida
                 bump = 55
                 if n in {"ultracongelad", "deshidratad"}:
                     bump = 12
                 s += bump
 
-        # Casos concretos muy frecuentes
-        if cores:
-            head = cores[0]
-            if head.startswith("huev") and ("pasta" in name or "tagliatelle" in name or "fideo" in name):
+        head = (anchors[0] if anchors else (cores[0] if cores else "")) or ""
+        if head.startswith("huev") and ("pasta" in name or "tagliatelle" in name or "fideo" in name):
+            s += 120
+        if "harina" in phrase or head.startswith("harin") or "maiz" in phrase:
+            if "panecillo" in name or name.startswith("pan "):
                 s += 120
-            if head.startswith("harin"):
-                if "panecillo" in name or name.startswith("pan "):
-                    s += 120
+            # Maicena / harina de maíz
+            if "maiz" in phrase or "maicen" in original or "maizen" in original:
+                if "maiz" in name:
+                    s -= 40
+                if "fina" in name:
+                    s -= 15
+            elif head.startswith("harin") or phrase.startswith("harina"):
                 if "trigo" in name:
                     s -= 30
-                if any(x in name for x in ("arroz", "garbanzo", "maiz", "almendra", "coco", "fuerza")):
+                specialties = ("arroz", "garbanzo", "almendra", "coco", "fuerza", "maiz")
+                if any(x in name for x in specialties) and not any(x in phrase for x in specialties):
                     s += 18
-            if head.startswith("ceboll") and ("sopa" in name or "patatas fritas" in name or "sabor" in name):
-                s += 100
-            if head.startswith("arroz") and (
-                "bebida" in name or "tortitas" in name or "cocido" in name or "leche" in name
+        if head.startswith("ceboll") and ("sopa" in name or "patatas fritas" in name or "sabor" in name):
+            s += 100
+        if head.startswith("arroz") and (
+            "bebida" in name or "tortitas" in name or "cocido" in name or "leche" in name
+        ):
+            s += 100
+        if "bomba" in original:
+            if "sendra" in name:
+                s -= 75
+            elif "bomba" in name:
+                s -= 70
+            elif "redondo" in name and "cocido" not in name:
+                s -= 40
+            if "cocido" in name:
+                s += 50
+            if any(x in name for x in ("basmati", "largo", "vaporizado", "microondas", "verduras")):
+                s += 35
+        if head.startswith("limon") or head.startswith("limones"):
+            if name.startswith("limon") or name.startswith("limones"):
+                s -= 45
+            if any(
+                x in name
+                for x in (
+                    "refresco",
+                    "fanta",
+                    "ambientador",
+                    "golosina",
+                    "gominola",
+                    "helado",
+                    "lavavajillas",
+                    "limpiador",
+                    "mantecado",
+                    "granizado",
+                    "galleta",
+                )
             ):
                 s += 100
-            # Paella: el catálogo no trae "bomba" → priorizar Sendra/redondo crudo
-            if "bomba" in original:
-                if "sendra" in name:
-                    s -= 75
-                elif "bomba" in name:
-                    s -= 70
-                elif "redondo" in name and "cocido" not in name:
-                    s -= 40
-                if "cocido" in name:
-                    s += 50
-                if any(x in name for x in ("basmati", "largo", "vaporizado", "microondas", "verduras")):
-                    s += 35
-            if head.startswith("limon") or head.startswith("limones"):
-                if name.startswith("limon") or name.startswith("limones"):
-                    s -= 45
-                if any(
-                    x in name
-                    for x in (
-                        "refresco",
-                        "fanta",
-                        "ambientador",
-                        "golosina",
-                        "gominola",
-                        "helado",
-                        "lavavajillas",
-                        "limpiador",
-                        "mantecado",
-                        "granizado",
-                        "galleta",
-                    )
-                ):
-                    s += 100
-            if head.startswith("pulp") and any(x in name for x in ("pota", "calamar", "sepia")):
-                s += 90
-            if head.startswith("poll"):
-                if any(
-                    x in name
-                    for x in (
-                        "teriyaki",
-                        "curry",
-                        "fiambre",
-                        "loncha",
-                        "nugget",
-                        "croqueta",
-                        "asado",
-                        "relleno",
-                    )
-                ):
-                    s += 70
-                if any(x in name for x in ("pechuga", "muslo", "filete", "contramuslo", "entero", "troceado")) and (
-                    "asado" not in name and "curry" not in name
-                ):
-                    s -= 40
-            if head.startswith("conej"):
-                if "enano" in name or "alimento" in name:
-                    s += 200
-                if "troceado" in name or "entero" in name:
-                    s -= 30
+        if head.startswith("nuez") or "nueces" in original:
+            if "moscada" in name and "moscada" not in original:
+                s += 200
+            if "natural" in name or name.startswith("nueces ") or name.startswith("nuez natural"):
+                s -= 40
+            if any(x in name for x in ("macadamia", "pecana", "pecán", "brasil", "troceada")):
+                s += 12
+        if head.startswith("pulp") and any(x in name for x in ("pota", "calamar", "sepia")):
+            s += 90
+        if head.startswith("bacala"):
+            # Nunca carne disfrazada de "lomo"
+            if any(x in name for x in ("cerdo", "vacuno", "iberico", "ibérico", "anojo", "añojo", "cebo")):
+                s += 200
+            if "salmon" in name:
+                s += 80
+            if "piquillo" in name or "relleno" in name or "dorado con" in name:
+                s += 50
+            if "lomo" in name and "bacalao" in name:
+                s -= 35
+        if head.startswith("romer") or head in {"oregano", "tomillo", "perejil", "albahaca", "laurel"}:
+            if any(x in name for x in ("hamburguesa", "cracker", "alcohol", "corporal", "aceite corporal")):
+                s += 120
+            if name.startswith(head) or name.startswith(head.rstrip("o") + "os"):
+                s -= 40
+        if head.startswith("poll"):
+            if any(
+                x in name
+                for x in (
+                    "teriyaki",
+                    "curry",
+                    "fiambre",
+                    "loncha",
+                    "nugget",
+                    "croqueta",
+                    "asado",
+                    "relleno",
+                    "gyoza",
+                    "taquito",
+                )
+            ):
+                s += 70
+            if any(
+                x in name
+                for x in (
+                    "pechuga",
+                    "muslo",
+                    "filete",
+                    "contramuslo",
+                    "entero",
+                    "troceado",
+                    "solomillo",
+                    "ala",
+                    "alitas",
+                )
+            ) and ("asado" not in name and "curry" not in name):
+                s -= 45
+        if head.startswith("conej"):
+            if "enano" in name or "alimento" in name:
+                s += 200
+            if "troceado" in name or "entero" in name:
+                s -= 30
 
-        # 1) relevancia  2) precio  3) nombre más corto
-        return (s, price, word_count, name)
+        # Preferir “limpio/crudo/fresco” y filetes frente a latas
+        if any(x in original for x in ("limpio", "limpia", "crudo", "fresca", "fresco")):
+            if any(x in name for x in ("limpio", "limpia", "crudo", "fresca", "fresco")):
+                s -= 40
+            if any(x in name for x in ("lata", "conserva", "escabeche", "salsa")):
+                s += 60
+        if head.startswith("merluz") or head.startswith("gamba") or head.startswith("calamar"):
+            if name.startswith(head) or name.startswith(head.rstrip("a") + "as") or name.startswith(
+                head.rstrip("o") + "os"
+            ):
+                s -= 25
+            if "filete" in name or "lomo" in name or "pelada" in name or "pelado" in name:
+                s -= 20
+        if "jamon" in original and "serrano" in original:
+            if "serrano" in name and "rosca" not in name:
+                s -= 30
+            if "queso" in name or "emmental" in name:
+                s += 80
+        if "higado" in original:
+            if "filete" in name or name.startswith("filetes"):
+                s -= 40
+            if "pate" in name:
+                s += 100
+        if "vino" in original and "vinagre" not in original:
+            if name.startswith("vino"):
+                s -= 40
+            if "vinagre" in name:
+                s += 200
 
-    return sorted(products, key=score)
+        # Tier grueso: 0 = producto pedido, luego derivados.
+        # Dentro del mismo tier → precio (más barato primero).
+        has_anchor = bool(anchors) and all(_token_in_name(a, name) for a in anchors[:1])
+        has_shape = bool(shapes) and any(_token_in_name(sh, name) for sh in shapes)
+        if s >= 180 or not has_anchor:
+            tier = 3
+        elif shapes:
+            tier = 0 if has_shape else 1
+            if s >= 120:
+                tier = max(tier, 2)
+        else:
+            if s <= 55:
+                tier = 0
+            elif s <= 100:
+                tier = 1
+            else:
+                tier = 2
+
+        p["_match_tier"] = tier
+        return (tier, price, s, word_count, name)
+
+    ranked = sorted(products, key=score)
+    # Anotar tier limpio para el front (badge “más barato” solo en tier mínimo)
+    if ranked:
+        best_tier = ranked[0].get("_match_tier", 0)
+        for p in ranked:
+            p["match_tier"] = p.get("_match_tier", 2)
+            p["is_best_match"] = p.get("_match_tier", 2) == best_tier
+            p.pop("_match_tier", None)
+    return ranked

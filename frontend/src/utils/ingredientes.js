@@ -1,7 +1,9 @@
-﻿export const ingredientes = {
+export const ingredientes = {
   // Condimentos y básicos
   "Aceite de oliva": "Aceite, vinagre y sal",
   "Aceite de oliva virgen extra": "Aceite, vinagre y sal",
+  "Aceite de Oliva Virgen Extra": "Aceite, vinagre y sal",
+  "AOVE": "Aceite, vinagre y sal",
   "Aceite de girasol": "Aceite, vinagre y sal",
   "Vinagre de vino": "Aceite, vinagre y sal",
   "Vinagre de manzana": "Aceite, vinagre y sal",
@@ -117,7 +119,6 @@
   "Cayena": "Especias",
   "Pimentón": "Especias",
   "Aceite": "Aceite, vinagre y sal",
-  "Aceite de Oliva Virgen Extra": "Aceite, vinagre y sal",
   "Vinagre": "Aceite, vinagre y sal",
   "Sal gorda": "Aceite, vinagre y sal",
   "Sal fina": "Aceite, vinagre y sal",
@@ -164,7 +165,15 @@
   "Pan de molde": "Pan de molde y otras especialidades",
   "Harina": "Harina y preparado repostería",
   "Harina de trigo": "Harina y preparado repostería",
+  "Maicena": "Harina y preparado repostería",
+  "Maizena": "Harina y preparado repostería",
+  "Fécula de maíz": "Harina y preparado repostería",
   "Levadura en polvo": "Harina y preparado repostería",
+  "Romero": "Especias",
+  "Romero fresco": "Especias",
+  "Lomos de bacalao desalado": "Pescado",
+  "Lomo de bacalao desalado": "Pescado",
+  "Lomo de bacalao": "Pescado",
 
   // Dulces
   "Azúcar": "Azúcar y edulcorante",

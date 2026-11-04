@@ -208,10 +208,105 @@
           Añadir paso
         </button>
       </div>
-      <!-- Filtros -->
 
+      <!-- Subrecetas (N independientes) -->
+      <div v-show="wizardStep === 3" class="p-6 sm:p-8 border-b border-amber-100 space-y-5">
+        <div>
+          <h2 class="text-xl font-bold text-amber-800 mb-1">Subrecetas</h2>
+          <p class="text-sm text-amber-700/80 mb-4">
+            Opcional: varias bases caseras independientes (ej. Alioli y Salsa brava)
+          </p>
+        </div>
+
+        <div
+          v-for="(sub, sIdx) in recipebook.subrecipes"
+          :key="'sub-' + sIdx"
+          class="rounded-xl border border-amber-200 bg-amber-50/50 p-4 space-y-4 relative"
+        >
+          <button
+            type="button"
+            class="absolute top-3 right-3 text-sm text-red-600 hover:text-red-800"
+            @click="removeSubRecipe(sIdx)"
+          >
+            Quitar
+          </button>
+          <div class="pr-14">
+            <label class="block text-sm font-medium text-amber-700 mb-1">Nombre</label>
+            <input
+              v-model="sub.title"
+              class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              placeholder="Ej: Alioli"
+            >
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-amber-900 mb-2">Ingredientes</h3>
+            <div
+              v-for="(ingredient, index) in sub.ingredients"
+              :key="'subing-' + sIdx + '-' + index"
+              class="grid md:grid-cols-2 gap-2 mb-2"
+            >
+              <input
+                v-model="sub.ingredients[index]"
+                class="w-full px-3 py-2 rounded-lg border border-amber-300"
+                placeholder="Ingrediente"
+              >
+              <div class="flex gap-2">
+                <input
+                  v-model="sub.quantities[index]"
+                  class="w-full px-3 py-2 rounded-lg border border-amber-300"
+                  placeholder="Cantidad"
+                >
+                <button type="button" class="text-red-600 text-sm shrink-0" @click="removeSubIngredient(sIdx, index)">×</button>
+              </div>
+            </div>
+            <button type="button" class="text-sm text-amber-700 hover:underline" @click="addSubIngredient(sIdx)">
+              + Ingrediente
+            </button>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-amber-900 mb-2">Pasos</h3>
+            <div
+              v-for="(step, index) in sub.steps"
+              :key="'substep-' + sIdx + '-' + index"
+              class="mb-3 p-3 bg-white rounded-lg border border-amber-200 relative"
+            >
+              <button type="button" class="absolute top-2 right-2 text-xs text-red-600" @click="removeSubStep(sIdx, index)">
+                Quitar
+              </button>
+              <input
+                v-model="step.title"
+                class="w-full mb-2 px-3 py-2 rounded-lg border border-amber-300"
+                placeholder="Título"
+              >
+              <textarea
+                v-model="step.description"
+                rows="2"
+                class="w-full px-3 py-2 rounded-lg border border-amber-300"
+                placeholder="Descripción"
+              />
+              <div class="mt-2 relative">
+                <input type="file" class="absolute inset-0 opacity-0 cursor-pointer" @change="handleSubStepImageChange($event, sIdx, index)">
+                <div class="px-3 py-1.5 text-xs text-amber-700 border border-amber-200 rounded-lg bg-amber-50 truncate">
+                  {{ step.image ? (typeof step.image === 'object' ? step.image.name : 'Imagen existente') : 'Imagen opcional…' }}
+                </div>
+              </div>
+            </div>
+            <button type="button" class="text-sm text-amber-700 hover:underline" @click="addSubStep(sIdx)">
+              + Paso
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          @click="addSubRecipe"
+          class="inline-flex items-center rounded-full border border-amber-300 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-50"
+        >
+          + Añadir otra subreceta
+        </button>
+      </div>
       <!-- Sección de Filtros -->
-      <div v-show="wizardStep === 3" class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
+      <div v-show="wizardStep === 4" class="p-6 sm:p-8 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
         <h2 class="text-xl font-bold text-amber-800 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -336,12 +431,17 @@ const proteinas = ref([]);
 const showBasicInfo = ref();
 const wizardStep = ref(0);
 const submitting = ref(false);
-const wizardLabels = ['Básica', 'Ingredientes', 'Pasos', 'Categorías'];
+const wizardLabels = ['Básica', 'Ingredientes', 'Pasos', 'Subreceta', 'Categorías'];
 const recipebook = reactive({
   ingredients: [],
   quantities: [],
-  steps: []
+  steps: [],
+  subrecipes: [],
 });
+
+function emptySubRecipe() {
+  return { title: '', ingredients: [], quantities: [], steps: [] }
+}
 
 // Función para añadir ingrediente
 const addIngredient = () => {
@@ -353,6 +453,32 @@ const addIngredient = () => {
 const addStep = () => {
   recipebook.steps.push({ title: '', description: '', image: null });
 };
+
+const addSubRecipe = () => {
+  recipebook.subrecipes.push(emptySubRecipe())
+}
+
+const removeSubRecipe = (sIdx) => {
+  recipebook.subrecipes.splice(sIdx, 1)
+}
+
+const addSubIngredient = (sIdx) => {
+  recipebook.subrecipes[sIdx].ingredients.push('')
+  recipebook.subrecipes[sIdx].quantities.push('')
+}
+
+const removeSubIngredient = (sIdx, index) => {
+  recipebook.subrecipes[sIdx].ingredients.splice(index, 1)
+  recipebook.subrecipes[sIdx].quantities.splice(index, 1)
+}
+
+const addSubStep = (sIdx) => {
+  recipebook.subrecipes[sIdx].steps.push({ title: '', description: '', image: null })
+}
+
+const removeSubStep = (sIdx, index) => {
+  recipebook.subrecipes[sIdx].steps.splice(index, 1)
+}
 
 function nextWizardStep() {
   if (wizardStep.value === 0 && !title.value.trim()) {
@@ -391,6 +517,36 @@ onMounted(() => {
       response.data.step_list.forEach(element => {
         recipebook.steps.push(element);
       });
+
+      const loadedSubs = response.data.subrecipes || []
+      if (loadedSubs.length) {
+        loadedSubs.forEach((sub) => {
+          recipebook.subrecipes.push({
+            title: sub.title || '',
+            ingredients: (sub.ingredients || []).map((i) => i.ingredients),
+            quantities: (sub.ingredients || []).map((i) => i.quantity),
+            steps: (sub.steps || []).map((s) => ({
+              title: s.title || '',
+              description: s.description || '',
+              image: s.image || null,
+            })),
+          })
+        })
+      } else if (
+        (response.data.subingredient_list || []).length ||
+        (response.data.substep_list || []).length
+      ) {
+        recipebook.subrecipes.push({
+          title: 'Subreceta',
+          ingredients: (response.data.subingredient_list || []).map((i) => i.ingredients),
+          quantities: (response.data.subingredient_list || []).map((i) => i.quantity),
+          steps: (response.data.substep_list || []).map((s) => ({
+            title: s.title || '',
+            description: s.description || '',
+            image: s.image || null,
+          })),
+        })
+      }
 
       response.data.filters_list.forEach(element => {
         if (element.category === 'typeeat') {
@@ -453,6 +609,20 @@ async function handleStepImageChange(event, index) {
   }
 }
 
+async function handleSubStepImageChange(event, sIdx, index) {
+  const file = event.target.files[0];
+  if (!file) return
+  try {
+    recipebook.subrecipes[sIdx].steps[index].image = await compressImageFile(file, {
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.8,
+    })
+  } catch (err) {
+    alert(err.message || 'No se pudo procesar la imagen del subpaso')
+  }
+}
+
 function submitEditRecipe() {
   submitting.value = true
   const payload = {
@@ -468,6 +638,29 @@ function submitEditRecipe() {
       description: step.description,
       image: typeof step.image === 'object' ? step.image : { base64: null, name: step.image }
     })) : [],
+    subrecipes: recipebook.subrecipes
+      .filter((sub) =>
+        String(sub.title || '').trim() ||
+        sub.ingredients.some((x) => String(x || '').trim()) ||
+        sub.steps.some((s) => String(s.title || '').trim())
+      )
+      .map((sub) => {
+        const pairs = sub.ingredients
+          .map((name, i) => ({ name, qty: sub.quantities[i] }))
+          .filter((p) => String(p.name || '').trim())
+        return {
+          title: sub.title,
+          ingredients: pairs.map((p) => p.name),
+          quantities: pairs.map((p) => p.qty || ''),
+          steps: sub.steps
+            .filter((step) => String(step.title || '').trim())
+            .map((step) => ({
+              title: step.title,
+              description: step.description,
+              image: typeof step.image === 'object' ? step.image : { base64: null, name: step.image },
+            })),
+        }
+      }),
     typeeat: tipoComida.value,
     ccaa: ccaa.value,
     time: tiempo.value,

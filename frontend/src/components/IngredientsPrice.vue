@@ -312,24 +312,26 @@ const filteredProductos = computed(() => {
   )
 })
 
-const cheapest = computed(() => {
-  let best = null
-  let bestPrice = Infinity
-  for (const p of filteredProductos.value) {
+/** Precio mínimo solo entre el mejor grupo de relevancia (producto real). */
+const cheapestPriceAmongBest = computed(() => {
+  const list = filteredProductos.value
+  const best = list.filter((p) => p.is_best_match === true)
+  const pool = best.length ? best : list
+  let min = Infinity
+  for (const p of pool) {
     const n = numericPrice(p)
-    if (n === null) continue
-    if (n < bestPrice) {
-      bestPrice = n
-      best = p
-    }
+    if (n !== null && n < min) min = n
   }
-  return best
+  return Number.isFinite(min) ? min : null
 })
 
 function isCheapest(p) {
-  const c = cheapest.value
-  if (!c) return false
-  return (p.id && c.id && p.id === c.id) || p.display_name === c.display_name
+  const min = cheapestPriceAmongBest.value
+  if (min === null) return false
+  // Solo badge en el grupo real; todos los empatados al mínimo
+  if (p.is_best_match === false) return false
+  const n = numericPrice(p)
+  return n !== null && Math.abs(n - min) < 0.001
 }
 
 const sortedProductos = computed(() => {

@@ -20,6 +20,8 @@ def test_clean_query_strips_recipe_noise():
     assert _clean_search_query("Piel de limón") == "limon"
     assert _clean_search_query("Pollo en trozos") == "pollo"
     assert _clean_search_query("Conejo en trozos") == "conejo"
+    assert _clean_search_query("AOVE") == "aceite oliva virgen extra"
+    assert _clean_search_query("aove") == "aceite oliva virgen extra"
 
 
 def test_huevos_prefers_eggs_not_pasta():
@@ -123,3 +125,184 @@ def test_among_real_products_cheapest_first():
     assert ranked[0]["display_name"] == "Cebollas"
     assert ranked[0]["price"] == 1.20
     assert ranked[-1]["display_name"].startswith("Sopa")
+
+
+def test_real_group_sorted_by_price():
+    products = [
+        _p("Huevos camperos Hacendado", 3.35),
+        _p("Huevos grandes L", 1.80),
+        _p("Huevos medianos M", 2.85),
+        _p("Pasta fresca tagliatelle al huevo Hacendado", 1.20),
+    ]
+    ranked = _rank_by_query(_filter_relevant(products, "Huevos frescos M/L"), "Huevos frescos M/L")
+    assert ranked[0]["display_name"] == "Huevos grandes L"
+    assert ranked[0]["price"] == 1.80
+    # Entre huevos reales, orden por precio
+    egg_prices = [p["price"] for p in ranked if p["display_name"].startswith("Huevos")]
+    assert egg_prices == sorted(egg_prices)
+
+
+def test_bacalao_not_pork_loin():
+    q = "Lomos de bacalao desalado"
+    assert _clean_search_query(q) == "lomo bacalao"
+    assert "bacalao" in _core_tokens(q)
+    assert "lomos" not in _core_tokens(q)
+    products = [
+        _p("Lomo Hacendado", 6.13),
+        _p("Lomo de cerdo trozo", 4.95),
+        _p("Lomo de vacuno añojo", 8.09),
+        _p("Lomos de salmón sin piel Hacendado congelado", 7.0),
+        _p("Lomo de bacalao MareDeus ultracongelado", 9.22),
+        _p("Migas de bacalao desaladas Hacendado", 7.64),
+    ]
+    filtered = _filter_relevant(products, q)
+    assert all("bacalao" in p["display_name"].lower() for p in filtered)
+    ranked = _rank_by_query(filtered, q)
+    assert "bacalao" in ranked[0]["display_name"].lower()
+    assert "cerdo" not in ranked[0]["display_name"].lower()
+    assert "vacuno" not in ranked[0]["display_name"].lower()
+
+
+def test_maicena_maps_to_corn_flour():
+    assert _clean_search_query("maicena") == "harina maiz"
+    products = [
+        _p("Harina de trigo Hacendado", 0.72),
+        _p("Harina fina de maíz Hacendado", 1.20),
+        _p("Harina de maíz blanco precocida Hacendado", 1.70),
+    ]
+    ranked = _rank_by_query(_filter_relevant(products, "maicena"), "maicena")
+    assert ranked
+    assert "maíz" in ranked[0]["display_name"].lower() or "maiz" in ranked[0]["display_name"].lower()
+
+
+def test_romero_prefers_spice_jar():
+    products = [
+        _p("Alcohol de romero Deliplus", 2.0),
+        _p("Hamburguesa de cordero al romero", 3.8),
+        _p("Aceite corporal de romero Deliplus 100% natural", 3.2),
+        _p("Romero Hacendado", 1.35),
+        _p("Crackers sin gluten Hacendado con romero", 1.7),
+    ]
+    filtered = _filter_relevant(products, "Romero fresco")
+    ranked = _rank_by_query(filtered, "Romero fresco")
+    assert ranked[0]["display_name"].startswith("Romero")
+
+
+def test_merluza_rejects_baby_food_and_fingers():
+    products = [
+        _p("Papilla verduritas con merluza Hero Solo +6 meses", 1.8),
+        _p("Palitos de merluza a la romana Hacendado ultracongelados", 2.8),
+        _p("Fingers de merluza Hacendado", 3.0),
+        _p("Merluza rebozada", 3.5),
+        _p("Filetes de merluza sin piel", 6.5),
+        _p("Merluza en rodajas", 5.9),
+    ]
+    filtered = _filter_relevant(products, "Merluza")
+    names = " ".join(p["display_name"].lower() for p in filtered)
+    assert "papilla" not in names
+    assert "fingers" not in names
+    assert "palitos" not in names
+    assert "rebozada" not in names
+    ranked = _rank_by_query(filtered, "Merluza")
+    assert "merluza" in ranked[0]["display_name"].lower()
+    assert ranked[0]["is_best_match"] is True
+
+
+def test_vino_blanco_not_vinegar():
+    products = [
+        _p("Vinagre de vino blanco Hacendado", 0.65),
+        _p("Vino blanco Casón Histórico", 1.05),
+        _p("Vino blanco Airén", 1.5),
+    ]
+    filtered = _filter_relevant(products, "Vino blanco")
+    assert all("vinagre" not in p["display_name"].lower() for p in filtered)
+    ranked = _rank_by_query(filtered, "Vino blanco")
+    assert ranked[0]["display_name"].lower().startswith("vino blanco")
+
+
+def test_pollo_trozos_not_broth_or_carcass():
+    products = [
+        _p("Caldo de pollo Hacendado", 0.75),
+        _p("Hígados y corazones de pollo", 1.2),
+        _p("Carcasa y espinazo de pollo", 1.23),
+        _p("Sazonador pollo y carne Hacendado", 0.55),
+        _p("Gyozas de pollo y verduras Hacendado congeladas", 1.95),
+        _p("Pollo entero", 6.65),
+        _p("Medio pollo troceado", 3.6),
+        _p("Muslos de pollo", 2.78),
+    ]
+    filtered = _filter_relevant(products, "Pollo en trozos")
+    blob = " ".join(p["display_name"].lower() for p in filtered)
+    assert "caldo" not in blob
+    assert "carcasa" not in blob
+    assert "sazonador" not in blob
+    assert "gyoza" not in blob
+    assert "higado" not in blob and "hígado" not in blob
+    ranked = _rank_by_query(filtered, "Pollo en trozos")
+    top = ranked[0]["display_name"].lower()
+    assert "pollo" in top
+    assert "gyoza" not in top
+
+
+def test_calamar_limpio_prefers_clean_not_canned_sauce():
+    products = [
+        _p("Calamar en salsa americana Hacendado", 2.7),
+        _p("Calamar en tinta Hacendado", 3.1),
+        _p("Calamar grande Hacendado congelado", 3.5),
+        _p("Calamar pequeño limpio patagónico", 5.8),
+        _p("Calamar troceado limpio Hacendado congelado", 4.2),
+    ]
+    filtered = _filter_relevant(products, "Calamar limpio")
+    assert all("salsa" not in p["display_name"].lower() for p in filtered)
+    assert all("tinta" not in p["display_name"].lower() for p in filtered)
+    ranked = _rank_by_query(filtered, "Calamar limpio")
+    assert "limpio" in ranked[0]["display_name"].lower()
+
+
+def test_higado_not_pate_first():
+    products = [
+        _p("Paté de hígado de cerdo ibérico Hacendado", 2.0),
+        _p("Filetes hígado de cerdo", 3.37),
+        _p("Paté de hígado de cerdo sabor intenso Hacendado", 2.0),
+    ]
+    filtered = _filter_relevant(products, "Hígado de cerdo")
+    assert all("paté" not in p["display_name"].lower() and "pate" not in p["display_name"].lower() for p in filtered)
+    ranked = _rank_by_query(filtered, "Hígado de cerdo")
+    assert "filete" in ranked[0]["display_name"].lower()
+
+
+def test_gambas_not_stirfry_first():
+    products = [
+        _p("Salteado de gambas, espárragos verdes Hacendado", 2.9),
+        _p("Gamba pelada cruda tamaño mediano", 4.9),
+        _p("Gamba pelada cruda tamaño grande", 5.95),
+    ]
+    filtered = _filter_relevant(products, "Gambas")
+    assert all("salteado" not in p["display_name"].lower() for p in filtered)
+    ranked = _rank_by_query(filtered, "Gambas")
+    assert ranked[0]["display_name"].startswith("Gamba")
+    assert ranked[0]["price"] == min(p["price"] for p in ranked)
+
+
+def test_nueces_not_pastry_first():
+    products = [
+        _p("Trenza con nueces pecán", 2.5),
+        _p("Galletas con nueces Hacendado", 1.8),
+        _p("Bífidus con nueces y cereales probióticos Hacendado 0% MG", 1.5),
+        _p("Bebida láctea Omega 3 Puleva con nueces y leche desnatada", 1.4),
+        _p("Nuez moscada molida Hacendado", 1.1),
+        _p("Nuez natural Hacendado", 2.2),
+        _p("Nuez natural Hacendado pelada", 2.9),
+        _p("Nueces peladas Hacendado", 2.4),
+    ]
+    filtered = _filter_relevant(products, "Nueces")
+    blob = " ".join(p["display_name"].lower() for p in filtered)
+    assert "trenza" not in blob
+    assert "galleta" not in blob
+    assert "bífidus" not in blob and "bifidus" not in blob
+    assert "bebida" not in blob and "puleva" not in blob
+    assert "moscada" not in blob
+    ranked = _rank_by_query(filtered, "Nueces")
+    top = ranked[0]["display_name"].lower()
+    assert "natural" in top or top.startswith("nueces")
+    assert "moscada" not in top
