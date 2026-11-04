@@ -49,6 +49,7 @@
   "Carne picada de ternera": "Vacuno",
   "Conejo": "Conejo y cordero",
   "Cordero": "Conejo y cordero",
+  "Carne de conejo": "Conejo y cordero",
 
   // Embutidos
   "Chorizo": "Embutido curado",
@@ -82,6 +83,9 @@
   "Queso fresco": "Queso untable y fresco",
   "Yogur natural": "Yogures naturales y sabores",
   "Huevos": "Huevos",
+  "Huevos frescos": "Huevos",
+  "Huevos frescos M/L": "Huevos",
+  "Huevo fresco": "Huevos",
 
   // Verduras
   "Patata":"Verdura",
@@ -89,6 +93,8 @@
   "Pepino":"Verdura",
   "Patatas medianas":"Verdura",
   "Cebolla": "Verdura",
+  "Cebolla dulce": "Verdura",
+  "Cebollas": "Verdura",
   "Ajo": "Verdura",
   "Zanahoria": "Verdura",
   "Pimiento": "Verdura",
@@ -96,6 +102,7 @@
   "Pimiento rojo": "Verdura",
   "Pimientos rojos": "Verdura",
   "Pimiento verde": "Verdura",
+  "Pimientos del piquillo": "Verdura",
   "Calabacín": "Verdura",
   "Berenjena": "Verdura",
   "Espinacas": "Verdura",
@@ -110,17 +117,27 @@
   "Cayena": "Especias",
   "Pimentón": "Especias",
   "Aceite": "Aceite, vinagre y sal",
+  "Aceite de Oliva Virgen Extra": "Aceite, vinagre y sal",
   "Vinagre": "Aceite, vinagre y sal",
   "Sal gorda": "Aceite, vinagre y sal",
+  "Sal fina": "Aceite, vinagre y sal",
   "Yemas": "Huevos",
   "Huevo": "Huevos",
   "Corteza de limón": "Fruta",
+  "Piel de limón": "Fruta",
   "Limón": "Fruta",
+  "Limones": "Fruta",
   "Bacalao": "Pescado",
   "Lomos de bacalao": "Pescado",
   "Garrofón": "Legumbres",
   "Garrofon": "Legumbres",
   "Caldo": "Caldo y puré",
+  "Pollo en trozos": "Aves y pollo",
+  "Conejo en trozos": "Conejo y cordero",
+  "Medio conejo": "Conejo y cordero",
+  "Pulpo limpio": "Marisco",
+  "Arroz bomba (o D.O. Valencia)": "Arroz",
+  "Arroz bomba": "Arroz",
 
   // Frutas y frutos secos
   "Manzana": "Fruta",
@@ -136,7 +153,6 @@
 
   // Legumbres y cereales
   "Arroz": "Arroz",
-  "Arroz bomba": "Arroz",
   "Garbanzos": "Legumbres",
   "Lentejas": "Legumbres",
   "Alubias blancas": "Legumbres",
@@ -189,21 +205,32 @@ const CATEGORY_ALIASES = {
   'pan rallado': 'Pan tostado y rallado',
 }
 
+function simplifyIngredientKey(text) {
+  return normalizeText(text)
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\b[mlsxl](?:\s*\/\s*[mlsxl])+\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export function resolveMercadonaCategory(ingredientText) {
   if (!ingredientText) return null
   const raw = String(ingredientText).trim()
   if (!raw) return null
   if (ingredientes[raw]) return mapCategoryName(ingredientes[raw])
 
-  const needle = normalizeText(raw)
-  // match exacto sin acentos
+  const needle = simplifyIngredientKey(raw)
+  // match exacto sin acentos / sin paréntesis
   for (const [key, cat] of Object.entries(ingredientes)) {
-    if (normalizeText(key) === needle) return mapCategoryName(cat)
+    if (normalizeText(key) === needle || simplifyIngredientKey(key) === needle) {
+      return mapCategoryName(cat)
+    }
   }
   // match por inclusión (más largo primero)
   const keys = Object.keys(ingredientes).sort((a, b) => b.length - a.length)
   for (const key of keys) {
-    const k = normalizeText(key)
+    const k = simplifyIngredientKey(key)
+    if (!k) continue
     if (needle.includes(k) || k.includes(needle)) {
       return mapCategoryName(ingredientes[key])
     }
