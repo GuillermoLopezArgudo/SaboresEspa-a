@@ -207,6 +207,30 @@ _QUERY_ALIASES = {
     "aove": "aceite oliva virgen extra",
     "aceite aove": "aceite oliva virgen extra",
     "aceite de oliva aove": "aceite oliva virgen extra",
+    # Regionalismos / nombres que el catálogo no indexa igual
+    "ajonjoli": "sesamo",
+    "ajonjolí": "sesamo",
+    "berza": "repollo",
+    "grelos": "acelgas",
+    "fabes": "alubias",
+    "fabes de la granja": "alubias",
+    "galets": "macarrones",
+    "ternasco": "cordero",
+    "chuleton de vacuno": "entrecot",
+    "chuletón de vacuno": "entrecot",
+    "papas arrugadas": "patatas",
+    "papas pequenas": "patatas",
+    "papas pequeñas": "patatas",
+    "mojo rojo": "salsa",
+    "mojo verde": "salsa",
+    "cherne o corvina salada": "corvina",
+    "pulmon o magro": "lomo de cerdo",
+    "pulmón o magro": "lomo de cerdo",
+    "pescado de roca": "rape",
+    "pimienta": "pimienta negra",
+    "caldo de pollo o agua": "caldo de pollo",
+    "morcilllo / pollo / tocino": "pollo",
+    "morcillo / pollo / tocino": "pollo",
 }
 
 # Cortes / formatos: no sirven solos como búsqueda (lomo ≠ bacalao)
@@ -754,15 +778,42 @@ def _reject_derivative(name: str, query: str, head: str) -> bool:
     if any(x in name for x in _ALWAYS_REJECT):
         return True
 
-    # Vino ≠ vinagre
-    if "vino" in original and "vinagre" in name:
-        return True
-    if head.startswith("vino") and "vinagre" in name:
-        return True
+    # Vino ≠ vinagre (pero “vinagre de vino” sí debe encontrar vinagre)
+    if "vinagre" not in original:
+        if ("vino" in original or head.startswith("vino")) and "vinagre" in name:
+            return True
 
-    # Hígado fresco ≠ paté
+    # Hígado fresco ≠ paté; pimienta ≠ paté con pimienta
     if "higado" in original or head.startswith("higado"):
         if "pate" in name or "paté" in name or "mousse" in name:
+            return True
+    if "pimienta" in original and ("pate" in name or "paté" in name):
+        return True
+    # Pescado / rape / pollo: no caldo si no buscan caldo
+    if "caldo" not in original and "fumet" not in original and not head.startswith("caldo"):
+        if name.startswith("caldo"):
+            return True
+
+    # Patatas/papas: no chips
+    if ("patata" in original or "papa" in original) and "frita" not in original:
+        if "frita" in name or "fritas" in name or "chip" in name:
+            return True
+
+    # Sésamo / ajonjolí: semillas, no pan
+    if "sesamo" in original or "ajonjol" in original:
+        if name.startswith("pan ") or " pan " in f" {name}":
+            return True
+
+    # Cordero/ternasco: no hamburguesa
+    if "cordero" in original or "ternasco" in original:
+        if "hamburguesa" in name:
+            return True
+
+    # Magro / lomo de cerdo para cocinar ≠ fiambre loncheado / paté
+    if ("magro" in original or "pulmon" in original or ("lomo" in original and "cerdo" in original)):
+        if "pate" in name or "fiambre" in name:
+            return True
+        if "loncha" in name and ("asado" in name or "cocido" in name):
             return True
 
     # Jamón serrano ≠ rosca/sandwich (ya en ALWAYS) ni loncheados raros de pan
@@ -806,12 +857,14 @@ def _reject_derivative(name: str, query: str, head: str) -> bool:
         for x in ("pollo", "merluza", "gamba", "calamar", "mejill", "jamon", "higado")
     )
     if proteinish and any(x in name for x in _MEAT_FISH_REJECT):
-        # Excepción: si la query pide explícitamente rebozado/romana
-        if not any(x in original for x in ("reboz", "romana", "finger", "nugget", "croqueta")):
+        # Excepción: si la query pide explícitamente rebozado/romana/caldo
+        if "caldo" in original and "caldo" in name:
+            pass  # buscan caldo → no rechazar
+        elif not any(x in original for x in ("reboz", "romana", "finger", "nugget", "croqueta")):
             return True
 
     # Pollo en trozos: solo piezas de carne, no vísceras / caldo / platos
-    if "pollo" in original:
+    if "pollo" in original and "caldo" not in original:
         if any(
             x in name
             for x in (
