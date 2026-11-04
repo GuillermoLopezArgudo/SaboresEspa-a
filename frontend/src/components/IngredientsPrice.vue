@@ -152,6 +152,7 @@
                 v-model="sortBy"
                 class="rounded-full border border-amber-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
+                <option value="relevance">Relevancia</option>
                 <option value="price-asc">Precio: menor a mayor</option>
                 <option value="price-desc">Precio: mayor a menor</option>
                 <option value="name-asc">Nombre A–Z</option>
@@ -239,7 +240,7 @@ const productos = ref([])
 const loading = ref(false)
 const error = ref('')
 const categoryName = ref('')
-const sortBy = ref('price-asc')
+const sortBy = ref('relevance')
 const searchInput = ref('')
 const localFilter = ref('')
 const selectedCategoryId = ref('')
@@ -333,6 +334,8 @@ function isCheapest(p) {
 
 const sortedProductos = computed(() => {
   const list = [...filteredProductos.value]
+  // Relevancia = orden que ya viene del API (producto real primero)
+  if (sortBy.value === 'relevance') return list
   if (sortBy.value === 'name-asc') {
     return list.sort((a, b) =>
       String(a.display_name || '').localeCompare(String(b.display_name || ''), 'es')
@@ -472,12 +475,17 @@ async function load() {
         }
       }
 
+      const payload = { q: palabra }
+      if (selectedCategoryId.value) {
+        payload.category_id = Number(selectedCategoryId.value)
+      }
       const search = await axios.post(
         apiUrl('/searchIngredient'),
-        { q: palabra },
+        payload,
         { skipAuth: true }
       )
       productos.value = search.data.products || []
+      sortBy.value = 'relevance'
       loading.value = false
       return
     }
