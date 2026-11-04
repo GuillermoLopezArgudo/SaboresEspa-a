@@ -119,7 +119,6 @@
   "Cayena": "Especias",
   "Pimentón": "Especias",
   "Aceite": "Aceite, vinagre y sal",
-  "Aceite de Oliva Virgen Extra": "Aceite, vinagre y sal",
   "Vinagre": "Aceite, vinagre y sal",
   "Sal gorda": "Aceite, vinagre y sal",
   "Sal fina": "Aceite, vinagre y sal",
