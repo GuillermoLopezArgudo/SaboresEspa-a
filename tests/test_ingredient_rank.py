@@ -123,3 +123,49 @@ def test_among_real_products_cheapest_first():
     assert ranked[0]["display_name"] == "Cebollas"
     assert ranked[0]["price"] == 1.20
     assert ranked[-1]["display_name"].startswith("Sopa")
+
+
+def test_bacalao_not_pork_loin():
+    q = "Lomos de bacalao desalado"
+    assert _clean_search_query(q) == "lomo bacalao"
+    assert "bacalao" in _core_tokens(q)
+    assert "lomos" not in _core_tokens(q)
+    products = [
+        _p("Lomo Hacendado", 6.13),
+        _p("Lomo de cerdo trozo", 4.95),
+        _p("Lomo de vacuno añojo", 8.09),
+        _p("Lomos de salmón sin piel Hacendado congelado", 7.0),
+        _p("Lomo de bacalao MareDeus ultracongelado", 9.22),
+        _p("Migas de bacalao desaladas Hacendado", 7.64),
+    ]
+    filtered = _filter_relevant(products, q)
+    assert all("bacalao" in p["display_name"].lower() for p in filtered)
+    ranked = _rank_by_query(filtered, q)
+    assert "bacalao" in ranked[0]["display_name"].lower()
+    assert "cerdo" not in ranked[0]["display_name"].lower()
+    assert "vacuno" not in ranked[0]["display_name"].lower()
+
+
+def test_maicena_maps_to_corn_flour():
+    assert _clean_search_query("maicena") == "harina maiz"
+    products = [
+        _p("Harina de trigo Hacendado", 0.72),
+        _p("Harina fina de maíz Hacendado", 1.20),
+        _p("Harina de maíz blanco precocida Hacendado", 1.70),
+    ]
+    ranked = _rank_by_query(_filter_relevant(products, "maicena"), "maicena")
+    assert ranked
+    assert "maíz" in ranked[0]["display_name"].lower() or "maiz" in ranked[0]["display_name"].lower()
+
+
+def test_romero_prefers_spice_jar():
+    products = [
+        _p("Alcohol de romero Deliplus", 2.0),
+        _p("Hamburguesa de cordero al romero", 3.8),
+        _p("Aceite corporal de romero Deliplus 100% natural", 3.2),
+        _p("Romero Hacendado", 1.35),
+        _p("Crackers sin gluten Hacendado con romero", 1.7),
+    ]
+    filtered = _filter_relevant(products, "Romero fresco")
+    ranked = _rank_by_query(filtered, "Romero fresco")
+    assert ranked[0]["display_name"].startswith("Romero")

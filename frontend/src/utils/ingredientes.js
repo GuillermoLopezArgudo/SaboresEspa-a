@@ -164,7 +164,15 @@
   "Pan de molde": "Pan de molde y otras especialidades",
   "Harina": "Harina y preparado repostería",
   "Harina de trigo": "Harina y preparado repostería",
+  "Maicena": "Harina y preparado repostería",
+  "Maizena": "Harina y preparado repostería",
+  "Fécula de maíz": "Harina y preparado repostería",
   "Levadura en polvo": "Harina y preparado repostería",
+  "Romero": "Especias",
+  "Romero fresco": "Especias",
+  "Lomos de bacalao desalado": "Pescado",
+  "Lomo de bacalao desalado": "Pescado",
+  "Lomo de bacalao": "Pescado",
 
   // Dulces
   "Azúcar": "Azúcar y edulcorante",
